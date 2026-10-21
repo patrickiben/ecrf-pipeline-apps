@@ -53,6 +53,15 @@ Manual equivalent: `pip install -r requirements.txt && streamlit run <app>.py`.
 
 ## Hosted demo (no install)
 
+**Live demos** (synthetic data only; each opens on the bundled sample cut, then click **Execute**):
+
+- [Coding app](https://ecrf-coding.streamlit.app/?demo=1) (`meddra_app.py`)
+- [PHI app](https://ecrf-phi.streamlit.app/?demo=1) (`phi_app.py`)
+- [Risk app](https://ecrf-risk.streamlit.app/?demo=1) (`risk_app.py`)
+- [Anomaly app](https://ecrf-anomaly.streamlit.app/?demo=1) (`anomaly_app.py`)
+
+An app that has been idle may take about 30 seconds to wake up. Landing page: https://patrickiben.github.io/ecrf-pipeline-apps/
+
 A public demo runs each app in **hosted mode**: every data input (the uploaders, folder paths and models dir) is locked to the bundled synthetic cut, outputs go to a per-session server temp folder (deleted when the session ends), a banner on every page says the demo takes synthetic data only, and the audit records `hosted_mode=true`. Everything bundled is synthetic: no real patients, no real study and no licensed dictionary. The demo dictionary's codes are 99-prefixed placeholders, not MedDRA codes. Hosted mode is off unless a deployment switches it on, so a local run behaves exactly as described in the rest of this README; there, opening the app with `?demo=1` appended simply starts with **Use the bundled synthetic sample data** ticked. Use a local run for real data.
 
 ### Deploy your own demo
@@ -89,7 +98,7 @@ Local runs on the bundled synthetic data, opened with `?demo=1` and captured aft
 
 ## Landing page
 
-[`docs/index.html`](docs/index.html) is a one-page overview for GitHub Pages: the four apps, the screenshots, both decks, and a placeholder list for the demo URLs. It is not live until the repository owner enables Pages under **Settings > Pages > Deploy from a branch**, branch `main`, folder `/docs`. `docs/` also holds byte-identical copies of the two HTML decks so they render there; after editing a deck's HTML in `presentations/`, copy it into `docs/` too (QC check D1 fails otherwise).
+[`docs/index.html`](docs/index.html) is a one-page overview for GitHub Pages: the four apps, links to the live demos, the screenshots and both decks. It is published by GitHub Pages from `main`, folder `/docs` (Settings > Pages), at https://patrickiben.github.io/ecrf-pipeline-apps/. `docs/` also holds byte-identical copies of the two HTML decks so they render there; after editing a deck's HTML in `presentations/`, copy it into `docs/` too (QC check D1 fails otherwise).
 
 ## Using your own cut
 
