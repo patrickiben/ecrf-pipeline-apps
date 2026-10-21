@@ -21,6 +21,9 @@
 #     substitutes in-field position + lexical cues for the page geometry the
 #     document path would use, and the audit records that scope explicitly.
 #   * No safety/DLT logic, no temporal window, no negation.
+#   * Hosted-demo safety mode exists: set ECRF_HOSTED=1 (or the Streamlit secret
+#     hosted = true) and every data input is locked to the bundled synthetic cut
+#     (disabled in the UI and overwritten in code). See _hosted().
 #
 # WHAT IT DOES, TIER BY TIER:
 #   Tier 1 intake   -> copy each field through UNCHANGED; discover which columns
@@ -44,7 +47,7 @@
 #        exactly what it uses.)
 #   real path (flips banner to REAL):  pip install cactus-needle laya xgboost
 
-import json, os, re, time
+import json, os, re, tempfile, time
 import pandas as pd, streamlit as st
 
 # Runtime probe -- same pattern as meddra_app.py (see the comment there). PHI
@@ -65,6 +68,50 @@ DEF_REDACT_GATE=0.85
 # removed because a pre-specified list of column names is guaranteed to miss PHI
 # hiding in any column whose header did not match. (meddra_app.py has no such
 # discovery at all; it locates its one verbatim column by AETERM synonym.)
+
+# --------------------------------------------------------------------------- #
+# Hosted-demo safety mode. ON when the environment variable ECRF_HOSTED=1 is set
+# or the Streamlit secret "hosted = true" exists (Streamlit Community Cloud: app
+# Settings > Secrets). A public demo must never take in real data, so in this
+# mode every input that could bring data in (the uploaders, the folder path, the
+# models dir and, in the coding app, the .asc folder) is DISABLED in the UI and
+# its value is also OVERWRITTEN in code: a disabled widget only stops the
+# browser, and a crafted client could still send a value, so it is never
+# trusted. The bundled synthetic cut is forced, outputs go to a per-session
+# server temp folder (never a path a visitor typed), a banner says so on every
+# rerun, and the audit records hosted_mode=true. With nothing set (the local
+# default) the app behaves exactly as before; the audit only gains
+# hosted_mode=false. Duplicated in each app on purpose (no shared module, same
+# rule as _have/_col).
+# The switch fails CLOSED. Any ECRF_HOSTED or hosted value other than empty, 0,
+# false, no or off turns it on (a typo such as "on" or hosted = 1.0 locks the
+# demo instead of opening it), and so does a secrets file that exists but does
+# not load (hosted = True with a capital T, a stray bad line): Streamlit only
+# logs that parse error on the server, so failing open would leave a public app
+# unlocked with nothing on the page to show it. The deploy step in README.md is
+# to open the app and confirm the banner.
+# --------------------------------------------------------------------------- #
+HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real patient data. "
+                 "Run locally for real data.")
+_HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
+def _hosted():
+    if os.environ.get("ECRF_HOSTED","").strip().lower() not in _HOSTED_OFF: return True
+    # load_if_toml_exists() is asked FIRST (it returns False rather than raising when no
+    # secrets file loads, the usual local case) because older Streamlit releases also draw
+    # an st.error box when st.secrets.get misses the file, which would change the local
+    # default view. The try/except covers any other loader failure.
+    try:
+        if st.secrets.load_if_toml_exists():
+            # Streamlit copies root-level secrets into os.environ OVER the host's own value,
+            # so an ECRF_HOSTED secret could quietly undo a host-set ECRF_HOSTED=1: the key
+            # being there at all counts as on.
+            if "ECRF_HOSTED" in st.secrets: return True
+            return str(st.secrets.get("hosted", "")).strip().lower() not in _HOSTED_OFF
+    except Exception: pass
+    # Nothing loaded: local mode ONLY when no secrets file or folder exists at all. One that
+    # exists but did not load fails closed (banner shown, inputs locked) instead of open.
+    try: return any(os.path.exists(p) for p in st.get_option("secrets.files"))
+    except Exception: return True
 
 # ============================ IMPORT LAYER ============================
 def _col(df,*syn):
@@ -290,9 +337,14 @@ def _guard_artifacts(models_dir):
 # BEFORE compute, so a column that should not be touched (or one the operator wants
 # excluded) is caught on screen and deselected there.
 st.set_page_config(page_title="PII/PHI Flagging Engine", layout="wide")
+HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
+# Hosted: an uncaught exception shows a generic message, not a traceback with server
+# paths (a crafted widget value can raise one). Process-wide, like the switch itself.
+if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("🛡 PII/PHI Flagging & Redaction Engine")
 st.caption("Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · "
            "scrubs free-text eCRF fields only · air-gapped · no sample data in this file")
+if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
 # Built-in, app-specific instruction manual (from USER_GUIDE.md §4), rendered as a
 # collapsible panel so the working view stays clean but help is one click away.
@@ -335,18 +387,27 @@ with st.expander("📖 How to use this app"):
 
 # ---- sidebar 1: WHERE the data is. No dictionary input here at all -- this
 #      program needs none, and a meddra*.csv in the folder is ignored. ----
+# Hosted banner is the FIRST sidebar element and sits above every st.stop(), so it
+# shows on every rerun.
+if HOSTED: st.sidebar.warning(HOSTED_BANNER, icon="🔒")
 st.sidebar.header("📂 1. Point this at your data")
 _SAMPLE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample_data")
 # Demo toggle: off by default; a link ending in ?demo=1 (e.g. a hosted demo) starts it on.
+# Hosted mode (see _hosted): each data input is disabled AND its value is overwritten
+# on the line after it, because a disabled widget only stops the browser and a crafted
+# client could still send a value. The bundled synthetic cut is forced; no upload.
 _use_sample = st.sidebar.checkbox("Use the bundled synthetic sample data",
-    value=(st.query_params.get("demo") == "1"),
+    value=(HOSTED or st.query_params.get("demo") == "1"), disabled=HOSTED,
     help="Fills the folder path with the synthetic demo cut shipped in ./sample_data/ (no real patients or licensed dictionary).")
-folder = st.sidebar.text_input("Cut folder path (domain CSVs)", value=(_SAMPLE_DIR if _use_sample else ""),
+if HOSTED: _use_sample = True
+folder = st.sidebar.text_input("Cut folder path (domain CSVs)", value=(_SAMPLE_DIR if _use_sample else ""), disabled=HOSTED,
     help="Path to a folder of domain CSVs. A meddra*.csv here is IGNORED (this "
          "program needs no dictionary). Domain names are irrelevant -- the "
          "columns to scan are discovered by content (see section 2).")
+if HOSTED: folder = _SAMPLE_DIR            # never trust a client-sent value in hosted mode
 up_dom = st.sidebar.file_uploader("...or upload domain files (CSV or SAS .sas7bdat)",
-    type=["csv","sas7bdat"], accept_multiple_files=True)
+    type=["csv","sas7bdat"], accept_multiple_files=True, disabled=HOSTED)
+if HOSTED: up_dom = None
 
 # ---- sidebar 2: how discovery works. It is CONTENT-BASED and deliberately not
 #      configurable by column name -- a pre-specified list of names is guaranteed to
@@ -366,11 +427,22 @@ st.caption("⚠ Structured fields are scanned too: if one matches an identifier 
 st.sidebar.markdown("---"); st.sidebar.header("⚖ 3. Operating point")
 redact_gate = st.sidebar.slider("Redaction gate",0.50,0.99,DEF_REDACT_GATE,0.01,
     help="Tier-4 threshold; reviewer-set, recorded in the audit.")
-out_dir = st.sidebar.text_input("Output folder","phi_output",
+# Hosted mode: outputs go to a per-session server temp folder (made once per browser
+# session), never a path a visitor typed, and the models dir is pinned to "models";
+# both inputs are disabled and overwritten in code, as in sidebar 1.
+# A TemporaryDirectory (not a bare mkdtemp) is kept in session_state, so the folder
+# is deleted when Streamlit discards the expired session (and at exit) instead of
+# piling up in /tmp, one per page view.
+if HOSTED and "_hosted_out" not in st.session_state:
+    st.session_state["_hosted_tmp"] = tempfile.TemporaryDirectory(prefix="phi_output_", ignore_cleanup_errors=True)
+    st.session_state["_hosted_out"] = st.session_state["_hosted_tmp"].name
+out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"] if HOSTED else "phi_output"), disabled=HOSTED,
     help="Where phi_flags.csv + sanitized/*.csv + audit_log.csv are written on Run.")
-models_dir = st.sidebar.text_input("Models dir (optional real weights)","models",
+if HOSTED: out_dir = st.session_state["_hosted_out"]
+models_dir = st.sidebar.text_input("Models dir (optional real weights)","models", disabled=HOSTED,
     help="If a trained artifact is present here but its runtime is not installed, "
          "the app STOPS rather than silently substituting a stand-in.")
+if HOSTED: models_dir = "models"
 _guard_artifacts(models_dir)
 
 # ---- LOAD so the pre-flight panel + the multi-select are live. Errors captured
@@ -503,6 +575,7 @@ st.expander("Processing log").write("\n".join(log))
 #      is over-claimed. This is what keeps this head's validation scope separate
 #      from meddra_app.py's (separate program, separate audit_log.csv). ----
 audit=pd.DataFrame([dict(program="phi_scanner", timestamp=pd.Timestamp.now().isoformat(timespec="seconds"),
+    hosted_mode=("true" if HOSTED else "false"),
     domains=list(domains.keys()),
     # QC FIX: json.dumps so the audit cell is a clean machine-readable string;
     # a raw Python dict would serialize into its repr ({'ae': 6, ...}) with

@@ -19,6 +19,11 @@
 #     human review; it does NOT certify data quality or make a clinical determination.
 #   * It reads CSV OR SAS .sas7bdat (SDTM/ADaM dumps) via an optional pyreadstat reader, exactly
 #     like the siblings -- install `pyreadstat` to load .sas7bdat; CSV works without it.
+#   * Hosted-demo safety mode: with ECRF_HOSTED=1 set (or the Streamlit secret
+#     hosted = true) every data input (uploaders, folder path, models dir) is
+#     locked to the bundled synthetic cut in anomaly_data/ and outputs go to a
+#     per-session temp folder. Nothing set means the normal local behavior. See
+#     _hosted().
 #
 # WHAT IT DOES, TIER BY TIER (the chain is the product; every decision is a row of readable
 # numbers, never a hidden weight). Three separate signals are detected with fast, scalable
@@ -52,7 +57,7 @@
 #   real numeric-outlier path:         pip install scikit-learn     (Isolation Forest)
 #   real drift path (flips banner):    pip install POT scipy
 
-import json, os, re, time
+import json, os, re, tempfile, time
 import numpy as np, pandas as pd, streamlit as st
 
 # --------------------------------------------------------------------------- #
@@ -106,6 +111,50 @@ SYN = {
     # study-id-like columns are EXCLUDED from free-text scanning (they are codes, not notes).
     "STUDY": ["studyid","study_id","studynm","studyname"],
 }
+
+# --------------------------------------------------------------------------- #
+# Hosted-demo safety mode. ON when the environment variable ECRF_HOSTED=1 is set
+# or the Streamlit secret "hosted = true" exists (Streamlit Community Cloud: app
+# Settings > Secrets). A public demo must never take in real data, so in this
+# mode every input that could bring data in (the uploaders, the folder path, the
+# models dir and, in the coding app, the .asc folder) is DISABLED in the UI and
+# its value is also OVERWRITTEN in code: a disabled widget only stops the
+# browser, and a crafted client could still send a value, so it is never
+# trusted. The bundled synthetic cut is forced, outputs go to a per-session
+# server temp folder (never a path a visitor typed), a banner says so on every
+# rerun, and the audit records hosted_mode=true. With nothing set (the local
+# default) the app behaves exactly as before; the audit only gains
+# hosted_mode=false. Duplicated in each app on purpose (no shared module, same
+# rule as _have/_col).
+# The switch fails CLOSED. Any ECRF_HOSTED or hosted value other than empty, 0,
+# false, no or off turns it on (a typo such as "on" or hosted = 1.0 locks the
+# demo instead of opening it), and so does a secrets file that exists but does
+# not load (hosted = True with a capital T, a stray bad line): Streamlit only
+# logs that parse error on the server, so failing open would leave a public app
+# unlocked with nothing on the page to show it. The deploy step in README.md is
+# to open the app and confirm the banner.
+# --------------------------------------------------------------------------- #
+HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real patient data. "
+                 "Run locally for real data.")
+_HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
+def _hosted():
+    if os.environ.get("ECRF_HOSTED","").strip().lower() not in _HOSTED_OFF: return True
+    # load_if_toml_exists() is asked FIRST (it returns False rather than raising when no
+    # secrets file loads, the usual local case) because older Streamlit releases also draw
+    # an st.error box when st.secrets.get misses the file, which would change the local
+    # default view. The try/except covers any other loader failure.
+    try:
+        if st.secrets.load_if_toml_exists():
+            # Streamlit copies root-level secrets into os.environ OVER the host's own value,
+            # so an ECRF_HOSTED secret could quietly undo a host-set ECRF_HOSTED=1: the key
+            # being there at all counts as on.
+            if "ECRF_HOSTED" in st.secrets: return True
+            return str(st.secrets.get("hosted", "")).strip().lower() not in _HOSTED_OFF
+    except Exception: pass
+    # Nothing loaded: local mode ONLY when no secrets file or folder exists at all. One that
+    # exists but did not load fails closed (banner shown, inputs locked) instead of open.
+    try: return any(os.path.exists(p) for p in st.get_option("secrets.files"))
+    except Exception: return True
 
 # ============================ IMPORT LAYER ============================
 def _col(df,*syn):
@@ -515,10 +564,16 @@ def _guard_artifacts(models_dir):
 
 # ============================ UI ============================
 st.set_page_config(page_title="Data Anomaly & Drift Detection", layout="wide")
+HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
+# Hosted: an uncaught exception shows a generic message, not a traceback with server
+# paths (a crafted widget value can raise one). Process-wide, like the switch itself.
+if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("🔎 Data Anomaly & Distributional-Drift Detection")
 st.caption("Tier 1 intake → Tier 2 numeric outliers (robust-z + Isolation Forest) → "
            "Tier 3 Sinkhorn OT drift (cohort + per-lab + between-lab) → Tier 3b text outliers → Tier 4 categorize · "
            "decision support, not a data-quality certification · air-gapped · no sample data in this file")
+# Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
+if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
 _HELP_MD = """
 **What this app does.** Flags anomalous observations and distributional drift over longitudinal safety/lab/vital data, across **numeric AND free-text** fields. It emits only the FLAGGED observations (subjects whose measurements deviate far from the cohort, notes isolated from their field's corpus) plus per-column and per-lab drift tables. It ranks and flags for human review; it is **decision support, not a data-quality certification or clinical determination**.
@@ -559,28 +614,46 @@ with st.expander("📖 How to use this app"):
     st.markdown(_HELP_MD)
 
 # ---- sidebar 1: WHERE the data is. Folder path AND/OR uploads are additive; a meddra*.csv is ignored. ----
+if HOSTED: st.sidebar.warning(HOSTED_BANNER, icon="🔒")
 st.sidebar.header("📂 1. Point this at your data")
 _SAMPLE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "anomaly_data")
 # Demo toggle: off by default; a link ending in ?demo=1 (e.g. a hosted demo) starts it on.
+# Hosted mode: each data input below is disabled AND its value overwritten right after
+# the widget (sample forced on, folder pinned to anomaly_data/, no uploads), because a
+# disabled widget only stops the browser; a crafted client could still send a value.
 _use_sample = st.sidebar.checkbox("Use the bundled synthetic sample data",
-    value=(st.query_params.get("demo") == "1"),
+    value=(HOSTED or st.query_params.get("demo") == "1"), disabled=HOSTED,
     help="Fills the folder path with the synthetic demo cut shipped in ./anomaly_data/ (no real patients or licensed dictionary).")
-folder = st.sidebar.text_input("Cut folder path (CSV or SAS .sas7bdat)", value=(_SAMPLE_DIR if _use_sample else ""),
+if HOSTED: _use_sample = True
+folder = st.sidebar.text_input("Cut folder path (CSV or SAS .sas7bdat)", value=(_SAMPLE_DIR if _use_sample else ""), disabled=HOSTED,
     help="Path to a folder of CSV / SAS .sas7bdat files with a subject-id column and numeric columns "
          "to measure, plus an optional time/visit column for drift, an optional lab/site column for "
          "per-lab drift, and any free-text columns to scan. Every *.csv/*.sas7bdat EXCEPT one named "
          "*meddra* loads; columns are located by content/synonym, not file name.")
+if HOSTED: folder = _SAMPLE_DIR            # never trust a client-sent value in hosted mode
 up_dom = st.sidebar.file_uploader("...or upload files (CSV or SAS .sas7bdat)",
-    type=["csv","sas7bdat"], accept_multiple_files=True)
+    type=["csv","sas7bdat"], accept_multiple_files=True, disabled=HOSTED)
+if HOSTED: up_dom = None
 
 # ---- sidebar 2: outputs + optional models dir. No gate slider -- the operating point is the built-in [SI] criteria. ----
 st.sidebar.markdown("---"); st.sidebar.header("⚖ 2. Outputs")
-out_dir = st.sidebar.text_input("Output folder","anomaly_output",
+# Hosted mode: outputs go to a server temp folder made ONCE per browser session
+# (kept in session_state so reruns reuse it), and the models dir is pinned to its
+# default "models"; neither path ever comes from a visitor.
+# A TemporaryDirectory (not a bare mkdtemp) is kept in session_state, so the folder
+# is deleted when Streamlit discards the expired session (and at exit) instead of
+# piling up in /tmp, one per page view.
+if HOSTED and "_hosted_out" not in st.session_state:
+    st.session_state["_hosted_tmp"] = tempfile.TemporaryDirectory(prefix="anomaly_output_", ignore_cleanup_errors=True)
+    st.session_state["_hosted_out"] = st.session_state["_hosted_tmp"].name
+out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"] if HOSTED else "anomaly_output"), disabled=HOSTED,
     help="Where anomalies.csv + drift.csv + lab_drift.csv + text_anomalies.csv + audit_log.csv are "
          "written on Run (also offered as downloads).")
-models_dir = st.sidebar.text_input("Models dir (optional real model)","models",
+if HOSTED: out_dir = st.session_state["_hosted_out"]
+models_dir = st.sidebar.text_input("Models dir (optional real model)","models", disabled=HOSTED,
     help="If a trained anomaly_model.json is present here but its runtime is not installed, the app STOPS "
          "rather than silently substituting the [SI] stand-in.")
+if HOSTED: models_dir = "models"
 _guard_artifacts(models_dir)   # runs on every rerun, before any compute
 
 # ---- LOAD now so the pre-flight panel + classification are live. Errors captured into load_err and surfaced. ----
@@ -670,6 +743,7 @@ else:
 #      and the category distributions. This makes a run reproducible from its audit alone and keeps this head's
 #      scope separate from the sibling programs (separate program, separate audit_log.csv). ----
 audit=pd.DataFrame([dict(program="anomaly_drift", timestamp=pd.Timestamp.now().isoformat(timespec="seconds"),
+    hosted_mode=("true" if HOSTED else "false"),
     domains=list(domains.keys()), domain_rows=json.dumps({d:len(df) for d,df in domains.items()}),
     n_subjects=int(meta["n_subjects"]), measurable_columns=meta["numcols"], time_column=meta["timecol"] or None,
     lab_column=meta["labcol"] or None, text_columns=meta["textcols"],
