@@ -5,7 +5,7 @@ streamlit>=1.36    # all four apps
 
 # Real path — install these and the mode banner flips tier-by-tier to REAL:
 #   pip install cactus-needle hnswlib laya xgboost
-# (not distributed with this repository; if a trained artifact is dropped into the models dir but
+# (open-source Needle3 by Cactus Compute and Laya; not bundled here. If a trained artifact is dropped into the models dir but
 #  its runtime is missing, the app hard-stops instead of substituting a stand-in)
 
 # Optional — SAS .sas7bdat input (SDTM/ADaM dumps). CSV-only users can skip this;
@@ -21,4 +21,4 @@ streamlit>=1.36    # all four apps
 #   pip install scikit-learn
 
 # Optional — real Needle3/Laya text-outlier detection for anomaly_app.py (Tier 3b) and the coding/PHI apps.
-# Not distributed with this repository; without them those tiers run labelled [SI] stand-ins with identical output columns.
+# Open-source Needle3/Laya runtimes, not bundled here; without them those tiers run labelled [SI] stand-ins with identical output columns.

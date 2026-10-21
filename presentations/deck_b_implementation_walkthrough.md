@@ -2,6 +2,8 @@
 
 **Companion to [Deck A](deck_a_four_tier_pipeline.md) · QC'd build, October 2026.** Every `[SI]` number in this deck is the exact output of the shipped stand-in on [`../sample_data/`](../sample_data/) — run either app against that folder and you will reproduce these tables. See [QC_REPORT](../QC_REPORT.md) for what was verified.
 
+> **About the `[RM]` numbers.** No trained checkpoint was run for this deck. Every value tagged `[RM]`, and the index costs in §1.2, are illustrative of what a trained Needle3 + Laya + XGBoost stack would emit; they are not measurements. Every `[SI]` value is real output of the shipped stand-in.
+
 **Scenario.** Protocol PROTO-2026-X89. A cut is on disk as `ae.csv`, `pr.csv`, `eg.csv` plus the MedDRA release. Two programs read that folder. The coding program consumes `ae.csv`'s `AETERM` column and the dictionary; the PHI program scans every non-numeric column it finds across `ae`/`pr`/`eg` (content-based discovery). They read different columns of the same files, compute independently, and write separate outputs and separate audit sections. No scanned page, no bounding box, no dose-escalation logic anywhere in this build.
 
 ---
@@ -37,7 +39,7 @@ Keys `ae.csv` on `STUDYID/USUBJID/AESEQ`, copies `AETERM` through byte-for-byte,
 
 ### 1.2 · Tier 2 — Cactus Needle3: embed, index, retrieve
 
-The verbatim is encoded to a 384-dim unit vector; because stored vectors are L2-normalized, the index's inner-product distance *is* cosine, so the cheap `ip` search returns exact angular closeness. The ~85,000 active term vectors sit in a 3-layer HNSW skip-list; a query enters at the top entry point, follows `ip` links greedily while the score improves, steps down at each local maximum, and at layer 0 runs a bounded priority-queue search to return the top-K. Reference parameters and costs for the full model stack (not produced by the stand-in build in this repository): `M = 32`, `efConstruction = 200`, `efSearch = 64`; embed 2.4 ms + search 0.8 ms; resident 178.3 MB (133.3 MB vectors + 45.0 MB edges).
+The verbatim is encoded to a 384-dim unit vector; because stored vectors are L2-normalized, the index's inner-product distance *is* cosine, so the cheap `ip` search returns exact angular closeness. The ~85,000 active term vectors sit in a 3-layer HNSW skip-list; a query enters at the top entry point, follows `ip` links greedily while the score improves, steps down at each local maximum, and at layer 0 runs a bounded priority-queue search to return the top-K. Illustrative index parameters and costs for the full model stack (not measured; the stand-in build in this repository does not produce them): `M = 32`, `efConstruction = 200`, `efSearch = 64`; embed 2.4 ms + search 0.8 ms; resident 178.3 MB (133.3 MB vectors + 45.0 MB edges).
 
 Zoomed on AESEQ 1, `"severe throbbing pain in back of head"` — top-3 **[RM]** (each candidate carries its full hierarchy path):
 
@@ -203,10 +205,10 @@ The PHI sanitization screen renders 2.4 as a raw-vs-sanitized inspector per row 
 
 ## Trace legend (properties of this build)
 
-- **[RM]** = the trained component's output on this record; **[SI]** = the deterministic stand-in's output on this record; untagged numbers = configured parameters (gate 0.90 in this run, default 0.88; redaction cutoff 0.85; index `M/efC/efS = 32/200/64`).
+- **[RM]** = an illustrative value for what the trained component would output on this record (not measured; no trained checkpoint was run); **[SI]** = the deterministic stand-in's output on this record; untagged numbers = configured parameters (gate 0.90 in this run, default 0.88; redaction cutoff 0.85; index `M/efC/efS = 32/200/64`).
 - The stand-in reproduces the contract and the gates exactly. For PHI it reproduces the trace, because identifier detection is pattern-shaped and the eCRF scrub is a string replace — every `[SI]` offset in §2.2 was verified against a shipped run on 2026-10-13. For coding its retrieval is lexical, so its `[SI]` scores will not match the `[RM]` column on semantically-gapped verbatims; install the trained encoder + index and the Laya checkpoint and the same tables fill with `[RM]` numbers, columns unmoved.
 - Two parameters are deployment decisions the audit records, not fixed constants: the coding gate (0.88 vs 0.90, discriminated by the 0.8820 row) and the redaction tag scheme. Both are reviewer-set in the app and written to the audit with the run.
 
 ## Verify this walkthrough yourself
 
-Point either app at [`../sample_data/`](../sample_data/) (the worked cut plus a synthetic demo dictionary) and Execute — no code edits, no setup beyond `pip install -r requirements.txt`. The PHI trace reproduces §2.2–§2.5 exactly; the coding trace exercises both routing branches with honest `[SI]` scores. What was checked, what bugs were found and fixed, and how to re-run the 41-check harness: [QC_REPORT.md](../QC_REPORT.md).
+Point either app at [`../sample_data/`](../sample_data/) (the worked cut plus a synthetic demo dictionary) and Execute — no code edits, no setup beyond `pip install -r requirements.txt`. The PHI trace reproduces §2.2–§2.5 exactly; the coding trace exercises both routing branches with honest `[SI]` scores. What was checked, what bugs were found and fixed, and how to re-run the 95-check harness: [QC_REPORT.md](../QC_REPORT.md).

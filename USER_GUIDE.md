@@ -260,7 +260,7 @@ banner and recorded per tier in every audit row:
 - **Anomaly & drift:** numeric outliers use a robust z-score (median/MAD) as the interpretable gate, corroborated by
   **Isolation Forest** — install `scikit-learn` and that detector runs for real. Drift uses a labelled **1-D-Wasserstein stand-in**
   by default; install `POT` + `scipy` and it becomes **real Sinkhorn optimal transport** (`ot.sinkhorn2`). Text outliers use a
-  labelled **bag-of-words isolation stand-in**; install the `cactus-needle`/`laya` packages (not distributed with this repository) for real retrieval-isolation.
+  labelled **bag-of-words isolation stand-in**; install the open-source Needle3 (Cactus Compute) and Laya runtimes (not bundled with this repository) for real retrieval-isolation.
   Each flips its tier to REAL with identical output columns.
 
 Install the real runtimes (`cactus-needle`, `hnswlib`, `laya`, `xgboost`) and the banner flips tier-by-tier to **REAL**;

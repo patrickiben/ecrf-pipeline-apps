@@ -66,7 +66,7 @@ def _have(m):
 HAVE = {m: _have(m) for m in ("ot","scipy","sklearn","pyreadstat","cactus-needle","laya")}
 REAL_OT   = HAVE["ot"] and HAVE["scipy"]     # Sinkhorn needs BOTH the library and scipy (for ot.dist)
 REAL_IF   = HAVE["sklearn"]                  # Isolation Forest numeric-outlier corroborator
-# Needle3/Laya are packages not distributed with this repository; when absent the text tier runs its labelled [SI] stand-in.
+# Needle3 (Cactus Compute) and Laya are open-source models not bundled with this repository; when absent the text tier runs its labelled [SI] stand-in.
 REAL_TEXT = HAVE.get("cactus-needle", False) and HAVE.get("laya", False)
 
 # Reviewer-set starting values; the effective thresholds are written to the audit. These are the
