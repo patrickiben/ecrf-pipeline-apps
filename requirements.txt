@@ -1,0 +1,24 @@
+# Stand-in path — runs anywhere, no trained weights needed.
+numpy>=1.24        # meddra_app.py + anomaly_app.py (stand-in encoder/index math; [SI] Wasserstein)
+pandas>=2.0        # all four apps (risk_app.py uses pandas only)
+streamlit>=1.36    # all four apps
+
+# Real path — install these and the mode banner flips tier-by-tier to REAL:
+#   pip install cactus-needle hnswlib laya xgboost
+# (not distributed with this repository; if a trained artifact is dropped into the models dir but
+#  its runtime is missing, the app hard-stops instead of substituting a stand-in)
+
+# Optional — SAS .sas7bdat input (SDTM/ADaM dumps). CSV-only users can skip this;
+# every app probes for it and reads .csv without it. Install to also load .sas7bdat:
+#   pip install pyreadstat
+
+# Optional — real Sinkhorn optimal-transport drift for anomaly_app.py (Tier 3). Without these it runs a
+# labelled [SI] 1-D-Wasserstein stand-in with identical output columns. Install to flip that tier REAL:
+#   pip install POT scipy
+
+# Optional — real Isolation-Forest numeric-outlier corroborator for anomaly_app.py (Tier 2). Without it the
+# tier runs its labelled [SI] robust-z gate alone; install to add the REAL detector and flip the banner:
+#   pip install scikit-learn
+
+# Optional — real Needle3/Laya text-outlier detection for anomaly_app.py (Tier 3b) and the coding/PHI apps.
+# Not distributed with this repository; without them those tiers run labelled [SI] stand-ins with identical output columns.

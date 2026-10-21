@@ -1,0 +1,800 @@
+# meddra_app.py -- INDEPENDENT program: MedDRA auto-coding of verbatim AE terms.
+#
+# READ THIS FIRST (for whoever maintains this file):
+#   * This is ONE of two separate programs. The other is phi_app.py. They do NOT
+#     import each other and share NO module. The small helpers near the bottom of
+#     this header (_have, _col, load_domains) are DELIBERATELY DUPLICATED in
+#     phi_app.py. Do not "refactor" them into a shared pipeline.py: a shared
+#     module is a coupling point that would let a retrain of one head silently
+#     change the other's behaviour, and the two heads are validated as separate
+#     computer-system scopes with separate audit trails. Duplication is the
+#     price of that independence, and it is intentional.
+#   * This program codes verbatims ONLY. It never opens a free-text comment
+#     column and never flags PHI -- that is phi_app.py's job, with its own audit.
+#     The pre-flight panel at the bottom enforces this by listing exactly the one
+#     verbatim column it will read and nothing else.
+#   * No safety/DLT logic, no temporal window, no PDF/bounding-box path, no
+#     negation feature. The coding context output of Tier 3 here is an ambiguity
+#     scalar, not a negation probability; the gate is a single threshold on the
+#     re-rank score.
+#
+# WHAT IT DOES, TIER BY TIER (the chain is the product; the weights are
+# swappable underneath it -- see the [SI]/[RM] discipline in the banner/audit):
+#   Tier 1 intake   -> align rows to subjects; copy the verbatim through
+#                      UNCHANGED (Tier 2 must measure closeness to what the site
+#                      actually typed, so rewriting here would corrupt it).
+#   Tier 2 Needle3  -> embed the verbatim to a 384-dim UNIT vector (SapBERT),
+#                      HNSW inner-product search -> top-k candidates + cosine.
+#                      Because stored vectors are unit-norm, the graph's cheap
+#                      inner-product distance EQUALS cosine, so the search
+#                      returns exact angular closeness. Stand-in: a lexical
+#                      hashing bag-of-words + brute-force dot product, same
+#                      output columns, but it CANNOT reproduce semantic
+#                      mappings (e.g. a colloquial verbatim -> the right PT)
+#                      without the trained encoder -- that limit is tagged [SI],
+#                      never hidden.
+#   Tier 3 Laya     -> P(Unambiguous) as ONE extra re-rank feature. Stand-in:
+#                      emits None, so Tier 4's row simply lacks that column; the
+#                      gate still runs on the remaining named columns.
+#   Tier 4 XGBoost  -> re-rank each candidate from Tier-2 cosine + two string
+#                      distances + a body-system agreement flag (+ Tier-3
+#                      ambiguity when present), then a single gate:
+#                      AUTO_COMMIT_TO_SDTM or FLAGGED_FOR_HUMAN_CODER. Writes
+#                      AEDECOD/AEPTCD/AESOC/AECODCONF/AECODSTAT.
+#
+#   streamlit run meddra_app.py
+#   stand-in path (runs anywhere):     pip install numpy pandas streamlit
+#   real path (flips banner to REAL):  pip install cactus-needle hnswlib laya xgboost
+
+# stdlib only for the parts that must not depend on optional ML libs:
+#   hashlib -> dictionary content hash for the audit (reproducibility)
+#   zlib    -> STABLE token hash for the stand-in encoder (see _bow: this is the
+#              one fix vs the prior version; Python's built-in hash() is salted
+#              per-process, which made the stand-in non-reproducible across runs)
+#   os/re/time -> file walking, column-name normalization, latency measurement
+import hashlib, os, re, time, zlib
+import numpy as np, pandas as pd, streamlit as st
+
+# --------------------------------------------------------------------------- #
+# Runtime probe. We test each OPTIONAL library by attempting an import inside a
+# try/except, WITHOUT importing it at module scope. Consequence: a missing
+# optional dependency never crashes the app -- it only downgrades the
+# corresponding tier to its deterministic stand-in. (The opposite failure --
+# an artifact file present on disk but its runtime missing -- is a HARD STOP
+# later, in _guard_artifacts; we never silently substitute a stand-in for a
+# model the operator believes is loaded, because that would corrupt the review
+# and the audit.)
+# --------------------------------------------------------------------------- #
+def _have(m):
+    try: __import__(m); return True
+    except Exception: return False
+HAVE = {m: _have(m) for m in ("needle","laya","xgboost","hnswlib","pyreadstat")}
+# Coding Tier 2 needs BOTH the embedder (needle) and the graph index (hnswlib);
+# if either is absent we fall back to the lexical stand-in for the whole tier,
+# because a real embedder with no index (or vice versa) cannot serve the same
+# contract. Tiers 3 and 4 each need one lib.
+REAL_T2 = HAVE["needle"] and HAVE["hnswlib"]
+REAL_T3 = HAVE["laya"]
+REAL_T4 = HAVE["xgboost"]
+
+# --------------------------------------------------------------------------- #
+# Reviewer-set STARTING values. These are not magic constants the audit hides:
+# whatever the slider ends at is written to audit_log.csv with the run, so a
+# run is reproducible from its audit alone and the operating point is a logged
+# decision, not a value buried in code.
+# --------------------------------------------------------------------------- #
+DEF_CODE_GATE = 0.88     # Tier-4 auto-commit gate (a validation-selected
+                         # operating point; the build default, editable in UI)
+# The verbatim source column is matched by NAME SYNONYM, never by file name, so
+# the same program works whether the term lives in ae.csv, a custom domain, or a
+# vendor dump that spells it differently. Add to this list for a study with an
+# unusual header -- that is the ONLY place column naming is configured.
+AETERM_SYNONYMS = ["AETERM","VERBATIM","AE_TERM","REPORTED_TERM"]
+
+# ============================ IMPORT LAYER ============================
+# The ONLY place this program touches the outside world. It reads (a) domain
+# CSVs and (b) a MedDRA dictionary, and NOTHING else -- there is no built-in
+# dataset, so every number downstream is computed from the operator's files.
+
+def _col(df, *syn):
+    """Return the first column of `df` whose NORMALIZED name (lowercased, all
+    non-alphanumerics stripped) equals any synonym. Normalization is why
+    'AE Term', 'ae_term', and 'AETERM' all match 'AETERM': EDC vendors and SDTM
+    dumps name the same field different ways, and we refuse to assume one
+    spelling. Returns None if nothing matches -- callers must handle None."""
+    norm = [re.sub(r"[^a-z0-9]","",c.lower()) for c in df.columns]
+    for s in syn:
+        t = re.sub(r"[^a-z0-9]","",s.lower())
+        if t in norm: return df.columns[norm.index(t)]
+    return None
+
+# The MedDRA parse is the expensive step on a full ~86k-term release, so it is
+# cached by st.cache_data keyed on the source identity (_key). The heavy join
+# therefore happens ONCE per distinct dictionary, not on every Streamlit rerun
+# (Streamlit reruns the whole script on each widget interaction). max_entries=4
+# keeps a few recent dictionaries in memory; show_spinner=False because the
+# pre-flight panel already tells the operator what is loading.
+@st.cache_data(show_spinner=False, max_entries=4)
+def ingest_meddra(source_kind, source_ref, _key=None):
+    """Build the active LLT->PT->HLT->HLGT->SOC lookup table the index is built
+    over. Two accepted shapes, because CROs hold the dictionary either way:
+      'flat_csv' : a pre-joined export, one row per lowest-level term with the
+                   PT/HLT/HLGT/SOC columns alongside. Needs an LLT-name +
+                   PT-name column; llt_code/pt_code/hlt_name/hlgt_name/soc_name
+                   are detected by synonym if present.
+      'asc_dir'  : the licensed ASCII release (llt.asc/pt.asc/hlt.asc/
+                   hlgt.asc/soc.asc), pipe-delimited, with a `currency` flag;
+                   we filter to active terms (currency=='Y') and join LLT->PT
+                   on pt_code, PT->HLT on hlt_code, HLT->HLGT on hlgt_code,
+                   HLGT->SOC on soc_code.
+    The full MedDRA chain is LLT -> PT -> HLT -> HLGT -> SOC: related preferred
+    terms are grouped into High Level Terms by anatomy, pathology, physiology,
+    aetiology or function; related HLTs in turn link to High Level Group Terms;
+    and HLGTs group into System Organ Classes (by aetiology, manifestation site
+    or purpose). HLT/HLGT ride along on every candidate as EVIDENCE columns --
+    they are never scored by Tier 4 and are not SDTM write-back fields (the
+    write-back stays AEDECOD/AEPTCD/AESOC).
+    Returns a DataFrame with columns llt_code, llt_name, pt_code, pt_name,
+    hlt_name, hlgt_name, soc_name; codes optional, and any hierarchy level the
+    source lacks is simply absent (the pre-flight panel shows exactly what
+    loaded). RAISES with a precise message if the shape is unrecognized --
+    never a silent empty table, because an empty dictionary would make every
+    verbatim retrieve garbage and the operator must know why.
+    _key is the cache identity; it is not used by the logic."""
+    if source_kind == "asc_dir":
+        # dtype=str + keep_default_na=False: the .asc codes are 8-digit strings
+        # and must NOT be coerced to float (99019211.0) or have 'NA'-looking
+        # tokens turned into NaN; low_memory=False avoids mixed-type warnings on
+        # a large pipe-delimited read.
+        rd = lambda n: pd.read_csv(os.path.join(source_ref,n), sep="|",
+                                   dtype=str, keep_default_na=False, low_memory=False)
+        llt, pt, soc = rd("llt.asc"), rd("pt.asc"), rd("soc.asc")
+        # HLT/HLGT are the two intermediate levels of the chain. The licensed
+        # release always ships hlt.asc/hlgt.asc; a partial .asc set is tolerated
+        # -- an absent file simply means that level does not appear in the
+        # candidates (pre-flight shows what loaded), and coding still writes
+        # back AEDECOD/AEPTCD/AESOC.
+        extra={}
+        for n in ("hlt","hlgt"):
+            if os.path.exists(os.path.join(source_ref,n+".asc")): extra[n]=rd(n+".asc")
+        # Filter to ACTIVE terms only. The release carries superseded rows; an
+        # inactive LLT must never be retrieved, or we would code to a retired
+        # term. The currency column is named differently across releases, so we
+        # detect it by synonym and skip the filter if absent (tolerant of a
+        # pre-filtered export someone dropped in .asc form).
+        for d in (llt,pt,soc,*extra.values()):
+            c = _col(d,"currency","curr","active")
+            if c: d.drop(d[d[c].str.upper()!="Y"].index, inplace=True)
+        # Resolve the join keys by synonym on each file, then validate that the
+        # minimum viable schema is present before joining -- a missing code
+        # column would produce an empty inner join and a confusing "0 rows".
+        l_code,l_name = _col(llt,"llt_code","lltcd"), _col(llt,"llt_name","llt")
+        # QC FIX: the LLT file's pt_code LINK column must be selected and carried
+        # into the join. The original code never selected it, so every .asc load
+        # crashed with KeyError('pt_code') -- a latent bug that only surfaced once
+        # the .asc path was actually exercised by the test harness.
+        l_ptc = _col(llt,"pt_code","ptcd")
+        p_ptc,p_pt,p_soc = _col(pt,"pt_code","ptcd"), _col(pt,"pt_name","pt"), _col(pt,"soc_code","soccd")
+        s_soc,s_socn = _col(soc,"soc_code","soccd"), _col(soc,"soc_name","soc")
+        if not (l_code and l_name and l_ptc and p_ptc and p_pt and s_soc and s_socn):
+            raise ValueError("MedDRA .asc columns not recognized (need llt_code/"
+                             "llt_name/pt_code on llt.asc; pt_code/pt_name/soc_code "
+                             "on pt.asc; soc_code/soc_name on soc.asc). "
+                             "Supply a flattened CSV instead.")
+        # Inner joins on the codes: an LLT with no PT, or a PT with no SOC, is
+        # dropped, because we cannot emit a complete AEDECOD/AEPTCD/AESOC triple
+        # for a partial hierarchy row. reset_index so positional .iloc[i] lookups
+        # downstream line up with the index rows we build next.
+        # The PT->HLT link lives in pt.asc itself (its hlt_code column); the
+        # HLT->HLGT link lives in hlt.asc. If either file or link is missing,
+        # that level is skipped -- the chain degrades gracefully instead of
+        # failing the whole dictionary load.
+        p_hltc=_col(pt,"hlt_code","hltcd")
+        pt_cols=[p_ptc,p_pt,p_soc]+([p_hltc] if p_hltc else [])
+        pt_ren={p_ptc:"pt_code",p_pt:"pt_name",p_soc:"soc_code"}
+        if p_hltc: pt_ren[p_hltc]="hlt_code"
+        out=(llt[[l_code,l_name,l_ptc]].rename(
+                 columns={l_code:"llt_code",l_name:"llt_name",l_ptc:"pt_code"})
+             .merge(pt[pt_cols].rename(columns=pt_ren), on="pt_code", how="inner"))
+        if "hlt" in extra and p_hltc:
+            h=extra["hlt"]
+            h_hc,h_hn = _col(h,"hlt_code","hltcd"), _col(h,"hlt_name","hlt")
+            h_gl=_col(h,"hlgt_code","hlgtcd")
+            if h_hc and h_hn:
+                out=out.merge(h[[h_hc,h_hn]+([h_gl] if h_gl else [])].rename(
+                    columns={h_hc:"hlt_code",h_hn:"hlt_name"}), on="hlt_code", how="inner")
+        if "hlgt" in extra and "hlgt_code" in out.columns:
+            g=extra["hlgt"]
+            g_gc,g_gn = _col(g,"hlgt_code","hlgtcd"), _col(g,"hlgt_name","hlgt")
+            if g_gc and g_gn:
+                out=out.merge(g[[g_gc,g_gn]].rename(columns={g_gc:"hlgt_code",g_gn:"hlgt_name"}),
+                              on="hlgt_code", how="inner")
+        return (out.merge(soc[[s_soc,s_socn]].rename(columns={s_soc:"soc_code",s_socn:"soc_name"}),
+                          on="soc_code", how="inner")).reset_index(drop=True)
+    # source_kind == 'flat_csv': detect each logical column by synonym, then
+    # normalize the header to the canonical names the rest of the program uses.
+    df = source_ref.copy()
+    ren = {"llt_code":_col(df,"llt_code","lltcd"),"llt_name":_col(df,"llt_name","llt","lowest_level_term"),
+           "pt_code":_col(df,"pt_code","ptcd"),"pt_name":_col(df,"pt_name","pt","preferred_term"),
+           "hlt_code":_col(df,"hlt_code","hltcd"),"hlt_name":_col(df,"hlt_name","hlt","high_level_term"),
+           "hlgt_code":_col(df,"hlgt_code","hlgtcd"),"hlgt_name":_col(df,"hlgt_name","hlgt","high_level_group_term"),
+           "soc_name":_col(df,"soc_name","soc","system_organ_class")}
+    # LLT-name and PT-name are the irreducible minimum: without them there is no
+    # term to index and no term to write back. Codes/SOC are optional (a
+    # name-only dictionary still allows ranking, but see has_codes below -- it
+    # forces routing, because a code without a number is not submission-grade).
+    if not ren["llt_name"] or not ren["pt_name"]:
+        raise ValueError("Flattened MedDRA CSV needs an LLT-name and PT-name column; found: "+", ".join(df.columns))
+    keep=[v for v in ren.values() if v]
+    return df.rename(columns={v:k for k,v in ren.items() if v})[keep].reset_index(drop=True)
+
+def resolve_meddra(folder, asc_dir, uploaded_flat):
+    """Apply a FIXED, documented precedence so the operator can predict which
+    source wins when more than one is present (ambiguity here would mean two
+    dictionaries silently competing). Order, highest first:
+      1. an uploaded flattened CSV          (explicit operator intent)
+      2. an explicit .asc folder path       (explicit operator intent)
+      3. a meddra*.csv inside the cut folder (convention)
+      4. a <folder>/meddra/ subdir of .asc  (convention)
+      else -> raise, listing every location searched.
+    Returns (meddra_df, human_readable_source_label); the label is written to
+    the audit so a reviewer knows exactly which dictionary produced the codes."""
+    if uploaded_flat is not None:
+        # QC FIX: parse the upload HERE into a DataFrame. Streamlit's UploadedFile
+        # has no .copy(), so handing it straight to ingest_meddra (whose flat
+        # branch does source_ref.copy()) crashed with AttributeError on every
+        # uploaded dictionary. _key still carries name+size for cache identity.
+        return ingest_meddra("flat_csv", pd.read_csv(uploaded_flat),
+                             _key=("flat",uploaded_flat.name,uploaded_flat.size)), "uploaded flattened CSV"
+    if asc_dir:
+        return ingest_meddra("asc_dir", asc_dir, _key=("asc",asc_dir)), f".asc release @ {asc_dir}"
+    if folder:
+        cand=[os.path.join(folder,f) for f in sorted(os.listdir(folder))
+              if f.lower().endswith(".csv") and "meddra" in f.lower()]
+        if cand:
+            return ingest_meddra("flat_csv", pd.read_csv(cand[0]), _key=("flat",cand[0])), f"flattened CSV in cut folder ({os.path.basename(cand[0])})"
+        asc=os.path.join(folder,"meddra")
+        if os.path.isdir(asc) and os.path.exists(os.path.join(asc,"llt.asc")):
+            return ingest_meddra("asc_dir", asc, _key=("asc",asc)), f".asc release in cut folder ({asc})"
+    raise ValueError("No MedDRA source found. Searched: uploaded flattened CSV, the "
+                     ".asc folder path, meddra*.csv in the cut folder, and a meddra/ subdir.")
+
+# Data files are CSV or SAS .sas7bdat (SDTM/ADaM dumps). A file named *meddra* is
+# reference data for the dictionary, never a domain -- excluded here so it is handled only by
+# resolve_meddra (one source of truth).
+SAS_EXT = ".sas7bdat"
+def _is_data_file(name):
+    n=name.lower()
+    return (n.endswith(".csv") or n.endswith(SAS_EXT)) and "meddra" not in n
+def _read_table(p):
+    """Read one domain table from CSV or SAS .sas7bdat into a DataFrame. SAS support is
+    OPTIONAL: pyreadstat is probed, never imported at module scope (same discipline as the ML
+    runtimes), so CSV-only users need nothing extra. A missing runtime with a SAS file present
+    raises a clear error -- we never silently skip a data file, because that would be a coverage
+    gap and an unexplained hole in what got coded."""
+    if str(p).lower().endswith(SAS_EXT):
+        if not HAVE.get("pyreadstat", False):
+            raise ValueError("SAS .sas7bdat input needs 'pyreadstat' (pip install pyreadstat). "
+                             "Install it, or export the table to CSV.")
+        import pyreadstat
+        df,_meta = pyreadstat.read_sas7bdat(p)
+        return df
+    return pd.read_csv(p)
+def load_domains(folder=None, uploads=None):
+    """Read every data file (CSV or SAS .sas7bdat) that is NOT a MedDRA file, keyed by filename
+    stem (ae.csv / ae.sas7bdat -> 'ae', pr.csv -> 'pr'). Domain NAMES are irrelevant -- the
+    verbatim column is located by synonym inside whatever loaded, not by file. This is what lets
+    the same program code terms from a non-'ae' domain if a study stores them elsewhere."""
+    doms={}; paths=[]
+    if folder:
+        paths += [os.path.join(folder,f) for f in sorted(os.listdir(folder)) if _is_data_file(f)]
+    for u in (uploads or []):
+        if _is_data_file(u.name): paths.append(u)
+    for p in paths:
+        name=os.path.basename(p) if isinstance(p,str) else p.name
+        # re.sub strips any suffix after the first '.' or '_' so 'ae_2026.csv' and 'ae.final.sas7bdat'
+        # both key to 'ae'; keeps the dict small and stable.
+        doms[re.sub(r"[_.].*$","",name.lower()).strip()] = _read_table(p)
+    return doms
+
+# ============================ TIER 1 ============================
+# CONSUMES: the loaded domain frames + the operator's verbatim-column choice.
+# EMITS:    the verbatim rows to code, each carrying USUBJID + a row key so the
+#           coded output can be joined back to its source row.
+# INVARIANT: Tier 1 NEVER rewrites the verbatim. The string Tier 2 measures
+#           closeness against is exactly the bytes the site entered.
+def verbatim_candidates(domains):
+    """All (domain, column) pairs whose header matches an AETERM synonym. We
+    return the LIST so the operator can SEE and CHOOSE which column the coding
+    head reads -- never an automatic guess. A wrong auto-pick (e.g. coding a
+    comment column because it happens to be named similarly) would silently
+    produce garbage codes, so the choice is surfaced in the UI."""
+    out=[]
+    for d,df in domains.items():
+        c=_col(df,*AETERM_SYNONYMS)
+        if c: out.append((d,c))
+    return out
+
+def _row_key(r,i):
+    """Row key for join-back: the first NON-MISSING of AESEQ/ID, else the 1-based
+    row number. QC FIX: this is not r.get("AESEQ", ...) because Series.get() only
+    falls back to its default when the COLUMN is absent -- a present-but-NaN value
+    would leak into KEY and break the join-back on ae_coded.csv, so we test
+    pd.notna explicitly."""
+    for c in ("AESEQ","ID"):
+        if c in r.index and pd.notna(r[c]): return r[c]
+    return int(i)+1
+
+def collect_verbatims(domains, domain, col):
+    """Pull verbatim rows from the ONE chosen (domain, column). Keys are carried
+    through (USUBJID + AESEQ if present and non-missing, else ID, else the 1-based
+    row number) so ae_coded.csv is joinable back to the source. Blank/NaN
+    verbatims are dropped -- there is nothing to code, and an empty string would
+    retrieve a meaningless nearest neighbour. NOTE: `domain`/`col` arrive from
+    splitting the selectbox option string; the option format here ('{d} :: {c}')
+    and the split separator in the UI MUST match, or this unpacks wrong -- see
+    the UI section comment."""
+    df=domains[domain]; rows=[]
+    for i,r in df.iterrows():
+        v=r[col]
+        if pd.isna(v) or not str(v).strip(): continue
+        rows.append(dict(SOURCE_DOMAIN=domain, ROW=int(i)+1, USUBJID=r.get("USUBJID"),
+                         KEY=_row_key(r,i), VERBATIM=str(v)))
+    return pd.DataFrame(rows)
+
+# ============================ TIER 2 ============================
+# CONSUMES: a verbatim string (coding) + the dictionary (to build the index).
+# EMITS:    candidates[] each with LLT/PT/PT_CODE/SOC + cosine in [0,1].
+# CONTRACT: Tier 2 PROPOSES and MEASURES; it decides nothing. The decision is
+#           Tier 4's. The two real sub-jobs (embed + graph search) share one
+#           model family; the stand-in keeps the SAME output columns with a
+#           lexical encoder and no graph, which is exact-but-slow at demo scale
+#           and semantically-blind -- that blindness is the documented limit.
+def _bow(t, dim=384):
+    """[SI] coding encoder: hashing bag-of-words, L2-normalized to a 384-dim
+    UNIT vector -- the SAME shape and unit-norm property the real SapBERT
+    encoder emits, so the downstream cosine math (dot product of unit vectors)
+    is identical and the tier boundary holds either way.
+    DETERMINISM FIX (the one behavior change vs the prior version): token->bucket
+    uses zlib.crc32, NOT Python's built-in hash(). hash() of a str is salted
+    per-process (PYTHONHASHSEED), so the same verbatim could map to different
+    buckets on two runs -> different vectors -> different cosines -> possibly a
+    different AUTO/FLAGGED status. That breaks the audit's reproducibility
+    claim. crc32 is stable across processes and platforms, so a stand-in run is
+    now bit-reproducible. This is NOT a semantic model: it cannot map a
+    colloquial verbatim to the right PT (no embedding space); install the real
+    weights to get semantic retrieval. The [SI] tag in the banner/audit says so.
+    Empty/whitespace-only input -> zero vector -> norm 0 -> we return the zero
+    vector rather than divide by zero; its cosine against anything is 0, which
+    correctly routes (a blank verbatim should never auto-code)."""
+    v=np.zeros(dim)
+    for tok in str(t).lower().split(): v[zlib.crc32(tok.encode())%dim]+=1.0
+    n=np.linalg.norm(v); return v/n if n>0 else v
+
+# The real embedder is constructed ONCE at import if its libs are present; if
+# not, _agent is None and every Tier-2 call takes the stand-in branch. We do NOT
+# lazy-load inside the request path, because a slow first-call model load would
+# look like a hang and would not be reflected in the per-record latency.
+_agent = needle.Needle() if REAL_T2 else None
+def t2_index(meddra):
+    """Build the retrieval index ONCE over the dictionary's LLT strings, before
+    any verbatim is processed (building per-query would be O(dictionary) every
+    time). Returns (V, idx):
+      V   = the matrix of unit vectors, row i aligned to meddra row i. This is
+            the COMMON contract both paths return -- the caller dots a query
+            against V (stand-in) or queries idx (real); either way row i of the
+            result maps to meddra.iloc[i], so candidate assembly is shared.
+      idx = the HNSW graph (real) or None (stand-in).
+    Real path: embed every llt_name to a unit vector, load into an hnswlib graph
+    with space='ip' (inner product). Because the vectors are L2-normalized, ip
+    distance == 1 - cosine, so the cheap graph search returns EXACT angular
+    closeness -- this is why we can use the cheaper metric and still report
+    cosine. ef_construction/M are BUILD knobs (graph quality/size); set_ef(64)
+    is the QUERY-BREADTH knob (larger = more exhaustive = higher recall, slower);
+    these tune the speed/recall trade and do NOT change what the tier emits.
+    Stand-in path: stack the _bow vectors; no graph (a brute-force dot product
+    over V is exact and fine at demo scale; on a full 86k dictionary it is slow,
+    which is itself a reason to install the real index)."""
+    if REAL_T2:
+        V=np.vstack([np.asarray(_agent.embed(s),float) for s in meddra["llt_name"]])
+        V/=np.linalg.norm(V,axis=1,keepdims=True)   # enforce unit-norm so ip==cosine
+        idx=hnswlib.Index(space="ip",dim=V.shape[1])
+        idx.init_index(max_elements=len(V),ef_construction=200,M=32)
+        idx.add_items(V,np.arange(len(V))); idx.set_ef(64); return V,idx
+    return np.vstack([_bow(s) for s in meddra["llt_name"]]), None
+
+def t2_coding(s, meddra, V, idx, k=3):
+    """Retrieve the k nearest dictionary terms for verbatim `s` and attach the
+    cosine. Real: embed s to a unit vector, HNSW knn (distances are 1-cosine, so
+    cos = 1 - dist). Stand-in: dot s's _bow vector against V (both unit-norm, so
+    the dot IS the cosine), take the top-k by value. Both branches produce the
+    SAME row shape, which is the whole point of the tier boundary: Tier 4 cannot
+    tell which path ran except via the [SI]/[RM] tag.
+    Emits a DataFrame with columns rank, llt_code, LLT, PT, PT_CODE, SOC, cosine.
+    cosine is rounded to 4dp for display/audit stability. PT_CODE/SOC may be
+    None if the dictionary was name-only -- Tier 4 handles that via has_codes.
+    Proposes and measures; decides nothing (no threshold is applied here)."""
+    if REAL_T2:
+        q=np.asarray(_agent.embed(s),float); q/=np.linalg.norm(q)
+        lab,dist=idx.knn_query(q.reshape(1,-1),k=k); order=lab[0]; cos=1.0-dist[0]
+    else:
+        cos=V@_bow(s); order=np.argsort(-cos)[:k]; cos=cos[order]
+    rows=[]
+    for r,i in enumerate(order):
+        # HLT/HLGT ride along as evidence columns (the full hierarchy path a
+        # reviewer sees next to each candidate); they are absent -- None -- when
+        # the dictionary source did not carry those levels.
+        rows.append(dict(rank=r+1,
+            llt_code=meddra["llt_code"].iloc[i] if "llt_code" in meddra else None,
+            LLT=meddra["llt_name"].iloc[i], PT=meddra["pt_name"].iloc[i],
+            PT_CODE=meddra["pt_code"].iloc[i] if "pt_code" in meddra else None,
+            HLT=meddra["hlt_name"].iloc[i] if "hlt_name" in meddra else None,
+            HLGT=meddra["hlgt_name"].iloc[i] if "hlgt_name" in meddra else None,
+            SOC=meddra["soc_name"].iloc[i] if "soc_name" in meddra else None,
+            cosine=round(float(cos[r]),4)))
+    return pd.DataFrame(rows)
+
+# ============================ TIER 3 ============================
+# CONSUMES: a verbatim string. EMITS: P(Unambiguous) (or None in the stand-in).
+# CONTRACT: Tier 3 is its own hop because vector similarity (Tier 2) is blind to
+#           sentence intent. "X" and "patient denies X" retrieve the same term at
+#           the same cosine; only a separate sentence-level reading separates
+#           them, and it must be separate so the separation is a READABLE NUMBER
+#           Tier 4 can weight, not a hidden weight inside the retrieval.
+# The router is warmed ONCE (preload=True) so the model load is not paid per
+# request; a cold load inside the loop would dominate the latency and look like
+# a stall. CODING_SCHEMA declares the one question the coding head asks.
+_router = laya.Router(preload=True) if REAL_T3 else None
+CODING_SCHEMA={"unambiguous":{"type":"noul","instructions":"Maps cleanly to one clinical concept?"}}
+def t3_coding(s):
+    """Coding context scalar. Real: route s against CODING_SCHEMA -> a calibrated
+    P(Unambiguous) in [0,1] (one non-autoregressive pass, no text generated, so
+    the output is deterministic and the number is calibratable). Stand-in: emits
+    None -- the lexical build has no sentence-intent model, and we refuse to fake
+    a probability. Consequence downstream: Tier 4's feature row simply OMITS this
+    column; the gate still runs on the remaining named columns. This is a
+    documented limit of the stand-in, not a silent substitution of a guess."""
+    if REAL_T3:
+        r=_router.route(s,CODING_SCHEMA); return dict(P_UNAMBIGUOUS=float(r.unambiguous))
+    return dict(P_UNAMBIGUOUS=None)
+
+# ============================ TIER 4 ============================
+# CONSUMES: ONLY the named columns from Tiers 1-3 (cosine, the ambiguity scalar,
+#           and the string distances/SOC flag computed right here). It NEVER
+#           re-reads the verbatim as tokens -- that is the chain's defining
+#           constraint and the reason a decision is a row of readable numbers.
+# EMITS:    a re-ranked candidate table + a status string.
+# CONTRACT: this is where the chain pays off. Because the decision is a function
+#           of readable upstream numbers, the THRESHOLD is a parameter the
+#           operator moves in the sidebar (and the audit records), not a weight
+#           baked into a model. Moving it does not require retraining.
+def _lev(a,b):
+    """Levenshtein SIMILARITY = 1 - edit_distance(a,b)/max(len a, len b), in
+    [0,1]. A Tier-4 string feature computed from the PRESERVED verbatim vs a
+    candidate LLT -- i.e. Tier 4 derives this scalar itself from two strings it
+    was handed, it does not receive tokens. Classic DP over the edit-distance
+    recurrence (insert/delete/substitute); O(len a * len b), fine for short
+    terms. Returns 0.0 if either string is empty (no meaningful similarity)."""
+    a,b=str(a).lower(),str(b).lower()
+    if not a or not b: return 0.0
+    prev=list(range(len(b)+1))
+    for i,ca in enumerate(a,1):
+        cur=[i]
+        for j,cb in enumerate(b,1): cur.append(min(prev[j]+1,cur[j-1]+1,prev[j-1]+(ca!=cb)))
+        prev=cur
+    return 1.0-prev[-1]/max(len(a),len(b))
+def _jaro(a,b):
+    """Jaro-Winkler similarity in [0,1] -- the SECOND Tier-4 string feature,
+    complementing edit distance by rewarding shared characters within the match
+    window and a common prefix (Winkler boost when Jaro>0.7). Two short terms
+    can have identical edit distance but different Jaro-Winkler; carrying both
+    gives the ranker two independent lexical signals. Returns 1.0 on exact match,
+    0.0 if either is empty or no characters match."""
+    a,b=str(a).lower(),str(b).lower()
+    if a==b: return 1.0
+    la,lb=len(a),len(b)
+    if not la or not lb: return 0.0
+    win=max(la,lb)//2-1; ma=[False]*la; mb=[False]*lb; m=0
+    for i,ca in enumerate(a):
+        for j in range(max(0,i-win),min(lb,i+win+1)):
+            if not mb[j] and ca==b[j]: ma[i]=mb[j]=True; m+=1; break
+    if not m: return 0.0
+    k=0;tr=0
+    for i in range(la):
+        if ma[i]:
+            while not mb[k]: k+=1
+            if a[i]!=b[k]: tr+=1
+            k+=1
+    tr//=2; j=(m/la+m/lb+(m-tr)/m)/3; l=0
+    while l<4 and a[l]==b[l]: l+=1
+    return j+0.1*l*(1-j) if j>0.7 else j
+
+# [SI] composite weights (sum to 1 by construction). These are the STAND-IN's
+# declared blend; the REAL path is a TRAINED pairwise-LTR (LambdaMART) booster
+# whose weights are learned from historical coder decisions, not typed here. We
+# keep the same four-term structure so the feature CONTRACT is identical either
+# way -- only the weight source changes. soc_match is currently always 1 because
+# this build does not infer a body-system context to compare against; a trained
+# ranker would learn from that column when present, so we keep it in the row
+# rather than dropping it (dropping a contract column would change Tier 4's
+# input schema between stand-in and real, which is exactly what we avoid).
+SI_W=[0.40,0.25,0.20,0.15]
+def t4_coding(cands,s,gate,has_codes,amb):
+    """Re-rank the retrieved candidates and gate. Per candidate the feature row
+    = Tier-2 cosine + _lev + _jaro (both computed here from the preserved verbatim
+    `s` and the candidate LLT) + the SOC agreement flag, blended by SI_W (sum=1);
+    the Tier-3 ambiguity scalar `amb` is an EXTRA booster feature when present
+    (None in the stand-in -> omitted, gate unaffected). The gate is a SINGLE
+    threshold on the score: there is NO negation conjunct, because the coding
+    context output here is ambiguity, not negation -- a negated/ambiguous verbatim
+    is handled by the trained ranker pushing its score down via the ambiguity
+    feature, not by a hard-coded if. has_codes=False (a name-only dictionary)
+    FORCES routing regardless of score: AEPTCD without a number is not
+    submission-grade, so we never auto-commit a code we cannot populate.
+    Returns (cands_with_S, status, top_row); status is AUTO_COMMIT_TO_SDTM or
+    FLAGGED_FOR_HUMAN_CODER, top_row is rank-1 (the candidate the status is for)."""
+    lev=[round(_lev(s,r.LLT),4) for r in cands.itertuples()]
+    jar=[round(_jaro(s,r.LLT),4) for r in cands.itertuples()]
+    soc=[1]*len(cands)
+    S=[round(SI_W[0]*r.cosine+SI_W[1]*lv+SI_W[2]*ja+SI_W[3]*so,4)
+       for r,lv,ja,so in zip(cands.itertuples(),lev,jar,soc)]
+    cands=cands.assign(lev=lev,jaro=jar,soc_match=soc,S=S)
+    top=cands.iloc[0]
+    auto=(top.S>=gate) and has_codes
+    return cands,("AUTO_COMMIT_TO_SDTM" if auto else "FLAGGED_FOR_HUMAN_CODER"),top
+
+def _hierarchy(df):
+    """The levels of the MedDRA chain this dictionary actually carries, e.g.
+    'LLT > PT > HLT > HLGT > SOC'. Shown in pre-flight and written to the audit
+    so a reviewer sees at a glance whether the hierarchy is complete or degraded
+    (a source without hlt/hlgt columns still codes fine -- AEDECOD/AEPTCD/AESOC
+    write-back does not depend on those levels)."""
+    return " > ".join(L for L,c in (("LLT","llt_name"),("PT","pt_name"),("HLT","hlt_name"),
+                                    ("HLGT","hlgt_name"),("SOC","soc_name")) if c in df.columns)
+
+def _guard_artifacts(models_dir):
+    """HARD STOP, never a silent fallback: if a trained artifact file exists in
+    models_dir but the runtime that would load it is NOT installed, we refuse to
+    run. Silently substituting a stand-in for a model the operator BELIEVES is
+    loaded would corrupt both the review (they'd trust [SI] numbers as real) and
+    the audit (which would record REAL because the file is there). The filenames
+    below are a CONVENTION the operator must match when dropping real weights;
+    an unexpected name is simply not guarded (it would just not be loaded)."""
+    if not os.path.isdir(models_dir): return
+    for art,lib in [("meddra_coder.json","xgboost"),("needle3.onnx","needle"),("laya.onnx","laya")]:
+        if os.path.exists(os.path.join(models_dir,art)) and not HAVE.get(lib,False):
+            st.error(f"{art} present but '{lib}' not installed. Install '{lib}' or remove "
+                     f"the artifact -- the engine will NOT silently substitute a stand-in."); st.stop()
+
+# ============================ UI ============================
+# Layout order is deliberate: gather WHERE the data is (1), set the operating
+# point + outputs (2), LOAD so the pre-flight panel can show what was actually
+# read, then the verbatim selector (3) populated FROM the load, then the banner,
+# then the pre-flight CONTRACT panel, then Run. The operator confirms the input
+# contract BEFORE any compute, so a mis-pointed folder or a wrong verbatim column
+# is caught on screen, not after a silent wrong answer.
+st.set_page_config(page_title="MedDRA Auto-Coding Engine", layout="wide")
+st.title("🏷 MedDRA Auto-Coding Engine")
+st.caption("Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · "
+           "codes verbatim AETERM only · air-gapped · no sample data in this file")
+
+# Built-in, app-specific instruction manual (from USER_GUIDE.md §3), rendered as a
+# collapsible panel so the working view stays clean but help is one click away.
+_HELP_MD = """
+**What this app does.** Proposes a MedDRA code (`LLT → PT → HLT → HLGT → SOC`) for each adverse-event verbatim, then either auto-commits it or routes it to a human coder. It reads only the one verbatim column you select — nothing else in your data is opened or modified.
+
+**What it needs.** Domain CSVs with the terms to code, plus exactly **one** MedDRA dictionary.
+
+### Step by step
+1. **Point at your data** (sidebar 📂 1) — type a cut-folder path and/or upload domain CSVs. Every `*.csv` except one named `*meddra*` loads as a domain; the verbatim column is found by name synonym inside whatever loads (`AETERM`, `VERBATIM`, `AE_TERM`, `REPORTED_TERM`).
+2. **Provide the dictionary** — choose exactly one shape:
+   - *Flattened CSV (recommended):* upload it, or drop a `meddra*.csv` in the cut folder to auto-find it. Needs an LLT-name + PT-name column; codes and SOC are detected by synonym when present.
+   - *ASCII release (.asc):* give the folder with `llt.asc / pt.asc / hlt.asc / hlgt.asc / soc.asc`. Filtered to active terms (`currency == 'Y'`) and joined across the full chain; `hlt.asc`/`hlgt.asc` are optional.
+3. **Set the operating point** (sidebar ⚖ 2) — the Auto-commit gate slider (default **0.88**). Candidates scoring at/above it auto-commit; below it route to a human. The value you end at is written to the audit with the run.
+4. **Confirm the input** (sidebar 🎯 3 + pre-flight panel) — pick the verbatim column from the dropdown and check the panel: domains loaded, dictionary source + rows, detected columns, the Hierarchy chain this dictionary carries, and whether it has PT codes.
+5. **Execute** — click 🚀 Execute MedDRA Auto-Coding. Results render on screen and write to the output folder (default `meddra_output`).
+
+### The hierarchy
+MedDRA groups related preferred terms into **High Level Terms (HLT)** by anatomy/pathology/physiology/aetiology/function; HLTs link to **High Level Group Terms (HLGT)**; HLGTs group into **System Organ Classes (SOC)**. Every candidate carries the full `LLT → PT → HLT → HLGT → SOC` path as evidence columns.
+
+### Reading ae_coded.csv
+One row per candidate (top-3), so a coder sees the whole pre-populated list, not just the winner.
+
+| Column | Meaning |
+|---|---|
+| `VERBATIM` | The term exactly as typed (never rewritten). |
+| `rank` | 1 = top candidate; 2–3 are alternatives. |
+| `AEDECOD` / `AEPTCD` | Preferred-term decode + code to write back. |
+| `HLT`, `HLGT` | Evidence columns — full path; never scored, not SDTM write-back. |
+| `AESOC` | System Organ Class. |
+| `cosine`, `lev`, `jaro`, `S` | The readable numbers the decision is made from. |
+| `AECODSTAT` | `AUTO_COMMIT_TO_SDTM` (rank 1 only) or `FLAGGED_FOR_HUMAN_CODER`; ranks 2–3 are `ALT_CANDIDATE`. |
+
+> A **name-only dictionary** (no PT codes) forces every verbatim to route to a human — an `AEPTCD` without a number is not submission-grade. The pre-flight panel warns you up front.
+
+### Stand-in vs real (`[SI]` / `[RM]`)
+Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install `cactus-needle`, `hnswlib`, `laya`, `xgboost` and the banner flips tier-by-tier; columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
+
+### Troubleshooting
+- **"No MedDRA source found":** provide exactly one dictionary shape (upload CSV / set the .asc folder / name it `meddra*.csv` in the cut folder).
+- **Everything routes to a human:** your dictionary is likely name-only — pre-flight says "Has PT codes → NO".
+- **Verbatim column not detected:** rename it to `AETERM`, or add its spelling to `AETERM_SYNONYMS` at the top of this file.
+
+### What this build does NOT do
+No scanned-document path, no safety/DLT logic, no negation feature, nothing leaves the machine. See Deck A for full governance and limits.
+"""
+with st.expander("📖 How to use this app"):
+    st.markdown(_HELP_MD)
+
+# ---- sidebar 1: WHERE the data is. Folder path AND/OR uploads are additive;
+#      a meddra*.csv in the folder is treated as the dictionary, not a domain. ----
+st.sidebar.header("📂 1. Point this at your data")
+_SAMPLE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample_data")
+# Demo toggle: off by default; a link ending in ?demo=1 (e.g. a hosted demo) starts it on.
+_use_sample = st.sidebar.checkbox("Use the bundled synthetic sample data",
+    value=(st.query_params.get("demo") == "1"),
+    help="Fills the folder path with the synthetic demo cut shipped in ./sample_data/ (no real patients or licensed dictionary).")
+folder = st.sidebar.text_input("Cut folder path (domain CSVs)", value=(_SAMPLE_DIR if _use_sample else ""),
+    help="Path to a folder of domain CSVs. Every *.csv here EXCEPT one named "
+         "*meddra* is loaded as a domain; the verbatim column is found by synonym "
+         "inside whatever loaded, not by file name. Leave blank to use uploads.")
+up_dom = st.sidebar.file_uploader("...or upload domain files (CSV or SAS .sas7bdat)",
+    type=["csv","sas7bdat"], accept_multiple_files=True)
+# The dictionary shape is an explicit radio so the operator states intent rather
+# than the app guessing between a flat CSV and an .asc release.
+st.sidebar.markdown("**MedDRA dictionary** — provide exactly one shape:")
+kind = st.sidebar.radio("Source shape", ["Flattened CSV (recommended)","ASCII release (llt/pt/hlt/hlgt/soc.asc)"])
+up_med=None; asc_dir=""
+if kind.startswith("Flattened"):
+    up_med = st.sidebar.file_uploader("Upload flattened MedDRA CSV", type="csv",
+        help="Needs an LLT-name + PT-name column; llt_code/pt_code/soc_name detected "
+             "by synonym. A meddra*.csv in the cut folder is also auto-found.")
+else:
+    asc_dir = st.sidebar.text_input("Folder with llt.asc / pt.asc / hlt.asc / hlgt.asc / soc.asc",
+        help="Pipe-delimited release; filtered to currency=='Y', joined "
+             "LLT→PT→HLT→HLGT→SOC. The hlt/hlgt files are optional -- if absent, "
+             "those levels simply do not appear on the candidates.")
+
+# ---- sidebar 2: the operating point + where outputs land + optional weights. ----
+st.sidebar.markdown("---"); st.sidebar.header("⚖ 2. Operating point")
+code_gate = st.sidebar.slider("Auto-commit gate",0.70,0.98,DEF_CODE_GATE,0.01,
+    help="Tier-4 threshold. A reviewer-set operating point; the value in force is "
+         "written to the audit with the run, so a run is reproducible from its audit.")
+out_dir = st.sidebar.text_input("Output folder","meddra_output",
+    help="Where ae_coded.csv + audit_log.csv are written on Run (also offered as downloads).")
+models_dir = st.sidebar.text_input("Models dir (optional real weights)","models",
+    help="If a trained artifact is present here but its runtime is not installed, "
+         "the app STOPS rather than silently substituting a stand-in.")
+_guard_artifacts(models_dir)   # runs on every rerun, before any compute
+
+# ---- LOAD now (dictionary cached) so the pre-flight panel + selector are live.
+#      Errors are captured into load_err and SURFACED in the panel, not raised as
+#      a stack trace, so the operator sees a plain-language reason. ----
+domains={}; meddra=None; meddra_label=""; load_err=None
+try:
+    domains = load_domains(folder or None, up_dom)
+    if domains: meddra, meddra_label = resolve_meddra(folder or None, asc_dir or None, up_med)
+except Exception as e: load_err=str(e)
+
+# ---- sidebar 3: the verbatim selector, populated from what actually loaded.
+#      Option strings are formatted '{domain} :: {column}'. collect_verbatims
+#      splits on ' :: ' -- the FORMAT here and the SPLIT there MUST match, or the
+#      unpacking silently picks the wrong domain/column. If you change one,
+#      change the other. (This is the single easiest thing to break in this file.) ----
+st.sidebar.markdown("---"); st.sidebar.header("🎯 3. Confirm the input (pre-flight)")
+vopts=[f"{d} :: {c}" for d,c in verbatim_candidates(domains)] if domains else []
+verb_sel = st.sidebar.selectbox("Verbatim source column (this program reads ONLY this)",
+    options=vopts if vopts else ["(none detected)"], index=0, disabled=not vopts,
+    help="Lists every loaded column matching an AETERM synonym. If yours has an "
+         "unusual name, rename it to AETERM in the CSV or add it to "
+         "AETERM_SYNONYMS at the top of this file -- do not hard-code a column.")
+
+# ---- mode banner: which path ran PER TIER, computed from the runtime probe, not
+#      from a constant. This is the [SI]/[RM] discipline made visible: a stand-in
+#      is never presented as the component. ----
+banner = "Tier 2: %s | Tier 3: %s | Tier 4: %s" % (
+    "REAL needle+hnsw" if REAL_T2 else "STAND-IN [SI] (lexical)",
+    "REAL laya" if REAL_T3 else "STAND-IN [SI]",
+    "REAL xgboost" if REAL_T4 else "STAND-IN [SI]")
+st.info("**Mode banner** — "+banner+" · a [SI] stand-in is never the component; the "
+        "audit records which path ran per tier. Without the trained encoder, Tier-2 "
+        "retrieval is lexical and will not reproduce semantic MedDRA mappings.")
+
+# ---- pre-flight CONTRACT panel: show, before any compute, exactly what the app
+#      read, so the operator confirms it matches their cut. If a column is wrong
+#      here, fix it in the sidebar (selector / rule inputs), NOT in the code. ----
+st.subheader("📋 Input contract (pre-flight)")
+if load_err: st.error(f"Import failed: {load_err}")
+elif not domains: st.warning("No domain CSVs loaded yet — set the folder path or upload files.")
+else:
+    c1,c2=st.columns(2)
+    with c1:
+        st.markdown("**Domains loaded**")
+        st.dataframe(pd.DataFrame([(d,f"{len(df)} rows",", ".join(df.columns)) for d,df in domains.items()],
+                     columns=["domain","size","columns"]), width="stretch", hide_index=True)
+        st.markdown("**Verbatim source**"); st.write(f"`{verb_sel}`" if vopts else "None detected.")
+    with c2:
+        st.markdown("**MedDRA dictionary**"); st.write(f"Source → {meddra_label}")
+        if meddra is not None:
+            st.write(f"Active LLT→PT rows → **{len(meddra):,}**"); st.write("Detected columns → "+", ".join(meddra.columns))
+            # The hierarchy chain this dictionary actually carries (e.g.
+            # 'LLT > PT > HLT > HLGT > SOC'). Surfaced here so a reviewer sees at
+            # a glance whether the full five-level path is present or degraded,
+            # and written to the audit with the run.
+            st.write("Hierarchy → "+_hierarchy(meddra))
+            # has_codes drives Tier-4 routing: a name-only dictionary cannot emit
+            # AEPTCD, so every verbatim must route to a human. Surfaced HERE so
+            # the operator is not surprised by 100% routing later.
+            hc = "pt_code" in meddra.columns and meddra["pt_code"].notna().any()
+            st.write("Has PT codes → "+("YES" if hc else "NO (name-only → all coding routes to a human)"))
+    st.caption("This program reads ONLY the verbatim column above -- nothing else in your data "
+               "is opened or modified.")
+
+# ---- Run button: disabled until BOTH a domain and a dictionary are loaded, so
+#      an empty/partial input cannot produce a misleading empty result. ----
+if not st.button("🚀 Execute MedDRA Auto-Coding", type="primary", disabled=not (domains and meddra is not None)):
+    st.stop()
+
+# ---- execute the tiers on the already-loaded frames; time the whole run for the
+#      latency figure shown in the results header and written to the audit. ----
+t0=time.perf_counter()
+# Split the selectbox option on ' :: ' to recover (domain, column); must match
+# the option format built in sidebar 3 (see the warning there).
+verbatims = collect_verbatims(domains, *verb_sel.split(" :: ",1)) if vopts else pd.DataFrame()
+V, idx = t2_index(meddra)            # build the index ONCE over the dictionary
+has_codes = "pt_code" in meddra.columns and meddra["pt_code"].notna().any()
+coded_rows=[]; log=[]
+if len(verbatims):
+    for _,vr in verbatims.iterrows():
+        s=vr["VERBATIM"]
+        cands=t2_coding(s,meddra,V,idx)            # Tier 2: retrieve + cosine
+        amb=t3_coding(s)                           # Tier 3: ambiguity scalar (or None)
+        cands,status,top=t4_coding(cands,s,code_gate,has_codes,amb["P_UNAMBIGUOUS"])  # Tier 4
+        # One output row PER CANDIDATE so the human queue can see the full
+        # pre-populated top-k, not just the winner; rank-1 carries the status,
+        # the rest are marked ALT_CANDIDATE (evidence, not decisions).
+        # QC FIX: every cell is read with BRACKET access (cc["rank"]), never dot
+        # access. 'rank' collides with pandas' built-in Series.rank() method, so
+        # cc.rank silently returned a bound METHOD instead of the integer and
+        # ae_coded.csv's rank column came out full of repr garbage. Bracket
+        # access is used for ALL columns here (not just rank) so a future column
+        # rename onto another method name cannot corrupt the export again.
+        for _,cc in cands.iterrows():
+            coded_rows.append(dict(SOURCE_DOMAIN=vr["SOURCE_DOMAIN"],USUBJID=vr["USUBJID"],KEY=vr["KEY"],
+                VERBATIM=s,rank=int(cc["rank"]),LLT=cc["LLT"],LLT_CODE=cc["llt_code"],AEDECOD=cc["PT"],AEPTCD=cc["PT_CODE"],
+                HLT=cc["HLT"],HLGT=cc["HLGT"],AESOC=cc["SOC"],cosine=cc["cosine"],lev=cc["lev"],jaro=cc["jaro"],S=cc["S"],
+                AECODSTAT=(status if int(cc["rank"])==1 else "ALT_CANDIDATE")))
+        log.append(f"{vr['SOURCE_DOMAIN']} row {vr['KEY']} '{s[:30]}…' -> {top.PT} S={top.S} {status}")
+elapsed=(time.perf_counter()-t0)*1000
+
+# ---- results: these tables ARE the tier outputs, computed from the operator's
+#      files; no reference/expected table is embedded anywhere in this file. ----
+st.subheader(f"Tier 2–4 · results (computed from your files; {elapsed:.2f} ms)")
+if coded_rows:
+    st.dataframe(pd.DataFrame(coded_rows), width="stretch")
+    st.caption("cosine/S are computed from your dictionary by the active Tier-2 path "
+               f"({'real' if REAL_T2 else '[SI] lexical'}); no reference table is embedded.")
+st.expander("Processing log").write("\n".join(log))
+
+# ---- audit: one row per run, recording the CONTRACT (which files, which column,
+#      which dictionary + its hash), the per-tier PATH (REAL/[SI]), and the
+#      EFFECTIVE operating point. This is what makes a run reproducible and what
+#      keeps this head's validation scope separate from phi_app.py's. ----
+sha=lambda df: hashlib.sha256(df.to_csv(index=False).encode()).hexdigest()[:16]
+audit=pd.DataFrame([dict(program="meddra_coder", timestamp=pd.Timestamp.now().isoformat(timespec="seconds"),
+    domains=list(domains.keys()), verbatim_source=verb_sel, n_verbatims=len(verbatims),
+    meddra_source=meddra_label, meddra_rows=len(meddra), meddra_sha256=sha(meddra),
+    meddra_has_codes="YES" if has_codes else "NO",
+    meddra_hierarchy=_hierarchy(meddra),
+    mode_T2="REAL" if REAL_T2 else "STAND-IN", mode_T3="REAL" if REAL_T3 else "STAND-IN",
+    mode_T4="REAL" if REAL_T4 else "STAND-IN", coding_gate=code_gate,
+    coding_note="single threshold on the re-rank score; no negation conjunct",
+    n_coded_rows=len(coded_rows),
+    n_auto=sum(1 for r in coded_rows if r.get("AECODSTAT")=="AUTO_COMMIT_TO_SDTM" and r.get("rank")==1),
+    measured_latency_ms=round(elapsed,2))])
+os.makedirs(out_dir, exist_ok=True)
+if coded_rows: pd.DataFrame(coded_rows).to_csv(os.path.join(out_dir,"ae_coded.csv"), index=False)
+audit.to_csv(os.path.join(out_dir,"audit_log.csv"), index=False)
+st.success(f"Wrote `{out_dir}/ae_coded.csv` and `{out_dir}/audit_log.csv`")
+st.download_button("⬇ ae_coded.csv",(pd.DataFrame(coded_rows) if coded_rows else pd.DataFrame()).to_csv(index=False).encode(),"ae_coded.csv","text/csv")
+st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv")

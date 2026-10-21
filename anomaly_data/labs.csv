@@ -1,0 +1,601 @@
+STUDYID,USUBJID,AVISIT,VISITNUM,LAB,ALT,AST,CREAT,SYSBP,LABCOM
+PROTO-2026-X89,SUBJ-A001,V1,1,LAB-A,33.52,18.6,1.04,125.13,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A001,V2,2,LAB-A,52.02,28.11,1.02,141.3,Specimen adequate.
+PROTO-2026-X89,SUBJ-A001,V3,3,LAB-A,66.2,35.83,0.89,125.84,Specimen adequate.
+PROTO-2026-X89,SUBJ-A001,V4,4,LAB-A,73.7,39.5,1.0,121.92,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A002,V1,1,LAB-B,37.01,30.67,1.17,112.91,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A002,V2,2,LAB-B,46.74,21.8,1.2,122.4,Specimen adequate.
+PROTO-2026-X89,SUBJ-A002,V3,3,LAB-B,58.98,37.31,1.16,117.79,Sample received on time.
+PROTO-2026-X89,SUBJ-A002,V4,4,LAB-B,75.31,27.41,1.07,132.22,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A003,V1,1,LAB-C,41.35,21.11,0.81,139.76,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A003,V2,2,LAB-C,49.15,26.87,0.94,122.08,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A003,V3,3,LAB-C,64.67,47.76,0.91,121.49,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A003,V4,4,LAB-C,420.0,30.54,0.96,130.54,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A004,V1,1,LAB-A,32.93,24.45,0.75,122.41,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A004,V2,2,LAB-A,50.77,31.09,1.06,109.87,Specimen adequate.
+PROTO-2026-X89,SUBJ-A004,V3,3,LAB-A,52.5,31.97,0.73,148.56,Sample received on time.
+PROTO-2026-X89,SUBJ-A004,V4,4,LAB-A,72.55,28.36,1.14,123.72,Sample received on time.
+PROTO-2026-X89,SUBJ-A005,V1,1,LAB-B,45.69,25.39,1.35,122.94,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A005,V2,2,LAB-B,48.2,22.89,1.24,115.48,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A005,V3,3,LAB-B,70.41,29.71,0.7,133.63,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A005,V4,4,LAB-B,91.22,23.79,0.98,126.3,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A006,V1,1,LAB-C,47.53,38.23,1.32,118.19,Specimen adequate.
+PROTO-2026-X89,SUBJ-A006,V2,2,LAB-C,50.36,31.67,1.3,119.82,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A006,V3,3,LAB-C,65.47,40.05,0.96,127.01,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A006,V4,4,LAB-C,87.98,25.43,0.94,127.62,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A007,V1,1,LAB-A,54.75,24.46,0.93,108.76,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A007,V2,2,LAB-A,41.2,32.84,0.69,139.37,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A007,V3,3,LAB-A,68.95,30.48,0.81,135.39,Sample received on time.
+PROTO-2026-X89,SUBJ-A007,V4,4,LAB-A,78.0,27.15,0.91,120.69,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A008,V1,1,LAB-B,37.55,21.7,1.28,143.57,Specimen adequate.
+PROTO-2026-X89,SUBJ-A008,V2,2,LAB-B,48.96,23.27,0.89,128.0,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A008,V3,3,LAB-B,75.22,28.98,0.89,131.45,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A008,V4,4,LAB-B,71.59,10.03,1.16,132.15,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A009,V1,1,LAB-C,38.72,29.85,0.73,134.37,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A009,V2,2,LAB-C,34.58,36.07,0.98,128.63,Specimen adequate.
+PROTO-2026-X89,SUBJ-A009,V3,3,LAB-C,74.33,23.34,1.29,120.95,Sample received on time.
+PROTO-2026-X89,SUBJ-A009,V4,4,LAB-C,69.85,45.72,1.24,113.41,Sample received on time.
+PROTO-2026-X89,SUBJ-A010,V1,1,LAB-A,20.21,34.56,1.46,123.27,Specimen adequate.
+PROTO-2026-X89,SUBJ-A010,V2,2,LAB-A,37.41,26.91,1.03,138.49,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A010,V3,3,LAB-A,47.48,29.23,0.99,128.54,Specimen adequate.
+PROTO-2026-X89,SUBJ-A010,V4,4,LAB-A,52.5,34.76,0.94,131.31,Specimen adequate.
+PROTO-2026-X89,SUBJ-A011,V1,1,LAB-B,37.17,31.76,1.01,116.84,Specimen adequate.
+PROTO-2026-X89,SUBJ-A011,V2,2,LAB-B,54.0,29.36,0.82,110.85,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A011,V3,3,LAB-B,69.76,27.12,0.9,114.41,"SAMPLE HEMOLYZED -- RESULT UNRELIABLE, RECOLLECT IMMEDIATELY"
+PROTO-2026-X89,SUBJ-A011,V4,4,LAB-B,86.64,35.07,0.59,127.73,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A012,V1,1,LAB-C,30.22,26.53,1.07,131.14,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A012,V2,2,LAB-C,59.03,29.23,1.13,140.14,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A012,V3,3,LAB-C,49.41,26.76,0.96,123.26,Specimen adequate.
+PROTO-2026-X89,SUBJ-A012,V4,4,LAB-C,77.85,51.63,1.05,122.28,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A013,V1,1,LAB-A,40.85,30.81,0.91,109.61,Specimen adequate.
+PROTO-2026-X89,SUBJ-A013,V2,2,LAB-A,35.73,26.41,1.06,124.07,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A013,V3,3,LAB-A,68.2,23.89,0.99,132.28,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A013,V4,4,LAB-A,85.61,30.98,0.97,115.36,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A014,V1,1,LAB-B,46.26,23.43,1.11,126.34,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A014,V2,2,LAB-B,42.63,40.75,1.1,121.65,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A014,V3,3,LAB-B,70.41,34.67,1.27,132.62,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A014,V4,4,LAB-B,96.03,28.63,1.16,118.84,Sample received on time.
+PROTO-2026-X89,SUBJ-A015,V1,1,LAB-C,40.17,21.98,1.25,116.81,Sample received on time.
+PROTO-2026-X89,SUBJ-A015,V2,2,LAB-C,53.29,42.85,1.25,137.13,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A015,V3,3,LAB-C,71.31,48.23,0.89,126.5,Sample received on time.
+PROTO-2026-X89,SUBJ-A015,V4,4,LAB-C,84.76,51.03,0.91,129.21,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A016,V1,1,LAB-A,47.38,26.72,1.03,120.02,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A016,V2,2,LAB-A,60.43,41.45,0.95,126.63,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A016,V3,3,LAB-A,57.58,36.29,0.56,133.07,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A016,V4,4,LAB-A,71.66,32.79,0.95,137.56,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A017,V1,1,LAB-B,28.81,23.5,0.61,126.44,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A017,V2,2,LAB-B,34.8,21.27,1.17,131.38,Specimen adequate.
+PROTO-2026-X89,SUBJ-A017,V3,3,LAB-B,54.26,33.18,0.84,121.06,Sample received on time.
+PROTO-2026-X89,SUBJ-A017,V4,4,LAB-B,75.47,35.74,0.76,215.0,Sample received on time.
+PROTO-2026-X89,SUBJ-A018,V1,1,LAB-C,31.03,32.84,0.81,117.94,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A018,V2,2,LAB-C,35.76,34.87,0.73,123.72,Sample received on time.
+PROTO-2026-X89,SUBJ-A018,V3,3,LAB-C,57.43,32.53,0.89,113.06,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A018,V4,4,LAB-C,80.54,32.56,0.95,118.66,Sample received on time.
+PROTO-2026-X89,SUBJ-A019,V1,1,LAB-A,36.61,22.02,1.23,115.86,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A019,V2,2,LAB-A,43.61,28.75,1.07,123.57,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A019,V3,3,LAB-A,64.59,24.44,1.16,109.9,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A019,V4,4,LAB-A,83.35,30.0,1.18,115.45,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A020,V1,1,LAB-B,38.85,16.59,0.84,107.84,Specimen adequate.
+PROTO-2026-X89,SUBJ-A020,V2,2,LAB-B,39.85,22.98,0.98,111.11,Sample received on time.
+PROTO-2026-X89,SUBJ-A020,V3,3,LAB-B,61.74,17.72,0.91,108.13,Sample received on time.
+PROTO-2026-X89,SUBJ-A020,V4,4,LAB-B,71.8,24.19,0.85,127.24,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A021,V1,1,LAB-C,39.21,30.8,0.92,132.76,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A021,V2,2,LAB-C,45.33,34.45,0.75,138.62,Specimen adequate.
+PROTO-2026-X89,SUBJ-A021,V3,3,LAB-C,65.52,36.99,1.18,119.27,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A021,V4,4,LAB-C,85.47,42.59,1.04,108.6,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A022,V1,1,LAB-A,23.57,27.42,0.89,117.77,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A022,V2,2,LAB-A,41.46,15.72,1.41,103.26,Specimen adequate.
+PROTO-2026-X89,SUBJ-A022,V3,3,LAB-A,65.83,28.08,1.01,115.95,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A022,V4,4,LAB-A,77.8,32.1,1.18,119.91,Sample received on time.
+PROTO-2026-X89,SUBJ-A023,V1,1,LAB-B,40.19,26.72,1.12,113.08,Specimen adequate.
+PROTO-2026-X89,SUBJ-A023,V2,2,LAB-B,64.88,33.36,1.04,126.5,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A023,V3,3,LAB-B,60.73,13.95,1.04,124.71,Sample received on time.
+PROTO-2026-X89,SUBJ-A023,V4,4,LAB-B,74.86,35.39,1.31,138.78,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A024,V1,1,LAB-C,33.24,21.15,1.2,106.31,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A024,V2,2,LAB-C,31.1,22.56,0.75,119.74,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A024,V3,3,LAB-C,51.2,39.86,1.24,136.79,Sample received on time.
+PROTO-2026-X89,SUBJ-A024,V4,4,LAB-C,86.33,45.28,1.16,118.81,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A025,V1,1,LAB-A,34.59,23.1,1.06,124.98,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A025,V2,2,LAB-A,51.84,22.48,1.28,122.79,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A025,V3,3,LAB-A,61.92,18.84,1.03,100.45,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A025,V4,4,LAB-A,64.78,16.06,1.1,115.21,Specimen adequate.
+PROTO-2026-X89,SUBJ-A026,V1,1,LAB-B,38.68,29.62,0.81,126.53,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A026,V2,2,LAB-B,43.45,38.66,0.93,133.81,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A026,V3,3,LAB-B,64.44,27.43,1.18,112.89,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A026,V4,4,LAB-B,67.22,30.17,1.05,130.44,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A027,V1,1,LAB-C,15.45,28.9,1.06,123.54,Sample received on time.
+PROTO-2026-X89,SUBJ-A027,V2,2,LAB-C,39.97,40.72,0.79,121.69,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A027,V3,3,LAB-C,67.74,38.13,0.87,128.46,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A027,V4,4,LAB-C,71.59,46.33,1.0,124.35,Specimen adequate.
+PROTO-2026-X89,SUBJ-A028,V1,1,LAB-A,37.9,34.78,1.05,117.67,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A028,V2,2,LAB-A,56.99,22.52,0.95,137.62,Specimen adequate.
+PROTO-2026-X89,SUBJ-A028,V3,3,LAB-A,69.38,28.19,1.15,133.91,Sample received on time.
+PROTO-2026-X89,SUBJ-A028,V4,4,LAB-A,73.0,19.24,1.05,132.06,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A029,V1,1,LAB-B,40.12,26.02,1.07,117.09,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A029,V2,2,LAB-B,34.83,24.24,1.17,141.08,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A029,V3,3,LAB-B,64.81,30.81,0.86,122.49,Specimen adequate.
+PROTO-2026-X89,SUBJ-A029,V4,4,LAB-B,75.06,24.34,6.8,124.64,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A030,V1,1,LAB-C,52.62,36.68,1.14,137.15,Sample received on time.
+PROTO-2026-X89,SUBJ-A030,V2,2,LAB-C,47.45,38.52,0.94,139.89,Sample received on time.
+PROTO-2026-X89,SUBJ-A030,V3,3,LAB-C,70.5,41.17,0.83,122.63,Sample received on time.
+PROTO-2026-X89,SUBJ-A030,V4,4,LAB-C,74.2,50.81,0.97,124.28,Sample received on time.
+PROTO-2026-X89,SUBJ-A031,V1,1,LAB-A,47.7,23.5,0.73,116.85,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A031,V2,2,LAB-A,55.43,24.01,1.0,128.24,Specimen adequate.
+PROTO-2026-X89,SUBJ-A031,V3,3,LAB-A,75.57,22.99,0.81,122.5,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A031,V4,4,LAB-A,90.82,23.56,0.88,121.0,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A032,V1,1,LAB-B,40.59,34.41,1.12,114.22,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A032,V2,2,LAB-B,64.95,25.47,0.98,127.29,Sample received on time.
+PROTO-2026-X89,SUBJ-A032,V3,3,LAB-B,55.59,27.1,1.07,121.26,Specimen adequate.
+PROTO-2026-X89,SUBJ-A032,V4,4,LAB-B,67.5,29.81,1.15,122.27,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A033,V1,1,LAB-C,30.33,26.45,1.29,116.02,Specimen adequate.
+PROTO-2026-X89,SUBJ-A033,V2,2,LAB-C,49.96,36.68,1.03,127.17,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A033,V3,3,LAB-C,70.49,32.69,1.34,122.36,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A033,V4,4,LAB-C,70.21,48.1,0.87,135.04,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A034,V1,1,LAB-A,23.68,29.91,1.16,140.8,Specimen adequate.
+PROTO-2026-X89,SUBJ-A034,V2,2,LAB-A,52.97,17.4,0.86,123.75,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A034,V3,3,LAB-A,83.92,36.72,1.01,116.42,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A034,V4,4,LAB-A,74.36,23.61,0.98,118.8,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A035,V1,1,LAB-B,35.03,32.47,0.73,116.08,Sample received on time.
+PROTO-2026-X89,SUBJ-A035,V2,2,LAB-B,50.06,25.76,0.97,115.74,Specimen adequate.
+PROTO-2026-X89,SUBJ-A035,V3,3,LAB-B,59.77,29.82,0.89,106.92,Specimen adequate.
+PROTO-2026-X89,SUBJ-A035,V4,4,LAB-B,83.11,29.35,1.05,135.76,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A036,V1,1,LAB-C,47.67,19.21,0.91,141.28,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A036,V2,2,LAB-C,59.04,39.22,0.82,113.93,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A036,V3,3,LAB-C,74.46,40.76,0.85,126.79,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A036,V4,4,LAB-C,88.87,57.63,0.87,135.48,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A037,V1,1,LAB-A,55.28,19.57,1.27,133.12,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A037,V2,2,LAB-A,48.2,38.92,0.86,109.42,Specimen adequate.
+PROTO-2026-X89,SUBJ-A037,V3,3,LAB-A,63.61,34.68,0.98,108.66,Specimen adequate.
+PROTO-2026-X89,SUBJ-A037,V4,4,LAB-A,85.63,31.6,0.8,108.68,Sample received on time.
+PROTO-2026-X89,SUBJ-A038,V1,1,LAB-B,40.96,20.78,0.96,107.99,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A038,V2,2,LAB-B,47.71,27.26,0.97,136.53,Sample received on time.
+PROTO-2026-X89,SUBJ-A038,V3,3,LAB-B,52.79,23.93,1.09,122.4,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A038,V4,4,LAB-B,70.86,21.7,1.0,117.57,Specimen adequate.
+PROTO-2026-X89,SUBJ-A039,V1,1,LAB-C,51.65,30.73,1.18,119.32,Sample received on time.
+PROTO-2026-X89,SUBJ-A039,V2,2,LAB-C,68.46,41.56,1.12,127.42,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A039,V3,3,LAB-C,61.98,33.92,0.81,164.44,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A039,V4,4,LAB-C,85.36,48.74,0.92,134.56,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A040,V1,1,LAB-A,50.15,20.81,1.32,121.68,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A040,V2,2,LAB-A,63.56,17.38,1.01,118.17,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A040,V3,3,LAB-A,69.97,32.44,0.99,142.1,Sample received on time.
+PROTO-2026-X89,SUBJ-A040,V4,4,LAB-A,70.99,19.26,0.92,118.47,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A041,V1,1,LAB-B,34.14,33.99,1.17,148.19,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A041,V2,2,LAB-B,34.61,25.92,1.15,124.7,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A041,V3,3,LAB-B,72.53,27.45,1.28,118.31,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A041,V4,4,LAB-B,84.27,27.71,1.38,127.3,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A042,V1,1,LAB-C,50.54,27.76,0.71,134.47,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A042,V2,2,LAB-C,41.84,26.46,1.0,128.53,value entered in wrong units; see correction log 9999-99-99
+PROTO-2026-X89,SUBJ-A042,V3,3,LAB-C,57.72,38.6,1.05,127.17,Specimen adequate.
+PROTO-2026-X89,SUBJ-A042,V4,4,LAB-C,83.18,44.25,1.08,110.69,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A043,V1,1,LAB-A,38.03,26.96,1.03,137.67,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A043,V2,2,LAB-A,36.64,29.6,1.0,101.17,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A043,V3,3,LAB-A,51.06,22.0,1.18,115.69,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A043,V4,4,LAB-A,61.91,17.61,0.97,140.35,Sample received on time.
+PROTO-2026-X89,SUBJ-A044,V1,1,LAB-B,23.7,23.13,1.16,122.25,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A044,V2,2,LAB-B,38.24,45.6,1.28,117.69,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A044,V3,3,LAB-B,49.67,22.71,0.99,122.37,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A044,V4,4,LAB-B,69.81,33.16,0.96,122.07,Specimen adequate.
+PROTO-2026-X89,SUBJ-A045,V1,1,LAB-C,45.91,39.92,1.33,122.74,Sample received on time.
+PROTO-2026-X89,SUBJ-A045,V2,2,LAB-C,59.54,34.03,1.06,117.79,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A045,V3,3,LAB-C,68.69,43.78,1.08,109.45,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A045,V4,4,LAB-C,78.8,46.36,1.03,110.19,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A046,V1,1,LAB-A,10.22,28.27,1.22,129.55,Specimen adequate.
+PROTO-2026-X89,SUBJ-A046,V2,2,LAB-A,39.85,36.79,1.5,131.89,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A046,V3,3,LAB-A,54.09,29.9,0.93,114.31,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A046,V4,4,LAB-A,69.53,31.68,1.12,134.81,Specimen adequate.
+PROTO-2026-X89,SUBJ-A047,V1,1,LAB-B,21.84,29.71,1.26,133.91,Specimen adequate.
+PROTO-2026-X89,SUBJ-A047,V2,2,LAB-B,45.28,23.26,0.97,126.99,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A047,V3,3,LAB-B,64.06,22.01,1.06,116.25,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A047,V4,4,LAB-B,70.35,22.36,1.27,143.37,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A048,V1,1,LAB-C,33.19,30.82,1.26,136.96,Specimen adequate.
+PROTO-2026-X89,SUBJ-A048,V2,2,LAB-C,48.18,36.24,0.78,139.51,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A048,V3,3,LAB-C,72.77,31.48,1.11,125.07,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A048,V4,4,LAB-C,85.71,47.88,1.01,137.22,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A049,V1,1,LAB-A,33.86,36.76,0.8,120.75,Specimen adequate.
+PROTO-2026-X89,SUBJ-A049,V2,2,LAB-A,37.92,24.84,1.38,130.91,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A049,V3,3,LAB-A,66.89,31.34,1.06,104.64,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A049,V4,4,LAB-A,90.74,30.94,0.9,123.04,Sample received on time.
+PROTO-2026-X89,SUBJ-A050,V1,1,LAB-B,28.25,26.23,1.13,134.9,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A050,V2,2,LAB-B,50.25,13.94,1.1,129.35,Sample received on time.
+PROTO-2026-X89,SUBJ-A050,V3,3,LAB-B,62.59,19.68,1.2,132.99,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A050,V4,4,LAB-B,67.91,22.18,1.03,144.27,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A051,V1,1,LAB-C,27.35,28.09,1.04,148.53,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A051,V2,2,LAB-C,54.89,34.21,0.98,125.45,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A051,V3,3,LAB-C,61.13,41.9,0.81,120.35,Sample received on time.
+PROTO-2026-X89,SUBJ-A051,V4,4,LAB-C,67.02,50.36,0.68,120.14,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A052,V1,1,LAB-A,54.74,24.41,0.84,119.22,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A052,V2,2,LAB-A,52.72,36.02,1.1,123.91,Specimen adequate.
+PROTO-2026-X89,SUBJ-A052,V3,3,LAB-A,56.87,32.37,0.91,133.38,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A052,V4,4,LAB-A,83.17,38.08,0.86,123.7,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A053,V1,1,LAB-B,28.35,20.82,1.09,139.67,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A053,V2,2,LAB-B,46.85,15.32,1.05,116.69,Sample received on time.
+PROTO-2026-X89,SUBJ-A053,V3,3,LAB-B,62.76,30.0,1.15,137.26,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A053,V4,4,LAB-B,83.03,35.57,0.75,124.05,Specimen adequate.
+PROTO-2026-X89,SUBJ-A054,V1,1,LAB-C,16.76,21.27,0.86,118.66,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A054,V2,2,LAB-C,31.02,36.36,0.98,109.94,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A054,V3,3,LAB-C,49.21,39.48,0.87,123.78,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A054,V4,4,LAB-C,84.27,50.28,1.05,111.86,Specimen adequate.
+PROTO-2026-X89,SUBJ-A055,V1,1,LAB-A,48.79,33.45,1.01,120.33,Specimen adequate.
+PROTO-2026-X89,SUBJ-A055,V2,2,LAB-A,41.32,30.62,1.16,124.91,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A055,V3,3,LAB-A,63.18,29.82,1.07,120.9,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A055,V4,4,LAB-A,83.58,29.69,0.98,117.09,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A056,V1,1,LAB-B,25.89,26.72,0.9,135.03,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A056,V2,2,LAB-B,42.07,40.09,0.81,105.7,Sample received on time.
+PROTO-2026-X89,SUBJ-A056,V3,3,LAB-B,53.51,37.56,1.08,131.02,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A056,V4,4,LAB-B,81.47,37.52,1.16,130.31,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A057,V1,1,LAB-C,32.98,17.96,0.95,110.9,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A057,V2,2,LAB-C,57.67,30.29,1.18,116.47,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A057,V3,3,LAB-C,78.01,60.59,1.12,126.16,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A057,V4,4,LAB-C,68.89,39.34,1.03,107.04,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A058,V1,1,LAB-A,43.34,34.03,0.74,108.43,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A058,V2,2,LAB-A,59.5,27.21,0.9,97.72,Specimen adequate.
+PROTO-2026-X89,SUBJ-A058,V3,3,LAB-A,63.27,35.4,0.8,127.57,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A058,V4,4,LAB-A,93.85,23.41,1.05,119.94,Specimen adequate.
+PROTO-2026-X89,SUBJ-A059,V1,1,LAB-B,18.02,25.06,1.1,112.43,Sample received on time.
+PROTO-2026-X89,SUBJ-A059,V2,2,LAB-B,54.37,26.33,0.84,130.02,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A059,V3,3,LAB-B,64.23,20.72,1.03,131.8,Sample received on time.
+PROTO-2026-X89,SUBJ-A059,V4,4,LAB-B,78.07,40.63,1.09,137.42,Sample received on time.
+PROTO-2026-X89,SUBJ-A060,V1,1,LAB-C,31.55,26.96,1.01,125.95,Sample received on time.
+PROTO-2026-X89,SUBJ-A060,V2,2,LAB-C,69.91,30.89,1.17,110.97,Sample received on time.
+PROTO-2026-X89,SUBJ-A060,V3,3,LAB-C,69.98,37.2,1.17,109.71,Sample received on time.
+PROTO-2026-X89,SUBJ-A060,V4,4,LAB-C,80.21,31.7,0.81,108.84,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A061,V1,1,LAB-A,30.95,32.05,0.88,131.28,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A061,V2,2,LAB-A,49.6,41.09,0.87,120.54,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A061,V3,3,LAB-A,61.58,31.93,0.8,122.34,Sample received on time.
+PROTO-2026-X89,SUBJ-A061,V4,4,LAB-A,76.66,32.88,0.79,133.44,Sample received on time.
+PROTO-2026-X89,SUBJ-A062,V1,1,LAB-B,24.91,25.96,1.21,123.83,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A062,V2,2,LAB-B,49.98,25.85,0.91,131.07,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A062,V3,3,LAB-B,60.44,28.88,1.03,139.37,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A062,V4,4,LAB-B,78.06,17.44,1.0,127.38,Specimen adequate.
+PROTO-2026-X89,SUBJ-A063,V1,1,LAB-C,41.64,30.1,1.08,124.58,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A063,V2,2,LAB-C,51.8,36.85,1.12,99.54,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A063,V3,3,LAB-C,69.37,37.99,1.23,118.83,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A063,V4,4,LAB-C,85.81,47.9,0.98,139.08,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A064,V1,1,LAB-A,47.05,20.06,1.16,121.62,Sample received on time.
+PROTO-2026-X89,SUBJ-A064,V2,2,LAB-A,41.53,26.56,1.2,122.16,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A064,V3,3,LAB-A,64.45,23.98,0.82,116.54,Specimen adequate.
+PROTO-2026-X89,SUBJ-A064,V4,4,LAB-A,77.9,29.08,0.98,135.09,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A065,V1,1,LAB-B,47.9,29.67,0.66,149.9,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A065,V2,2,LAB-B,37.24,18.32,1.19,126.8,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A065,V3,3,LAB-B,50.91,34.64,0.82,99.22,Sample received on time.
+PROTO-2026-X89,SUBJ-A065,V4,4,LAB-B,81.3,19.13,0.91,123.51,Sample received on time.
+PROTO-2026-X89,SUBJ-A066,V1,1,LAB-C,26.02,20.2,1.08,125.43,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A066,V2,2,LAB-C,40.76,27.44,0.77,137.13,Sample received on time.
+PROTO-2026-X89,SUBJ-A066,V3,3,LAB-C,65.32,35.41,1.01,139.59,Specimen adequate.
+PROTO-2026-X89,SUBJ-A066,V4,4,LAB-C,87.75,47.73,0.91,121.81,Specimen adequate.
+PROTO-2026-X89,SUBJ-A067,V1,1,LAB-A,38.7,27.96,1.1,118.66,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A067,V2,2,LAB-A,55.19,18.63,1.19,123.86,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A067,V3,3,LAB-A,55.12,31.68,0.94,130.68,Sample received on time.
+PROTO-2026-X89,SUBJ-A067,V4,4,LAB-A,78.01,26.33,1.04,129.74,Sample received on time.
+PROTO-2026-X89,SUBJ-A068,V1,1,LAB-B,12.95,34.28,1.16,144.12,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A068,V2,2,LAB-B,37.8,52.88,0.91,117.02,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A068,V3,3,LAB-B,64.7,28.69,1.16,126.52,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A068,V4,4,LAB-B,67.88,32.33,1.14,142.56,Specimen adequate.
+PROTO-2026-X89,SUBJ-A069,V1,1,LAB-C,35.99,25.75,1.12,128.16,Sample received on time.
+PROTO-2026-X89,SUBJ-A069,V2,2,LAB-C,57.52,43.76,1.12,148.09,Specimen adequate.
+PROTO-2026-X89,SUBJ-A069,V3,3,LAB-C,73.93,29.71,1.06,138.3,Specimen adequate.
+PROTO-2026-X89,SUBJ-A069,V4,4,LAB-C,73.99,50.13,1.01,121.19,Sample received on time.
+PROTO-2026-X89,SUBJ-A070,V1,1,LAB-A,37.39,23.13,1.08,128.59,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A070,V2,2,LAB-A,62.47,33.41,1.06,122.15,Sample received on time.
+PROTO-2026-X89,SUBJ-A070,V3,3,LAB-A,60.35,20.08,0.93,120.93,Specimen adequate.
+PROTO-2026-X89,SUBJ-A070,V4,4,LAB-A,68.52,40.84,0.77,131.86,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A071,V1,1,LAB-B,29.26,29.29,0.96,121.2,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A071,V2,2,LAB-B,47.06,17.04,1.14,125.77,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A071,V3,3,LAB-B,58.86,28.63,1.06,131.69,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A071,V4,4,LAB-B,76.68,31.6,1.02,136.12,Specimen adequate.
+PROTO-2026-X89,SUBJ-A072,V1,1,LAB-C,39.55,27.15,1.12,126.25,Specimen adequate.
+PROTO-2026-X89,SUBJ-A072,V2,2,LAB-C,25.77,38.58,1.02,120.85,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A072,V3,3,LAB-C,35.0,40.49,1.12,129.89,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A072,V4,4,LAB-C,67.74,53.97,1.21,108.31,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A073,V1,1,LAB-A,27.05,16.84,0.79,136.03,Specimen adequate.
+PROTO-2026-X89,SUBJ-A073,V2,2,LAB-A,35.94,24.78,0.85,138.07,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A073,V3,3,LAB-A,57.55,22.1,1.11,127.45,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A073,V4,4,LAB-A,73.45,28.89,0.58,149.52,Specimen adequate.
+PROTO-2026-X89,SUBJ-A074,V1,1,LAB-B,37.54,26.49,1.11,136.36,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A074,V2,2,LAB-B,49.47,26.08,1.09,126.12,Specimen adequate.
+PROTO-2026-X89,SUBJ-A074,V3,3,LAB-B,64.64,31.94,0.81,116.68,Specimen adequate.
+PROTO-2026-X89,SUBJ-A074,V4,4,LAB-B,74.22,36.14,0.79,126.36,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A075,V1,1,LAB-C,28.48,30.65,1.23,114.63,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A075,V2,2,LAB-C,43.27,30.37,0.76,104.5,Specimen adequate.
+PROTO-2026-X89,SUBJ-A075,V3,3,LAB-C,51.12,33.57,0.91,123.62,Specimen adequate.
+PROTO-2026-X89,SUBJ-A075,V4,4,LAB-C,77.63,37.27,1.03,119.98,Specimen adequate.
+PROTO-2026-X89,SUBJ-A076,V1,1,LAB-A,43.58,35.11,0.83,134.63,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A076,V2,2,LAB-A,59.57,20.61,1.13,127.49,Sample received on time.
+PROTO-2026-X89,SUBJ-A076,V3,3,LAB-A,38.16,19.69,0.91,126.73,Sample received on time.
+PROTO-2026-X89,SUBJ-A076,V4,4,LAB-A,68.9,29.49,0.84,121.11,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A077,V1,1,LAB-B,36.77,42.92,0.97,138.0,Sample received on time.
+PROTO-2026-X89,SUBJ-A077,V2,2,LAB-B,43.99,20.53,0.81,131.73,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A077,V3,3,LAB-B,58.93,34.61,0.69,124.41,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A077,V4,4,LAB-B,83.68,13.43,1.04,122.31,patient not found at site; data may be from a prior study
+PROTO-2026-X89,SUBJ-A078,V1,1,LAB-C,36.15,23.57,1.13,115.3,Specimen adequate.
+PROTO-2026-X89,SUBJ-A078,V2,2,LAB-C,48.81,29.65,0.93,113.48,Sample received on time.
+PROTO-2026-X89,SUBJ-A078,V3,3,LAB-C,80.74,41.81,1.09,129.51,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A078,V4,4,LAB-C,67.37,47.67,1.29,132.45,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A079,V1,1,LAB-A,50.27,21.89,0.9,116.25,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A079,V2,2,LAB-A,52.63,34.33,1.1,127.51,Specimen adequate.
+PROTO-2026-X89,SUBJ-A079,V3,3,LAB-A,73.08,36.3,1.07,127.65,Sample received on time.
+PROTO-2026-X89,SUBJ-A079,V4,4,LAB-A,72.35,32.18,1.09,128.77,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A080,V1,1,LAB-B,34.94,28.11,0.94,129.85,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A080,V2,2,LAB-B,44.3,44.12,0.83,113.75,Sample received on time.
+PROTO-2026-X89,SUBJ-A080,V3,3,LAB-B,68.82,21.08,1.03,121.46,Sample received on time.
+PROTO-2026-X89,SUBJ-A080,V4,4,LAB-B,76.12,17.89,0.99,115.23,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A081,V1,1,LAB-C,46.6,14.94,1.09,111.86,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A081,V2,2,LAB-C,47.14,31.56,1.17,121.21,Sample received on time.
+PROTO-2026-X89,SUBJ-A081,V3,3,LAB-C,71.91,35.25,0.89,125.11,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A081,V4,4,LAB-C,73.94,49.1,1.22,123.56,Sample received on time.
+PROTO-2026-X89,SUBJ-A082,V1,1,LAB-A,19.5,28.26,0.94,120.56,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A082,V2,2,LAB-A,38.25,17.54,0.91,134.05,Sample received on time.
+PROTO-2026-X89,SUBJ-A082,V3,3,LAB-A,55.75,29.36,1.12,128.14,Specimen adequate.
+PROTO-2026-X89,SUBJ-A082,V4,4,LAB-A,89.98,23.2,1.07,111.12,Sample received on time.
+PROTO-2026-X89,SUBJ-A083,V1,1,LAB-B,25.71,24.07,1.08,117.83,Specimen adequate.
+PROTO-2026-X89,SUBJ-A083,V2,2,LAB-B,51.58,22.76,0.93,118.88,Specimen adequate.
+PROTO-2026-X89,SUBJ-A083,V3,3,LAB-B,49.89,28.31,0.98,108.91,Specimen adequate.
+PROTO-2026-X89,SUBJ-A083,V4,4,LAB-B,72.62,25.76,1.12,127.89,Specimen adequate.
+PROTO-2026-X89,SUBJ-A084,V1,1,LAB-C,26.64,35.67,1.03,105.86,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A084,V2,2,LAB-C,41.31,38.25,0.98,118.09,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A084,V3,3,LAB-C,75.34,38.36,1.01,125.12,Sample received on time.
+PROTO-2026-X89,SUBJ-A084,V4,4,LAB-C,82.53,27.42,0.94,110.71,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A085,V1,1,LAB-A,44.12,26.97,1.18,140.85,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A085,V2,2,LAB-A,46.54,36.41,0.74,123.23,Sample received on time.
+PROTO-2026-X89,SUBJ-A085,V3,3,LAB-A,63.06,21.02,1.15,124.64,Specimen adequate.
+PROTO-2026-X89,SUBJ-A085,V4,4,LAB-A,63.29,32.39,1.0,137.16,Sample received on time.
+PROTO-2026-X89,SUBJ-A086,V1,1,LAB-B,36.84,27.75,1.03,102.43,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A086,V2,2,LAB-B,47.97,35.81,0.86,117.01,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A086,V3,3,LAB-B,61.87,35.38,0.82,127.73,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A086,V4,4,LAB-B,91.95,48.26,1.03,145.23,Specimen adequate.
+PROTO-2026-X89,SUBJ-A087,V1,1,LAB-C,31.77,34.1,0.92,115.92,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A087,V2,2,LAB-C,45.58,43.5,0.77,113.01,Sample received on time.
+PROTO-2026-X89,SUBJ-A087,V3,3,LAB-C,55.25,36.43,0.57,122.63,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A087,V4,4,LAB-C,76.75,40.82,0.9,124.74,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A088,V1,1,LAB-A,39.4,28.11,0.95,128.65,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A088,V2,2,LAB-A,60.61,29.19,1.08,133.42,Sample received on time.
+PROTO-2026-X89,SUBJ-A088,V3,3,LAB-A,63.04,32.86,0.87,130.84,Specimen adequate.
+PROTO-2026-X89,SUBJ-A088,V4,4,LAB-A,77.78,26.88,0.98,142.72,Specimen adequate.
+PROTO-2026-X89,SUBJ-A089,V1,1,LAB-B,33.55,24.53,1.11,141.06,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A089,V2,2,LAB-B,51.56,27.95,1.38,110.15,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A089,V3,3,LAB-B,63.94,18.18,1.23,112.09,Sample received on time.
+PROTO-2026-X89,SUBJ-A089,V4,4,LAB-B,73.49,30.91,0.97,127.33,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A090,V1,1,LAB-C,28.4,27.57,1.16,128.47,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A090,V2,2,LAB-C,52.66,29.56,0.83,136.4,Sample received on time.
+PROTO-2026-X89,SUBJ-A090,V3,3,LAB-C,59.97,36.44,0.81,125.43,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A090,V4,4,LAB-C,72.57,46.33,1.02,142.67,Sample received on time.
+PROTO-2026-X89,SUBJ-A091,V1,1,LAB-A,39.4,13.93,0.87,113.14,Sample received on time.
+PROTO-2026-X89,SUBJ-A091,V2,2,LAB-A,43.53,22.46,1.1,131.86,Sample received on time.
+PROTO-2026-X89,SUBJ-A091,V3,3,LAB-A,67.0,24.28,0.95,119.46,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A091,V4,4,LAB-A,74.0,26.02,1.0,119.3,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A092,V1,1,LAB-B,39.24,30.82,0.87,141.14,Specimen adequate.
+PROTO-2026-X89,SUBJ-A092,V2,2,LAB-B,53.78,25.83,1.19,132.44,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A092,V3,3,LAB-B,67.55,30.96,0.95,158.44,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A092,V4,4,LAB-B,59.38,30.28,0.69,141.24,Sample received on time.
+PROTO-2026-X89,SUBJ-A093,V1,1,LAB-C,21.63,26.85,1.01,137.1,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A093,V2,2,LAB-C,58.71,31.99,1.03,142.55,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A093,V3,3,LAB-C,57.88,28.01,0.85,110.84,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A093,V4,4,LAB-C,84.63,46.92,0.98,126.0,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A094,V1,1,LAB-A,23.85,41.45,1.36,116.77,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A094,V2,2,LAB-A,50.79,39.85,0.98,108.15,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A094,V3,3,LAB-A,65.62,27.73,1.34,110.59,Specimen adequate.
+PROTO-2026-X89,SUBJ-A094,V4,4,LAB-A,73.87,23.89,1.06,118.81,Sample received on time.
+PROTO-2026-X89,SUBJ-A095,V1,1,LAB-B,34.65,27.58,1.0,140.02,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A095,V2,2,LAB-B,40.02,19.2,0.8,132.02,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A095,V3,3,LAB-B,36.78,25.83,1.14,124.63,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A095,V4,4,LAB-B,65.05,34.57,1.13,118.26,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A096,V1,1,LAB-C,25.77,39.59,0.86,131.05,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A096,V2,2,LAB-C,61.05,37.63,1.14,109.7,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A096,V3,3,LAB-C,64.63,44.18,1.09,119.13,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A096,V4,4,LAB-C,77.97,45.96,1.2,125.06,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A097,V1,1,LAB-A,26.13,24.37,1.11,129.83,Specimen adequate.
+PROTO-2026-X89,SUBJ-A097,V2,2,LAB-A,58.11,31.36,0.99,136.02,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A097,V3,3,LAB-A,51.19,32.26,1.02,114.57,Sample received on time.
+PROTO-2026-X89,SUBJ-A097,V4,4,LAB-A,72.72,25.29,0.99,130.94,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A098,V1,1,LAB-B,30.49,39.31,0.79,146.19,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A098,V2,2,LAB-B,44.41,27.14,1.12,133.1,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A098,V3,3,LAB-B,57.29,36.6,1.07,119.36,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A098,V4,4,LAB-B,63.29,34.06,0.91,116.87,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A099,V1,1,LAB-C,52.21,29.77,0.96,143.2,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A099,V2,2,LAB-C,59.34,36.15,0.96,135.52,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A099,V3,3,LAB-C,47.39,53.69,1.18,160.97,Sample received on time.
+PROTO-2026-X89,SUBJ-A099,V4,4,LAB-C,69.46,41.36,1.18,125.07,Sample received on time.
+PROTO-2026-X89,SUBJ-A100,V1,1,LAB-A,34.86,22.85,0.75,118.14,Sample received on time.
+PROTO-2026-X89,SUBJ-A100,V2,2,LAB-A,46.46,32.22,0.83,122.59,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A100,V3,3,LAB-A,69.66,28.35,0.82,125.01,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A100,V4,4,LAB-A,60.92,25.88,0.76,134.49,Specimen adequate.
+PROTO-2026-X89,SUBJ-A101,V1,1,LAB-B,26.64,21.93,0.89,118.55,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A101,V2,2,LAB-B,50.13,23.93,1.06,122.38,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A101,V3,3,LAB-B,56.58,32.2,0.84,125.36,Specimen adequate.
+PROTO-2026-X89,SUBJ-A101,V4,4,LAB-B,72.5,30.75,0.81,130.39,Specimen adequate.
+PROTO-2026-X89,SUBJ-A102,V1,1,LAB-C,44.49,33.57,1.07,111.24,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A102,V2,2,LAB-C,52.17,45.91,1.0,136.43,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A102,V3,3,LAB-C,79.98,50.32,0.9,126.46,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A102,V4,4,LAB-C,84.98,47.03,1.08,113.63,Sample received on time.
+PROTO-2026-X89,SUBJ-A103,V1,1,LAB-A,35.65,31.84,0.66,128.71,Sample received on time.
+PROTO-2026-X89,SUBJ-A103,V2,2,LAB-A,58.31,34.41,0.73,134.47,Sample received on time.
+PROTO-2026-X89,SUBJ-A103,V3,3,LAB-A,59.7,28.3,1.03,124.69,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A103,V4,4,LAB-A,81.97,15.41,0.99,126.27,Specimen adequate.
+PROTO-2026-X89,SUBJ-A104,V1,1,LAB-B,42.47,24.38,0.83,115.48,Specimen adequate.
+PROTO-2026-X89,SUBJ-A104,V2,2,LAB-B,47.02,31.81,0.86,134.69,Sample received on time.
+PROTO-2026-X89,SUBJ-A104,V3,3,LAB-B,68.98,21.32,0.89,139.02,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A104,V4,4,LAB-B,74.84,25.38,0.96,130.8,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A105,V1,1,LAB-C,29.85,27.88,0.82,114.5,Sample received on time.
+PROTO-2026-X89,SUBJ-A105,V2,2,LAB-C,38.94,27.96,1.05,132.78,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A105,V3,3,LAB-C,49.95,27.11,1.14,122.64,Sample received on time.
+PROTO-2026-X89,SUBJ-A105,V4,4,LAB-C,83.88,26.13,0.8,125.67,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A106,V1,1,LAB-A,43.0,32.28,0.94,132.86,Specimen adequate.
+PROTO-2026-X89,SUBJ-A106,V2,2,LAB-A,40.36,40.47,0.74,118.22,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A106,V3,3,LAB-A,53.98,29.42,1.17,136.48,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A106,V4,4,LAB-A,58.73,27.69,0.99,114.35,Sample received on time.
+PROTO-2026-X89,SUBJ-A107,V1,1,LAB-B,27.47,49.81,0.92,122.03,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A107,V2,2,LAB-B,26.76,35.09,1.07,111.89,Specimen adequate.
+PROTO-2026-X89,SUBJ-A107,V3,3,LAB-B,58.55,16.87,0.93,112.4,Specimen adequate.
+PROTO-2026-X89,SUBJ-A107,V4,4,LAB-B,81.97,31.06,1.06,122.52,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A108,V1,1,LAB-C,28.01,34.89,1.25,131.15,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A108,V2,2,LAB-C,53.55,39.87,1.04,136.53,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A108,V3,3,LAB-C,61.57,35.03,1.16,129.04,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A108,V4,4,LAB-C,79.19,33.4,1.0,124.32,Specimen adequate.
+PROTO-2026-X89,SUBJ-A109,V1,1,LAB-A,35.76,15.64,0.78,135.66,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A109,V2,2,LAB-A,37.09,27.46,0.72,116.19,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A109,V3,3,LAB-A,58.91,18.91,0.91,118.04,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A109,V4,4,LAB-A,76.25,19.71,1.26,122.41,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A110,V1,1,LAB-B,25.87,29.68,0.83,142.07,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A110,V2,2,LAB-B,59.06,34.87,0.97,127.93,Sample received on time.
+PROTO-2026-X89,SUBJ-A110,V3,3,LAB-B,62.03,32.55,1.06,127.72,Sample received on time.
+PROTO-2026-X89,SUBJ-A110,V4,4,LAB-B,81.31,29.04,1.17,114.96,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A111,V1,1,LAB-C,37.7,31.69,0.83,145.81,Sample received on time.
+PROTO-2026-X89,SUBJ-A111,V2,2,LAB-C,44.47,32.62,1.0,135.14,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A111,V3,3,LAB-C,65.48,39.68,0.9,130.0,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A111,V4,4,LAB-C,85.38,25.19,0.84,133.74,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A112,V1,1,LAB-A,30.64,32.77,0.81,135.56,Sample received on time.
+PROTO-2026-X89,SUBJ-A112,V2,2,LAB-A,41.61,22.02,1.19,128.61,Specimen adequate.
+PROTO-2026-X89,SUBJ-A112,V3,3,LAB-A,58.12,23.8,0.97,109.39,Sample received on time.
+PROTO-2026-X89,SUBJ-A112,V4,4,LAB-A,86.88,25.02,0.91,125.73,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A113,V1,1,LAB-B,23.26,33.51,1.0,135.69,Sample received on time.
+PROTO-2026-X89,SUBJ-A113,V2,2,LAB-B,39.82,26.27,0.79,110.43,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A113,V3,3,LAB-B,70.81,21.77,0.94,132.75,Specimen adequate.
+PROTO-2026-X89,SUBJ-A113,V4,4,LAB-B,81.05,34.49,0.83,107.4,Sample received on time.
+PROTO-2026-X89,SUBJ-A114,V1,1,LAB-C,11.72,25.11,1.27,123.1,Sample received on time.
+PROTO-2026-X89,SUBJ-A114,V2,2,LAB-C,35.85,40.52,0.75,131.01,Sample received on time.
+PROTO-2026-X89,SUBJ-A114,V3,3,LAB-C,63.02,23.17,0.92,123.19,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A114,V4,4,LAB-C,80.99,43.4,1.24,113.62,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A115,V1,1,LAB-A,29.51,25.48,0.74,121.82,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A115,V2,2,LAB-A,47.31,29.08,1.29,112.07,Sample received on time.
+PROTO-2026-X89,SUBJ-A115,V3,3,LAB-A,50.74,26.51,0.75,110.8,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A115,V4,4,LAB-A,69.33,33.84,1.04,122.84,Sample received on time.
+PROTO-2026-X89,SUBJ-A116,V1,1,LAB-B,33.14,38.52,0.92,121.55,Sample received on time.
+PROTO-2026-X89,SUBJ-A116,V2,2,LAB-B,50.49,25.9,1.1,123.04,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A116,V3,3,LAB-B,68.0,32.03,0.94,118.82,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A116,V4,4,LAB-B,80.19,27.87,0.96,119.12,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A117,V1,1,LAB-C,31.6,34.36,1.01,116.96,Sample received on time.
+PROTO-2026-X89,SUBJ-A117,V2,2,LAB-C,48.17,42.29,0.74,114.46,Sample received on time.
+PROTO-2026-X89,SUBJ-A117,V3,3,LAB-C,62.26,44.07,0.97,120.42,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A117,V4,4,LAB-C,68.56,50.54,1.15,140.36,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A118,V1,1,LAB-A,24.68,31.87,0.97,113.02,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A118,V2,2,LAB-A,38.67,24.95,0.97,117.92,Sample received on time.
+PROTO-2026-X89,SUBJ-A118,V3,3,LAB-A,63.86,10.3,1.05,119.76,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A118,V4,4,LAB-A,79.48,18.55,0.97,124.78,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A119,V1,1,LAB-B,30.73,23.41,0.81,117.32,Sample received on time.
+PROTO-2026-X89,SUBJ-A119,V2,2,LAB-B,50.03,20.58,0.98,118.2,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A119,V3,3,LAB-B,75.02,29.2,0.8,112.08,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A119,V4,4,LAB-B,79.55,27.98,0.79,107.43,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A120,V1,1,LAB-C,63.45,37.3,0.99,125.35,Sample received on time.
+PROTO-2026-X89,SUBJ-A120,V2,2,LAB-C,59.86,30.42,0.96,120.45,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A120,V3,3,LAB-C,57.83,36.33,0.91,122.04,Specimen adequate.
+PROTO-2026-X89,SUBJ-A120,V4,4,LAB-C,72.34,42.14,1.11,128.0,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A121,V1,1,LAB-A,35.28,29.43,0.95,153.56,Sample received on time.
+PROTO-2026-X89,SUBJ-A121,V2,2,LAB-A,55.31,15.77,0.96,134.67,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A121,V3,3,LAB-A,65.74,26.39,0.75,143.04,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A121,V4,4,LAB-A,79.08,27.98,0.98,133.71,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A122,V1,1,LAB-B,35.64,27.03,1.11,136.28,Specimen adequate.
+PROTO-2026-X89,SUBJ-A122,V2,2,LAB-B,57.71,26.24,1.15,121.32,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A122,V3,3,LAB-B,71.51,18.66,1.05,125.52,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A122,V4,4,LAB-B,80.74,21.61,1.39,128.32,Sample received on time.
+PROTO-2026-X89,SUBJ-A123,V1,1,LAB-C,32.57,25.02,0.93,147.34,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A123,V2,2,LAB-C,58.37,36.2,0.78,114.61,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A123,V3,3,LAB-C,79.51,34.94,0.92,131.63,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A123,V4,4,LAB-C,98.32,50.54,0.72,135.61,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A124,V1,1,LAB-A,42.26,33.16,1.05,125.68,Specimen adequate.
+PROTO-2026-X89,SUBJ-A124,V2,2,LAB-A,45.2,22.86,0.71,127.6,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A124,V3,3,LAB-A,73.78,30.49,1.08,132.53,Specimen adequate.
+PROTO-2026-X89,SUBJ-A124,V4,4,LAB-A,81.91,47.89,0.99,126.92,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A125,V1,1,LAB-B,43.67,22.08,0.86,127.79,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A125,V2,2,LAB-B,48.0,24.94,0.98,116.19,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A125,V3,3,LAB-B,50.18,23.9,1.34,123.66,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A125,V4,4,LAB-B,77.68,30.24,0.67,120.01,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A126,V1,1,LAB-C,21.38,31.24,0.94,119.46,Sample received on time.
+PROTO-2026-X89,SUBJ-A126,V2,2,LAB-C,37.57,21.22,0.74,98.82,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A126,V3,3,LAB-C,61.54,26.84,0.77,117.5,Sample received on time.
+PROTO-2026-X89,SUBJ-A126,V4,4,LAB-C,85.25,27.83,1.03,117.47,Sample received on time.
+PROTO-2026-X89,SUBJ-A127,V1,1,LAB-A,33.32,28.03,1.09,124.49,Sample received on time.
+PROTO-2026-X89,SUBJ-A127,V2,2,LAB-A,44.91,31.22,1.1,108.74,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A127,V3,3,LAB-A,72.14,29.16,1.23,119.22,Specimen adequate.
+PROTO-2026-X89,SUBJ-A127,V4,4,LAB-A,88.64,16.35,0.75,144.81,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A128,V1,1,LAB-B,31.57,20.49,0.82,125.93,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A128,V2,2,LAB-B,56.17,40.92,0.81,113.24,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A128,V3,3,LAB-B,62.3,34.77,0.99,142.44,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A128,V4,4,LAB-B,83.52,33.84,1.27,127.09,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A129,V1,1,LAB-C,32.2,34.61,0.8,114.75,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A129,V2,2,LAB-C,56.31,28.4,0.96,116.59,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A129,V3,3,LAB-C,74.46,45.54,1.17,132.27,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A129,V4,4,LAB-C,74.32,41.23,0.97,127.7,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A130,V1,1,LAB-A,31.95,26.02,0.8,136.91,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A130,V2,2,LAB-A,46.63,23.48,0.76,128.85,Sample received on time.
+PROTO-2026-X89,SUBJ-A130,V3,3,LAB-A,65.81,26.27,1.13,119.39,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A130,V4,4,LAB-A,77.91,27.09,0.89,143.82,Sample received on time.
+PROTO-2026-X89,SUBJ-A131,V1,1,LAB-B,25.38,20.39,0.98,124.22,Sample received on time.
+PROTO-2026-X89,SUBJ-A131,V2,2,LAB-B,41.88,21.0,1.15,126.9,Sample received on time.
+PROTO-2026-X89,SUBJ-A131,V3,3,LAB-B,53.98,29.11,1.19,118.33,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A131,V4,4,LAB-B,75.49,27.57,0.87,131.82,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A132,V1,1,LAB-C,31.04,22.95,0.97,128.64,Sample received on time.
+PROTO-2026-X89,SUBJ-A132,V2,2,LAB-C,36.52,22.28,0.88,127.29,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A132,V3,3,LAB-C,48.03,42.18,0.93,140.74,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A132,V4,4,LAB-C,85.35,56.33,0.84,134.42,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A133,V1,1,LAB-A,39.87,36.23,1.22,129.08,Specimen adequate.
+PROTO-2026-X89,SUBJ-A133,V2,2,LAB-A,35.15,33.88,1.05,124.11,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A133,V3,3,LAB-A,64.15,23.01,0.75,116.15,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A133,V4,4,LAB-A,69.41,26.75,0.99,130.15,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A134,V1,1,LAB-B,25.18,25.85,1.03,113.13,Sample received on time.
+PROTO-2026-X89,SUBJ-A134,V2,2,LAB-B,56.45,26.03,1.14,126.76,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A134,V3,3,LAB-B,60.55,38.58,1.15,130.05,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A134,V4,4,LAB-B,85.14,20.86,1.16,123.33,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A135,V1,1,LAB-C,41.41,27.2,0.64,114.78,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A135,V2,2,LAB-C,39.14,33.22,0.65,115.05,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A135,V3,3,LAB-C,66.19,32.97,0.97,128.77,Specimen adequate.
+PROTO-2026-X89,SUBJ-A135,V4,4,LAB-C,83.0,33.06,0.85,138.43,Specimen adequate.
+PROTO-2026-X89,SUBJ-A136,V1,1,LAB-A,24.77,21.76,1.3,132.27,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A136,V2,2,LAB-A,47.39,25.8,0.88,128.43,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A136,V3,3,LAB-A,76.95,28.98,0.95,134.87,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A136,V4,4,LAB-A,83.96,20.49,1.1,125.96,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A137,V1,1,LAB-B,28.43,31.9,1.06,128.56,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A137,V2,2,LAB-B,51.65,17.47,1.21,108.44,Specimen adequate.
+PROTO-2026-X89,SUBJ-A137,V3,3,LAB-B,67.18,25.45,0.98,112.35,Specimen adequate.
+PROTO-2026-X89,SUBJ-A137,V4,4,LAB-B,81.83,26.58,1.12,139.89,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A138,V1,1,LAB-C,32.78,41.7,0.87,121.47,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A138,V2,2,LAB-C,46.52,31.6,0.92,122.69,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A138,V3,3,LAB-C,56.67,37.76,1.25,140.08,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A138,V4,4,LAB-C,75.28,51.44,1.18,133.05,Sample received on time.
+PROTO-2026-X89,SUBJ-A139,V1,1,LAB-A,36.52,25.94,1.03,105.38,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A139,V2,2,LAB-A,47.67,25.81,1.1,138.07,Sample received on time.
+PROTO-2026-X89,SUBJ-A139,V3,3,LAB-A,65.66,36.14,0.85,146.71,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A139,V4,4,LAB-A,72.98,27.98,0.91,128.36,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A140,V1,1,LAB-B,64.64,31.83,1.22,117.29,Specimen adequate.
+PROTO-2026-X89,SUBJ-A140,V2,2,LAB-B,41.16,24.18,0.92,125.85,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A140,V3,3,LAB-B,58.43,34.89,0.89,128.46,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A140,V4,4,LAB-B,79.4,37.46,0.95,124.7,Specimen adequate.
+PROTO-2026-X89,SUBJ-A141,V1,1,LAB-C,25.99,29.28,1.14,120.08,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A141,V2,2,LAB-C,24.21,24.51,1.06,117.31,Sample received on time.
+PROTO-2026-X89,SUBJ-A141,V3,3,LAB-C,56.24,31.31,0.66,129.31,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A141,V4,4,LAB-C,59.24,43.66,1.17,108.48,Sample received on time.
+PROTO-2026-X89,SUBJ-A142,V1,1,LAB-A,17.56,25.8,1.3,111.56,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A142,V2,2,LAB-A,49.01,34.81,1.1,111.03,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A142,V3,3,LAB-A,54.67,36.35,0.92,119.71,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A142,V4,4,LAB-A,83.09,24.69,1.05,117.26,Sample received on time.
+PROTO-2026-X89,SUBJ-A143,V1,1,LAB-B,43.37,31.91,1.03,132.36,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A143,V2,2,LAB-B,59.42,26.97,1.05,126.81,Sample received on time.
+PROTO-2026-X89,SUBJ-A143,V3,3,LAB-B,58.24,21.16,0.9,122.7,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A143,V4,4,LAB-B,76.96,28.13,0.97,121.22,Sample received on time.
+PROTO-2026-X89,SUBJ-A144,V1,1,LAB-C,24.14,23.73,1.21,125.78,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A144,V2,2,LAB-C,30.91,31.22,1.37,121.39,Specimen adequate.
+PROTO-2026-X89,SUBJ-A144,V3,3,LAB-C,61.96,46.66,0.99,122.5,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A144,V4,4,LAB-C,70.16,45.85,0.94,127.72,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A145,V1,1,LAB-A,30.23,23.09,1.35,109.98,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A145,V2,2,LAB-A,59.49,26.02,0.98,125.24,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A145,V3,3,LAB-A,69.87,26.71,1.08,130.59,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A145,V4,4,LAB-A,74.09,24.24,0.83,142.02,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A146,V1,1,LAB-B,29.68,29.38,1.23,131.41,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A146,V2,2,LAB-B,42.69,24.63,0.87,128.07,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A146,V3,3,LAB-B,58.14,26.54,1.0,118.2,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A146,V4,4,LAB-B,67.55,22.91,0.99,133.0,Sample received on time.
+PROTO-2026-X89,SUBJ-A147,V1,1,LAB-C,26.16,40.8,0.71,124.79,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A147,V2,2,LAB-C,53.57,21.44,0.82,132.59,Sample received on time.
+PROTO-2026-X89,SUBJ-A147,V3,3,LAB-C,66.11,42.23,1.01,147.04,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A147,V4,4,LAB-C,71.15,46.46,0.98,127.16,Specimen adequate.
+PROTO-2026-X89,SUBJ-A148,V1,1,LAB-A,33.5,24.07,1.06,134.81,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A148,V2,2,LAB-A,47.89,28.72,1.18,108.79,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A148,V3,3,LAB-A,54.44,33.75,0.99,129.79,Routine panel; values within expected range.
+PROTO-2026-X89,SUBJ-A148,V4,4,LAB-A,80.47,27.01,0.98,120.44,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A149,V1,1,LAB-B,35.27,29.93,0.86,127.64,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A149,V2,2,LAB-B,48.06,21.11,0.72,131.0,Sample received on time.
+PROTO-2026-X89,SUBJ-A149,V3,3,LAB-B,74.79,33.51,1.33,129.77,Sample received on time.
+PROTO-2026-X89,SUBJ-A149,V4,4,LAB-B,93.43,35.48,0.8,122.57,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A150,V1,1,LAB-C,30.19,19.63,1.07,124.87,Repeat ordered per protocol.
+PROTO-2026-X89,SUBJ-A150,V2,2,LAB-C,56.56,39.15,1.1,127.97,No hemolysis noted.
+PROTO-2026-X89,SUBJ-A150,V3,3,LAB-C,80.37,41.07,0.75,123.19,Specimen adequate.
+PROTO-2026-X89,SUBJ-A150,V4,4,LAB-C,81.56,59.91,1.12,117.1,Specimen adequate.

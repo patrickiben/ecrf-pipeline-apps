@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Implementation Walkthrough — eCRF cut, two traces</title>
+<style>
+:root { --bg:#F6F7F8; --text:#18212B; --primary:#0868E0; --accent:#C66A36; --muted:#5A6672; --line:#D5DBE1; }
+* { box-sizing:border-box; }
+html,body { margin:0; height:100%; background:var(--bg); color:var(--text);
+  font-family:-apple-system,"Helvetica Neue",Helvetica,Arial,sans-serif; line-height:1.55; }
+.slide { display:none; max-width:1020px; margin:0 auto; padding:48px 40px 72px; min-height:100vh; overflow-y:auto; }
+.slide.active { display:block; }
+h1 { font-size:2.3rem; line-height:1.2; margin:.2em 0 .4em; color:var(--text); }
+h2 { font-size:1.7rem; margin:0 0 .8em; padding-bottom:.35em; border-bottom:3px solid var(--primary); }
+h3.slide-h { font-size:1.45rem; margin:0 0 .8em; padding-bottom:.35em; border-bottom:3px solid var(--accent); }
+p,li { font-size:1.06rem; }
+ul { padding-left:1.4em; } li { margin:.45em 0; }
+table { border-collapse:collapse; width:100%; margin:1em 0; font-size:.92rem; }
+th,td { border:1px solid var(--line); padding:.5em .7em; text-align:left; vertical-align:top; }
+thead th { background:#E8EDF3; color:var(--text); }
+tbody tr:nth-child(even) { background:#EFF2F5; }
+code { font-family:"SF Mono",Menlo,Consolas,monospace; font-size:.9em; background:#EAEFF4; padding:.1em .35em; border-radius:4px; }
+pre { background:#18212B; color:#EDF1F5; padding:1em 1.2em; border-radius:8px; overflow-x:auto; font-size:.86rem; line-height:1.5; }
+pre code { background:none; color:inherit; padding:0; }
+a { color:var(--primary); text-decoration-thickness:1px; }
+.kicker { color:var(--accent); font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:.85rem; }
+nav { position:fixed; bottom:0; left:0; right:0; display:flex; align-items:center; gap:12px;
+  padding:10px 20px; background:#E9EDF1; border-top:1px solid var(--line); font-size:.85rem; color:var(--muted); }
+nav button { font:inherit; padding:.3em .9em; border:1px solid var(--line); border-radius:6px; background:#fff; cursor:pointer; }
+nav button:hover { border-color:var(--primary); color:var(--primary); }
+#count { margin-left:auto; }
+@media print {
+  nav { display:none; } .slide { display:block !important; page-break-after:always; min-height:0; padding:24px 32px; overflow-y:visible; }
+}
+</style>
+</head>
+<body>
+<section class="slide title-slide active">
+<div class="kicker">Companion to Deck A · QC&#x27;d build, October 2026.</div>
+<h1>Implementation Walkthrough — eCRF cut, two traces</h1>
+<p><strong>Companion to <a href="deck_a_four_tier_pipeline.md">Deck A</a> · QC&#x27;d build, October 2026.</strong> Every <code>[SI]</code> number in this deck is the exact output of the shipped stand-in on <a href="../sample_data/"><code>../sample_data/</code></a> — run either app against that folder and you will reproduce these tables. See <a href="../QC_REPORT.md">QC_REPORT</a> for what was verified.</p>
+<p><strong>Scenario.</strong> Protocol PROTO-2026-X89. A cut is on disk as <code>ae.csv</code>, <code>pr.csv</code>, <code>eg.csv</code> plus the MedDRA release. Two programs read that folder. The coding program consumes <code>ae.csv</code>&#x27;s <code>AETERM</code> column and the dictionary; the PHI program scans every non-numeric column it finds across <code>ae</code>/<code>pr</code>/<code>eg</code> (content-based discovery). They read different columns of the same files, compute independently, and write separate outputs and separate audit sections. No scanned page, no bounding box, no dose-escalation logic anywhere in this build.</p>
+</section>
+<section class="slide"><h2>race 1 — MedDRA auto-coding</h2>
+
+</section><section class="slide"><h3 class="slide-h">1.0 The input on disk</h3 class="slide-h">
+<p><code>ae.csv</code> as DM delivers it. <code>AECOM</code> is present but is the PHI trace&#x27;s column — the coding trace never reads it. The code columns are absent because deriving them is this trace&#x27;s job.</p>
+<table><thead><tr><th>STUDYID</th><th>USUBJID</th><th>AESEQ</th><th>AETERM <em>(coding reads this)</em></th><th>AESEV</th><th>AESER</th><th>AECOM <em>(PHI reads this)</em></th></tr></thead><tbody>
+<tr><td>PROTO-2026-X89</td><td>SUBJ-3092</td><td>1</td><td>severe throbbing pain in back of head</td><td>SEVERE</td><td>Y</td><td>CRC Note: Patient Jane Miller called site cell phone (617) 555-0192 at 10:15 AM.</td></tr>
+<tr><td>PROTO-2026-X89</td><td>SUBJ-3092</td><td>2</td><td>feeling lightheaded when standing up</td><td>MODERATE</td><td>N</td><td>Patient Jane Miller tolerating well; continued Alanine 50 mg; repeat glucose 120 mg/dL.</td></tr>
+<tr><td>PROTO-2026-X89</td><td>SUBJ-1044</td><td>3</td><td>frequent watery bowel movements</td><td>MODERATE</td><td>N</td><td>Four episodes; no intervention required.</td></tr>
+<tr><td>PROTO-2026-X89</td><td>SUBJ-4110</td><td>4</td><td>marked prolonged heart rhythm interval</td><td>MILD</td><td>N</td><td>Repeat ECG ordered; subject resting comfortably.</td></tr>
+</tbody></table>
+<p>Tier 2 indexes the MedDRA release assembled from the licensed ASCII conversions, the first artifact it needs on disk:</p>
+<table><thead><tr><th>file</th><th>columns</th><th>active rows</th></tr></thead><tbody>
+<tr><td><code>llt.asc</code></td><td><code>llt_code</code> · <code>llt_name</code> · <code>pt_code</code></td><td>~86,800</td></tr>
+<tr><td><code>pt.asc</code></td><td><code>pt_code</code> · <code>pt_name</code> · <code>hlt_code</code> · <code>soc_code</code></td><td>~25,700</td></tr>
+<tr><td><code>hlt.asc</code></td><td><code>hlt_code</code> · <code>hlt_name</code> · <code>hlgt_code</code></td><td>~2,400</td></tr>
+<tr><td><code>hlgt.asc</code></td><td><code>hlgt_code</code> · <code>hlgt_name</code> · <code>soc_code</code></td><td>136</td></tr>
+<tr><td><code>soc.asc</code></td><td><code>soc_code</code> · <code>soc_name</code></td><td>27</td></tr>
+</tbody></table>
+<p>merged on <code>currency = &#x27;Y&#x27;</code>, joined LLT→PT on <code>pt_code</code>, PT→HLT on <code>hlt_code</code>, HLT→HLGT on <code>hlgt_code</code>, HLGT→SOC on <code>soc_code</code>; each term is indexed under <code>llt_name + &quot;[PT: &quot; + pt_name + &quot;]&quot;</code>. The full chain is LLT → PT → <strong>HLT</strong> → <strong>HLGT</strong> → SOC: related preferred terms are grouped into High Level Terms by anatomy, pathology, physiology, aetiology or function; related HLTs in turn link to High Level Group Terms; and HLGTs group into System Organ Classes (by aetiology, manifestation site or purpose).</p>
+</section><section class="slide"><h3 class="slide-h">1.1 · Tier 1 — eCRF intake</h3 class="slide-h">
+<p>Keys <code>ae.csv</code> on <code>STUDYID/USUBJID/AESEQ</code>, copies <code>AETERM</code> through byte-for-byte, withholds <code>AECOM</code> from this trace. No columns added — the verbatim reaches Tier 2 exactly as typed, because Tier 2 measures closeness to what the site wrote. (The spatial/PDF front-end is not invoked: the input is tabular.)</p>
+</section><section class="slide"><h3 class="slide-h">1.2 · Tier 2 — Cactus Needle3: embed, index, retrieve</h3 class="slide-h">
+<p>The verbatim is encoded to a 384-dim unit vector; because stored vectors are L2-normalized, the index&#x27;s inner-product distance <em>is</em> cosine, so the cheap <code>ip</code> search returns exact angular closeness. The ~85,000 active term vectors sit in a 3-layer HNSW skip-list; a query enters at the top entry point, follows <code>ip</code> links greedily while the score improves, steps down at each local maximum, and at layer 0 runs a bounded priority-queue search to return the top-K. Reference parameters and costs for the full model stack (not produced by the stand-in build in this repository): <code>M = 32</code>, <code>efConstruction = 200</code>, <code>efSearch = 64</code>; embed 2.4 ms + search 0.8 ms; resident 178.3 MB (133.3 MB vectors + 45.0 MB edges).</p>
+<p>Zoomed on AESEQ 1, <code>&quot;severe throbbing pain in back of head&quot;</code> — top-3 <strong>[RM]</strong> (each candidate carries its full hierarchy path):</p>
+<table><thead><tr><th>rank</th><th>LLT</th><th>PT</th><th>PT_CODE</th><th>HLT · HLGT</th><th>SOC</th><th>cosine [RM]</th></tr></thead><tbody>
+<tr><td>1</td><td>Pain in back of head</td><td>Headache</td><td>99019211</td><td>Cranial pain · Cranial and cerebral disorders</td><td>Nervous system disorders</td><td>0.9412</td></tr>
+<tr><td>2</td><td>Throbbing pain in head</td><td>Headache</td><td>99019211</td><td>Cranial pain · Cranial and cerebral disorders</td><td>Nervous system disorders</td><td>0.8920</td></tr>
+<tr><td>3</td><td>Migraine</td><td>Migraine</td><td>99027599</td><td>Cranial pain · Cranial and cerebral disorders</td><td>Nervous system disorders</td><td>0.8105</td></tr>
+</tbody></table>
+<p>Zoomed on AESEQ 2, <code>&quot;feeling lightheaded when standing up&quot;</code> — top-1 <strong>[RM]</strong>: <code>Postural dizziness → Dizziness postural (99013575)</code>, cosine 0.8910.</p>
+<p>Ranks 1–2 of AESEQ 1 share a preferred term but are distinct lowest-level terms; the re-ranker resolves them to the same PT/code, so the write-back is unambiguous whichever LLT ranks first. Tier 2 has appended <code>LLT, PT, PT_CODE, SOC, cosine</code> and stopped — it proposes and measures, it decides nothing.</p>
+</section><section class="slide"><h3 class="slide-h">1.3 · Tier 3 — Laya: what it adds to a coding row</h3 class="slide-h">
+<p>Tier 4 scores each candidate from a feature row built out of upstream columns, never out of the raw string:</p>
+<p>``<code> x_k = [ cosine(Tier 2),         LevenshteinSim(Tier 4) = 1 - EditDistance(s,m)/max(len s, len m),         JaroWinkler(Tier 4),         I(SOC match)(Tier 4),         + ambiguity(Tier 3)   # present only when the trained checkpoint is installed       ] y_k = XGBoost(x_k)            # learned weights, sum to 1 </code>``</p>
+<p>The trained Tier-3 checkpoint supplies the <code>ambiguity</code> scalar — the probability the verbatim maps to a single clean concept — which is what lets a row whose <em>term</em> matches well but whose <em>sentence</em> negates or blurs it be pushed below the gate. This build&#x27;s deterministic stand-in does not emit that scalar on coding rows, so the <code>[SI]</code> trace runs the re-ranker without it; the <code>[RM]</code> trace reports the trained re-ranker&#x27;s output score, whose internal features are not exposed per record. Either way the gate is a single threshold on <code>y_k</code>.</p>
+</section><section class="slide"><h3 class="slide-h">1.4 · Tier 4 — XGBoost: re-rank and gate</h3 class="slide-h">
+<p>The composite weights are learned at training time and are not re-derived per record, so the trace reports the resulting score, not the weights. This run sets the gate to <strong>0.90</strong> so both branches are exercised; the build&#x27;s slider default is 0.88, at which the 0.8820 candidate below would also auto-code — the gate is a deployment operating point, recorded in the audit, and AESEQ 2 is the row that discriminates between the two values.</p>
+<table><thead><tr><th>AESEQ</th><th>verbatim</th><th>top PT</th><th>PT_CODE</th><th>re-rank y_k [RM]</th><th>status @0.90</th></tr></thead><tbody>
+<tr><td>1</td><td>severe throbbing pain in back of head</td><td>Headache</td><td>99019211</td><td>0.9580</td><td>AUTO_CODED</td></tr>
+<tr><td>4</td><td>marked prolonged heart rhythm interval</td><td>Electrocardiogram QT prolonged</td><td>99014387</td><td>0.9710</td><td>AUTO_CODED</td></tr>
+<tr><td>3</td><td>frequent watery bowel movements</td><td>Diarrhoea</td><td>99012735</td><td>0.9340</td><td>AUTO_CODED</td></tr>
+<tr><td>2</td><td>feeling lightheaded when standing up</td><td>Dizziness postural</td><td>99013575</td><td>0.8820</td><td>FLAGGED_FOR_HUMAN_CODER</td></tr>
+</tbody></table>
+<p>The stand-in computes the same four feature columns per candidate (cosine via hashed bag-of-words, Levenshtein-sim, Jaro-Winkler, SOC-match) and a weighted composite with Σw = 1; its scores are <code>[SI]</code> and will not match the <code>[RM]</code> column on semantically-gapped verbatims — <code>&quot;marked prolonged heart rhythm interval&quot; → QT prolonged</code> needs the trained encoder, which a lexical stand-in cannot supply.</p>
+</section><section class="slide"><h3 class="slide-h">1.5 · Write-back and export</h3 class="slide-h">
+<p>On <code>AUTO_CODED</code> the head writes the coded fields onto the AE row; on <code>FLAGGED_FOR_HUMAN_CODER</code> it writes the same columns, leaves <code>AEDECOD</code> empty, and attaches the top candidates for the human queue. Exported <code>ae_coded.csv</code>:</p>
+<table><thead><tr><th>USUBJID</th><th>AESEQ</th><th>AETERM</th><th>AEDECOD</th><th>AEPTCD</th><th>AESOC</th><th>AECODCONF</th><th>AECODSTAT</th></tr></thead><tbody>
+<tr><td>SUBJ-3092</td><td>1</td><td>severe throbbing pain in back of head</td><td>Headache</td><td>99019211</td><td>Nervous system disorders</td><td>0.9580</td><td>AUTO_CODED</td></tr>
+<tr><td>SUBJ-4110</td><td>4</td><td>marked prolonged heart rhythm interval</td><td>Electrocardiogram QT prolonged</td><td>99014387</td><td>Investigations</td><td>0.9710</td><td>AUTO_CODED</td></tr>
+<tr><td>SUBJ-1044</td><td>3</td><td>frequent watery bowel movements</td><td>Diarrhoea</td><td>99012735</td><td>Gastrointestinal disorders</td><td>0.9340</td><td>AUTO_CODED</td></tr>
+<tr><td>SUBJ-3092</td><td>2</td><td>feeling lightheaded when standing up</td><td><em>(empty)</em></td><td>—</td><td>—</td><td>0.8820</td><td>FLAGGED_FOR_HUMAN_CODER</td></tr>
+</tbody></table>
+<p><code>AECOM</code> is untouched in this file — scrubbing it is the PHI trace&#x27;s output, a separate artifact. The exported rows also carry <code>HLT</code> and <code>HLGT</code> as <strong>evidence columns</strong> next to each candidate so a reviewer sees the full path (LLT → PT → HLT → HLGT → SOC) beside every proposal; they are not standard SDTM variables — the write-back fields remain <code>AEDECOD</code>/<code>AEPTCD</code>/<code>AESOC</code>, and Tier 4 never scores on the hierarchy levels.</p>
+</section><section class="slide"><h3 class="slide-h">1.6 · App tie-in (coding)</h3 class="slide-h">
+<p>The MedDRA write-back screen renders 1.5 as an editable table: each <code>AUTO_CODED</code> row shows its top PT — with its HLT · HLGT · SOC path alongside — and score for accept; each <code>FLAGGED</code> row shows the pre-populated candidates for the coder to pick or override, and an override writes a reason to the audit. The reviewer sets the gate here (default 0.88) and the effective value goes into the audit with the run. The pre-flight panel prints the hierarchy chain the dictionary actually carries (<code>LLT &gt; PT &gt; HLT &gt; HLGT &gt; SOC</code>, or a degraded subset if the source lacked those levels), and that chain is written to the audit with every run.</p>
+</section><section class="slide"><h2>race 2 — PII/PHI detection and redaction</h2>
+
+</section><section class="slide"><h3 class="slide-h">2.0 · The free-text on disk, across domains</h3 class="slide-h">
+<p>These are the boxes a coordinator types into. The cut deliberately contains four cases: a direct leak, a look-alike trap, a mosaic, and a clean negative — all in eCRF fields, no page.</p>
+<table><thead><tr><th>DOMAIN</th><th>USUBJID</th><th>ROW</th><th>FIELD</th><th>free-text value as typed</th><th>case</th></tr></thead><tbody>
+<tr><td>AE</td><td>SUBJ-3092</td><td>1</td><td>AECOM</td><td>CRC Note: Patient Jane Miller called site cell phone (617) 555-0192 at 10:15 AM.</td><td>direct</td></tr>
+<tr><td>AE</td><td>SUBJ-3092</td><td>2</td><td>AECOM</td><td>Patient Jane Miller tolerating well; continued Alanine 50 mg; repeat glucose 120 mg/dL.</td><td>look-alike</td></tr>
+<tr><td>PR</td><td>SUBJ-3092</td><td>1</td><td>PRDSC</td><td>Subject J.M. (MRN 884-019-22), DOB 04/12/1972, residing 02114, missed the 09:00 dose window.</td><td>mosaic + direct</td></tr>
+<tr><td>EG</td><td>SUBJ-1044</td><td>1</td><td>EGCOM</td><td>Sinus rhythm, no artifact.</td><td>clean</td></tr>
+</tbody></table>
+<p>The entity schema is the HIPAA safe-harbour set (Name, DOB, Phone, MRN, Address, …). Every non-numeric column in each domain is scanned — content-based discovery, not a hard-coded <code>AECOM</code> list or a name-suffix rule — which is what makes the scan both domain-agnostic and gap-free.</p>
+</section><section class="slide"><h3 class="slide-h">2.1 · Tier 1 — intake + content-based discovery</h3 class="slide-h">
+<p>Discovery is <strong>content-based</strong>: every column that is <em>not</em> strictly numeric (text, dates, coded values, flags) is scanned; only columns typed as a number are skipped. A pre-specified list of column names was removed because it is guaranteed to miss PHI hiding in any column whose header did not match — and missing PHI is exactly the failure this program exists to prevent. Applied per domain on the sample cut:</p>
+<table><thead><tr><th>DOMAIN</th><th>columns scanned (every non-numeric column)</th><th>identifiers found</th></tr></thead><tbody>
+<tr><td>AE</td><td>STUDYID, USUBJID, AETERM, AESEV, AESER, AECOM</td><td>AECOM only</td></tr>
+<tr><td>PR</td><td>STUDYID, USUBJID, PRDSC</td><td>PRDSC only</td></tr>
+<tr><td>EG</td><td>STUDYID, USUBJID, EGCOM</td><td>none (clean)</td></tr>
+</tbody></table>
+<p>The operator confirms or deselects columns in the app&#x27;s pre-flight before compute — so a known-safe structured column (a date you don&#x27;t want touched) can be excluded interactively. A missing value stays missing, not an empty string that would scan silently clean. No page, no layout, no coordinate map — the input is tabular.</p>
+</section><section class="slide"><h3 class="slide-h">2.2 · Tier 2 — Cactus Needle3: typed span extraction</h3 class="slide-h">
+<p>The extractor is schema-typed, not a regex library; the stand-in implements the declaration as explicit patterns, shown verbatim so a reviewer can audit exactly what matches — phone <code>\(?[0-9]{3}\)?[-. ]?[0-9]{3}[-. ]?[0-9]{4}</code>, MRN <code>\b[0-9]{3}-[0-9]{3}-[0-9]{2}\b</code>, DOB <code>\b[0-9]{2}/[0-9]{2}/[0-9]{4}\b</code>, postcode <code>(?&lt;!\d)[0-9]{5}(?!\d)</code>, initials <code>\b[A-Z]\.<a href="?:\.(?=[^0-9a-zA-Z]|$">A-Z</a>)?</code>, and a patient name only when introduced by a title keyword (<code>Patient|Mr|Ms|Mrs|Dr</code>) or in surname-comma form. The title-keyword guard is what stops a bare capitalized clinical word from being read as a name. Spans carry in-field character offsets; there is no page and no bounding box.</p>
+<p>The offsets below are the <strong>exact output of the shipped stand-in</strong> on <code>sample_data/</code> (verified 2026-10-13):</p>
+<table><thead><tr><th>DOMAIN</th><th>FIELD</th><th>ROW</th><th>span</th><th>entity</th><th>direct / indirect</th><th>in-field offset [SI]</th></tr></thead><tbody>
+<tr><td>AE</td><td>AECOM</td><td>1</td><td>Jane Miller</td><td>PERSON_NAME</td><td>direct</td><td>18–29</td></tr>
+<tr><td>AE</td><td>AECOM</td><td>1</td><td>(617) 555-0192</td><td>PHONE</td><td>direct</td><td>53–67</td></tr>
+<tr><td>AE</td><td>AECOM</td><td>2</td><td>Jane Miller</td><td>PERSON_NAME</td><td>direct</td><td>8–19</td></tr>
+<tr><td>AE</td><td>AECOM</td><td>2</td><td><em>Alanine</em></td><td><em>(drug — no name match)</em></td><td><strong>none</strong></td><td>—</td></tr>
+<tr><td>AE</td><td>AECOM</td><td>2</td><td><em>120 mg/dL</em></td><td><em>(lab — no MRN/DOB/ZIP match)</em></td><td><strong>none</strong></td><td>—</td></tr>
+<tr><td>PR</td><td>PRDSC</td><td>1</td><td>J.M.</td><td>INITIALS</td><td>indirect</td><td>8–12</td></tr>
+<tr><td>PR</td><td>PRDSC</td><td>1</td><td>884-019-22</td><td>MRN</td><td>direct</td><td>18–28</td></tr>
+<tr><td>PR</td><td>PRDSC</td><td>1</td><td>04/12/1972</td><td>DOB</td><td>direct</td><td>35–45</td></tr>
+<tr><td>PR</td><td>PRDSC</td><td>1</td><td>02114</td><td>ZIP</td><td>indirect</td><td>56–61</td></tr>
+<tr><td>EG</td><td>EGCOM</td><td>1</td><td>—</td><td>—</td><td>none</td><td>—</td></tr>
+</tbody></table>
+<p>The two italicised <em>none</em> rows are the look-alike test the typed schema exists to pass: a mid-sentence <em>Alanine</em> matches no name pattern (the title-keyword guard) and <em>120 mg/dL</em> matches no MRN/DOB/ZIP pattern, so both survive while the patient name beside them is flagged. The PR row mixes direct (MRN, DOB) and indirect (initials, postcode) attributes — that is the mosaic case Tier 3 must score.</p>
+</section><section class="slide"><h3 class="slide-h">2.3 · Tier 3 — Laya: calibrated field-level probabilities</h3 class="slide-h">
+<p>One non-generative pass per field returns the probability that direct identifiers are present, the probability that indirect attributes jointly re-identify, and a risk tier. <code>P(Quasi)</code> is the joint re-identification probability over indirect attributes; it rises only where two or more co-occur, which in this cut is the PR row alone.</p>
+<table><thead><tr><th>DOMAIN</th><th>FIELD</th><th>ROW</th><th>P(direct PHI)</th><th>P(quasi-ID)</th><th>risk tier</th></tr></thead><tbody>
+<tr><td>AE</td><td>AECOM</td><td>1</td><td>0.998 (Name) / 0.995 (Phone) [RM]</td><td>low [SI]</td><td>high (direct)</td></tr>
+<tr><td>AE</td><td>AECOM</td><td>2</td><td>0.998 [RM]</td><td>low [SI]</td><td>high (direct)</td></tr>
+<tr><td>PR</td><td>PRDSC</td><td>1</td><td>high [SI]</td><td>0.96 [SI: ≥2 indirect spans]</td><td>high (direct + mosaic)</td></tr>
+<tr><td>EG</td><td>EGCOM</td><td>1</td><td>0.05 [RM]</td><td>low [SI]</td><td>none</td></tr>
+</tbody></table>
+<p>The single-name rows keep <code>P(Quasi)</code> low because no indirect set co-occurs; the PR row raises it because initials and postcode appear together. That joint risk is a field-level judgement Tier 2 cannot produce — Tier 2 flagged the MRN and DOB as direct spans but said nothing about the <em>combination</em> of the indirect attributes, which is precisely Tier 3&#x27;s output.</p>
+<p><em>(Stand-in note: on the shipped build the direct branch reports <code>P(direct) = 0.99</code> whenever a DIRECT span exists — the <code>[RM]</code> values above are the trained checkpoint&#x27;s per-entity outputs and are not exposed by the stand-in.)</em></p>
+</section><section class="slide"><h3 class="slide-h">2.4 · Tier 4 — XGBoost: per-span redaction and scrub</h3 class="slide-h">
+<p>Per span the head predicts a redaction probability from the Tier-2 span match, the two Tier-3 probabilities, and in-field cues (relative character position, digit ratio, capitalization, a preceding label word). The full per-token feature set also includes page geometry — bounding box and normalized vertical position — which the eCRF path has no page to supply, so in-field position and lexical cues stand in for it and the score reduces to the span-match and direct-identifier test: <code>P(Redact) = 0.99</code> when the token falls in a Needle3 span or the field&#x27;s direct-identifier probability exceeds 0.8, else <code>0.01</code>; mask above the configured cutoff (default 0.85, a reviewer parameter). The scrub is a string replace on the field, shown as the exact operation so the result is reproducible:</p>
+<p>``<code> SAN_AECOM = str_replace_all(AECOM, &quot;(?i)Jane Miller&quot;, &quot;[REDACTED_PATIENT_NAME]&quot;) SAN_AECOM = str_replace_all(SAN_AECOM,               &quot;\\(?[0-9]{3}\\)?[-.]?[0-9]{3}[-.]?[0-9]{4}&quot;, &quot;[REDACTED_PHONE]&quot;) AEPHI     = if_else(SAN_AECOM != AECOM, &quot;Y&quot;, &quot;N&quot;) </code>``</p>
+<table><thead><tr><th>DOMAIN</th><th>FIELD</th><th>ROW</th><th>span</th><th>P(Redact)</th><th>action</th><th>result</th></tr></thead><tbody>
+<tr><td>AE</td><td>AECOM</td><td>1</td><td>Jane Miller / (617) 555-0192</td><td>0.99</td><td>scrub</td><td><code>SAN_AECOM</code></td></tr>
+<tr><td>AE</td><td>AECOM</td><td>2</td><td>Jane Miller</td><td>0.99</td><td>scrub</td><td><code>SAN_AECOM</code></td></tr>
+<tr><td>AE</td><td>AECOM</td><td>2</td><td><em>Alanine</em> / <em>120 mg/dL</em></td><td>0.01</td><td><strong>keep</strong></td><td>unchanged</td></tr>
+<tr><td>PR</td><td>PRDSC</td><td>1</td><td>J.M. / 884-019-22 / 04/12/1972 / 02114</td><td>0.99</td><td>scrub + mosaic flag</td><td><code>SAN_PRDSC</code></td></tr>
+<tr><td>EG</td><td>EGCOM</td><td>1</td><td>—</td><td>—</td><td>none</td><td><code>AEPHI = &quot;N&quot;</code>, text unchanged</td></tr>
+</tbody></table>
+<p>Resulting sanitized field, AE row 1: <code>CRC Note: Patient [REDACTED_PATIENT_NAME] called site cell phone [REDACTED_PHONE] at 10:15 AM.</code>, with <code>AEPHI = &quot;Y&quot;</code>; AE row 2 keeps <em>Alanine 50 mg</em> and <em>120 mg/dL</em> intact while the patient name beside them is scrubbed. The tag vocabulary (<code>[REDACTED_PATIENT_NAME]</code>, <code>[REDACTED_PHONE]</code>, …) is a configuration choice and the audit records the scheme in force for the run. Because the input is a database field there is no manifest and no text-layer deletion — those belong to a page, which this build does not process.</p>
+</section><section class="slide"><h3 class="slide-h">2.5 · Exports (PHI)</h3 class="slide-h">
+<p>Two artifacts, neither of which is the coding file. <code>phi_flags.csv</code>, one row per detected span (page and bounding-box columns do not appear, because the input is a field, not a page):</p>
+<table><thead><tr><th>DOMAIN</th><th>USUBJID</th><th>ROW</th><th>FIELD</th><th>SPAN</th><th>ENTITY</th><th>START</th><th>END</th><th>P_REDACT</th><th>ACTION</th></tr></thead><tbody>
+<tr><td>AE</td><td>SUBJ-3092</td><td>1</td><td>AECOM</td><td>Jane Miller</td><td>PERSON_NAME</td><td>18</td><td>29</td><td>0.99</td><td>MASK_AND_FLAG</td></tr>
+<tr><td>AE</td><td>SUBJ-3092</td><td>1</td><td>AECOM</td><td>(617) 555-0192</td><td>PHONE</td><td>53</td><td>67</td><td>0.99</td><td>MASK_AND_FLAG</td></tr>
+<tr><td>PR</td><td>SUBJ-3092</td><td>1</td><td>PRDSC</td><td>02114</td><td>ZIP</td><td>56</td><td>61</td><td>0.99</td><td>MASK_AND_FLAG</td></tr>
+</tbody></table>
+<p>and a sanitized copy of each scanned domain — <code>sanitized/ae.csv</code>, <code>sanitized/pr.csv</code>, <code>sanitized/eg.csv</code> — carrying the original columns plus <code>SAN_&lt;field&gt;</code> and <code>&lt;field&gt;_PHI_FLAG</code> per scanned column. The audit row for this trace records the selected-column list, the content-based discovery mode and the tag scheme in force, the redaction cutoff, the per-tier path (trained or stand-in) — so the privacy run is reproducible from its audit alone and shares no audit line with the coding run.</p>
+</section><section class="slide"><h3 class="slide-h">2.6 · App tie-in (PHI)</h3 class="slide-h">
+<p>The PHI sanitization screen renders 2.4 as a raw-vs-sanitized inspector per row with an Approve-Redaction action that logs reviewer and time, and shows the 2.1 discovery table so a reviewer can confirm coverage before trusting the scrub. The reviewer confirms or deselects scan columns and sets the cutoff here; those effective choices go into the audit with the run. End users write no code.</p>
+</section><section class="slide"><h2>race legend (properties of this build)</h2>
+<ul><li><strong>[RM]</strong> = the trained component&#x27;s output on this record; <strong>[SI]</strong> = the deterministic stand-in&#x27;s output on this record; untagged numbers = configured parameters (gate 0.90 in this run, default 0.88; redaction cutoff 0.85; index <code>M/efC/efS = 32/200/64</code>).</li><li>The stand-in reproduces the contract and the gates exactly. For PHI it reproduces the trace, because identifier detection is pattern-shaped and the eCRF scrub is a string replace — every <code>[SI]</code> offset in §2.2 was verified against a shipped run on 2026-10-13. For coding its retrieval is lexical, so its <code>[SI]</code> scores will not match the <code>[RM]</code> column on semantically-gapped verbatims; install the trained encoder + index and the Laya checkpoint and the same tables fill with <code>[RM]</code> numbers, columns unmoved.</li><li>Two parameters are deployment decisions the audit records, not fixed constants: the coding gate (0.88 vs 0.90, discriminated by the 0.8820 row) and the redaction tag scheme. Both are reviewer-set in the app and written to the audit with the run.</li></ul>
+</section><section class="slide"><h2>erify this walkthrough yourself</h2>
+<p>Point either app at <a href="../sample_data/"><code>../sample_data/</code></a> (the worked cut plus a synthetic demo dictionary) and Execute — no code edits, no setup beyond <code>pip install -r requirements.txt</code>. The PHI trace reproduces §2.2–§2.5 exactly; the coding trace exercises both routing branches with honest <code>[SI]</code> scores. What was checked, what bugs were found and fixed, and how to re-run the 41-check harness: <a href="../QC_REPORT.md">QC_REPORT.md</a>.</p>
+</section>
+<nav><button id="prev">&#8592; Prev</button><span id="count"></span><button id="next">Next &#8594;</button></nav>
+<script>
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+function show(n){cur=Math.max(0,Math.min(slides.length-1,n));slides.forEach((s,i)=>s.classList.toggle('active',i===cur));
+document.getElementById('count').textContent=(cur+1)+' / '+slides.length;try{history.replaceState(null,'','#'+(cur+1))}catch(e){}}
+document.getElementById('prev').onclick=()=>show(cur-1);
+document.getElementById('next').onclick=()=>show(cur+1);
+addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ')show(cur+1);else if(e.key==='ArrowLeft'||e.key==='PageUp')show(cur-1);});
+const m=location.hash.match(/\d+/);show(m?parseInt(m[0],10)-1:0);
+</script>
+</body></html>

@@ -1,0 +1,9 @@
+.DS_Store
+.agents/
+.claude/
+.venv/
+__pycache__/
+anomaly_output/
+meddra_output/
+phi_output/
+risk_output/

@@ -1,0 +1,29 @@
+STUDYID,USUBJID,AVISIT,VISITNUM,EGSEQ,EGQTC,EGHRR1,ABNORMAL,CLINSIG,EGCOM
+PROTO-2026-X89,SUBJ-1044,V1,1,1,432,72,N,N,"Sinus rhythm, no artifact."
+PROTO-2026-X89,SUBJ-9001,V2,2,1,530,65,Y,Y,Prolonged QTc noted; cardiology consulted.
+PROTO-2026-X89,SUBJ-9002,V3,3,1,470,94,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9005,V4,4,1,476,74,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9007,V1,1,1,471,67,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9008,V2,2,1,476,79,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9009,V3,3,1,422,88,N,N,QTc within limits.
+PROTO-2026-X89,SUBJ-9010,V4,4,1,403,68,N,N,QTc within limits.
+PROTO-2026-X89,SUBJ-9011,V1,1,1,419,70,N,N,QTc within limits.
+PROTO-2026-X89,SUBJ-9014,V2,2,1,505,65,Y,Y,Prolonged QTc noted; cardiology consulted.
+PROTO-2026-X89,SUBJ-9016,V3,3,1,486,60,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9017,V4,4,1,412,62,N,N,QTc within limits.
+PROTO-2026-X89,SUBJ-9018,V1,1,1,483,83,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9020,V2,2,1,479,94,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9021,V3,3,1,444,80,N,N,QTc within limits.
+PROTO-2026-X89,SUBJ-9022,V4,4,1,455,90,N,N,QTc within limits.
+PROTO-2026-X89,SUBJ-9029,V1,1,1,496,77,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9031,V2,2,1,491,67,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9032,V3,3,1,451,71,N,N,QTc within limits.
+PROTO-2026-X89,SUBJ-9034,V4,4,1,397,65,N,N,QTc within limits.
+PROTO-2026-X89,SUBJ-9037,V1,1,1,456,62,N,N,QTc within limits.
+PROTO-2026-X89,SUBJ-9038,V2,2,1,487,80,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9041,V3,3,1,427,77,N,N,QTc within limits.
+PROTO-2026-X89,SUBJ-9042,V4,4,1,490,69,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9043,V1,1,1,484,86,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9044,V2,2,1,422,60,N,N,QTc within limits.
+PROTO-2026-X89,SUBJ-9045,V3,3,1,494,88,Y,N,QTc borderline; repeat ECG ordered.
+PROTO-2026-X89,SUBJ-9047,V4,4,1,470,79,Y,N,QTc borderline; repeat ECG ordered.
