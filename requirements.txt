@@ -1,7 +1,7 @@
 # Stand-in path — runs anywhere, no trained weights needed.
 numpy>=1.24        # meddra_app.py + anomaly_app.py (stand-in encoder/index math; [SI] Wasserstein)
 pandas>=2.0        # all four apps (risk_app.py uses pandas only)
-streamlit>=1.36    # all four apps
+streamlit>=1.49    # all four apps (floor: oldest release accepting st.dataframe(width="stretch"); 1.36-1.48 raise TypeError)
 
 # Real path — install these and the mode banner flips tier-by-tier to REAL:
 #   pip install cactus-needle hnswlib laya xgboost
