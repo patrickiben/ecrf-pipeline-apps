@@ -211,4 +211,4 @@ The PHI sanitization screen renders 2.4 as a raw-vs-sanitized inspector per row 
 
 ## Verify this walkthrough yourself
 
-Point either app at [`../sample_data/`](../sample_data/) (the worked cut plus a synthetic demo dictionary) and Execute — no code edits, no setup beyond `pip install -r requirements.txt`. The PHI trace reproduces §2.2–§2.5 exactly; the coding trace exercises both routing branches with honest `[SI]` scores. What was checked, what bugs were found and fixed, and how to re-run the 95-check harness: [QC_REPORT.md](../QC_REPORT.md).
+Point either app at [`../sample_data/`](../sample_data/) (the worked cut plus a synthetic demo dictionary) and Execute: no code edits, no setup beyond `pip install -r requirements.txt`. The PHI trace reproduces §2.2–§2.5 exactly; the coding trace exercises both routing branches with honest `[SI]` scores. What was checked, what bugs were found and fixed, and how to re-run the QC harness (`tests/qc_test.py`): [QC_REPORT.md](../QC_REPORT.md).

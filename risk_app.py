@@ -26,6 +26,11 @@
 #     SAP/protocol file to import: every threshold is a declared constant below, tagged [SI],
 #     written to the banner and the audit. A real deployment replaces them with study-specific
 #     declared criteria (or a validated model) -- that is an external step this file never fakes.
+#   * Hosted-demo safety mode: with ECRF_HOSTED=1 set (or the Streamlit secret
+#     hosted = true) every data input (uploaders, folder path, models dir) is
+#     locked to the bundled synthetic cut in sample_data/ and outputs go to a
+#     per-session temp folder. Nothing set means the normal local behavior. See
+#     _hosted().
 #
 # WHAT IT DOES, TIER BY TIER (the chain is the product; every decision is a row of
 # readable numbers, never a hidden weight -- see the [SI]/[RM] discipline):
@@ -49,7 +54,7 @@
 #        exactly what it uses, matching phi_app.py's discipline.)
 #   real path (flips banner to [RM]):  a validated survival/risk model replacing Tier 3
 
-import json, os, re, time
+import json, os, re, tempfile, time
 import pandas as pd, streamlit as st
 
 # --------------------------------------------------------------------------- #
@@ -105,6 +110,50 @@ DISC_CLINSIG_EACH, DISC_CLINSIG_CAP = 0.1, 0.2    # per source-system clinically
 # parameter is not here has no declared limit and is simply not scored (documented, not
 # silently dropped -- it still appears in Tier-2 signals as "no declared limit").
 VITAL_KEY = {"SYSBP": "SYSBP_HIGH_MMHG", "DIASTP": "DIASTP_HIGH_MMHG", "TEMPC": "TEMPC_HIGH_C"}
+
+# --------------------------------------------------------------------------- #
+# Hosted-demo safety mode. ON when the environment variable ECRF_HOSTED=1 is set
+# or the Streamlit secret "hosted = true" exists (Streamlit Community Cloud: app
+# Settings > Secrets). A public demo must never take in real data, so in this
+# mode every input that could bring data in (the uploaders, the folder path, the
+# models dir and, in the coding app, the .asc folder) is DISABLED in the UI and
+# its value is also OVERWRITTEN in code: a disabled widget only stops the
+# browser, and a crafted client could still send a value, so it is never
+# trusted. The bundled synthetic cut is forced, outputs go to a per-session
+# server temp folder (never a path a visitor typed), a banner says so on every
+# rerun, and the audit records hosted_mode=true. With nothing set (the local
+# default) the app behaves exactly as before; the audit only gains
+# hosted_mode=false. Duplicated in each app on purpose (no shared module, same
+# rule as _have/_col).
+# The switch fails CLOSED. Any ECRF_HOSTED or hosted value other than empty, 0,
+# false, no or off turns it on (a typo such as "on" or hosted = 1.0 locks the
+# demo instead of opening it), and so does a secrets file that exists but does
+# not load (hosted = True with a capital T, a stray bad line): Streamlit only
+# logs that parse error on the server, so failing open would leave a public app
+# unlocked with nothing on the page to show it. The deploy step in README.md is
+# to open the app and confirm the banner.
+# --------------------------------------------------------------------------- #
+HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real patient data. "
+                 "Run locally for real data.")
+_HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
+def _hosted():
+    if os.environ.get("ECRF_HOSTED","").strip().lower() not in _HOSTED_OFF: return True
+    # load_if_toml_exists() is asked FIRST (it returns False rather than raising when no
+    # secrets file loads, the usual local case) because older Streamlit releases also draw
+    # an st.error box when st.secrets.get misses the file, which would change the local
+    # default view. The try/except covers any other loader failure.
+    try:
+        if st.secrets.load_if_toml_exists():
+            # Streamlit copies root-level secrets into os.environ OVER the host's own value,
+            # so an ECRF_HOSTED secret could quietly undo a host-set ECRF_HOSTED=1: the key
+            # being there at all counts as on.
+            if "ECRF_HOSTED" in st.secrets: return True
+            return str(st.secrets.get("hosted", "")).strip().lower() not in _HOSTED_OFF
+    except Exception: pass
+    # Nothing loaded: local mode ONLY when no secrets file or folder exists at all. One that
+    # exists but did not load fails closed (banner shown, inputs locked) instead of open.
+    try: return any(os.path.exists(p) for p in st.get_option("secrets.files"))
+    except Exception: return True
 
 # ============================ IMPORT LAYER ============================
 # The ONLY place this program touches the outside world. It reads safety-domain CSVs and
@@ -508,9 +557,15 @@ def _guard_artifacts(models_dir):
 # Run. The operator confirms the input contract BEFORE any compute, so a mis-pointed folder or
 # an unrecognized domain is caught on screen, not after a silent wrong answer.
 st.set_page_config(page_title="Participant Risk Scoring Engine", layout="wide")
+HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
+# Hosted: an uncaught exception shows a generic message, not a traceback with server
+# paths (a crafted widget value can raise one). Process-wide, like the switch itself.
+if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("⚖ Participant Safety & Discontinuation Risk Scoring")
 st.caption("Tier 1 intake → Tier 2 signals → Tier 3 aggregate [SI] → Tier 4 categorize · "
            "decision support, not a clinical determination · air-gapped · no sample data in this file")
+# Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
+if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
 # Built-in, app-specific instruction manual (from USER_GUIDE.md §5), rendered as a collapsible
 # panel so the working view stays clean but help is one click away. Self-contained: it refers to
@@ -551,28 +606,46 @@ with st.expander("📖 How to use this app"):
 
 # ---- sidebar 1: WHERE the data is. Folder path AND/OR uploads are additive; a
 #      meddra*.csv in the folder is ignored (this program needs no dictionary). ----
+if HOSTED: st.sidebar.warning(HOSTED_BANNER, icon="🔒")
 st.sidebar.header("📂 1. Point this at your safety data")
 _SAMPLE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample_data")
 # Demo toggle: off by default; a link ending in ?demo=1 (e.g. a hosted demo) starts it on.
+# Hosted mode: each data input below is disabled AND its value overwritten right after
+# the widget (sample forced on, folder pinned to sample_data/, no uploads), because a
+# disabled widget only stops the browser; a crafted client could still send a value.
 _use_sample = st.sidebar.checkbox("Use the bundled synthetic sample data",
-    value=(st.query_params.get("demo") == "1"),
+    value=(HOSTED or st.query_params.get("demo") == "1"), disabled=HOSTED,
     help="Fills the folder path with the synthetic demo cut shipped in ./sample_data/ (no real patients or licensed dictionary).")
-folder = st.sidebar.text_input("Cut folder path (safety domains)", value=(_SAMPLE_DIR if _use_sample else ""),
+if HOSTED: _use_sample = True
+folder = st.sidebar.text_input("Cut folder path (safety domains)", value=(_SAMPLE_DIR if _use_sample else ""), disabled=HOSTED,
     help="Path to a folder of safety-domain CSVs (ae/lb/eg/vs/pe). Every *.csv EXCEPT one "
          "named *meddra* loads; each file is classified by its content, not its name. No "
          "dictionary or SAP/protocol file is needed.")
+if HOSTED: folder = _SAMPLE_DIR            # never trust a client-sent value in hosted mode
 up_dom = st.sidebar.file_uploader("...or upload safety files (CSV or SAS .sas7bdat)",
-    type=["csv","sas7bdat"], accept_multiple_files=True)
+    type=["csv","sas7bdat"], accept_multiple_files=True, disabled=HOSTED)
+if HOSTED: up_dom = None
 
 # ---- sidebar 2: outputs + optional models dir. No gate slider here -- the operating point
 #      for this engine is the built-in [SI] criteria, which are recorded in the audit; there
 #      is no single tunable cutoff to hide behind a slider and no external file to import. ----
 st.sidebar.markdown("---"); st.sidebar.header("⚖ 2. Outputs")
-out_dir = st.sidebar.text_input("Output folder","risk_output",
+# Hosted mode: outputs go to a server temp folder made ONCE per browser session
+# (kept in session_state so reruns reuse it), and the models dir is pinned to its
+# default "models"; neither path ever comes from a visitor.
+# A TemporaryDirectory (not a bare mkdtemp) is kept in session_state, so the folder
+# is deleted when Streamlit discards the expired session (and at exit) instead of
+# piling up in /tmp, one per page view.
+if HOSTED and "_hosted_out" not in st.session_state:
+    st.session_state["_hosted_tmp"] = tempfile.TemporaryDirectory(prefix="risk_output_", ignore_cleanup_errors=True)
+    st.session_state["_hosted_out"] = st.session_state["_hosted_tmp"].name
+out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"] if HOSTED else "risk_output"), disabled=HOSTED,
     help="Where risk_scores.csv + audit_log.csv are written on Run (also offered as downloads).")
-models_dir = st.sidebar.text_input("Models dir (optional real model)","models",
+if HOSTED: out_dir = st.session_state["_hosted_out"]
+models_dir = st.sidebar.text_input("Models dir (optional real model)","models", disabled=HOSTED,
     help="If a trained risk_model.json is present here but its runtime is not installed, "
          "the app STOPS rather than silently substituting the [SI] stand-in.")
+if HOSTED: models_dir = "models"
 _guard_artifacts(models_dir)   # runs on every rerun, before any compute
 
 # ---- LOAD now so the pre-flight panel + classification are live. Errors captured into
@@ -644,6 +717,7 @@ st.expander("Processing log").write(
 #      This is what makes a run reproducible from its audit alone and keeps this head's scope
 #      separate from meddra_app.py / phi_app.py (separate program, separate audit_log.csv). ----
 audit=pd.DataFrame([dict(program="risk_scorer", timestamp=pd.Timestamp.now().isoformat(timespec="seconds"),
+    hosted_mode=("true" if HOSTED else "false"),
     domains={d:classify_domain(df) for d,df in domains.items()},
     domain_rows=json.dumps({d:len(df) for d,df in domains.items()}),
     n_subjects=int(n_ready), criteria_source="[SI] built-in defaults (no external SAP/protocol file)",

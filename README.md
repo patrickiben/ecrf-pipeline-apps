@@ -1,5 +1,7 @@
 # eCRF Pipeline Apps — MedDRA Auto-Coding · PII/PHI Redaction · Risk Scoring · Anomaly & Drift
 
+[![QC](https://github.com/patrickiben/ecrf-pipeline-apps/actions/workflows/qc.yml/badge.svg)](https://github.com/patrickiben/ecrf-pipeline-apps/actions/workflows/qc.yml)
+
 📖 **New here?** Start with the [User Guide](USER_GUIDE.md) for step-by-step usage of all four apps.
 
 Four independent Streamlit apps that run on local, air-gapped hardware and read the
@@ -51,7 +53,43 @@ Manual equivalent: `pip install -r requirements.txt && streamlit run <app>.py`.
 
 ## Hosted demo (no install)
 
-Each app can run on [Streamlit Community Cloud](https://streamlit.io/cloud) straight from this repository: deploy it with the app file (`meddra_app.py`, `phi_app.py`, `risk_app.py` or `anomaly_app.py`) as the main file and `requirements.txt` as is. In the sidebar, tick **Use the bundled synthetic sample data**, or open the app link with `?demo=1` appended to start with it ticked. Everything bundled is synthetic: no real patients, no real study and no licensed dictionary. The demo dictionary's codes are 99-prefixed placeholders, not MedDRA codes.
+A public demo runs each app in **hosted mode**: every data input (the uploaders, folder paths and models dir) is locked to the bundled synthetic cut, outputs go to a per-session server temp folder (deleted when the session ends), a banner on every page says the demo takes synthetic data only, and the audit records `hosted_mode=true`. Everything bundled is synthetic: no real patients, no real study and no licensed dictionary. The demo dictionary's codes are 99-prefixed placeholders, not MedDRA codes. Hosted mode is off unless a deployment switches it on, so a local run behaves exactly as described in the rest of this README; there, opening the app with `?demo=1` appended simply starts with **Use the bundled synthetic sample data** ticked. Use a local run for real data.
+
+### Deploy your own demo
+
+On [Streamlit Community Cloud](https://streamlit.io/cloud), straight from this repository:
+
+1. **One app per deployment.** Deploy each program as its own app from the same repository and branch, with the main file path set to `meddra_app.py`, `phi_app.py`, `risk_app.py` or `anomaly_app.py`.
+2. **Python 3.12.** Choose it under **Advanced settings** when you create the app (it is the version CI tests; changing it later means deleting and redeploying). Leave `requirements.txt` as is: it installs the labeled `[SI]` stand-in path.
+3. **Turn on hosted mode.** Add the secret `hosted = true` (the Secrets box takes TOML: paste it under Advanced settings, or later under the app's **Settings > Secrets**). Do not skip this step: without it, a public deployment accepts uploads and folder paths like a local install. On any other host, set the environment variable `ECRF_HOSTED=1` instead. Do not put an `ECRF_HOSTED` key in the secrets: Streamlit copies top-level secrets into the environment over the host's own value, so the apps treat that key as on whatever it says. The switch fails closed: any value other than empty, `0`, `false`, `no` or `off` turns hosted mode on, and so does a secrets file that exists but does not parse (for example `hosted = True` with a capital T), because Streamlit only logs that error on the server.
+4. **Check the banner.** Open the deployed app and confirm that the "Public demo: synthetic data only" banner shows on the main page and at the top of the sidebar, and that the uploaders and folder fields are grayed out. If the banner is missing, hosted mode is off: fix the secret before you share the link.
+5. **Share the link** with `?demo=1` appended, for example `https://<your-app>.streamlit.app/?demo=1`.
+
+**Hosting it yourself** (a container or server where you control the start command): set `ECRF_HOSTED=1` and also start Streamlit with `--server.maxUploadSize 1` (or `STREAMLIT_SERVER_MAX_UPLOAD_SIZE=1`). In hosted mode the apps never read or process an uploaded file, but Streamlit's upload endpoint still keeps the bytes a crafted client sends, even to a disabled uploader, in server memory until the session expires; the 1 MB cap bounds that. Keep the cap out of `.streamlit/config.toml`, which local runs share.
+
+## Screenshots
+
+Local runs on the bundled synthetic data, opened with `?demo=1` and captured after **Execute**.
+
+![Coding app results table: each adverse-event verbatim with its top three candidate terms, ranks and 99-prefixed placeholder codes](docs/img/meddra_results.png)
+
+*Coding app: top three candidates per verbatim, with placeholder codes; the ranking comes from the `[SI]` lexical stand-in.*
+
+![PHI app results: flagged spans such as invented phone numbers, names, a ZIP code and initials, with entity type, offsets, redaction probability and action](docs/img/phi_results.png)
+
+*PHI app: one row per scrubbed span; every name and number shown is invented.*
+
+![Risk app results: per-subject safety and discontinuation scores and categories with contributing factors, the fatal subject pinned to the top](docs/img/risk_results.png)
+
+*Risk app: per-subject safety and discontinuation scores, sorted highest risk first, with the reasons for each.*
+
+![Anomaly app results: flagged per-subject numeric outliers, cohort-wide drift per column, and per-lab drift](docs/img/anomaly_results.png)
+
+*Anomaly app: flagged numeric outliers, cohort-wide drift per column and per-lab drift on the longitudinal demo.*
+
+## Landing page
+
+[`docs/index.html`](docs/index.html) is a one-page overview for GitHub Pages: the four apps, the screenshots, both decks, and a placeholder list for the demo URLs. It is not live until the repository owner enables Pages under **Settings > Pages > Deploy from a branch**, branch `main`, folder `/docs`. `docs/` also holds byte-identical copies of the two HTML decks so they render there; after editing a deck's HTML in `presentations/`, copy it into `docs/` too (QC check D1 fails otherwise).
 
 ## Using your own cut
 
@@ -108,10 +146,12 @@ run_risk.sh   / .bat     one-command launchers (same as above, risk app on port 
 run_anomaly.sh/ .bat     one-command launchers (same as above, anomaly app on port 8504)
 Launch *.command         macOS double-click launchers — Finder runs them in Terminal
 .streamlit/config.toml   disables Streamlit usage stats — nothing leaves the machine
+.github/workflows/qc.yml CI: runs tests/qc_test.py on every push and pull request, stand-in and optional-extras variants
 sample_data/             the one SYNTHETIC cut the coding/PHI/risk apps read (+ generate.py to regenerate ae/lb/eg/vs/pe)
 anomaly_data/            the anomaly app's own SYNTHETIC longitudinal demo (labs.csv + generate.py)
 presentations/           Deck A (conceptual) and Deck B (implementation walkthrough), MD + HTML
+docs/                    GitHub Pages landing page (index.html), byte-identical copies of the two HTML decks, screenshots (img/), .nojekyll
 USER_GUIDE.md            step-by-step instruction manual for running all four apps
-tests/qc_test.py         portable end-to-end test harness (87 checks; `python tests/qc_test.py`)
+tests/qc_test.py         portable end-to-end test harness (247 checks with the optional extras, 244 with requirements.txt only; `python tests/qc_test.py`)
 QC_REPORT.md             what was tested, what bugs were found and fixed, how to re-run the tests
 ```

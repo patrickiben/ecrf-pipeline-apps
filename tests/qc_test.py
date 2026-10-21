@@ -14,6 +14,9 @@ SAMPLE = os.path.join(APP_DIR, "sample_data")
 SCRATCH = tempfile.mkdtemp(prefix="qc_out_")
 
 from streamlit.testing.v1 import AppTest
+from streamlit import config as _stcfg
+# the stock error-detail option, read before ANY app runs: hosted mode changes it process-wide (H18)
+_ERR0 = _stcfg.get_option("client.showErrorDetails")
 
 PASS, FAIL = [], []
 def check(name, cond, detail=""):
@@ -450,6 +453,497 @@ if anomm is not None:
     inj = {"SUBJ-A003", "SUBJ-A017", "SUBJ-A029"}
     top6 = set(anomm.sort_values("anomaly_score", ascending=False).head(6)["USUBJID"])
     check("A20b mixed upload: 3 injected numeric outliers still flagged in top-6", inj <= top6, sorted(inj & top6))
+
+# ---------------------------------------------------------------- hosted-demo safety mode (H-checks)
+# Every app has a hosted mode (ECRF_HOSTED=1, or the Streamlit secret hosted = true; see _hosted() in each
+# app) that locks every data input to the bundled synthetic cut, writes outputs to a per-session server
+# temp folder and shows a banner. Per app (HM coding, HP PHI, HR risk, HA anomaly; the b/c-suffixed checks
+# are coding-app extras for its dictionary inputs):
+#   1-3   the LOCAL default is unchanged (no banner, every input live, audit records hosted_mode false)
+#   4-11  the hosted view end-to-end (banner, nothing enabled that brings data in, sample cut, run, audit)
+#   12-16 a crafted client: widget values are forged by assigning _value/_files directly, which skips
+#         AppTest's own disabled guard. Recent Streamlit releases (1.66.1, for one) discard values sent for a
+#         disabled widget on the server, so 12-13 test that stock path (the disabled flag with the app's
+#         override behind it; only both missing at once fails them), and 14-16 repeat the forgery with that
+#         server-side drop switched off (as on a release that trusted the client), so there the app's own
+#         overrides are the only defense. HX1 proves a forged value then really reaches a disabled widget,
+#         so 14-16 cannot pass vacuously.
+#   17    the Output folder is a per-session temp folder: stable across reruns, new for each session.
+#   18    hosted mode redacts uncaught-error details (client.showErrorDetails none); a local run leaves it.
+#   19    the banners still show when the artifact guard's st.stop() cuts the page short.
+#   20    the per-session temp folder is deleted once the session is discarded (no /tmp growth).
+#   21    source order (read from the file, since a misplaced line has no runtime symptom on 1.66.1):
+#         set_page_config, then HOSTED = _hosted() on the next line, then the main banner, then the sidebar
+#         banner as the first sidebar call right before the "📂 1." header, all above every st.stop().
+# The switch itself (fail closed: see _hosted() in each app): HS1-HS32 inject secret values through
+# AppTest (bool and string forms, and a secrets file with an unrelated key only); HE1-HE8 try other
+# ECRF_HOSTED spellings; HF1-HF20 run Streamlit's REAL secrets loader on scratch secrets.toml files,
+# malformed ones included, and the ECRF_HOSTED secret that Streamlit copies over the host's own value.
+# Every block removes ECRF_HOSTED (and restores the server-side drop, the secrets store and the error
+# option) in a finally, and a block that raises is recorded as a FAIL instead of aborting, so later
+# checks still run locally. The apps' temp folders land under SCRATCH (tempfile.tempdir points there for
+# this section).
+import uuid, dataclasses, gc
+import streamlit as _st
+from streamlit.runtime.secrets import Secrets
+from streamlit.runtime.state.session_state import SessionState
+HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real patient data. "
+                 "Run locally for real data.")
+_SEC0, _SECFILES0 = _st.secrets, _stcfg.get_option("secrets.files")
+_REG_WIDGET = getattr(SessionState, "register_widget", None)
+def _trust_client(on):
+    """on=True: hand register_widget the widget metadata with disabled=False, so Streamlit KEEPS a value a
+    client sent for a disabled widget (a release without the server-side drop); the app's own
+    'if HOSTED: x = ...' overrides are then the only defense. on=False restores the stock method. If a
+    future Streamlit moves this internal hook, the patch is skipped and HX1 fails loudly (never a silent pass)."""
+    if _REG_WIDGET is None: return
+    if not on: SessionState.register_widget = _REG_WIDGET; return
+    def _reg(self, metadata, *a, **k):
+        if dataclasses.is_dataclass(metadata) and getattr(metadata, "disabled", False):
+            metadata = dataclasses.replace(metadata, disabled=False)
+        return _REG_WIDGET(self, metadata, *a, **k)
+    SessionState.register_widget = _reg
+def _dis(w): return bool(getattr(w.proto, "disabled", False))
+def _banners(blk): return [w for w in blk.warning if w.value == HOSTED_BANNER]
+def _opt(at, kind, label): return next((w for w in getattr(at, kind) if w.label == label), None)
+def _forge_text(at, label, v): find(at, "text_input", label)._value = v      # bypasses _assert_can_interact
+def _forge_files(w, name, content): w._files = [(str(uuid.uuid4()), name, content, "text/csv")]   # (file_id, name, bytes, mime)
+def _md(at): return "\n".join(m.value for m in at.markdown)
+def _stems(folder):
+    return {re.sub(r"[_.].*$","",f.lower()) for f in os.listdir(folder) if f.lower().endswith(".csv") and "meddra" not in f.lower()}
+def _loaded(at):
+    """Every domain/file name the app reports as loaded: the pre-flight 'Domains loaded' table plus the
+    coding/PHI selector options ('{domain} :: col' / '{domain}::col'), which list a domain even when the
+    table is not drawn (e.g. a cut without a dictionary)."""
+    s=set()
+    for d in at.dataframe:
+        v=d.value; cols=set(getattr(v,"columns",[]))
+        if {"domain","size"} <= cols or {"file","rows"} <= cols:
+            for c in ("domain","file"):
+                if c in cols: s |= {str(x).lower() for x in v[c]}
+    for w in list(at.selectbox)+list(at.multiselect):
+        s |= {re.split(r"\s*::", str(o))[0].strip().lower() for o in (w.options or [])}
+    return s
+def _audit(d):
+    p = os.path.join(d,"audit_log.csv") if d else ""
+    return pd.read_csv(p) if p and os.path.exists(p) else None
+def _hm_ok(aud, want):
+    """hosted_mode == want, compared as a lowercase string (pandas parses true/false as bool), and placed
+    right after timestamp as the spec says."""
+    if aud is None or "hosted_mode" not in aud.columns or "timestamp" not in aud.columns: return False
+    cols=list(aud.columns)
+    return str(aud.iloc[0]["hosted_mode"]).strip().lower()==want and cols.index("hosted_mode")==cols.index("timestamp")+1
+def _hm_detail(aud): return None if aud is None else (list(aud.columns)[:4], aud.iloc[0].get("hosted_mode"))
+
+# Decoys under SCRATCH: a complete alternative cut (and a longitudinal one for the anomaly app), a models
+# dir holding every guarded artifact name (it would trip _guard_artifacts if a forged path got through),
+# and the redirected temp root the apps' per-session Output folders are made in.
+HDECOY = os.path.join(SCRATCH,"hosted_decoy"); shutil.rmtree(HDECOY, ignore_errors=True)
+for _sub,_src in (("cut",os.path.join(SAMPLE,"ae.csv")),("labs",os.path.join(ANOM,"labs.csv"))):
+    os.makedirs(os.path.join(HDECOY,_sub)); shutil.copy(_src, os.path.join(HDECOY,_sub,"decoyfolder.csv"))
+shutil.copy(os.path.join(SAMPLE,"meddra_demo.csv"), os.path.join(HDECOY,"cut"))
+os.makedirs(os.path.join(HDECOY,"models"))
+for _art in ("meddra_coder.json","needle3.onnx","laya.onnx","phi_token_classifier.json","risk_model.json","anomaly_model.json"):
+    open(os.path.join(HDECOY,"models",_art),"w").close()
+HTMP = os.path.join(SCRATCH,"hosted_tmp"); os.makedirs(HTMP, exist_ok=True)
+SRC_AE = os.path.join(SAMPLE,"ae.csv"); SRC_LABS = os.path.join(ANOM,"labs.csv")
+ASC_RADIO = "ASCII release (llt/pt/hlt/hlgt/soc.asc)"
+ASC_LABEL = "Folder with llt.asc / pt.asc / hlt.asc / hlgt.asc / soc.asc"
+DICT_UP = "Upload flattened MedDRA CSV"
+HAPPS = [
+    dict(c="M", app="coding", file="meddra_app.py", folder="Cut folder path (domain CSVs)",
+         up="...or upload domain files (CSV or SAS .sas7bdat)", models="Models dir (optional real weights)",
+         btn="🚀 Execute MedDRA Auto-Coding", out="meddra_output", sample=SAMPLE, local_run=out1,
+         decoy="cut", src=SRC_AE, pre="verbatim selector = 'ae :: AETERM'"),
+    dict(c="P", app="PHI", file="phi_app.py", folder="Cut folder path (domain CSVs)",
+         up="...or upload domain files (CSV or SAS .sas7bdat)", models="Models dir (optional real weights)",
+         btn="🚀 Execute PII/PHI Flagging", out="phi_output", sample=SAMPLE, local_run=outp,
+         decoy="cut", src=SRC_AE, pre="PHI scan set = expected_scan(sample)"),
+    dict(c="R", app="risk", file="risk_app.py", folder="Cut folder path (safety domains)",
+         up="...or upload safety files (CSV or SAS .sas7bdat)", models="Models dir (optional real model)",
+         btn="🚀 Execute Risk Scoring", out="risk_output", sample=SAMPLE, local_run=outr1,
+         decoy="cut", src=SRC_AE, pre="pre-flight classifies ae/lb/eg/vs/pe"),
+    dict(c="A", app="anomaly", file="anomaly_app.py", folder="Cut folder path (CSV or SAS .sas7bdat)",
+         up="...or upload files (CSV or SAS .sas7bdat)", models="Models dir (optional real model)",
+         btn="🚀 Execute Anomaly & Drift Detection", out="anomaly_output", sample=ANOM, local_run=outa1,
+         decoy="labs", src=SRC_LABS, pre="pre-flight detects VISITNUM + ALT"),
+]
+def _preflight(c, at):
+    """App-specific proof that the bundled sample cut loaded: (ok, detail)."""
+    if c=="M":
+        v=find(at,"selectbox","Verbatim source column (this program reads ONLY this)").value; return v=="ae :: AETERM", v
+    if c=="P":
+        v=set(find(at,"multiselect","Columns to scan for PHI (this program reads ONLY these)").value); e=expected_scan(SAMPLE)
+        return v==e, sorted(v ^ e)
+    if c=="R":
+        pre=next((d.value for d in at.dataframe if {"file","domain","rows"} <= set(getattr(d.value,"columns",[]))), None)
+        return pre is not None and {"ae","lb","eg","vs","pe"} <= set(pre["domain"]), list(getattr(pre,"domain",[]))
+    # the pre-flight lines themselves: the How-to-use text also mentions VISITNUM, so a bare substring
+    # test would pass without the cut
+    ms=[m.value for m in at.markdown]; i=ms.index("**Measurable numeric columns**") if "**Measurable numeric columns**" in ms else -1
+    nums=ms[i+1].split(", ") if 0 <= i < len(ms)-1 else []
+    return any(m.startswith("Time/visit column → **VISITNUM**") for m in ms) and "ALT" in nums, (nums, [m for m in ms if m.startswith("Time/visit")])
+def _view(at, A):
+    """('hosted' | 'local' | 'error' | 'mixed', detail) for one finished run. hosted = both banners, every
+    uploader and the folder disabled, the folder pinned to the sample cut; local = no banner, uploaders and
+    folder enabled, folder empty (the untouched default)."""
+    ups=list(at.file_uploader); fo=find(at,"text_input",A["folder"])
+    d=dict(exc=[str(e.value)[:80] for e in at.exception], banners=(len(_banners(at.main)),len(_banners(at.sidebar))),
+           ups=[_dis(u) for u in ups], folder=(fo.value,_dis(fo)))
+    if at.exception: return "error", d
+    if (len(_banners(at.main))==1 and len(_banners(at.sidebar))==1 and ups and all(_dis(u) for u in ups) and _dis(fo)
+            and os.path.realpath(fo.value or "")==os.path.realpath(A["sample"])): return "hosted", d
+    if not _banners(at) and ups and not any(_dis(u) for u in ups) and not _dis(fo) and fo.value=="": return "local", d
+    return "mixed", d
+def _order(path):
+    """(ok, detail): the spec's placement rules, read from the source (comments stripped; none of the
+    lines tested holds a '#' inside a string)."""
+    L=[l.split("#",1)[0] for l in open(path, encoding="utf-8").read().splitlines()]
+    def first(s, start=0): return next((i for i in range(start, len(L)) if s in L[i]), -1)
+    cfg=first("st.set_page_config("); h=first("HOSTED = _hosted()"); mb=first('if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")')
+    sb=first('if HOSTED: st.sidebar.warning(HOSTED_BANNER, icon="🔒")'); s1=first("st.sidebar.", max(cfg,0))
+    guard=first("_guard_artifacts(models_dir)", max(cfg,0)+1)          # the call (the def sits above the UI)
+    stops=[i for i in range(max(cfg,0), len(L)) if "st.stop()" in L[i]]
+    nxt=next((L[i].strip() for i in range(sb+1, len(L)) if L[i].strip()), "") if sb >= 0 else ""
+    ok=(cfg >= 0 and h==cfg+1 and cfg < mb < sb < guard and s1==sb and nxt.startswith('st.sidebar.header("📂 1.')
+        and len(stops) >= 1 and all(sb < s for s in stops))
+    return ok, dict(set_page_config=cfg, HOSTED=h, main_banner=mb, sidebar_banner=sb, first_sidebar=s1, guard=guard, stops=stops, after_sidebar_banner=nxt[:40])
+def _real_secrets(body, sp, host_env=None):
+    """Point Streamlit's REAL secrets loader at secrets file `sp` holding `body`, the way a fresh server sees
+    it: a new secrets store (file watchers off), the host's ECRF_HOSTED (None: unset), and the server's own
+    start-up load done first, which is when Streamlit copies root-level secrets into os.environ. Returns
+    what that load reported; _restore_secrets() undoes all of it."""
+    with open(sp,"w") as f: f.write(body)
+    os.environ.pop("ECRF_HOSTED", None)
+    if host_env is not None: os.environ["ECRF_HOSTED"]=host_env
+    _stcfg.set_option("secrets.files", [sp]); sec=Secrets(); sec._file_watchers_installed=True; _st.secrets=sec
+    return sec.load_if_toml_exists()
+def _restore_secrets():
+    try: _st.secrets._reset()            # drops what the load copied into os.environ
+    except Exception: pass
+    _st.secrets=_SEC0; _stcfg.set_option("secrets.files", _SECFILES0)
+    for k in ("ECRF_HOSTED","some_api_key","hosted"): os.environ.pop(k, None)
+GUARD_ARTS = ("meddra_coder.json","needle3.onnx","laya.onnx","phi_token_classifier.json","risk_model.json","anomaly_model.json")
+
+_saved_tmp = tempfile.tempdir; tempfile.tempdir = HTMP
+try:
+    # HX1: the forgery harness itself. A throwaway app with a disabled text_input + file_uploader echoes
+    # what it received; with the server-side drop off, the forged values must come through.
+    _CTRL = ('import streamlit as st\n'
+             't = st.text_input("t", "safe", disabled=True)\n'
+             'u = st.file_uploader("u", accept_multiple_files=True, disabled=True)\n'
+             'st.write(f"t={t} u={len(u or [])}")\n')
+    mdx = ""
+    _trust_client(True)
+    try:
+        ax = AppTest.from_string(_CTRL, default_timeout=120); ax.run()
+        find(ax,"text_input","t")._value = "forged"; _forge_files(find(ax,"file_uploader","u"), "x.csv", b"a\n1\n"); ax.run()
+        mdx = _md(ax)
+    except Exception as e: mdx = "raised: "+repr(e)
+    finally: _trust_client(False)
+    check("HX1 control: with the server-side drop off, a forged value reaches a disabled text_input + file_uploader", "t=forged u=1" in mdx, mdx)
+
+    for A in HAPPS:
+        c=A["c"]; P=f"H{c}"; path=os.path.join(APP_DIR,A["file"]); exp=_stems(A["sample"])
+        dsrc=open(A["src"],"rb").read(); want_ups={A["up"]} | ({DICT_UP} if c=="M" else set())
+        # ---- 1-3: local default (nothing set) must look exactly as before ----
+        os.environ.pop("ECRF_HOSTED", None); _stcfg.set_option("client.showErrorDetails", _ERR0); err_l=err_h=None
+        try:
+            al = AppTest.from_file(path, default_timeout=120); al.run(); err_l=_stcfg.get_option("client.showErrorDetails")
+            ups=list(al.file_uploader); box=find(al,"checkbox","Use the bundled synthetic sample data")
+            fo=find(al,"text_input",A["folder"]); od=find(al,"text_input","Output folder"); mdl=find(al,"text_input",A["models"])
+            check(f"{P}1 local default unchanged: no banner, sample box unticked, folder empty, every uploader and path input enabled",
+                  not al.exception and not _banners(al) and box.value is False and not _dis(box) and fo.value=="" and not _dis(fo)
+                  and want_ups <= {u.label for u in ups} and not any(_dis(u) for u in ups)
+                  and od.value==A["out"] and not _dis(od) and mdl.value=="models" and not _dis(mdl),
+                  dict(exc=[str(e.value)[:80] for e in al.exception], banner=len(_banners(al)), box=(box.value,_dis(box)), folder=(fo.value,_dis(fo)),
+                       ups=[(u.label,_dis(u)) for u in ups], out=(od.value,_dis(od)), models=(mdl.value,_dis(mdl))))
+            ad = AppTest.from_file(path, default_timeout=120); ad.query_params["demo"]="1"; ad.run()
+            fo=find(ad,"text_input",A["folder"]); box=find(ad,"checkbox","Use the bundled synthetic sample data")
+            check(f"{P}2 local ?demo=1 fills the folder with the sample path (no banner, inputs still editable)",
+                  not ad.exception and not _banners(ad) and os.path.realpath(fo.value or "")==os.path.realpath(A["sample"])
+                  and box.value is True and not _dis(box) and not _dis(fo), (fo.value, _dis(fo), box.value))
+            aud=_audit(A["local_run"])
+            check(f"{P}3 local audit (earlier local run in this harness) records hosted_mode false, right after timestamp", _hm_ok(aud,"false"), _hm_detail(aud))
+        except Exception as e: check(f"{P} local block raised", False, repr(e))
+
+        # ---- 4-11: hosted view end-to-end ----
+        hout=out_v=out_after=fout=None
+        os.environ["ECRF_HOSTED"]="1"
+        try:
+            ah = AppTest.from_file(path, default_timeout=120); ah.run(); err_h=_stcfg.get_option("client.showErrorDetails")
+            check(f"{P}4 hosted: no exception on load", not ah.exception, [str(e.value)[:200] for e in ah.exception])
+            side0 = ah.sidebar.children.get(0)
+            check(f"{P}5 hosted: exact banner on the main page and as the first sidebar element",
+                  len(_banners(ah.main))==1 and getattr(side0,"value",None)==HOSTED_BANNER and all(w.icon=="🔒" for w in _banners(ah)),
+                  [w.value for w in ah.warning])
+            ups=list(ah.file_uploader)
+            check(f"{P}6 hosted: no file_uploader enabled ({'domain + dictionary' if c=='M' else 'domain'} uploader present, disabled)",
+                  want_ups <= {u.label for u in ups} and all(_dis(u) for u in ups), [(u.label,_dis(u)) for u in ups])
+            box=find(ah,"checkbox","Use the bundled synthetic sample data"); fo=find(ah,"text_input",A["folder"])
+            od=find(ah,"text_input","Output folder"); mdl=find(ah,"text_input",A["models"])
+            check(f"{P}7 hosted: folder path, models dir and Output folder disabled; sample box locked on",
+                  _dis(fo) and _dis(mdl) and _dis(od) and box.value is True and _dis(box),
+                  dict(folder=_dis(fo), models=_dis(mdl), out=_dis(od), box=(box.value,_dis(box))))
+            check(f"{P}8 hosted: folder value is the bundled sample folder ({os.path.basename(A['sample'])}), models dir 'models'",
+                  os.path.realpath(fo.value or "")==os.path.realpath(A["sample"]) and mdl.value=="models", (fo.value, mdl.value))
+            ok,det=_preflight(c, ah); t=_loaded(ah)
+            check(f"{P}9 hosted: the sample cut loads ({A['pre']})", ok and exp <= t, (det, sorted(t)))
+            if c=="M": check("HM9b hosted: dictionary label names the bundled meddra_demo.csv", "meddra_demo.csv" in _md(ah), _md(ah)[:300])
+            hout = ah.session_state["_hosted_out"] if "_hosted_out" in ah.session_state else None; out_v = od.value
+            b=_opt(ah,"button",A["btn"])
+            if b is not None and not b.disabled: b.set_value(True).run()
+            check(f"{P}10 hosted: execute OK and the banner is still shown after the run",
+                  b is not None and not b.disabled and not ah.exception and len(_banners(ah.main))==1 and len(_banners(ah.sidebar))==1,
+                  dict(button=None if b is None else b.disabled, exc=[str(e.value)[:150] for e in ah.exception], banners=len(_banners(ah))))
+            out_after = find(ah,"text_input","Output folder").value; aud=_audit(out_after)
+            check(f"{P}11 hosted: audit_log.csv in the disabled temp Output folder records hosted_mode true", _hm_ok(aud,"true"), (out_after, _hm_detail(aud)))
+            if c=="M":
+                # the radio stays live in hosted mode; the .asc input it reveals must still be locked
+                find(ah,"radio","Source shape").set_value(ASC_RADIO).run()
+                asc=_opt(ah,"text_input",ASC_LABEL); mdm=_md(ah)
+                check("HM11b hosted: ASCII radio reveals a disabled .asc folder input, dictionary stays meddra_demo.csv",
+                      not ah.exception and asc is not None and _dis(asc) and "meddra_demo.csv" in mdm and all(_dis(u) for u in ah.file_uploader),
+                      (None if asc is None else _dis(asc), mdm[:200]))
+        except Exception as e: check(f"{P} hosted block raised", False, repr(e))
+        finally: os.environ.pop("ECRF_HOSTED", None); _stcfg.set_option("client.showErrorDetails", _ERR0)
+        check(f"{P}18 hosted: uncaught errors show no details (client.showErrorDetails none); a local run leaves the option as it was",
+              err_l==_ERR0 and err_h=="none", dict(stock=_ERR0, local=err_l, hosted=err_h))
+
+        # ---- 12-16: crafted client (stock Streamlit first, then with the server-side drop off) ----
+        dout=os.path.join(HDECOY,f"out_{c}"); shutil.rmtree(dout, ignore_errors=True)
+        os.environ["ECRF_HOSTED"]="1"
+        try:
+            af = AppTest.from_file(path, default_timeout=120); af.run()
+            def _forge(at):
+                _forge_text(at, A["folder"], os.path.join(HDECOY,A["decoy"]))
+                _forge_files(find(at,"file_uploader",A["up"]), "decoyupload.csv", dsrc)
+            _forge(af); af.run(); t=_loaded(af)
+            check(f"{P}12 crafted client, stock Streamlit (disabled flag plus app override, AppTest guard bypassed): forged folder value dropped, only the sample loads",
+                  not af.exception and exp <= t and "decoyfolder" not in t, sorted(t))
+            check(f"{P}13 crafted client, stock Streamlit (disabled flag plus app override, AppTest guard bypassed): forged domain upload dropped",
+                  not af.exception and exp <= t and "decoyupload" not in t, sorted(t))
+            _trust_client(True)
+            _forge(af)   # the tree is rebuilt on every run, so forge the new widgets
+            find(af,"checkbox","Use the bundled synthetic sample data")._value = False
+            if c=="M": _forge_files(find(af,"file_uploader",DICT_UP), "decoydict.csv", b"llt_name,pt_name\nHeadache,Headache\n")
+            _forge_text(af,"Output folder",dout)
+            af.run(); t=_loaded(af)
+            # the unticked box alone, in a fresh session: the folder override hides a missing box override from
+            # the data, but not from the folder field, whose default would flip to "" (shown empty, sample loaded)
+            ab = AppTest.from_file(path, default_timeout=120); ab.run()
+            find(ab,"checkbox","Use the bundled synthetic sample data")._value = False; ab.run()
+            fo14 = find(ab,"text_input",A["folder"]).value; ab = None
+            check(f"{P}14 crafted client, server-side drop off: forged folder value and unticked sample box ignored (the box alone leaves the folder field on the sample)",
+                  not af.exception and exp <= t and "decoyfolder" not in t and os.path.realpath(fo14 or "")==os.path.realpath(A["sample"]), (sorted(t), fo14))
+            check(f"{P}15 crafted client, server-side drop off: forged domain upload ignored",
+                  not af.exception and exp <= t and "decoyupload" not in t, sorted(t))
+            if c=="M":
+                mdm=_md(af)
+                check("HM15b crafted client, server-side drop off: forged dictionary upload ignored (meddra_demo.csv kept)",
+                      "meddra_demo.csv" in mdm and "uploaded flattened CSV" not in mdm, mdm[:300])
+            fout = af.session_state["_hosted_out"] if "_hosted_out" in af.session_state else None
+            b=_opt(af,"button",A["btn"])
+            if b is not None and not b.disabled: b.set_value(True).run()
+            ran = b is not None and not b.disabled and not af.exception; aud=_audit(fout)
+            if c=="M":
+                find(af,"radio","Source shape").set_value(ASC_RADIO).run()
+                _forge_text(af, ASC_LABEL, os.path.join(ascdir,"meddra")); af.run(); mdm=_md(af)   # a real .asc release (M19)
+                check("HM15c crafted client, server-side drop off: forged .asc folder ignored (meddra_demo.csv kept)",
+                      not af.exception and "meddra_demo.csv" in mdm and ".asc release @" not in mdm, mdm[:300])
+            # the models dir is forged LAST: if it got through, the artifact guard stops every later rerun
+            _forge_text(af, A["models"], os.path.join(HDECOY,"models")); af.run()
+            guard = [e.value for e in af.error if "present but" in e.value]
+            check(f"{P}16 crafted client, server-side drop off: forged Output folder + models dir ignored (outputs only in the session temp folder)",
+                  ran and not guard and not af.exception and not os.path.exists(dout)
+                  and _hm_ok(aud,"true") and "decoy" not in aud.to_csv(index=False).lower(),
+                  dict(ran=ran, guard=guard, wrote_decoy=os.path.exists(dout), audit=_hm_detail(aud)))
+        except Exception as e: check(f"{P} crafted-client block raised", False, repr(e))
+        finally:
+            _trust_client(False); os.environ.pop("ECRF_HOSTED", None); _stcfg.set_option("client.showErrorDetails", _ERR0)
+        check(f"{P}17 hosted: Output folder is a per-session server temp folder (stable across reruns, new per session)",
+              hout is not None and fout is not None and out_v==hout==out_after and fout!=hout and os.path.isdir(hout)
+              and os.path.dirname(hout)==HTMP and os.path.basename(hout).startswith(A["out"]+"_"), (out_v, hout, out_after, fout))
+
+        # ---- 19-20: the artifact guard's st.stop() keeps the banners; the temp folder goes with its session ----
+        gdir=os.path.join(HDECOY,f"guard_{c}"); os.makedirs(os.path.join(gdir,"models"), exist_ok=True); cwd0=os.getcwd()
+        for _art in GUARD_ARTS: open(os.path.join(gdir,"models",_art),"w").close()
+        os.environ["ECRF_HOSTED"]="1"
+        try:
+            os.chdir(gdir)   # hosted mode pins models_dir to the cwd-relative "models", here full of guarded artifacts
+            ag = AppTest.from_file(path, default_timeout=120); ag.run()
+            guard=[e.value for e in ag.error if "present but" in e.value]
+            check(f"{P}19 hosted: the artifact guard's st.stop() still leaves both banners on the page",
+                  bool(guard) and len(_banners(ag.main))==1 and len(_banners(ag.sidebar))==1,
+                  dict(guard=guard or "did not fire (is the runtime installed?)", banners=(len(_banners(ag.main)),len(_banners(ag.sidebar)))))
+            os.chdir(cwd0); ag=None
+            ac = AppTest.from_file(path, default_timeout=120); ac.run()
+            cout = ac.session_state["_hosted_out"] if "_hosted_out" in ac.session_state else None
+            cex = cout is not None and os.path.isdir(cout)
+            ac = None; gc.collect()   # what Streamlit does when it discards an expired session's state
+            check(f"{P}20 hosted: the per-session temp folder is deleted once the session is discarded",
+                  cex and not os.path.exists(cout), dict(folder=cout, existed=cex, after=cout is not None and os.path.exists(cout)))
+        except Exception as e: check(f"{P} guard/cleanup block raised", False, repr(e))
+        finally:
+            os.chdir(cwd0); os.environ.pop("ECRF_HOSTED", None); _stcfg.set_option("client.showErrorDetails", _ERR0)
+        ok,det=_order(path)
+        check(f"{P}21 source order: HOSTED right after set_page_config, both banners above every st.stop(), sidebar banner first", ok, det)
+
+    # ---- HS1-HS32: the Streamlit-secret switch, values injected through AppTest (env var unset) ----
+    # (value, tag, hosted expected); None = the secrets file holds only an unrelated key (AppTest swaps
+    # st.secrets in only when its dict is non-empty, so that case still exercises a loaded store).
+    HS_CASES = [(True,"true",True), (False,"false",False), ("true",'"true" (a string)',True), (" Yes ",'" Yes "',True),
+                ("on",'"on" (fails closed)',True), ("false",'"false" (a string)',False), ("0",'"0"',False),
+                (None,"absent (only an unrelated key in the file)",False)]
+    os.environ.pop("ECRF_HOSTED", None)
+    for i,(val,tag,want) in enumerate(HS_CASES):
+        for j,A in enumerate(HAPPS):
+            n=f"HS{i*len(HAPPS)+j+1} {A['app']} app: secret hosted = {tag} (env var unset)"
+            try:
+                s = AppTest.from_file(os.path.join(APP_DIR,A["file"]), default_timeout=120)
+                if val is None: s.secrets["some_api_key"]="x"
+                else: s.secrets["hosted"]=val
+                s.run(); v,d=_view(s,A)
+                if want: check(n+" shows the banner and disables every uploader", v=="hosted", (v,d))
+                else: check(n+" keeps local behavior (no banner, uploaders and folder enabled, folder empty)", v=="local", (v,d))
+            except Exception as e: check(n+" block raised", False, repr(e))
+            finally: os.environ.pop("ECRF_HOSTED", None); _stcfg.set_option("client.showErrorDetails", _ERR0)
+
+    # ---- HE1-HE8: other ECRF_HOSTED spellings. Anything but empty/0/false/no/off locks (fails closed). ----
+    k=0
+    for A in HAPPS:
+        for want,vals in (("hosted",[" True ","yes","on","2"]), ("local",["0"," false ","no","OFF"])):
+            k+=1; res=[]
+            for v in vals:
+                os.environ["ECRF_HOSTED"]=v
+                try: e=AppTest.from_file(os.path.join(APP_DIR,A["file"]), default_timeout=120); e.run(); res.append((v,)+_view(e,A))
+                except Exception as ex: res.append((v,"raised",repr(ex)))
+                finally: os.environ.pop("ECRF_HOSTED", None); _stcfg.set_option("client.showErrorDetails", _ERR0)
+            check(f"HE{k} {A['app']} app: ECRF_HOSTED = " + ", ".join(repr(v) for v in vals)
+                  + (" each lock the app (banner, inputs disabled)" if want=="hosted" else " each keep the local view"),
+                  all(r[1]==want for r in res), [r for r in res if r[1]!=want])
+
+    # ---- HF1-HF20: Streamlit's REAL secrets loader on scratch secrets.toml files ----
+    # (tag, file body, host ECRF_HOSTED, what the start-up load must report, hosted expected). The load
+    # result is asserted too, so a case cannot pass because the file was not what it claims to be.
+    HSEC=os.path.join(SCRATCH,"hosted_secrets"); os.makedirs(HSEC, exist_ok=True)
+    HF_CASES = [("'hosted = true' (valid)", "hosted = true\n", None, True, True),
+                ("'hosted = True' (capital T: does not parse)", "hosted = True\n", None, False, True),
+                ("'hosted = true' plus a bad line (does not parse)", "hosted = true\nAPI_KEY = abc\n", None, False, True),
+                ("an unrelated key only (valid)", 'some_api_key = "x"\n', None, True, False),
+                ("'ECRF_HOSTED = \"0\"', copied by Streamlit over the host's ECRF_HOSTED=1", 'ECRF_HOSTED = "0"\n', "1", True, True)]
+    k=0
+    for tag,body,henv,want_load,want in HF_CASES:
+        for A in HAPPS:
+            k+=1; n=(f"HF{k} {A['app']} app, real secrets loader, secrets.toml = {tag}: "
+                     + ("hosted view (banner, inputs locked)" if want else "local view"))
+            try:
+                loaded=_real_secrets(body, os.path.join(HSEC,f"secrets_{k}.toml"), henv); env1=os.environ.get("ECRF_HOSTED")
+                s = AppTest.from_file(os.path.join(APP_DIR,A["file"]), default_timeout=120); s.run(); v,d=_view(s,A)
+                check(n, loaded is want_load and (henv is None or env1=="0") and v==("hosted" if want else "local"),
+                      dict(loaded=loaded, env_after_load=env1, view=v, **d))
+            except Exception as e: check(n+" block raised", False, repr(e))
+            finally: _restore_secrets(); _stcfg.set_option("client.showErrorDetails", _ERR0)
+finally:
+    tempfile.tempdir = _saved_tmp; _trust_client(False); _restore_secrets(); os.environ.pop("ECRF_HOSTED", None)
+    _stcfg.set_option("client.showErrorDetails", _ERR0)
+
+# ---------------------------------------------------------------- docs / GitHub Pages (D-checks)
+# docs/ is served as-is by GitHub Pages (main branch, /docs; docs/.nojekyll turns Jekyll off). These checks
+# read files only, no app runs:
+#   D1  docs/ holds exactly the presentations/*.html decks (plus index.html), each a byte-identical copy, so
+#       a deck edit cannot silently drift from the Pages copy and no stale deck lingers there (fix: copy
+#       the edited deck into docs/, or delete the stray copy)
+#   D2  docs/index.html stays self-contained: no src/srcset/poster/data attribute, no href/xlink:href on a
+#       non-link tag (<link>, SVG <image>/<use>) and no <meta http-equiv=refresh> target points off-site
+#       (http:, https:, //), its CSS has no @import and no off-site url(), and no inline <script> names a
+#       URL. Plain <a>/<area> links (GitHub, Streamlit) are navigation, not resources, so they are allowed.
+#   D3  every LOCAL reference resolves on disk, against its file's folder: in README.md every Markdown link
+#       and image (inline and reference-style) and <img src>; in docs/index.html every href, src, srcset
+#       entry, poster, data, refresh target and CSS url(). Remote URLs (the CI badge), #anchors and
+#       mailto:/data: are skipped. Each file must hold at least one local reference, and every docs/img/
+#       file must be used by at least one of them, so the check cannot pass with nothing to check.
+from html.parser import HTMLParser
+from urllib.parse import unquote
+DOCS = os.path.join(APP_DIR,"docs"); PRES = os.path.join(APP_DIR,"presentations"); INDEX = os.path.join(DOCS,"index.html")
+def _offsite(v): v=(v or "").strip().lower(); return v.startswith(("http:","https:","//")) or "://" in v
+def _skip(v):
+    """True for a reference D3 does not resolve: empty, an #anchor, off-site, or any other URI scheme (mailto:, data:)."""
+    v=(v or "").strip(); return not v or v.startswith("#") or _offsite(v) or bool(re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", v))
+class _Refs(HTMLParser):
+    """Collects (tag, attr, value) for every attribute that loads a resource (res), every reference to check
+    on disk (refs: resources plus <a>/<area> links), the text of <style> blocks plus style="" attributes
+    (css, for the @import / url() test) and the text of inline <script> blocks (js)."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True); self.res=[]; self.refs=[]; self.css=[]; self.js=[]; self._in=None
+    def _attrs(self, tag, attrs):
+        a={k:(v or "") for k,v in attrs}
+        for k,v in a.items():
+            if k in ("src","srcset","poster","data") or (k in ("href","xlink:href") and tag not in ("a","area")): self.res.append((tag,k,v))
+            if k in ("src","poster","data","href","xlink:href"): self.refs.append(v)
+            if k=="srcset": self.refs += [(e.split() or [""])[0] for e in v.split(",")]   # "url 2x, url 3x"
+            if k=="style": self.css.append(v)
+        if tag=="meta" and a.get("http-equiv","").strip().lower()=="refresh":
+            m=re.search(r"url\s*=\s*['\"]?([^'\"\s;]+)", a.get("content",""), re.I)
+            if m: self.res.append((tag,"content",m.group(1))); self.refs.append(m.group(1))
+    def handle_starttag(self, tag, attrs):
+        self._attrs(tag, attrs)
+        if tag in ("style","script"): self._in=tag
+    def handle_startendtag(self, tag, attrs): self._attrs(tag, attrs)
+    def handle_endtag(self, tag):
+        if tag==self._in: self._in=None
+    def handle_data(self, data):
+        if self._in=="style": self.css.append(data)
+        elif self._in=="script": self.js.append(data)
+def _resolve(base_dir, r):
+    """A local reference -> its normalized path on disk (query/fragment stripped, %-escapes decoded)."""
+    return os.path.normpath(os.path.join(base_dir, unquote(re.split(r"[?#]", r.strip())[0])))
+def _local_missing(base_dir, refs):
+    """refs -> the local ones that do not exist (a file, or a folder such as sample_data/)."""
+    return [r for r in refs if not _skip(r) and not os.path.exists(_resolve(base_dir, r))]
+_CSS_URL = r"url\(\s*['\"]?([^'\")]+)"
+
+def _read(p):
+    with open(p,"rb") as f: return f.read()
+ix, ix_err = None, ""   # parsed docs/index.html, shared by D2 and D3 (None if it is missing or unreadable)
+try:
+    _p = _Refs(); _p.feed(_read(INDEX).decode("utf-8")); _p.close(); ix = _p
+except Exception as e: ix_err = repr(e)
+
+try:
+    decks = sorted(f for f in os.listdir(PRES) if f.lower().endswith(".html"))
+    drift = [f for f in decks if not os.path.isfile(os.path.join(DOCS,f)) or _read(os.path.join(DOCS,f))!=_read(os.path.join(PRES,f))]
+    stray = sorted(set(f for f in os.listdir(DOCS) if f.lower().endswith(".html") and f!="index.html") - set(decks))
+    check("D1 docs/ holds exactly the presentations/ decks, each a byte-identical copy", len(decks)>=1 and not drift and not stray,
+          dict(decks=decks, missing_or_drifted=drift, stray_in_docs=stray))
+except Exception as e: check("D1 docs deck copies block raised", False, repr(e))
+
+try:
+    if ix is None: raise RuntimeError("docs/index.html not parsed: " + ix_err)
+    # srcset holds "url 2x, url 3x": test the first token of every comma-separated entry
+    ext = [(t,k,v) for t,k,v in ix.res if any(_offsite((e.split() or [""])[0]) for e in v.split(","))]
+    css = " ".join(ix.css)
+    bad_css = re.findall(r"@import[^;]*", css, re.I) + [u for u in re.findall(_CSS_URL, css, re.I) if _offsite(u)]
+    bad_js = [j.strip()[:80] for j in ix.js if "://" in j]
+    check("D2 docs/index.html references no external script, stylesheet, font or image", not ext and not bad_css and not bad_js,
+          dict(external=ext, css=bad_css, inline_script=bad_js))
+except Exception as e: check("D2 docs/index.html block raised", False, repr(e))
+
+try:
+    if ix is None: raise RuntimeError("docs/index.html not parsed: " + ix_err)
+    rd = _read(os.path.join(APP_DIR,"README.md")).decode("utf-8")
+    rd_refs = (re.findall(r"\]\(\s*<?([^)\s>]+)", rd)                              # [text](..) and ![alt](..)
+               + re.findall(r"(?m)^ {0,3}\[[^\]]+\]:\s*<?([^\s>]+)", rd)            # [label]: target
+               + re.findall(r"<img\b[^>]*?\bsrc\s*=\s*[\"']([^\"']+)", rd, re.I))
+    ix_refs = ix.refs + re.findall(_CSS_URL, " ".join(ix.css), re.I)
+    miss = [("README.md",m) for m in _local_missing(APP_DIR, rd_refs)] + [("docs/index.html",m) for m in _local_missing(DOCS, ix_refs)]
+    nloc = dict(readme=sum(1 for r in rd_refs if not _skip(r)), index=sum(1 for r in ix_refs if not _skip(r)))
+    used = {_resolve(APP_DIR,r) for r in rd_refs if not _skip(r)} | {_resolve(DOCS,r) for r in ix_refs if not _skip(r)}
+    IMG = os.path.join(DOCS,"img")
+    unused = sorted(f for f in (os.listdir(IMG) if os.path.isdir(IMG) else []) if os.path.normpath(os.path.join(IMG,f)) not in used)
+    check("D3 every local link and image in README.md and docs/index.html exists on disk (and every docs/img/ file is used)",
+          not miss and nloc["readme"]>=1 and nloc["index"]>=1 and not unused, dict(local_refs=nloc, missing=miss, unused_images=unused))
+except Exception as e: check("D3 docs references block raised", False, repr(e))
 
 print("\n==== SUMMARY:", len(PASS), "passed,", len(FAIL), "failed ====")
 for n,d in FAIL: print("  FAILED:", n, "|", str(d)[:200])

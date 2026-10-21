@@ -17,6 +17,11 @@
 #     negation feature. The coding context output of Tier 3 here is an ambiguity
 #     scalar, not a negation probability; the gate is a single threshold on the
 #     re-rank score.
+#   * Hosted-demo safety mode: with ECRF_HOSTED=1 set (or the Streamlit secret
+#     hosted = true) every data input (uploaders, folder path, .asc folder,
+#     models dir) is locked to the bundled synthetic cut in sample_data/ and
+#     outputs go to a per-session temp folder. Nothing set means the normal local
+#     behavior. See _hosted().
 #
 # WHAT IT DOES, TIER BY TIER (the chain is the product; the weights are
 # swappable underneath it -- see the [SI]/[RM] discipline in the banner/audit):
@@ -52,7 +57,8 @@
 #              one fix vs the prior version; Python's built-in hash() is salted
 #              per-process, which made the stand-in non-reproducible across runs)
 #   os/re/time -> file walking, column-name normalization, latency measurement
-import hashlib, os, re, time, zlib
+#   tempfile -> per-session output folder in hosted-demo mode (see _hosted)
+import hashlib, os, re, tempfile, time, zlib
 import numpy as np, pandas as pd, streamlit as st
 
 # --------------------------------------------------------------------------- #
@@ -90,6 +96,50 @@ DEF_CODE_GATE = 0.88     # Tier-4 auto-commit gate (a validation-selected
 # vendor dump that spells it differently. Add to this list for a study with an
 # unusual header -- that is the ONLY place column naming is configured.
 AETERM_SYNONYMS = ["AETERM","VERBATIM","AE_TERM","REPORTED_TERM"]
+
+# --------------------------------------------------------------------------- #
+# Hosted-demo safety mode. ON when the environment variable ECRF_HOSTED=1 is set
+# or the Streamlit secret "hosted = true" exists (Streamlit Community Cloud: app
+# Settings > Secrets). A public demo must never take in real data, so in this
+# mode every input that could bring data in (the uploaders, the folder path, the
+# models dir and, in the coding app, the .asc folder) is DISABLED in the UI and
+# its value is also OVERWRITTEN in code: a disabled widget only stops the
+# browser, and a crafted client could still send a value, so it is never
+# trusted. The bundled synthetic cut is forced, outputs go to a per-session
+# server temp folder (never a path a visitor typed), a banner says so on every
+# rerun, and the audit records hosted_mode=true. With nothing set (the local
+# default) the app behaves exactly as before; the audit only gains
+# hosted_mode=false. Duplicated in each app on purpose (no shared module, same
+# rule as _have/_col).
+# The switch fails CLOSED. Any ECRF_HOSTED or hosted value other than empty, 0,
+# false, no or off turns it on (a typo such as "on" or hosted = 1.0 locks the
+# demo instead of opening it), and so does a secrets file that exists but does
+# not load (hosted = True with a capital T, a stray bad line): Streamlit only
+# logs that parse error on the server, so failing open would leave a public app
+# unlocked with nothing on the page to show it. The deploy step in README.md is
+# to open the app and confirm the banner.
+# --------------------------------------------------------------------------- #
+HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real patient data. "
+                 "Run locally for real data.")
+_HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
+def _hosted():
+    if os.environ.get("ECRF_HOSTED","").strip().lower() not in _HOSTED_OFF: return True
+    # load_if_toml_exists() is asked FIRST (it returns False rather than raising when no
+    # secrets file loads, the usual local case) because older Streamlit releases also draw
+    # an st.error box when st.secrets.get misses the file, which would change the local
+    # default view. The try/except covers any other loader failure.
+    try:
+        if st.secrets.load_if_toml_exists():
+            # Streamlit copies root-level secrets into os.environ OVER the host's own value,
+            # so an ECRF_HOSTED secret could quietly undo a host-set ECRF_HOSTED=1: the key
+            # being there at all counts as on.
+            if "ECRF_HOSTED" in st.secrets: return True
+            return str(st.secrets.get("hosted", "")).strip().lower() not in _HOSTED_OFF
+    except Exception: pass
+    # Nothing loaded: local mode ONLY when no secrets file or folder exists at all. One that
+    # exists but did not load fails closed (banner shown, inputs locked) instead of open.
+    try: return any(os.path.exists(p) for p in st.get_option("secrets.files"))
+    except Exception: return True
 
 # ============================ IMPORT LAYER ============================
 # The ONLY place this program touches the outside world. It reads (a) domain
@@ -574,9 +624,15 @@ def _guard_artifacts(models_dir):
 # contract BEFORE any compute, so a mis-pointed folder or a wrong verbatim column
 # is caught on screen, not after a silent wrong answer.
 st.set_page_config(page_title="MedDRA Auto-Coding Engine", layout="wide")
+HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
+# Hosted: an uncaught exception shows a generic message, not a traceback with server
+# paths (a crafted widget value can raise one). Process-wide, like the switch itself.
+if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("🏷 MedDRA Auto-Coding Engine")
 st.caption("Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · "
            "codes verbatim AETERM only · air-gapped · no sample data in this file")
+# Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
+if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
 # Built-in, app-specific instruction manual (from USER_GUIDE.md §3), rendered as a
 # collapsible panel so the working view stays clean but help is one click away.
@@ -628,43 +684,66 @@ with st.expander("📖 How to use this app"):
 
 # ---- sidebar 1: WHERE the data is. Folder path AND/OR uploads are additive;
 #      a meddra*.csv in the folder is treated as the dictionary, not a domain. ----
+if HOSTED: st.sidebar.warning(HOSTED_BANNER, icon="🔒")
 st.sidebar.header("📂 1. Point this at your data")
 _SAMPLE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample_data")
 # Demo toggle: off by default; a link ending in ?demo=1 (e.g. a hosted demo) starts it on.
+# Hosted mode: each data input below is disabled AND its value overwritten right after
+# the widget (sample forced on, folder pinned to sample_data/, no uploads), because a
+# disabled widget only stops the browser; a crafted client could still send a value.
 _use_sample = st.sidebar.checkbox("Use the bundled synthetic sample data",
-    value=(st.query_params.get("demo") == "1"),
+    value=(HOSTED or st.query_params.get("demo") == "1"), disabled=HOSTED,
     help="Fills the folder path with the synthetic demo cut shipped in ./sample_data/ (no real patients or licensed dictionary).")
-folder = st.sidebar.text_input("Cut folder path (domain CSVs)", value=(_SAMPLE_DIR if _use_sample else ""),
+if HOSTED: _use_sample = True
+folder = st.sidebar.text_input("Cut folder path (domain CSVs)", value=(_SAMPLE_DIR if _use_sample else ""), disabled=HOSTED,
     help="Path to a folder of domain CSVs. Every *.csv here EXCEPT one named "
          "*meddra* is loaded as a domain; the verbatim column is found by synonym "
          "inside whatever loaded, not by file name. Leave blank to use uploads.")
+if HOSTED: folder = _SAMPLE_DIR            # never trust a client-sent value in hosted mode
 up_dom = st.sidebar.file_uploader("...or upload domain files (CSV or SAS .sas7bdat)",
-    type=["csv","sas7bdat"], accept_multiple_files=True)
+    type=["csv","sas7bdat"], accept_multiple_files=True, disabled=HOSTED)
+if HOSTED: up_dom = None
 # The dictionary shape is an explicit radio so the operator states intent rather
 # than the app guessing between a flat CSV and an .asc release.
 st.sidebar.markdown("**MedDRA dictionary** — provide exactly one shape:")
 kind = st.sidebar.radio("Source shape", ["Flattened CSV (recommended)","ASCII release (llt/pt/hlt/hlgt/soc.asc)"])
 up_med=None; asc_dir=""
+# Hosted mode: the radio stays live, but both dictionary inputs are disabled and
+# blanked in code, so resolve_meddra falls back to the meddra_demo.csv it
+# auto-finds in the forced sample folder.
 if kind.startswith("Flattened"):
-    up_med = st.sidebar.file_uploader("Upload flattened MedDRA CSV", type="csv",
+    up_med = st.sidebar.file_uploader("Upload flattened MedDRA CSV", type="csv", disabled=HOSTED,
         help="Needs an LLT-name + PT-name column; llt_code/pt_code/soc_name detected "
              "by synonym. A meddra*.csv in the cut folder is also auto-found.")
+    if HOSTED: up_med = None
 else:
-    asc_dir = st.sidebar.text_input("Folder with llt.asc / pt.asc / hlt.asc / hlgt.asc / soc.asc",
+    asc_dir = st.sidebar.text_input("Folder with llt.asc / pt.asc / hlt.asc / hlgt.asc / soc.asc", disabled=HOSTED,
         help="Pipe-delimited release; filtered to currency=='Y', joined "
              "LLT→PT→HLT→HLGT→SOC. The hlt/hlgt files are optional -- if absent, "
              "those levels simply do not appear on the candidates.")
+    if HOSTED: asc_dir = ""
 
 # ---- sidebar 2: the operating point + where outputs land + optional weights. ----
 st.sidebar.markdown("---"); st.sidebar.header("⚖ 2. Operating point")
 code_gate = st.sidebar.slider("Auto-commit gate",0.70,0.98,DEF_CODE_GATE,0.01,
     help="Tier-4 threshold. A reviewer-set operating point; the value in force is "
          "written to the audit with the run, so a run is reproducible from its audit.")
-out_dir = st.sidebar.text_input("Output folder","meddra_output",
+# Hosted mode: outputs go to a server temp folder made ONCE per browser session
+# (kept in session_state so reruns reuse it), and the models dir is pinned to its
+# default "models"; neither path ever comes from a visitor.
+# A TemporaryDirectory (not a bare mkdtemp) is kept in session_state, so the folder
+# is deleted when Streamlit discards the expired session (and at exit) instead of
+# piling up in /tmp, one per page view.
+if HOSTED and "_hosted_out" not in st.session_state:
+    st.session_state["_hosted_tmp"] = tempfile.TemporaryDirectory(prefix="meddra_output_", ignore_cleanup_errors=True)
+    st.session_state["_hosted_out"] = st.session_state["_hosted_tmp"].name
+out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"] if HOSTED else "meddra_output"), disabled=HOSTED,
     help="Where ae_coded.csv + audit_log.csv are written on Run (also offered as downloads).")
-models_dir = st.sidebar.text_input("Models dir (optional real weights)","models",
+if HOSTED: out_dir = st.session_state["_hosted_out"]
+models_dir = st.sidebar.text_input("Models dir (optional real weights)","models", disabled=HOSTED,
     help="If a trained artifact is present here but its runtime is not installed, "
          "the app STOPS rather than silently substituting a stand-in.")
+if HOSTED: models_dir = "models"
 _guard_artifacts(models_dir)   # runs on every rerun, before any compute
 
 # ---- LOAD now (dictionary cached) so the pre-flight panel + selector are live.
@@ -782,6 +861,7 @@ st.expander("Processing log").write("\n".join(log))
 #      keeps this head's validation scope separate from phi_app.py's. ----
 sha=lambda df: hashlib.sha256(df.to_csv(index=False).encode()).hexdigest()[:16]
 audit=pd.DataFrame([dict(program="meddra_coder", timestamp=pd.Timestamp.now().isoformat(timespec="seconds"),
+    hosted_mode=("true" if HOSTED else "false"),
     domains=list(domains.keys()), verbatim_source=verb_sel, n_verbatims=len(verbatims),
     meddra_source=meddra_label, meddra_rows=len(meddra), meddra_sha256=sha(meddra),
     meddra_has_codes="YES" if has_codes else "NO",
