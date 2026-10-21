@@ -59,6 +59,14 @@ Before touching real data, run each app against its demo cut:
 
 [sample_data/README.md](sample_data/README.md) and [anomaly_data/README.md](anomaly_data/README.md) list precisely what each run should show. Both demo cuts are synthetic — see their READMEs.
 
+> **Hosted demo mode.** A public deployment (for example on Streamlit Community Cloud) should run with the Streamlit
+> secret `hosted = true`, or the environment variable `ECRF_HOSTED=1` on other hosts. The app then shows a banner
+> ("Public demo: synthetic data only..."), locks every uploader and path input to the bundled synthetic cut, writes
+> its outputs to a per-session temporary folder and records `hosted_mode=true` in the audit; you only confirm the
+> pre-flight panel and click **Execute**. On your own machine nothing is set, so everything in this guide applies
+> unchanged and the audit records `hosted_mode=false`. Use a local run for real data. Deployment steps are in the
+> [README](README.md#deploy-your-own-demo).
+
 ---
 
 ## 3. App 1 — MedDRA Auto-Coding (`meddra_app.py`)
@@ -333,4 +341,4 @@ A portable end-to-end test harness ships in [`tests/qc_test.py`](tests/qc_test.p
 pip install -r requirements.txt && python tests/qc_test.py
 ```
 
-Exit code **0 = all 76 checks pass** (all four apps driven end-to-end, including a synthetic `.asc` release with HLT/HLGT + currency filter, content-based PHI discovery, SAS `.sas7bdat` input routing, the risk app against `sample_data/` — anchor subjects landing in their expected categories, valid score ranges, full category coverage, `[SI]` criteria sourcing via the audit log — and the anomaly app catching its injected drift column + per-subject outliers. Every run is bit-identical across two runs). What was checked and what bugs were found and fixed: [QC_REPORT.md](QC_REPORT.md).
+Exit code **0 = every check passes**: 247 checks with the optional extras (`pyreadstat`, `scikit-learn`, `POT`, `scipy`) installed, 244 with `requirements.txt` only (all four apps driven end-to-end, including a synthetic `.asc` release with HLT/HLGT + currency filter, content-based PHI discovery, SAS `.sas7bdat` input routing, the risk app against `sample_data/` (anchor subjects landing in their expected categories, valid score ranges, full category coverage, `[SI]` criteria sourcing via the audit log) and the anomaly app catching its injected drift column + per-subject outliers. Every run is bit-identical across two runs; hosted demo mode and the `docs/` landing page are checked too). Leave `ECRF_HOSTED` unset and keep any Streamlit secrets file away while you run it: the hosted checks set both themselves. What was checked and what bugs were found and fixed: [QC_REPORT.md](QC_REPORT.md).

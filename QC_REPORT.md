@@ -6,6 +6,8 @@
 (uploaded dictionary, name-only dictionary, missing dictionary, blank fields, a synthetic
 `.asc` release with HLT/HLGT + an inactive term, SAS `.sas7bdat` input routing, risk-app anchor subjects, and the anomaly app's injected numeric outliers + cohort/per-lab/between-lab drift + text outliers + a mixed longitudinal/cross-sectional upload). **Result: 95/95 checks pass.**
 
+**Update, 2026-10-21:** the harness now runs 247 checks with the optional extras installed and 244 with `requirements.txt` only, all passing; see [New this pass: hosted-demo safety mode, CI and docs checks](#new-this-pass-hosted-demo-safety-mode-ci-and-docs-checks).
+
 **Sample-cut enrichment (this pass):** every domain in `sample_data/` now carries an `AVISIT` + `VISITNUM` visit/timepoint dimension, assigned deterministically from row position — deliberately *not* the seeded RNG stream — so no existing value, anchor subject, or PHI-bearing note moved. Labs keep their file-provided reference range (`LBNRHI`), which is exactly what the risk app scores each lab against (option: ranges live in a column of the lab file). All 95 checks still pass on the enriched cut.
 
 ## Bugs found and fixed
@@ -78,6 +80,51 @@ Two additions to the anomaly app, both verified end-to-end by the harness:
 - **Between-lab/site comparison (`lab_compare.csv`).** Per-lab drift asks *how much one lab moved over time*; it cannot see a site that systematically measures differently from every other site. The new Tier-3 signal compares each `LAB × column` current-window distribution against the POOLED-OTHERS (leave-one-out) distribution via the same Sinkhorn/Wasserstein transport distance, normalized by the robust spread → a unitless `between_lab_ratio`. A lab that agrees with the rest shows ~0; an outlier site stands out. Checks A17/A18 assert LAB-C×AST is the between-lab standout (HIGH/CRITICAL) while the other labs' AST stays LOW/MODERATE.
 - **Mixed-upload robustness (bug found & fixed).** Uploading a longitudinal file (`labs.csv`, with `VISITNUM`) together with cross-sectional safety files used to crash: `_change_matrix` called `np.nanargmin` on an all-NaN time slice for subjects present only in a domain without the detected time column. The change matrix now guards each subject's time axis (falls back to first-row + a static-outlier flag when no valid time value exists), and Tier 2 picks change-vs-static **per column** from whether that column's subjects carry a time axis — so mixed cuts score every column honestly without crashing or mixing signal definitions within one column. Checks A19–A20b build a temp cut of `labs.csv` + the cross-sectional safety files, assert no exception on load/execute, and confirm the three injected numeric outliers are still flagged (the longitudinal signal survives alongside cross-sectional data).
 
+## New this pass: hosted-demo safety mode, CI and docs checks
+
+**Date:** 2026-10-21 · **Method:** the same `AppTest` harness on Python 3.12.3 with Streamlit 1.66.1, pandas 3.0.6 and numpy 2.5.4, run in the two configurations below. No bug was found in the apps' existing behavior this pass, and no widget label, header or button text changed. Two bugs outside the apps were found and fixed: `requirements.txt` allowed Streamlit 1.36 to 1.48, on which every app crashes on load (see CI below), and the Deck B HTML build, now published on GitHub Pages, had dropped the first letter of four slide headings ("race 1" for "Trace 1", "erify" for "Verify"), closed 14 headings with a malformed `</h3 class="slide-h">` tag, and turned part of the initials regex on slide 2.2 into a stray link. The HTML now matches the `.md`.
+
+**Hosted-demo safety mode (all four apps).** A public demo must never take in real data. Hosted mode is switched on by the Streamlit secret `hosted = true` (Streamlit Community Cloud: the app's Settings > Secrets) or by the environment variable `ECRF_HOSTED=1`. When it is on:
+
+- every input that could bring data in (the domain uploader, the folder path, the models dir and, in the coding app, the dictionary uploader and the `.asc` folder) is disabled in the UI, and its value is also overwritten in code, because a disabled widget only stops the browser and a crafted client could still send a value;
+- the bundled synthetic cut is forced (`sample_data/`, or `anomaly_data/` for the anomaly app), with the sample box locked on;
+- outputs go to a per-session server temp folder, never a path a visitor typed, and the folder is deleted when Streamlit discards the expired session (and at process exit), so page views do not pile folders up in `/tmp`;
+- an uncaught exception shows a generic message instead of a traceback with server paths (`client.showErrorDetails` is set to `none`);
+- a banner ("Public demo: synthetic data only. Do not enter or upload real patient data. Run locally for real data.") shows on the main page and as the first sidebar element on every rerun;
+- the audit records `hosted_mode=true`, right after `timestamp`.
+
+With nothing set (the local default) every app behaves as before; its audit only gains `hosted_mode=false`. The switch is duplicated in each app on purpose (no shared module, same rule as the other helpers).
+
+**The switch fails closed** (see `_hosted()` in each app). A security review found three ways a public app could end up unlocked with nothing on the page to show it, all fixed this pass: (1) a secrets file that exists but does not parse (`hosted = True` with a capital T, or any stray bad line) made Streamlit's loader report "no secrets", so the app ran in local mode while Streamlit only logged the parse error on the server; (2) `ECRF_HOSTED` values such as `on` or `y` were read as off; (3) a top-level `ECRF_HOSTED` key in the secrets overwrote a host-set `ECRF_HOSTED=1`, because Streamlit copies top-level secrets into the environment. Now any `ECRF_HOSTED` or `hosted` value other than empty, `0`, `false`, `no` or `off` turns hosted mode on, so does a secrets file or folder that exists but does not load, and so does an `ECRF_HOSTED` key in the secrets. With no secrets file at all, a local run is unchanged. The README deploy steps now end with opening the app and confirming the banner, and say how to cap upload sizes on a self-managed host (`--server.maxUploadSize 1`): Streamlit's upload endpoint keeps bytes a crafted client sends to a disabled uploader in server memory until the session expires, although the apps never read them.
+
+**CI.** `.github/workflows/qc.yml` runs `python tests/qc_test.py` on Python 3.12 on every push and pull request, in two matrix variants: `stand-in` (`requirements.txt` only, what a plain install or a Community Cloud deploy gets) and `optional-extras` (plus `pyreadstat`, `scikit-learn`, `POT` and `scipy`). A guard step fails the job if the runner has `ECRF_HOSTED` set, so every run starts from the local default; the hosted checks set and clear it inside the harness process. `requirements.txt` now asks for `streamlit>=1.49`, the oldest release that accepts `st.dataframe(width="stretch")` (1.36 to 1.48 raise `TypeError` on load). The harness itself needs Streamlit 1.56 or newer (`AppTest.file_uploader`), which a fresh install satisfies.
+
+**New check groups (152 checks).**
+
+- **H, hosted mode (149 checks).** Per app (HM coding, HP PHI, HR risk, HA anomaly), checks 1 to 21:
+  - 1 to 3: the local default is unchanged (no banner, every input live, `?demo=1` still fills the folder, audit `hosted_mode=false`);
+  - 4 to 11: the hosted view end to end (banner on the main page and in the sidebar, no uploader or path input enabled, the sample cut loads and executes, audit `hosted_mode=true` in the temp Output folder);
+  - 12 to 16: a crafted client forges widget values (folder path, domain upload, unticked sample box, Output folder, models dir) and every one is ignored. 12 and 13 run on stock Streamlit, where the disabled flag already drops the forged value (so they fail only if the flag and the app's override are both missing); 14 to 16 switch Streamlit's server-side drop of disabled-widget values off, so the apps' code overrides are the only defense. 14 also checks that an unticked sample box alone leaves the folder field on the sample;
+  - 17: the Output folder is a per-session temp folder, stable across reruns and new for each session;
+  - 18: hosted mode sets `client.showErrorDetails` to `none`, and a local run leaves it alone;
+  - 19: both banners still show when the artifact guard's `st.stop()` cuts the page short (hosted mode pins the models dir to `models`, which is relative to the working folder);
+  - 20: the per-session temp folder is deleted once its session is discarded;
+  - 21: the placement rules, read from the source because a misplaced line has no runtime symptom on 1.66.1: `HOSTED = _hosted()` on the line after `st.set_page_config(...)`, then the main banner, then the sidebar banner as the first sidebar call right before the first sidebar header, all above every `st.stop()`.
+
+  The coding app adds HM9b, HM11b, HM15b and HM15c for its dictionary inputs. HX1 is a control: it proves a forged value really reaches a disabled widget once the server-side drop is off, so 14 to 16 cannot pass vacuously. The switch itself is tested per app: HS1 to HS32 inject secret values through `AppTest` (`true`, `"true"`, `" Yes "` and `"on"` lock each app; `false`, `"false"`, `"0"` and a secrets file with only an unrelated key keep local behavior); HE1 to HE8 try other `ECRF_HOSTED` spellings (`" True "`, `yes`, `on` and `2` lock; `0`, `" false "`, `no` and `OFF` do not); HF1 to HF20 run Streamlit's real secrets loader on scratch `secrets.toml` files: a valid `hosted = true`, the two malformed files above, a valid file with an unrelated key only, and `ECRF_HOSTED = "0"` over a host-set `ECRF_HOSTED=1`. Each HF check also asserts what the loader itself reported, so a case cannot pass because its file was not what it claims to be.
+- **D, docs and GitHub Pages (3 checks).** D1: `docs/` holds exactly the `presentations/` decks, each a byte-identical copy, so a deck edit cannot silently drift from the Pages copy and no stale deck lingers there. D2: `docs/index.html` loads no external script, stylesheet, font or image (including SVG `href`/`xlink:href`, a `<meta http-equiv=refresh>` target and inline scripts that name a URL). D3: every local link and image in `README.md` (inline and reference-style) and every local reference in `docs/index.html` (`href`, `src`, `srcset`, CSS `url()`) exists on disk; each file must hold at least one, and every `docs/img/` file must be used.
+
+Each new check was also seen to fail when what it guards is broken: the hosted checks against scratch copies of the apps with parts of hosted mode removed, and D1 to D3 against a drifted or missing deck copy, an added CDN script, stylesheet, font or image, and a deleted screenshot. A second round of reviews found mutations that still passed; each now fails at least one check, verified the same way on scratch copies: the old fail-open switch, a `hosted` default of true for a file without the key, a bool-only secret test, the old `ECRF_HOSTED` test, the `ECRF_HOSTED` secret rule removed, the fail-closed fallback removed, the sample-box override removed, `HOSTED = _hosted()` moved above `set_page_config`, the main banner moved below the artifact guard, `mkdtemp` instead of the self-deleting folder, the error-detail setting removed or made unconditional, and in `docs/` a broken deck link, a missing reference-style README image, CSS `url()`, `srcset` entry or icon, an off-site SVG image, a meta refresh, an inline fetch script, a stale deck copy and an unused screenshot.
+
+**Results.**
+
+| Configuration | Result |
+|---|---|
+| `requirements.txt` plus the optional extras `pyreadstat`, `scikit-learn`, `POT`, `scipy` (CI variant `optional-extras`) | **247 passed, 0 failed** (95 app + 149 hosted + 3 docs) |
+| `requirements.txt` only (CI variant `stand-in`) | **244 passed, 0 failed** (SAS2, SAS3 and A16 need `pyreadstat` or `scikit-learn` and do not run; SAS1 asserts the "install pyreadstat" message instead) |
+
+The "Verified working" list below still describes the 95 app checks; all of them pass in this pass too.
+
 ## Verified working (95 checks)
 
 **meddra_app.py:** domain + dictionary load from folder and via upload · verbatim
@@ -123,11 +170,11 @@ derive from its own location). With the app dependencies installed:
 
     pip install -r requirements.txt && python tests/qc_test.py
 
-Exit code 0 = all 95 checks pass. It drives each app end-to-end via
+Exit code 0 = every check passes: 247 checks with the optional extras (`pyreadstat`, `scikit-learn`, `POT`, `scipy`) installed, or 244 with `requirements.txt` only, where SAS2, SAS3 and A16 do not run. It drives each app end-to-end via
 `streamlit.testing.v1.AppTest.from_file(...)`, points the coding/PHI/risk apps at `sample_data/`
 and the anomaly app at `anomaly_data/`, clicks Execute, and asserts on the rendered dataframes and
 written CSVs — including a synthetic `.asc` release (HLT/HLGT + currency filter), content-based
-PHI discovery, SAS `.sas7bdat` input routing, the risk-app anchor subjects, and the anomaly app's injected drift column + per-subject outliers. The assertions above are the acceptance criteria; keep them green before sharing a change.
+PHI discovery, SAS `.sas7bdat` input routing, the risk-app anchor subjects, and the anomaly app's injected drift column + per-subject outliers. It also runs each app in hosted mode (the H checks, which set and clear `ECRF_HOSTED` and their own scratch secrets themselves, so leave `ECRF_HOSTED` unset and keep any secrets file out of `~/.streamlit/` and `.streamlit/` while it runs) and checks `docs/` (the D checks). The assertions above are the acceptance criteria; keep them green before sharing a change.
 
 ## Known limits (unchanged by QC)
 
