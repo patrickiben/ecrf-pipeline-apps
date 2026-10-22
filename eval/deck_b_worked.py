@@ -7,11 +7,12 @@ Run (after eval/run_eval.py has written the trained artifacts into the models di
 Drives both apps END TO END with Streamlit's AppTest on sample_data/ (the cut Deck B walks through)
 with the given models dir, exactly as a user would, and reads their written outputs. Tier-3 field
 probabilities are not exported by the PHI app, so they come from the app's own t3_phi_batch on the
-same texts. Writes eval/results/deck_b_worked.json; the RM checks in tests/qc_test.py assert that a
+same texts. It also times one record at a time through each real tier (the app's own functions,
+single-record calls, after a warm-up), which is the per-record latency Deck A quotes. Writes eval/results/deck_b_worked.json; the RM checks in tests/qc_test.py assert that a
 real-path run reproduces these values.
 """
-import argparse, json, os, sys, tempfile
-import pandas as pd
+import argparse, json, os, sys, tempfile, time
+import numpy as np, pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _app import load_app, ROOT
 from streamlit.testing.v1 import AppTest
@@ -33,6 +34,29 @@ def run(app, models, gate=None):
     banner = next(i.value for i in at.info if "Mode banner" in i.value)
     return out, banner
 
+def _ms(fn, reps):
+    """Median and p90 wall time of fn() in ms over reps calls, after one warm-up call."""
+    fn(); t = []
+    for _ in range(reps):
+        a = time.perf_counter(); fn(); t.append(1000 * (time.perf_counter() - a))
+    return dict(median=round(float(np.median(t)), 2), p90=round(float(np.percentile(t, 90)), 2), n=reps)
+
+def per_record(nc, np_, texts, reps=25):
+    """One record at a time through each real tier, as the deck describes it (not batched)."""
+    dd = pd.read_csv(os.path.join(SAMPLE, "meddra_demo.csv"), dtype=str); V, idx = nc["t2_index"](dd)
+    out = dict(coding={}, phi={})
+    for v in WORKED_AE:
+        c = nc["t2_coding"](v, dd, V, idx); amb = nc["t3_coding"](v)["P_UNAMBIGUOUS"]
+        out["coding"][v] = dict(t2_embed_search=_ms(lambda: nc["t2_coding"](v, dd, V, idx), reps),
+                                t3_laya=_ms(lambda: nc["t3_coding"](v), reps),
+                                t4_xgboost=_ms(lambda: nc["t4_coding"](c.copy(), v, 0.90, True, amb), reps))
+    for k, t in texts.items():
+        sp = np_["t2_phi"](t); cx = np_["t3_phi"](t, sp)
+        out["phi"][k] = dict(t2_needle_plus_patterns=_ms(lambda: np_["t2_phi"](t), reps),
+                             t3_laya=_ms(lambda: np_["t3_phi"](t, sp), reps),
+                             t4_xgboost=_ms(lambda: np_["t4_phi"](t, sp, cx, 0.85), reps))
+    return out
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--models", required=True); a = ap.parse_args()
     rec = {}
@@ -45,7 +69,7 @@ def main():
     r1 = w[w["rank"] == 1]
     rec["coding"] = {r.VERBATIM: dict(AEDECOD=r.AEDECOD, AEPTCD=str(r.AEPTCD), AESOC=r.AESOC, S=round(float(r.S), 4),
                                       AECODSTAT=r.AECODSTAT) for r in r1.itertuples()}
-    ns = load_app("meddra", a.models)
+    ns = nc = load_app("meddra", a.models)
     rec["coding_p_unambiguous"] = dict(zip(WORKED_AE, [x["P_UNAMBIGUOUS"] for x in ns["t3_coding_batch"](WORKED_AE)]))
     out, banner = run("phi_app.py", a.models)
     fl = pd.read_csv(os.path.join(out, "phi_flags.csv"))
@@ -60,9 +84,11 @@ def main():
              "PR|1|PRDSC": pd.read_csv(os.path.join(SAMPLE, "pr.csv")).PRDSC.iloc[0],
              "EG|1|EGCOM": "Sinus rhythm, no artifact."}
     ns = load_app("phi", a.models)
+    assert all(nc[f] for f in ("REAL_T2", "REAL_T3", "REAL_T4")) and all(ns[f] for f in ("REAL_T2", "REAL_T3", "REAL_T4"))
     sp = [ns["t2_phi"](t) for t in texts.values()]
     rec["phi_tier3"] = dict(zip(texts, ns["t3_phi_batch"](list(texts.values()), sp)))
     rec["phi_tier2_sources"] = {k: [(s[0], s[1], s[2], s[3], s[4]) for s in v] for k, v in zip(texts, sp)}
+    rec["per_record_ms"] = per_record(nc, ns, texts)
     json.dump(rec, open(os.path.join(ROOT, "eval", "results", "deck_b_worked.json"), "w"), indent=1, default=str)
     print(json.dumps(rec, indent=1, default=str))
 

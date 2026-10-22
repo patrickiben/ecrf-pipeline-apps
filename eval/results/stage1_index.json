@@ -1,0 +1,78 @@
+{
+ "machine": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "cores": 4,
+  "python": "3.12.3"
+ },
+ "runtimes": {
+  "needle3": "needle3.cact sha256:c9d915eca282ed42",
+  "laya": "laya/ sha256:891102d372688fc2; calibration NONE (uncalibrated)"
+ },
+ "results": [
+  {
+   "dictionary": "demo (sample_data/meddra_demo.csv)",
+   "terms": 12,
+   "dim": 3072,
+   "embed_build_s": 0.28,
+   "embed_ms_per_term": 23.43,
+   "resident_mb": 0.14,
+   "vectors_mb": 0.14,
+   "graph_edges_mb": 0.0,
+   "queries": 1920,
+   "embed_ms": {
+    "median": 27.572,
+    "p90": 39.393
+   },
+   "hnsw_search_ms": {
+    "median": 0.009,
+    "p90": 0.011
+   },
+   "brute_search_ms": {
+    "median": 0.007,
+    "p90": 0.008
+   },
+   "recall_at_10": 1.0
+  },
+  {
+   "dictionary": "generated (eval/data/dictionary.csv)",
+   "terms": 3371,
+   "dim": 3072,
+   "embed_build_s": 87.61,
+   "embed_ms_per_term": 25.99,
+   "resident_mb": 40.39,
+   "vectors_mb": 39.5,
+   "graph_edges_mb": 0.89,
+   "queries": 1920,
+   "embed_ms": {
+    "median": 26.469,
+    "p90": 38.548
+   },
+   "hnsw_search_ms": {
+    "median": 0.473,
+    "p90": 0.652
+   },
+   "brute_search_ms": {
+    "median": 0.586,
+    "p90": 0.858
+   },
+   "recall_at_10": 0.993
+  }
+ ],
+ "scale": {
+  "terms": 86800,
+  "dim": 3072,
+  "vectors": "random unit vectors (index cost only)",
+  "build_s": 496.4,
+  "build_threads": 4,
+  "resident_mb": 1040.1,
+  "vectors_mb": 1017.2,
+  "graph_edges_mb": 22.9,
+  "hnsw_search_ms": {
+   "median": 5.759,
+   "p90": 7.022
+  },
+  "recall_at_10_first100": 0.061,
+  "note": "random vectors are a hard case for HNSW (no cluster structure), so recall here is a floor, not the real-data value"
+ },
+ "peak_rss_mb": 2897.2
+}

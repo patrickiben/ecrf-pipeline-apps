@@ -39,13 +39,19 @@ def bench_dict(ns, df, queries, label):
     files = os.listdir(ag._index_cache)
     vec_b = sum(os.path.getsize(os.path.join(ag._index_cache, f)) for f in files if f.endswith(".npy"))
     graph_file_b = sum(os.path.getsize(os.path.join(ag._index_cache, f)) for f in files if f.endswith(".hnsw"))
-    emb, srch, brute, rec = [], [], [], []
+    emb, srch, brute, rec, Q = [], [], [], [], []
     k = min(10, len(names))
+    # three separate passes: interleaving the multi-threaded brute-force matmul with the embed calls
+    # lets idle BLAS threads compete with the Needle3 worker process and inflates the embed timings
     for q in queries:
         t = time.perf_counter(); v = np.asarray(ag.embed(q), np.float32); v /= np.linalg.norm(v); emb.append(1000 * (time.perf_counter() - t))
-        t = time.perf_counter(); lab, _ = idx.knn_query(v.reshape(1, -1), k=k); srch.append(1000 * (time.perf_counter() - t))
+        Q.append(v)
+    labs = []
+    for v in Q:
+        t = time.perf_counter(); lab, _ = idx.knn_query(v.reshape(1, -1), k=k); srch.append(1000 * (time.perf_counter() - t)); labs.append(lab[0])
+    for v, lab in zip(Q, labs):
         t = time.perf_counter(); ex = np.argsort(-(V @ v))[:k]; brute.append(1000 * (time.perf_counter() - t))
-        rec.append(len(set(lab[0]) & set(ex)) / k)
+        rec.append(len(set(lab) & set(ex)) / k)
     n, dim = V.shape
     return dict(dictionary=label, terms=n, dim=dim, embed_build_s=round(build_s, 2),
                 embed_ms_per_term=round(1000 * build_s / n, 2),
@@ -87,11 +93,14 @@ def main():
                runtimes=ns["_R"]["info"], results=[])
     for df, label in ((demo, "demo (sample_data/meddra_demo.csv)"), (big, "generated (eval/data/dictionary.csv)")):
         r = bench_dict(ns, df, queries, label); out["results"].append(r); print(json.dumps(r))
+    out_p = os.path.join(ROOT, "eval", "results", "stage1_index.json")
     if not a.no_scale:
         r = bench_scale(ns["hnswlib"]); out["scale"] = r; print(json.dumps(r))
+    elif os.path.exists(out_p) and "scale" in json.load(open(out_p)):
+        out["scale"] = json.load(open(out_p))["scale"]          # keep the previous scale run
     out["peak_rss_mb"] = round(rss_mb(), 1)
     os.makedirs(os.path.join(ROOT, "eval", "results"), exist_ok=True)
-    json.dump(out, open(os.path.join(ROOT, "eval", "results", "stage1_index.json"), "w"), indent=1)
+    json.dump(out, open(out_p, "w"), indent=1)
 
 if __name__ == "__main__":
     main()
