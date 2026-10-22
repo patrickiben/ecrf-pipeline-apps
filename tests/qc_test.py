@@ -964,7 +964,8 @@ except Exception as e: check("D3 docs references block raised", False, repr(e))
 #       different states. They pin the fixes for the defects in docs/FEASIBILITY.md: modules bound (no
 #       NameError), REAL only when an artifact LOADS, Laya probed with its torch/transformers runtime,
 #       an unrelated 'needle' rejected, a trained gate refused when its feature contract is not met, a
-#       corrupt artifact stopping the run, the risk/anomaly apps never claiming a model they cannot load.
+#       corrupt artifact stopping the run, a Laya calibration fitted for another checkpoint refused (one
+#       fitted on another machine accepted), the risk/anomaly apps never claiming a model they cannot load.
 # RM runs first: the RW block swaps the stub packages in and the real modules back out afterwards
 # (sys.modules is restored, so a real torch is never re-imported in this process).
 SKIP = []
@@ -1072,7 +1073,14 @@ class Index:
     def load_index(self, p, max_elements=0): self.V = np.load(p + ".npy")
 ''',
  "laya/__init__.py": '''
-def load(path, device=None, calibration=None, **kw): return _Agent()
+import json, warnings
+def load(path, device=None, calibration=None, **kw):
+    d = json.load(open(calibration)) if calibration else {}
+    if d.get("model_id_or_path"):            # Laya's identity warning, path-only or config too
+        warnings.warn("calibration was fitted for model_id_or_path=%r subfolder=None but this agent is "
+                      "model_id_or_path=%r subfolder=None.%s Loading the temperatures anyway."
+                      % (d["model_id_or_path"], path, " Checkpoint config identity differs." if d.get("config") == "other" else ""), UserWarning)
+    return _Agent()
 class _Agent:
     temperature_by_options = {"noul:2": 1.0}
     def predict_batch(self, states, questions):
@@ -1120,6 +1128,9 @@ def _rw_models(name, arts):
                      ["src_needle","src_pattern","p_direct","p_quasi","n_indirect","digit_ratio","capitalized","rel_pos","span_len","cue"]
                      + [f"ent_{e}" for e in ("PERSON_NAME","PHONE","EMAIL","MRN","DOB","ZIP","INITIALS","AGE")])
             open(p.replace(".json", ".meta.json"), "w").write(json.dumps({"features": feats, "requires": {"T2": "needle3", "T3": "laya"}}))
+        elif a in ("CAL_OTHER_PATH", "CAL_OTHER_CKPT"):    # a calibration fitted elsewhere / for another checkpoint
+            open(os.path.join(md, "laya_calibration_coding.json"), "w").write(json.dumps(
+                {"model_id_or_path": "/elsewhere/laya", "config": "other" if a == "CAL_OTHER_CKPT" else "same"}))
         elif a == "BROKEN_coder":
             open(os.path.join(md, "meddra_coder.json"), "w").write("{not json")
         elif a.endswith(".json"): open(p, "w").write("{}")
@@ -1171,6 +1182,14 @@ try:
     o = os.path.join(SCRATCH,"rw7"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("broken", ["BROKEN_coder"]), o)
     check("RW7 coding: a present but unreadable artifact STOPS the run (no fallback to a stand-in)",
           any("failed to load" in e.value for e in A.error), [e.value[:120] for e in A.error])
+    cal_arts = [x for x in FULL_CODING if x != "laya_calibration_coding.json"]
+    o = os.path.join(SCRATCH,"rw14"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("cal_path", cal_arts + ["CAL_OTHER_PATH"]), o); aud = _rp_audit(o)
+    check("RW14 coding: a Laya calibration fitted on another machine (checkpoint path differs, config same) loads and runs REAL",
+          not A.exception and not A.error and aud is not None and aud["mode_T3"]=="REAL", dict(err=[e.value[:140] for e in A.error]))
+    o = os.path.join(SCRATCH,"rw15"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("cal_ckpt", cal_arts + ["CAL_OTHER_CKPT"]), o)
+    check("RW15 coding: a Laya calibration fitted for a DIFFERENT checkpoint config STOPS the run",
+          any("fitted for a different Laya checkpoint" in e.value for e in A.error) and not os.path.exists(os.path.join(o,"ae_coded.csv")),
+          [e.value[:160] for e in A.error])
     _rw_use("no_torch")
     o = os.path.join(SCRATCH,"rw8"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("coding_full_b", FULL_CODING), o)
     check("RW8 coding: laya importable but torch missing -> laya NOT bound, and its checkpoint in the models dir STOPS the run",

@@ -457,6 +457,22 @@ def _guard_artifacts(models_dir):
                      f"torch and transformers). Install it or remove the artifact -- the engine will NOT "
                      f"silently substitute a stand-in."); st.stop()
 
+def _load_laya(d,cal):
+    """laya.load with the fitted calibration file, if there is one. Laya warns when the
+    file records a different checkpoint PATH; a models dir moves between machines by
+    design, so a path-only mismatch is expected and dropped. A different checkpoint
+    CONFIG means the temperatures were fitted for another model, so it is refused like
+    any other artifact that cannot be used (the UI stops on it)."""
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        ag=laya.load(d,device="cpu",calibration=cal)
+    for w in caught:
+        m=str(w.message)
+        if "Checkpoint config identity differs" in m:
+            raise ValueError(f"{ART_LAYA_CAL} was fitted for a different Laya checkpoint (refit it, eval/README.md)")
+        if "calibration was fitted for" not in m: warnings.warn_explicit(w.message,w.category,w.filename,w.lineno)
+    return ag
+
 @st.cache_resource(show_spinner="Loading the real models from the models dir...")
 def load_real(models_dir):
     """Same contract as meddra_app.py's load_real (duplicated on purpose): load each
@@ -478,7 +494,7 @@ def load_real(models_dir):
     try:
         if laya and os.path.isfile(lp):
             cal=os.path.join(md,ART_LAYA_CAL)
-            R["T3"]=laya.load(os.path.dirname(lp),device="cpu",calibration=cal if os.path.isfile(cal) else None)
+            R["T3"]=_load_laya(os.path.dirname(lp),cal if os.path.isfile(cal) else None)
             R["info"]["laya"]=(f"laya/ sha256:{_sha_file(lp)}; calibration "
                                +(f"{ART_LAYA_CAL} sha256:{_sha_file(cal)}" if os.path.isfile(cal) else "NONE (uncalibrated)"))
     except Exception as e: R["errors"].append(f"{os.path.relpath(lp,md)}: {type(e).__name__}: {e}")

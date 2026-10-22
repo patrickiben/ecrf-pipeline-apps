@@ -3,6 +3,7 @@
 
 Run (needs the real runtimes and a models dir holding needle3/ and laya/, see eval/README.md):
     python eval/run_eval.py --models <models_dir>
+    python eval/run_eval.py --models <models_dir> --smoke     # a small slice, to check the pipeline first
 
 Reproducible: fixed seeds, deterministic CPU inference, single-threaded HNSW insertion, and the
 data in eval/data/ (regenerate with eval/make_data.py, seed 42). Every number in docs/EVALUATION.md
@@ -32,6 +33,23 @@ XGB = dict(objective="binary:logistic", eval_metric="logloss", max_depth=4, eta=
            min_child_weight=1, seed=SEED, nthread=4)
 
 # ------------------------------------------------------------------ helpers
+def noul_temperature(router):
+    """The temperature Laya applies to a two-option noul answer: the "noul:2" bucket when the map has
+    one, else the type-level noul scalar (Laya's own lookup, agent.py). Laya fits a bucket only from
+    MIN_BUCKET_N = 2000 records, so a fit on a smaller split leaves the type-level scalar."""
+    from laya.common import QTYPES, temp_bucket
+    return float(router.temperature_by_options.get(temp_bucket(QTYPES["noul"], 2), router.temperature[QTYPES["noul"]]))
+
+def temperature_source(router):
+    from laya.common import QTYPES, temp_bucket
+    return "bucket noul:2" if temp_bucket(QTYPES["noul"], 2) in router.temperature_by_options else "type-level noul scalar"
+
+def out_name(name):
+    """Result file name; a --smoke run writes beside the real results, never over them."""
+    return name.replace(".", "_smoke.", 1) if SMOKE else name
+
+SMOKE = False
+
 def softmax_true(z, T):
     z = np.asarray(z, float) / T; z -= z.max(); e = np.exp(z); return float(e[-1] / e.sum())
 
@@ -69,6 +87,16 @@ def train_booster(xgb, Xtr, ytr, Xva, yva, names):
     b = xgb.train(XGB, dtr, num_boost_round=600, evals=[(dva, "calib")], early_stopping_rounds=40, verbose_eval=False)
     return xgb.train(XGB, dtr, num_boost_round=b.best_iteration + 1)   # refit to the chosen size, no eval coupling
 
+def save_calibration(router, path):
+    """Laya's own save_calibration, then the recorded checkpoint PATH (a temp staging dir here, which
+    means nothing on another machine and must not be committed) is replaced by the checkpoint's
+    published identity. Laya still compares the checkpoint config on load, and the apps refuse a
+    file fitted for a different one."""
+    from laya.revisions import PINNED_REVISIONS
+    router.save_calibration(path); d = json.load(open(path))
+    d["model_id_or_path"] = "convaiinnovations/laya@" + PINNED_REVISIONS["convaiinnovations/laya"]
+    with open(path, "w") as f: json.dump(d, f, indent=2); f.write("\n")
+
 def question_sha(schema): return hashlib.sha256(json.dumps(schema, sort_keys=True).encode()).hexdigest()[:16]
 
 # ------------------------------------------------------------------ coding
@@ -103,6 +131,7 @@ def run_coding(ns, test, dict_df, use_batch_t3=True):
 def coding(models, xgb, results):
     print("== coding", flush=True)
     data = pd.read_csv(os.path.join(DATA, "coding_eval.csv"), dtype=str)
+    if SMOKE: data = data.groupby("split", group_keys=False).head(40).reset_index(drop=True)
     dict_df = pd.read_csv(os.path.join(DATA, "dictionary.csv"), dtype=str)
     test = data[data.split == "test"].reset_index(drop=True)
     # 1. stand-in
@@ -112,24 +141,25 @@ def coding(models, xgb, results):
     os.makedirs(os.path.join(models, "index_cache"), exist_ok=True)      # shared, so the dictionary is embedded once
     st_dir = staging(models, ["needle3", "laya", "index_cache"])
     ns = load_app("meddra", st_dir); assert ns["REAL_T2"] and ns["REAL_T3"] and not ns["REAL_T4"]
-    T0 = float(ns["_router"].temperature_by_options["noul:2"])
+    T0, src0 = noul_temperature(ns["_router"]), temperature_source(ns["_router"])
     lab = {"unambiguous": list(data.negated == "N")}
     t0 = time.perf_counter(); recs = laya_records(ns, list(data.verbatim), ns["CODING_SCHEMA"], lab); laya_s = time.perf_counter() - t0
     z = [r[1] for r in recs]
     # 3. temperatures on calib, ECE on test
     calib_i = list(np.where(data.split == "calib")[0]); test_i = list(np.where(data.split == "test")[0])
     fit = ns["_router"].fit_temperatures([recs[i] for i in calib_i])
-    T1 = float(ns["_router"].temperature_by_options["noul:2"])
+    T1, src1 = noul_temperature(ns["_router"]), temperature_source(ns["_router"])
     p0 = [softmax_true(z[i], T0) for i in range(len(z))]; p1 = [softmax_true(z[i], T1) for i in range(len(z))]
     y = [int(v) for v in lab["unambiguous"]]
-    cal = dict(question="unambiguous", temperature_before=round(T0, 4), temperature_after=round(T1, 4), fitted_on=len(calib_i),
+    cal = dict(question="unambiguous", temperature_before=round(T0, 4), temperature_after=round(T1, 4),
+               temperature_source_before=src0, temperature_source_after=src1, fitted_on=len(calib_i),
                test_n=len(test_i), ece_before=ece([p0[i] for i in test_i], [y[i] for i in test_i]),
                ece_after=ece([p1[i] for i in test_i], [y[i] for i in test_i]),
                brier_before=brier([p0[i] for i in test_i], [y[i] for i in test_i]),
                brier_after=brier([p1[i] for i in test_i], [y[i] for i in test_i]),
                auroc=auroc([p1[i] for i in test_i], [y[i] for i in test_i]), laya_forward_s=round(laya_s, 1))
     os.makedirs(os.path.join(models, "_new"), exist_ok=True)
-    ns["_router"].save_calibration(os.path.join(models, "_new", ns["ART_LAYA_CAL"]))
+    save_calibration(ns["_router"], os.path.join(models, "_new", ns["ART_LAYA_CAL"]))
     # 4. re-ranker features on every split (top-RERANK_POOL Needle3 candidates)
     V, idx = ns["t2_index"](dict_df)
     feats, labels, split = [], [], []
@@ -173,8 +203,8 @@ def coding(models, xgb, results):
         gates={str(g): dict(standin=coding_metrics(si_rows, g), real=coding_metrics(real_rows, g)) for g in GATES},
         retrieval_only=dict(top1_acc=coding_metrics(abl, 2.0)["top1_acc"], top3_acc=coding_metrics(abl, 2.0)["top3_acc"],
                             note="Needle3 cosine order, no re-rank; gate not applicable"))
-    pd.DataFrame(real_rows).to_csv(os.path.join(ROOT, "eval", "results", "coding_test_real.csv"), index=False)
-    pd.DataFrame(si_rows).to_csv(os.path.join(ROOT, "eval", "results", "coding_test_standin.csv"), index=False)
+    pd.DataFrame(real_rows).to_csv(os.path.join(ROOT, "eval", "results", out_name("coding_test_real.csv")), index=False)
+    pd.DataFrame(si_rows).to_csv(os.path.join(ROOT, "eval", "results", out_name("coding_test_standin.csv")), index=False)
     shutil.rmtree(st_dir, ignore_errors=True)
 
 # ------------------------------------------------------------------ PHI
@@ -206,6 +236,7 @@ def run_phi(ns, fields, gate=0.85):
 def phi(models, xgb, results):
     print("== phi", flush=True)
     fields = pd.read_csv(os.path.join(DATA, "phi_fields.csv"), dtype={"field_id": str})
+    if SMOKE: fields = fields.groupby("split", group_keys=False).head(30).reset_index(drop=True)
     spans = pd.read_csv(os.path.join(DATA, "phi_spans.csv"), dtype={"field_id": str})
     tgt = spans[spans.target == "Y"]
     gold_all = {(r.field_id, int(r.start), int(r.end), r.entity) for r in tgt.itertuples()}
@@ -224,21 +255,23 @@ def phi(models, xgb, results):
         ns["_agent"] = ns["needle"].Needle(tools=[ns["PHI_EXTRACT_SCHEMA"]], weights=os.path.join(models, ns["ART_NEEDLE"]),
                                            auto_date=False, stateless=True)
     ns["REAL_T2"] = True; assert ns["REAL_T3"] and not ns["REAL_T4"]
-    T0 = float(ns["_router"].temperature_by_options["noul:2"])
+    T0, src0 = noul_temperature(ns["_router"]), temperature_source(ns["_router"])
     lab = {"direct_pii": list(fields.has_direct == "Y"), "reident_risk": list(fields.has_quasi == "Y")}
     t0 = time.perf_counter(); recs = laya_records(ns, list(fields.text), ns["PHI_SCHEMA"], lab); laya_s = time.perf_counter() - t0
     qs = list(ns["PHI_SCHEMA"]); nq = len(qs)
     zq = {q: [recs[i * nq + j][1] for i in range(len(fields))] for j, q in enumerate(qs)}
     calib_i = list(np.where(fields.split == "calib")[0]); test_i = list(np.where(fields.split == "test")[0])
     ns["_router"].fit_temperatures([recs[i * nq + j] for i in calib_i for j in range(nq)])
-    T1 = float(ns["_router"].temperature_by_options["noul:2"])
+    T1, src1 = noul_temperature(ns["_router"]), temperature_source(ns["_router"])
     os.makedirs(os.path.join(models, "_new"), exist_ok=True)
-    ns["_router"].save_calibration(os.path.join(models, "_new", ns["ART_LAYA_CAL"]))
+    save_calibration(ns["_router"], os.path.join(models, "_new", ns["ART_LAYA_CAL"]))
     pq = {q: [softmax_true(z, T1) for z in zq[q]] for q in qs}; pq0 = {q: [softmax_true(z, T0) for z in zq[q]] for q in qs}
     cal = {}
     for q in qs:
         y = [int(v) for v in lab[q]]; yt = [y[i] for i in test_i]
-        cal[q] = dict(temperature_before=round(T0, 4), temperature_after=round(T1, 4), fitted_on=len(calib_i), test_n=len(test_i),
+        cal[q] = dict(temperature_before=round(T0, 4), temperature_after=round(T1, 4), temperature_source_before=src0,
+                      temperature_source_after=src1, shared_by="both PHI questions (Laya calibrates per answer type and option count)",
+                      fitted_on=len(calib_i), test_n=len(test_i),
                       ece_before=ece([pq0[q][i] for i in test_i], yt), ece_after=ece([pq[q][i] for i in test_i], yt),
                       brier_before=brier([pq0[q][i] for i in test_i], yt), brier_after=brier([pq[q][i] for i in test_i], yt),
                       auroc=auroc([pq[q][i] for i in test_i], yt))
@@ -283,12 +316,15 @@ def phi(models, xgb, results):
     shutil.rmtree(st_dir, ignore_errors=True)
 
 def main():
+    global SMOKE
     ap = argparse.ArgumentParser(); ap.add_argument("--models", required=True); ap.add_argument("--only", choices=["coding", "phi"])
-    a = ap.parse_args()
+    ap.add_argument("--smoke", action="store_true", help="a small slice of every split, to check the pipeline end to end; "
+                    "writes *_smoke results and leaves eval/artifacts/ alone (the models dir still gets its artifacts)")
+    a = ap.parse_args(); SMOKE = a.smoke
     import xgboost as xgb, needle, laya, hnswlib, torch, transformers
     from importlib.metadata import version
     os.makedirs(os.path.join(ROOT, "eval", "results"), exist_ok=True)
-    out_p = os.path.join(ROOT, "eval", "results", "stage2_3.json")
+    out_p = os.path.join(ROOT, "eval", "results", out_name("stage2_3.json"))
     results = json.load(open(out_p)) if (a.only and os.path.exists(out_p)) else {}
     try: cpu = next(l.split(":", 1)[1].strip() for l in open("/proc/cpuinfo") if l.startswith("model name"))
     except Exception: cpu = platform.machine()
@@ -298,6 +334,7 @@ def main():
     if a.only in (None, "coding"): coding(a.models, xgb, results)
     if a.only in (None, "phi"): phi(a.models, xgb, results)
     json.dump(results, open(out_p, "w"), indent=1, default=str)
+    if SMOKE: print("wrote", out_p); return
     art = os.path.join(ROOT, "eval", "artifacts"); os.makedirs(art, exist_ok=True)
     for f in ("laya_calibration_coding.json", "meddra_coder.json", "meddra_coder.meta.json",
               "laya_calibration_phi.json", "phi_token_classifier.json", "phi_token_classifier.meta.json"):

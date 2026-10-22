@@ -42,12 +42,15 @@ A tier shows **REAL** in the banner and audit only when its artifact actually lo
 ```bash
 python eval/make_data.py                       # regenerate eval/data/ (seed 42; byte-identical)
 python eval/bench_index.py --models models     # Stage 1: index latency and size -> results/stage1_index.json
+python eval/run_eval.py   --models models --smoke   # optional: the whole pipeline on a small slice (about 5 min)
 python eval/run_eval.py   --models models      # Stages 2-3: calibrate, train, evaluate -> results/stage2_3.json
 python eval/deck_b_worked.py --models models   # Stage 4: Deck B worked rows -> results/deck_b_worked.json
 ECRF_MODELS_DIR=models python tests/qc_test.py # adds the RM real-path checks (skipped without it)
 ```
 
-`run_eval.py` re-fits the Laya temperatures and retrains both gates, writing them into the models dir (and copying them to `eval/artifacts/`). Everything is seeded and CPU inference is deterministic, so a rerun on the same versions reproduces the committed files.
+`run_eval.py` re-fits the Laya temperatures and retrains both gates, writing them into the models dir (and copying them to `eval/artifacts/`). Everything is seeded and CPU inference is deterministic, so a rerun on the same versions reproduces the committed files. A `--smoke` run writes `*_smoke` result files and leaves `eval/artifacts/` alone, but it does overwrite the artifacts in the models dir, so finish with a full run.
+
+Two Laya details matter when you refit. Laya fits a temperature per answer type and option count (the `noul:2` bucket) only from 2,000 records or more; below that it fits the type-level `noul` scalar, and that is what it applies. The calibration splits here are smaller, so the files hold the type-level scalar, and the two PHI questions share it. Each calibration file also records the checkpoint it was fitted for (`convaiinnovations/laya@<commit>` and the checkpoint config). The apps accept a file whose only difference is the path, because a models dir moves between machines, and stop on one fitted for a different checkpoint config.
 
 ## Files
 
