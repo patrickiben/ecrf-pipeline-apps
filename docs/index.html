@@ -49,11 +49,9 @@ code { font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.9
 .card dd { margin:2px 0 0; }
 ol.tiers { margin:0; padding-left:1.4em; }
 ol.tiers li { margin:0 0 10px; }
-.placeholder { background:var(--surface); border:2px dashed var(--line); border-radius:8px; padding:16px; }
-.placeholder .tag { display:inline-block; margin:0 0 10px; padding:2px 8px; border-radius:4px; background:var(--accent-soft);
-  color:var(--text); font-size:.8rem; font-weight:700; letter-spacing:.03em; text-transform:uppercase; }
-.placeholder ul { margin:0; padding-left:1.2em; }
-.placeholder li { margin:0 0 6px; }
+.demolinks { background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px; }
+.demolinks ul { margin:0; padding-left:1.2em; }
+.demolinks li { margin:0 0 6px; }
 figure { margin:0 0 28px; }
 figure a { display:block; }
 figure img { display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:6px; background:#FFFFFF; }
@@ -96,17 +94,15 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <p>Each app runs as its own Streamlit Community Cloud deployment in hosted mode: every data input is locked to the
     bundled synthetic cut, outputs go to a per-session temporary folder, a banner says so on every page, and the audit
     records <code>hosted_mode=true</code>. For real data, run the apps locally (see the README).</p>
-  <!-- Replace each placeholder line below with a link, for example:
-       <li>Coding app: <a href="https://YOUR-APP.streamlit.app/?demo=1">open the demo</a></li> -->
-  <div class="placeholder">
-    <p class="tag">Placeholder: add your Streamlit URLs here</p>
+  <div class="demolinks">
     <ul>
-      <li>Coding app (<code>meddra_app.py</code>): <code>https://&lt;your-coding-app&gt;.streamlit.app/?demo=1</code></li>
-      <li>PHI app (<code>phi_app.py</code>): <code>https://&lt;your-phi-app&gt;.streamlit.app/?demo=1</code></li>
-      <li>Risk app (<code>risk_app.py</code>): <code>https://&lt;your-risk-app&gt;.streamlit.app/?demo=1</code></li>
-      <li>Anomaly app (<code>anomaly_app.py</code>): <code>https://&lt;your-anomaly-app&gt;.streamlit.app/?demo=1</code></li>
+      <li><a href="https://ecrf-coding.streamlit.app/?demo=1">Coding app</a> (<code>meddra_app.py</code>): MedDRA-style auto-coding of adverse-event verbatims</li>
+      <li><a href="https://ecrf-phi.streamlit.app/?demo=1">PHI app</a> (<code>phi_app.py</code>): PII/PHI flagging and redaction</li>
+      <li><a href="https://ecrf-risk.streamlit.app/?demo=1">Risk app</a> (<code>risk_app.py</code>): participant safety and discontinuation risk scoring</li>
+      <li><a href="https://ecrf-anomaly.streamlit.app/?demo=1">Anomaly app</a> (<code>anomaly_app.py</code>): numeric outliers, distributional drift and text outliers</li>
     </ul>
-    <p class="muted" style="margin:10px 0 0">Append <code>?demo=1</code> to each URL so the app opens on the bundled sample data.</p>
+    <p class="muted" style="margin:10px 0 0">Each opens on the bundled synthetic sample data; click Execute to run it. An app that has been idle may take
+      about 30 seconds to wake up.</p>
   </div>
 </section>
 
@@ -209,9 +205,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
 <section aria-labelledby="about">
   <h2 id="about">About this page</h2>
   <p>This is a single static file, <code>docs/index.html</code>, with no external scripts, stylesheets or fonts. GitHub
-    Pages can serve it from the <code>main</code> branch's <code>/docs</code> folder, but Pages stays off until the
-    repository owner enables it under <strong>Settings &gt; Pages</strong> (Source: Deploy from a branch; branch
-    <code>main</code>, folder <code>/docs</code>).</p>
+    Pages serves it from the <code>main</code> branch's <code>/docs</code> folder.</p>
 </section>
 
 </main>
