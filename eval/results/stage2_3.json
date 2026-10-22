@@ -1,0 +1,229 @@
+{
+ "environment": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "cores": 4,
+  "python": "3.12.3",
+  "torch_threads": 4,
+  "versions": {
+   "cactus-needle": "3.2.8",
+   "laya": "0.4.13",
+   "hnswlib": "0.8.0",
+   "xgboost-cpu": "3.4.1",
+   "torch": "2.14.1+cpu",
+   "transformers": "5.20.2"
+  }
+ },
+ "coding": {
+  "data": {
+   "dictionary_terms": 3371,
+   "dictionary_pts": 519,
+   "test_verbatims": 384,
+   "train_candidate_rows": 11520,
+   "splits": {
+    "train": 1152,
+    "calib": 384,
+    "test": 384
+   }
+  },
+  "calibration": {
+   "question": "unambiguous",
+   "temperature_before": 1.9834,
+   "temperature_after": 1.4474,
+   "temperature_source_before": "bucket noul:2",
+   "temperature_source_after": "type-level noul scalar",
+   "fitted_on": 384,
+   "test_n": 384,
+   "ece_before": 0.1185,
+   "ece_after": 0.0842,
+   "brier_before": 0.1733,
+   "brier_after": 0.1719,
+   "auroc": 0.7361,
+   "laya_forward_s": 616.4
+  },
+  "reranker": {
+   "rounds": 164,
+   "features": [
+    "cosine",
+    "lev",
+    "jaro",
+    "soc_match",
+    "p_unambiguous",
+    "ret_rank"
+   ]
+  },
+  "timing_s": {
+   "standin_test": 2.5,
+   "real_test": 86.3,
+   "laya_records_all": 616.4,
+   "features_all": 86.8
+  },
+  "gates": {
+   "0.88": {
+    "standin": {
+     "n": 384,
+     "top1_acc": 0.5417,
+     "top3_acc": 0.6146,
+     "auto_code_rate": 0.2552,
+     "error_rate_of_auto": 0.0714,
+     "errors_per_100": 1.82,
+     "negated_auto_coded": 7,
+     "by_variant": {
+      "colloquial": {
+       "n": 96,
+       "top1_acc": 0.4583,
+       "auto_code_rate": 0.0,
+       "errors": 0
+      },
+      "exact": {
+       "n": 96,
+       "top1_acc": 0.9792,
+       "auto_code_rate": 0.9062,
+       "errors": 0
+      },
+      "misspelled": {
+       "n": 96,
+       "top1_acc": 0.1875,
+       "auto_code_rate": 0.0417,
+       "errors": 0
+      },
+      "negated": {
+       "n": 96,
+       "top1_acc": null,
+       "auto_code_rate": 0.0729,
+       "errors": 7
+      }
+     }
+    },
+    "real": {
+     "n": 384,
+     "top1_acc": 0.7778,
+     "top3_acc": 0.8542,
+     "auto_code_rate": 0.3802,
+     "error_rate_of_auto": 0.0,
+     "errors_per_100": 0.0,
+     "negated_auto_coded": 0,
+     "by_variant": {
+      "colloquial": {
+       "n": 96,
+       "top1_acc": 0.5208,
+       "auto_code_rate": 0.0,
+       "errors": 0
+      },
+      "exact": {
+       "n": 96,
+       "top1_acc": 1.0,
+       "auto_code_rate": 1.0,
+       "errors": 0
+      },
+      "misspelled": {
+       "n": 96,
+       "top1_acc": 0.8125,
+       "auto_code_rate": 0.5208,
+       "errors": 0
+      },
+      "negated": {
+       "n": 96,
+       "top1_acc": null,
+       "auto_code_rate": 0.0,
+       "errors": 0
+      }
+     }
+    }
+   },
+   "0.9": {
+    "standin": {
+     "n": 384,
+     "top1_acc": 0.5417,
+     "top3_acc": 0.6146,
+     "auto_code_rate": 0.2396,
+     "error_rate_of_auto": 0.0109,
+     "errors_per_100": 0.26,
+     "negated_auto_coded": 1,
+     "by_variant": {
+      "colloquial": {
+       "n": 96,
+       "top1_acc": 0.4583,
+       "auto_code_rate": 0.0,
+       "errors": 0
+      },
+      "exact": {
+       "n": 96,
+       "top1_acc": 0.9792,
+       "auto_code_rate": 0.9062,
+       "errors": 0
+      },
+      "misspelled": {
+       "n": 96,
+       "top1_acc": 0.1875,
+       "auto_code_rate": 0.0417,
+       "errors": 0
+      },
+      "negated": {
+       "n": 96,
+       "top1_acc": null,
+       "auto_code_rate": 0.0104,
+       "errors": 1
+      }
+     }
+    },
+    "real": {
+     "n": 384,
+     "top1_acc": 0.7778,
+     "top3_acc": 0.8542,
+     "auto_code_rate": 0.3802,
+     "error_rate_of_auto": 0.0,
+     "errors_per_100": 0.0,
+     "negated_auto_coded": 0,
+     "by_variant": {
+      "colloquial": {
+       "n": 96,
+       "top1_acc": 0.5208,
+       "auto_code_rate": 0.0,
+       "errors": 0
+      },
+      "exact": {
+       "n": 96,
+       "top1_acc": 1.0,
+       "auto_code_rate": 1.0,
+       "errors": 0
+      },
+      "misspelled": {
+       "n": 96,
+       "top1_acc": 0.8125,
+       "auto_code_rate": 0.5208,
+       "errors": 0
+      },
+      "negated": {
+       "n": 96,
+       "top1_acc": null,
+       "auto_code_rate": 0.0,
+       "errors": 0
+      }
+     }
+    }
+   }
+  },
+  "retrieval_only": {
+   "top1_acc": 0.7465,
+   "top3_acc": 0.8854,
+   "top1_by_variant": {
+    "colloquial": 0.5208,
+    "exact": 1.0,
+    "misspelled": 0.7188,
+    "negated": null
+   },
+   "note": "Needle3 cosine order, no re-rank; gate not applicable"
+  },
+  "retrieval_only_case_sensitive": {
+   "top1_acc": 0.6215,
+   "top3_acc": 0.7292,
+   "top1_by_variant": {
+    "colloquial": 0.4479,
+    "exact": 0.875,
+    "misspelled": 0.5417,
+    "negated": null
+   },
+   "note": "as retrieval_only, but dictionary terms and verbatims embedded as typed (no lower-casing)"
+  }
+ }
+}

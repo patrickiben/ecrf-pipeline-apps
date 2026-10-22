@@ -1,0 +1,43 @@
+{
+ "features": [
+  "src_needle",
+  "src_pattern",
+  "p_direct",
+  "p_quasi",
+  "n_indirect",
+  "digit_ratio",
+  "capitalized",
+  "rel_pos",
+  "span_len",
+  "cue",
+  "ent_PERSON_NAME",
+  "ent_PHONE",
+  "ent_EMAIL",
+  "ent_MRN",
+  "ent_DOB",
+  "ent_ZIP",
+  "ent_INITIALS",
+  "ent_AGE"
+ ],
+ "objective": "binary:logistic",
+ "requires": {
+  "T2": "needle3",
+  "T3": "laya"
+ },
+ "tier3_question_sha": "774b67801601d271",
+ "label": "candidate (start,end,entity) is a gold redaction target",
+ "trained_on": "eval/data/phi_fields.csv split=train (43 candidate spans)",
+ "early_stopping": "calib split",
+ "rounds": 210,
+ "xgb_params": {
+  "objective": "binary:logistic",
+  "eval_metric": "logloss",
+  "max_depth": 4,
+  "eta": 0.05,
+  "subsample": 0.9,
+  "min_child_weight": 1,
+  "seed": 42,
+  "nthread": 4
+ },
+ "seed": 42
+}
