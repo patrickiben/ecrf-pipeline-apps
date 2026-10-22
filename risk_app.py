@@ -546,9 +546,13 @@ def _guard_artifacts(models_dir):
     match when dropping real weights."""
     if not os.path.isdir(models_dir): return
     art=os.path.join(models_dir,"risk_model.json")
-    if os.path.exists(art) and not HAVE.get("xgboost",False):
-        st.error(f"risk_model.json present but 'xgboost' not installed. Install it or remove "
-                 f"the artifact -- the engine will NOT silently substitute a stand-in."); st.stop()
+    # This build has NO code that loads a trained risk model: the [SI] engine is the only
+    # scorer. So the file stops the run whether or not xgboost is installed -- running on
+    # while the operator believes a model is in use (an earlier build even wrote REAL to
+    # the audit here) would be exactly the silent substitution this guard exists to refuse.
+    if os.path.exists(art):
+        st.error(f"risk_model.json found, but this build has no trained-risk-model path: the labeled "
+                 f"[SI] engine is the only scorer. Remove the file to run."); st.stop()
 
 # ============================ UI ============================
 # Layout order is deliberate (mirrors the siblings): gather WHERE the data is (1), set the
@@ -643,8 +647,8 @@ out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"]
     help="Where risk_scores.csv + audit_log.csv are written on Run (also offered as downloads).")
 if HOSTED: out_dir = st.session_state["_hosted_out"]
 models_dir = st.sidebar.text_input("Models dir (optional real model)","models", disabled=HOSTED,
-    help="If a trained risk_model.json is present here but its runtime is not installed, "
-         "the app STOPS rather than silently substituting the [SI] stand-in.")
+    help="This build has no trained-model path for this app: the labeled [SI] engine is the only scorer, "
+         "and a risk_model.json found here STOPS the run rather than being silently ignored.")
 if HOSTED: models_dir = "models"
 _guard_artifacts(models_dir)   # runs on every rerun, before any compute
 
@@ -722,7 +726,7 @@ audit=pd.DataFrame([dict(program="risk_scorer", timestamp=pd.Timestamp.now().iso
     domain_rows=json.dumps({d:len(df) for d,df in domains.items()}),
     n_subjects=int(n_ready), criteria_source="[SI] built-in defaults (no external SAP/protocol file)",
     thresholds_in_force=json.dumps(thr),
-    mode_T3="REAL" if (HAVE.get("xgboost") and os.path.exists(os.path.join(models_dir,"risk_model.json"))) else "STAND-IN",
+    mode_T3="STAND-IN",   # no trained risk-model path in this build (see _guard_artifacts)
     scoring_note="[SI] transparent weighted rule engine; decision support, not a clinical determination",
     safety_distribution=json.dumps(results["safety_category"].value_counts().to_dict()) if len(results) else "{}",
     disc_distribution=json.dumps(results["disc_category"].value_counts().to_dict()) if len(results) else "{}",

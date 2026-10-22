@@ -28,8 +28,9 @@
 #   Tier 1 intake   -> align rows to subjects; copy the verbatim through
 #                      UNCHANGED (Tier 2 must measure closeness to what the site
 #                      actually typed, so rewriting here would corrupt it).
-#   Tier 2 Needle3  -> embed the verbatim to a 384-dim UNIT vector (SapBERT),
-#                      HNSW inner-product search -> top-k candidates + cosine.
+#   Tier 2 Needle3  -> embed the verbatim to a UNIT vector (Cactus Needle3:
+#                      3072-dim, measured), HNSW inner-product search -> top-k
+#                      candidates + cosine.
 #                      Because stored vectors are unit-norm, the graph's cheap
 #                      inner-product distance EQUALS cosine, so the search
 #                      returns exact angular closeness. Stand-in: a lexical
@@ -43,13 +44,17 @@
 #                      gate still runs on the remaining named columns.
 #   Tier 4 XGBoost  -> re-rank each candidate from Tier-2 cosine + two string
 #                      distances + a body-system agreement flag (+ Tier-3
-#                      ambiguity when present), then a single gate:
+#                      ambiguity when present; real path: a trained binary
+#                      booster scoring P(candidate is right)), then one gate:
 #                      AUTO_COMMIT_TO_SDTM or FLAGGED_FOR_HUMAN_CODER. Writes
 #                      AEDECOD/AEPTCD/AESOC/AECODCONF/AECODSTAT.
 #
 #   streamlit run meddra_app.py
 #   stand-in path (runs anywhere):     pip install numpy pandas streamlit
-#   real path (flips banner to REAL):  pip install cactus-needle hnswlib laya xgboost
+#   real path: install the pinned runtimes (requirements.txt, real-path block) AND
+#   put the trained artifacts in the models dir (layout below, steps in
+#   eval/README.md). A tier flips to REAL only when its artifact LOADS; an
+#   installed library with no artifact keeps that tier on its stand-in.
 
 # stdlib only for the parts that must not depend on optional ML libs:
 #   hashlib -> dictionary content hash for the audit (reproducibility)
@@ -58,8 +63,19 @@
 #              per-process, which made the stand-in non-reproducible across runs)
 #   os/re/time -> file walking, column-name normalization, latency measurement
 #   tempfile -> per-session output folder in hosted-demo mode (see _hosted)
-import hashlib, os, re, tempfile, time, zlib
+#   importlib/json/platform/warnings -> binding the optional runtimes, reading
+#              the re-ranker's feature contract, the per-OS engine file name
+import hashlib, importlib, json, os, platform, re, tempfile, time, warnings, zlib
 import numpy as np, pandas as pd, streamlit as st
+
+# --------------------------------------------------------------------------- #
+# Air gap. Set BEFORE any optional runtime is imported: the Hugging Face client
+# never reaches the network (every model loads from the models dir), and the
+# Needle3 package's usage telemetry, which is ON by default, is switched off.
+# setdefault, so an operator can still override one deliberately.
+# --------------------------------------------------------------------------- #
+for _k, _v in (("HF_HUB_OFFLINE", "1"), ("NEEDLE_TELEMETRY", "0"), ("DO_NOT_TRACK", "1")):
+    os.environ.setdefault(_k, _v)
 
 # --------------------------------------------------------------------------- #
 # Runtime probe. We test each OPTIONAL library by attempting an import inside a
@@ -74,14 +90,59 @@ import numpy as np, pandas as pd, streamlit as st
 def _have(m):
     try: __import__(m); return True
     except Exception: return False
-HAVE = {m: _have(m) for m in ("needle","laya","xgboost","hnswlib","pyreadstat")}
-# Coding Tier 2 needs BOTH the embedder (needle) and the graph index (hnswlib);
-# if either is absent we fall back to the lexical stand-in for the whole tier,
-# because a real embedder with no index (or vice versa) cannot serve the same
-# contract. Tiers 3 and 4 each need one lib.
-REAL_T2 = HAVE["needle"] and HAVE["hnswlib"]
-REAL_T3 = HAVE["laya"]
-REAL_T4 = HAVE["xgboost"]
+def _mod(m, *attrs):
+    """Import an OPTIONAL runtime and BIND it, or return None. The module must also
+    expose the API this file calls, so an unrelated package that shares the import
+    name (PyPI's 'needle' is a CSS-testing tool) or an empty stub cannot pass as the
+    model. Every attribute check sits INSIDE the try: some are lazy and import more
+    code (laya.load pulls in torch), and hasattr() only catches AttributeError."""
+    try:
+        mod = importlib.import_module(m)
+        return mod if all(hasattr(mod, a) for a in attrs) else None
+    except Exception: return None
+needle  = _mod("needle", "Needle")
+hnswlib = _mod("hnswlib", "Index")
+# Laya's own import is torch-free by design: torch and transformers load only when
+# a checkpoint does. A bare `import laya` therefore passes without them, and the
+# first real call would crash, so both are probed explicitly here.
+laya    = _mod("laya", "load") if (_have("torch") and _have("transformers")) else None
+xgboost = _mod("xgboost", "Booster", "DMatrix")
+HAVE = {"needle": needle is not None, "hnswlib": hnswlib is not None, "laya": laya is not None,
+        "xgboost": xgboost is not None, "pyreadstat": _have("pyreadstat")}
+# A tier is REAL only when its runtime is installed AND its trained artifact has
+# LOADED from the models dir (load_real, called once the sidebar names the dir).
+# An importable library alone never flips the banner: until then every tier is
+# its stand-in. Coding Tier 2 needs BOTH the embedder (needle) and the graph index
+# (hnswlib), because a real embedder with no index (or vice versa) cannot serve
+# the same contract.
+REAL_T2 = REAL_T3 = REAL_T4 = False
+_agent = _router = _coder = None
+
+# --------------------------------------------------------------------------- #
+# Models-dir CONVENTION (one folder, copied onto the air-gapped machine):
+#   needle3/needle3.cact  + needle3/libneedle.so (.dylib macOS, .dll Windows)
+#                                  Tier 2: Cactus Needle3 weights + native engine
+#   laya/                          Tier 3: Laya English checkpoint (model.safetensors,
+#                                  rl_agent_config.json, tokenizer/, encoder/)
+#   laya_calibration_coding.json   Tier-3 temperatures fitted for THIS head's question
+#   meddra_coder.json              Tier 4: trained re-ranker (XGBoost booster) ...
+#   meddra_coder.meta.json         ... and its feature contract (checked, see below)
+#   index_cache/                   written BY the app: the embedded dictionary, so a
+#                                  full release is embedded once, not on every run
+# eval/README.md says how each file is built. Nothing is downloaded at run time.
+# --------------------------------------------------------------------------- #
+ART_NEEDLE   = os.path.join("needle3", "needle3.cact")
+ART_LAYA     = os.path.join("laya", "model.safetensors")
+ART_LAYA_CAL = "laya_calibration_coding.json"
+ART_CODER    = "meddra_coder.json"
+RERANK_POOL  = 10    # real Tier 4 re-ranks this many retrieved terms, then keeps the top 3
+def _engine_file():
+    return {"Darwin": "libneedle.dylib", "Windows": "libneedle.dll"}.get(platform.system(), "libneedle.so")
+def _sha_file(p, n=16):
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for b in iter(lambda: f.read(1 << 20), b""): h.update(b)
+    return h.hexdigest()[:n]
 
 # --------------------------------------------------------------------------- #
 # Reviewer-set STARTING values. These are not magic constants the audit hides:
@@ -402,9 +463,10 @@ def collect_verbatims(domains, domain, col):
 #           and semantically-blind -- that blindness is the documented limit.
 def _bow(t, dim=384):
     """[SI] coding encoder: hashing bag-of-words, L2-normalized to a 384-dim
-    UNIT vector -- the SAME shape and unit-norm property the real SapBERT
-    encoder emits, so the downstream cosine math (dot product of unit vectors)
-    is identical and the tier boundary holds either way.
+    UNIT vector -- the same unit-norm property the real encoder's vectors have
+    (Needle3's are 3072-dim; the width does not matter to the contract), so the
+    downstream cosine math (dot product of unit vectors) is identical and the
+    tier boundary holds either way.
     DETERMINISM FIX (the one behavior change vs the prior version): token->bucket
     uses zlib.crc32, NOT Python's built-in hash(). hash() of a str is salted
     per-process (PYTHONHASHSEED), so the same verbatim could map to different
@@ -421,11 +483,37 @@ def _bow(t, dim=384):
     for tok in str(t).lower().split(): v[zlib.crc32(tok.encode())%dim]+=1.0
     n=np.linalg.norm(v); return v/n if n>0 else v
 
-# The real embedder is constructed ONCE at import if its libs are present; if
-# not, _agent is None and every Tier-2 call takes the stand-in branch. We do NOT
-# lazy-load inside the request path, because a slow first-call model load would
-# look like a hang and would not be reflected in the per-record latency.
-_agent = needle.Needle() if REAL_T2 else None
+# The real embedder is loaded ONCE per process by load_real (cached), before any
+# verbatim is processed; if its artifact is absent, _agent stays None and every
+# Tier-2 call takes the stand-in branch. We do NOT lazy-load inside the request
+# path, because a slow first-call load would look like a hang.
+@st.cache_resource(show_spinner="Embedding the dictionary with Needle3 (once per dictionary)...")
+def _t2_text(s):
+    """The string Needle3 embeds, for a dictionary term and a verbatim alike: lower-cased,
+    like every other matcher in this file (_bow, _lev, _jaro). Needle3's embedding is
+    case-sensitive (measured: "insomnia" vs "Insomnia" scores 0.948, below several
+    unrelated terms), and verbatims are typed in any case. Only the embedded copy is
+    folded; the verbatim itself still reaches the output byte for byte."""
+    return str(s).lower()
+def _real_index(names, cache_dir, weights_tag):
+    """Embed every dictionary term with Needle3 and build the HNSW graph, ONCE per
+    (dictionary content, weights) pair: cached in memory for the process and on disk
+    under models_dir/index_cache, because a full release takes tens of minutes to
+    embed on a CPU. add_items runs single-threaded so the graph (and therefore every
+    retrieval) is identical run to run; multi-threaded insertion can reorder it."""
+    key = hashlib.sha256("\n".join(names).encode()).hexdigest()[:16] + "_" + weights_tag
+    vf, gf = os.path.join(cache_dir, key + ".npy"), os.path.join(cache_dir, key + ".hnsw")
+    if os.path.isfile(vf) and os.path.isfile(gf):
+        V = np.load(vf); idx = hnswlib.Index(space="ip", dim=V.shape[1]); idx.load_index(gf, max_elements=len(V))
+    else:
+        V = np.vstack([np.asarray(_agent.embed(s), np.float32) for s in names])
+        V /= np.linalg.norm(V, axis=1, keepdims=True)   # enforce unit-norm so ip == cosine
+        idx = hnswlib.Index(space="ip", dim=V.shape[1])
+        idx.init_index(max_elements=len(V), ef_construction=200, M=32)
+        idx.add_items(V, np.arange(len(V)), num_threads=1)
+        try: os.makedirs(cache_dir, exist_ok=True); np.save(vf, V); idx.save_index(gf)
+        except OSError: pass                        # read-only models dir: memory only
+    idx.set_ef(64); return V, idx
 def t2_index(meddra):
     """Build the retrieval index ONCE over the dictionary's LLT strings, before
     any verbatim is processed (building per-query would be O(dictionary) every
@@ -435,7 +523,7 @@ def t2_index(meddra):
             against V (stand-in) or queries idx (real); either way row i of the
             result maps to meddra.iloc[i], so candidate assembly is shared.
       idx = the HNSW graph (real) or None (stand-in).
-    Real path: embed every llt_name to a unit vector, load into an hnswlib graph
+    Real path: embed every llt_name (lower-cased, _t2_text) to a unit vector, load into an hnswlib graph
     with space='ip' (inner product). Because the vectors are L2-normalized, ip
     distance == 1 - cosine, so the cheap graph search returns EXACT angular
     closeness -- this is why we can use the cheaper metric and still report
@@ -446,11 +534,7 @@ def t2_index(meddra):
     over V is exact and fine at demo scale; on a full 86k dictionary it is slow,
     which is itself a reason to install the real index)."""
     if REAL_T2:
-        V=np.vstack([np.asarray(_agent.embed(s),float) for s in meddra["llt_name"]])
-        V/=np.linalg.norm(V,axis=1,keepdims=True)   # enforce unit-norm so ip==cosine
-        idx=hnswlib.Index(space="ip",dim=V.shape[1])
-        idx.init_index(max_elements=len(V),ef_construction=200,M=32)
-        idx.add_items(V,np.arange(len(V))); idx.set_ef(64); return V,idx
+        return _real_index(tuple(_t2_text(x) for x in meddra["llt_name"]), _agent._index_cache, _agent._weights_tag)
     return np.vstack([_bow(s) for s in meddra["llt_name"]]), None
 
 def t2_coding(s, meddra, V, idx, k=3):
@@ -465,8 +549,10 @@ def t2_coding(s, meddra, V, idx, k=3):
     None if the dictionary was name-only -- Tier 4 handles that via has_codes.
     Proposes and measures; decides nothing (no threshold is applied here)."""
     if REAL_T2:
-        q=np.asarray(_agent.embed(s),float); q/=np.linalg.norm(q)
-        lab,dist=idx.knn_query(q.reshape(1,-1),k=k); order=lab[0]; cos=1.0-dist[0]
+        # The trained re-ranker (when loaded) re-orders a wider pool and keeps the top k.
+        kk=min(max(k, RERANK_POOL if REAL_T4 else k), len(V))
+        q=np.asarray(_agent.embed(_t2_text(s)),np.float32); q/=np.linalg.norm(q)
+        lab,dist=idx.knn_query(q.reshape(1,-1),k=kk); order=lab[0]; cos=1.0-dist[0]
     else:
         cos=V@_bow(s); order=np.argsort(-cos)[:k]; cos=cos[order]
     rows=[]
@@ -491,22 +577,33 @@ def t2_coding(s, meddra, V, idx, k=3):
 #           the same cosine; only a separate sentence-level reading separates
 #           them, and it must be separate so the separation is a READABLE NUMBER
 #           Tier 4 can weight, not a hidden weight inside the retrieval.
-# The router is warmed ONCE (preload=True) so the model load is not paid per
-# request; a cold load inside the loop would dominate the latency and look like
-# a stall. CODING_SCHEMA declares the one question the coding head asks.
-_router = laya.Router(preload=True) if REAL_T3 else None
-CODING_SCHEMA={"unambiguous":{"type":"noul","instructions":"Maps cleanly to one clinical concept?"}}
+# The checkpoint is loaded ONCE per process (load_real, cached) so the model load
+# is not paid per request; a cold load inside the loop would dominate the latency
+# and look like a stall. ONE local English checkpoint is loaded, not Laya's
+# Router: the router picks among three checkpoints by language and sends short
+# English strings to the multilingual one, which ships with no fitted
+# temperatures. CODING_SCHEMA declares the one question the coding head asks; its
+# temperatures (laya_calibration_coding.json) are fitted for exactly this wording,
+# so editing the text means refitting them (eval/README.md).
+CODING_SCHEMA={"unambiguous":{"type":"noul",
+    "instructions":"Does this adverse-event text report one specific medical problem that the participant actually had?",
+    "criteria":{"false":"negated, denied, ruled out, uncertain, or several problems","true":"one problem the participant had"}}}
+def t3_coding_batch(texts):
+    """Tier 3 for many verbatims in one batched pass (about half the per-item cost
+    of one call each). Real: P(true) of the noul question, calibrated by the fitted
+    temperatures. Stand-in: None for every item (see t3_coding)."""
+    if not REAL_T3: return [dict(P_UNAMBIGUOUS=None) for _ in texts]
+    out=_router.predict_batch([str(t) for t in texts], CODING_SCHEMA)
+    return [dict(P_UNAMBIGUOUS=round(float(o["answers"]["unambiguous"]["noul"]),4)) for o in out]
 def t3_coding(s):
-    """Coding context scalar. Real: route s against CODING_SCHEMA -> a calibrated
+    """Coding context scalar. Real: Laya answers CODING_SCHEMA on s -> a calibrated
     P(Unambiguous) in [0,1] (one non-autoregressive pass, no text generated, so
     the output is deterministic and the number is calibratable). Stand-in: emits
     None -- the lexical build has no sentence-intent model, and we refuse to fake
     a probability. Consequence downstream: Tier 4's feature row simply OMITS this
     column; the gate still runs on the remaining named columns. This is a
     documented limit of the stand-in, not a silent substitution of a guess."""
-    if REAL_T3:
-        r=_router.route(s,CODING_SCHEMA); return dict(P_UNAMBIGUOUS=float(r.unambiguous))
-    return dict(P_UNAMBIGUOUS=None)
+    return t3_coding_batch([s])[0]
 
 # ============================ TIER 4 ============================
 # CONSUMES: ONLY the named columns from Tiers 1-3 (cosine, the ambiguity scalar,
@@ -560,8 +657,9 @@ def _jaro(a,b):
     return j+0.1*l*(1-j) if j>0.7 else j
 
 # [SI] composite weights (sum to 1 by construction). These are the STAND-IN's
-# declared blend; the REAL path is a TRAINED pairwise-LTR (LambdaMART) booster
-# whose weights are learned from historical coder decisions, not typed here. We
+# declared blend; the REAL path is a TRAINED booster (XGBoost, binary:logistic,
+# so its score reads as P(candidate is the right code)) learned from labeled
+# examples (eval/README.md), not weights typed here. We
 # keep the same four-term structure so the feature CONTRACT is identical either
 # way -- only the weight source changes. soc_match is currently always 1 because
 # this build does not infer a body-system context to compare against; a trained
@@ -586,9 +684,22 @@ def t4_coding(cands,s,gate,has_codes,amb):
     lev=[round(_lev(s,r.LLT),4) for r in cands.itertuples()]
     jar=[round(_jaro(s,r.LLT),4) for r in cands.itertuples()]
     soc=[1]*len(cands)
-    S=[round(SI_W[0]*r.cosine+SI_W[1]*lv+SI_W[2]*ja+SI_W[3]*so,4)
-       for r,lv,ja,so in zip(cands.itertuples(),lev,jar,soc)]
-    cands=cands.assign(lev=lev,jaro=jar,soc_match=soc,S=S)
+    if REAL_T4:
+        # Trained re-ranker: the feature row is built in the ORDER the booster's
+        # contract file names (meddra_coder.meta.json), scored, re-ranked, and the
+        # top 3 kept, so the export shape is the same as the stand-in's.
+        booster,meta=_coder
+        feat=dict(cosine=list(cands["cosine"]),lev=lev,jaro=jar,soc_match=soc,
+                  p_unambiguous=[np.nan if amb is None else amb]*len(cands),ret_rank=list(cands["rank"]))
+        X=np.array([[feat[f][i] for f in meta["features"]] for i in range(len(cands))],float)
+        S=[round(float(v),4) for v in booster.predict(xgboost.DMatrix(X,feature_names=meta["features"]))]
+        cands=(cands.assign(lev=lev,jaro=jar,soc_match=soc,S=S)
+               .sort_values("S",ascending=False,kind="stable").head(3).reset_index(drop=True))
+        cands["rank"]=range(1,len(cands)+1)
+    else:
+        S=[round(SI_W[0]*r.cosine+SI_W[1]*lv+SI_W[2]*ja+SI_W[3]*so,4)
+           for r,lv,ja,so in zip(cands.itertuples(),lev,jar,soc)]
+        cands=cands.assign(lev=lev,jaro=jar,soc_match=soc,S=S)
     top=cands.iloc[0]
     auto=(top.S>=gate) and has_codes
     return cands,("AUTO_COMMIT_TO_SDTM" if auto else "FLAGGED_FOR_HUMAN_CODER"),top
@@ -611,10 +722,99 @@ def _guard_artifacts(models_dir):
     below are a CONVENTION the operator must match when dropping real weights;
     an unexpected name is simply not guarded (it would just not be loaded)."""
     if not os.path.isdir(models_dir): return
-    for art,lib in [("meddra_coder.json","xgboost"),("needle3.onnx","needle"),("laya.onnx","laya")]:
-        if os.path.exists(os.path.join(models_dir,art)) and not HAVE.get(lib,False):
-            st.error(f"{art} present but '{lib}' not installed. Install '{lib}' or remove "
-                     f"the artifact -- the engine will NOT silently substitute a stand-in."); st.stop()
+    for art,libs in [(ART_CODER,("xgboost",)),(ART_NEEDLE,("needle","hnswlib")),(ART_LAYA,("laya",))]:
+        miss=[l for l in libs if not HAVE.get(l,False)]
+        if os.path.exists(os.path.join(models_dir,art)) and miss:
+            st.error(f"{art} present but {', '.join(repr(m) for m in miss)} not installed (laya also needs "
+                     f"torch and transformers). Install it or remove the artifact -- the engine will NOT "
+                     f"silently substitute a stand-in."); st.stop()
+
+def _load_laya(d,cal):
+    """laya.load with the fitted calibration file, if there is one. Laya warns when the
+    file records a different checkpoint PATH; a models dir moves between machines by
+    design, so a path-only mismatch is expected and dropped. A different checkpoint
+    CONFIG means the temperatures were fitted for another model, so it is refused like
+    any other artifact that cannot be used (the UI stops on it)."""
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        ag=laya.load(d,device="cpu",calibration=cal)
+    for w in caught:
+        m=str(w.message)
+        if "Checkpoint config identity differs" in m:
+            raise ValueError(f"{ART_LAYA_CAL} was fitted for a different Laya checkpoint (refit it, eval/README.md)")
+        if "calibration was fitted for" not in m: warnings.warn_explicit(w.message,w.category,w.filename,w.lineno)
+    return ag
+
+def _artifact_stamp(models_dir):
+    """The rest of load_real's cache key: size and mtime of each artifact it reads, so
+    adding, replacing or removing a file is picked up on the next run instead of a
+    stale load being served for the life of the process."""
+    md=os.path.abspath(models_dir); out=[]
+    for a in (ART_NEEDLE,os.path.join("needle3",_engine_file()),ART_LAYA,ART_LAYA_CAL,ART_CODER,ART_CODER.replace(".json",".meta.json")):
+        try: st_=os.stat(os.path.join(md,a)); out.append((a,st_.st_size,st_.st_mtime_ns))
+        except OSError: out.append((a,None,None))
+    return tuple(out)
+
+@st.cache_resource(show_spinner="Loading the real models from the models dir...")
+def load_real(models_dir, stamp=None):
+    """Load every trained artifact in models_dir whose runtime is installed, ONCE per
+    process (st.cache_resource). Returns dict(T2,T3,T4,info,errors): None for a tier that
+    runs its stand-in; info holds what loaded (file names + content hashes) for the audit;
+    errors lists any artifact that is PRESENT but failed to load (the UI stops on it).
+    Nothing here reaches the network: Needle3 gets explicit file paths (never its
+    ~/.cache copy), Laya a local directory, and HF_HUB_OFFLINE is set at the top."""
+    R=dict(T2=None,T3=None,T4=None,info={},errors=[]); md=os.path.abspath(models_dir)
+    w,eng=os.path.join(md,ART_NEEDLE),os.path.join(md,"needle3",_engine_file())
+    try:
+        if needle and hnswlib and os.path.isfile(w) and os.path.isfile(eng):
+            os.environ["NEEDLE3_LIB_PATH"]=eng          # the engine from the models dir, nowhere else
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")          # "no confidence head": this head only embeds
+                ag=needle.Needle(weights=w)
+            ag._weights_tag=_sha_file(w); ag._index_cache=os.path.join(md,"index_cache")
+            R["T2"]=ag; R["info"]["needle3"]=f"needle3.cact sha256:{ag._weights_tag}"
+    except Exception as e: R["errors"].append(f"{os.path.relpath(w,md)}: {type(e).__name__}: {e}")
+    if R["T2"] is None and needle and hnswlib and os.path.isfile(w) and not os.path.isfile(eng):
+        R["errors"].append(f"{ART_NEEDLE}: its engine {os.path.relpath(eng,md)} is missing")
+    lp=os.path.join(md,ART_LAYA)
+    try:
+        if laya and os.path.isfile(lp):
+            cal=os.path.join(md,ART_LAYA_CAL)
+            R["T3"]=_load_laya(os.path.dirname(lp),cal if os.path.isfile(cal) else None)
+            R["info"]["laya"]=(f"laya/ sha256:{_sha_file(lp)}; calibration "
+                               +(f"{ART_LAYA_CAL} sha256:{_sha_file(cal)}" if os.path.isfile(cal) else "NONE (uncalibrated)"))
+    except Exception as e: R["errors"].append(f"{os.path.relpath(lp,md)}: {type(e).__name__}: {e}")
+    bp=os.path.join(md,ART_CODER)
+    try:
+        if xgboost and os.path.isfile(bp):
+            b=xgboost.Booster(); b.load_model(bp)
+            mp=bp.replace(".json",".meta.json"); meta=json.load(open(mp)) if os.path.isfile(mp) else None
+            R["T4"]=(b,meta); R["info"]["coder"]=f"{ART_CODER} sha256:{_sha_file(bp)}"
+    except Exception as e: R["errors"].append(f"{os.path.relpath(bp,md)}: {type(e).__name__}: {e}")
+    return R
+
+def _activate(R):
+    """Point the tier functions at what load_real found. They read these module
+    globals at call time, so the stand-in stays the default until this runs."""
+    global _agent,_router,_coder,REAL_T2,REAL_T3,REAL_T4
+    _agent,_router,_coder=R["T2"],R["T3"],R["T4"]
+    REAL_T2,REAL_T3,REAL_T4=_agent is not None,_router is not None,_coder is not None
+
+def _contract_error(R):
+    """The re-ranker was trained on features from SPECIFIC upstream tiers; scoring
+    stand-in cosines with a booster trained on Needle3 cosines would be a silent
+    wrong answer. Returns a plain-language reason when the loaded tiers do not match
+    the booster's contract file (or it has none), else None."""
+    if R["T4"] is None: return None
+    meta=R["T4"][1]
+    if not meta: return f"{ART_CODER} has no {ART_CODER.replace('.json','.meta.json')} feature contract next to it."
+    need=meta.get("requires",{})
+    if need.get("T2") and R["T2"] is None: return "the re-ranker was trained on Needle3 retrieval, but no Needle3 artifact loaded."
+    if need.get("T3") and R["T3"] is None: return "the re-ranker was trained with the Laya ambiguity scalar, but no Laya checkpoint loaded."
+    q=hashlib.sha256(json.dumps(CODING_SCHEMA,sort_keys=True).encode()).hexdigest()[:16]
+    if need.get("T3") and meta.get("tier3_question_sha") not in (None,q):
+        return "the Tier-3 question text changed since the re-ranker was trained (refit it, eval/README.md)."
+    return None
 
 # ============================ UI ============================
 # Layout order is deliberate: gather WHERE the data is (1), set the operating
@@ -669,7 +869,7 @@ One row per candidate (top-3), so a coder sees the whole pre-populated list, not
 > A **name-only dictionary** (no PT codes) forces every verbatim to route to a human — an `AEPTCD` without a number is not submission-grade. The pre-flight panel warns you up front.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
-Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install `cactus-needle`, `hnswlib`, `laya`, `xgboost` and the banner flips tier-by-tier; columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
+Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
 ### Troubleshooting
 - **"No MedDRA source found":** provide exactly one dictionary shape (upload CSV / set the .asc folder / name it `meddra*.csv` in the cut folder).
@@ -745,6 +945,18 @@ models_dir = st.sidebar.text_input("Models dir (optional real weights)","models"
          "the app STOPS rather than silently substituting a stand-in.")
 if HOSTED: models_dir = "models"
 _guard_artifacts(models_dir)   # runs on every rerun, before any compute
+# Load whatever trained artifacts the models dir holds (cached: once per process),
+# point the tiers at them, and refuse to run on a re-ranker whose feature contract
+# the loaded tiers do not meet -- same "no silent substitution" rule as the guard.
+_R=load_real(os.path.abspath(models_dir), _artifact_stamp(models_dir))   # keyed on content, not the typed path
+if _R["errors"]:
+    st.error("A trained artifact in the models dir is present but failed to load, so the run stops rather than "
+             "fall back to a stand-in: "+" | ".join(_R["errors"])); st.stop()
+_activate(_R)
+_cerr=_contract_error(_R)
+if _cerr:
+    st.error(f"Tier 4 re-ranker cannot run: {_cerr} Fix the models dir; the engine will NOT score with a "
+             f"mismatched model."); st.stop()
 
 # ---- LOAD now (dictionary cached) so the pre-flight panel + selector are live.
 #      Errors are captured into load_err and SURFACED in the panel, not raised as
@@ -772,9 +984,9 @@ verb_sel = st.sidebar.selectbox("Verbatim source column (this program reads ONLY
 #      from a constant. This is the [SI]/[RM] discipline made visible: a stand-in
 #      is never presented as the component. ----
 banner = "Tier 2: %s | Tier 3: %s | Tier 4: %s" % (
-    "REAL needle+hnsw" if REAL_T2 else "STAND-IN [SI] (lexical)",
-    "REAL laya" if REAL_T3 else "STAND-IN [SI]",
-    "REAL xgboost" if REAL_T4 else "STAND-IN [SI]")
+    "REAL needle3+hnsw" if REAL_T2 else "STAND-IN [SI] (lexical)",
+    ("REAL laya" + ("" if "calibration NONE" not in _R["info"].get("laya","") else " (UNCALIBRATED)")) if REAL_T3 else "STAND-IN [SI]",
+    "REAL xgboost re-ranker" if REAL_T4 else "STAND-IN [SI]")
 st.info("**Mode banner** — "+banner+" · a [SI] stand-in is never the component; the "
         "audit records which path ran per tier. Without the trained encoder, Tier-2 "
         "retrieval is lexical and will not reproduce semantic MedDRA mappings.")
@@ -824,10 +1036,12 @@ V, idx = t2_index(meddra)            # build the index ONCE over the dictionary
 has_codes = "pt_code" in meddra.columns and meddra["pt_code"].notna().any()
 coded_rows=[]; log=[]
 if len(verbatims):
-    for _,vr in verbatims.iterrows():
+    # Tier 3 runs as ONE batched pass over every verbatim (real path), before the loop.
+    amb_all=t3_coding_batch(list(verbatims["VERBATIM"]))
+    for vi,(_,vr) in enumerate(verbatims.iterrows()):
         s=vr["VERBATIM"]
         cands=t2_coding(s,meddra,V,idx)            # Tier 2: retrieve + cosine
-        amb=t3_coding(s)                           # Tier 3: ambiguity scalar (or None)
+        amb=amb_all[vi]                            # Tier 3: ambiguity scalar (or None)
         cands,status,top=t4_coding(cands,s,code_gate,has_codes,amb["P_UNAMBIGUOUS"])  # Tier 4
         # One output row PER CANDIDATE so the human queue can see the full
         # pre-populated top-k, not just the winner; rank-1 carries the status,
@@ -869,6 +1083,7 @@ audit=pd.DataFrame([dict(program="meddra_coder", timestamp=pd.Timestamp.now().is
     mode_T2="REAL" if REAL_T2 else "STAND-IN", mode_T3="REAL" if REAL_T3 else "STAND-IN",
     mode_T4="REAL" if REAL_T4 else "STAND-IN", coding_gate=code_gate,
     coding_note="single threshold on the re-rank score; no negation conjunct",
+    real_artifacts=json.dumps(_R["info"]) if _R["info"] else "none (all tiers stand-in)",
     n_coded_rows=len(coded_rows),
     n_auto=sum(1 for r in coded_rows if r.get("AECODSTAT")=="AUTO_COMMIT_TO_SDTM" and r.get("rank")==1),
     measured_latency_ms=round(elapsed,2))])

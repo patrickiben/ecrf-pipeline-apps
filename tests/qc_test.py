@@ -5,7 +5,7 @@ the apps. Run with a Python that has the app deps installed:
     pip install -r ../requirements.txt && python tests/qc_test.py
 Exit code 0 = all checks pass.
 """
-import os, re, sys, shutil, hashlib, tempfile
+import os, re, sys, json, shutil, hashlib, tempfile
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))      # .../biostat_pipeline_apps/tests
@@ -543,8 +543,17 @@ for _sub,_src in (("cut",os.path.join(SAMPLE,"ae.csv")),("labs",os.path.join(ANO
     os.makedirs(os.path.join(HDECOY,_sub)); shutil.copy(_src, os.path.join(HDECOY,_sub,"decoyfolder.csv"))
 shutil.copy(os.path.join(SAMPLE,"meddra_demo.csv"), os.path.join(HDECOY,"cut"))
 os.makedirs(os.path.join(HDECOY,"models"))
-for _art in ("meddra_coder.json","needle3.onnx","laya.onnx","phi_token_classifier.json","risk_model.json","anomaly_model.json"):
-    open(os.path.join(HDECOY,"models",_art),"w").close()
+# Every artifact name a guard looks for (the coding/PHI real-path layout keeps the model weights in
+# needle3/ and laya/ subfolders of the models dir).
+GUARD_ARTS = ("meddra_coder.json",os.path.join("needle3","needle3.cact"),os.path.join("laya","model.safetensors"),
+              "phi_token_classifier.json","risk_model.json","anomaly_model.json")
+def _touch_arts(models):
+    for _art in GUARD_ARTS:
+        os.makedirs(os.path.dirname(os.path.join(models,_art)), exist_ok=True); open(os.path.join(models,_art),"w").close()
+_touch_arts(os.path.join(HDECOY,"models"))
+# A guard fires with "<artifact> present but <runtime> not installed" (coding/PHI) or, for an app with no
+# trained-model path at all (risk/anomaly), "<artifact> found, but this build has no trained-... path".
+def _guard_msgs(at): return [e.value for e in at.error if "present but" in e.value or "found, but" in e.value]
 HTMP = os.path.join(SCRATCH,"hosted_tmp"); os.makedirs(HTMP, exist_ok=True)
 SRC_AE = os.path.join(SAMPLE,"ae.csv"); SRC_LABS = os.path.join(ANOM,"labs.csv")
 ASC_RADIO = "ASCII release (llt/pt/hlt/hlgt/soc.asc)"
@@ -623,7 +632,6 @@ def _restore_secrets():
     except Exception: pass
     _st.secrets=_SEC0; _stcfg.set_option("secrets.files", _SECFILES0)
     for k in ("ECRF_HOSTED","some_api_key","hosted"): os.environ.pop(k, None)
-GUARD_ARTS = ("meddra_coder.json","needle3.onnx","laya.onnx","phi_token_classifier.json","risk_model.json","anomaly_model.json")
 
 _saved_tmp = tempfile.tempdir; tempfile.tempdir = HTMP
 try:
@@ -753,7 +761,7 @@ try:
                       not af.exception and "meddra_demo.csv" in mdm and ".asc release @" not in mdm, mdm[:300])
             # the models dir is forged LAST: if it got through, the artifact guard stops every later rerun
             _forge_text(af, A["models"], os.path.join(HDECOY,"models")); af.run()
-            guard = [e.value for e in af.error if "present but" in e.value]
+            guard = _guard_msgs(af)
             check(f"{P}16 crafted client, server-side drop off: forged Output folder + models dir ignored (outputs only in the session temp folder)",
                   ran and not guard and not af.exception and not os.path.exists(dout)
                   and _hm_ok(aud,"true") and "decoy" not in aud.to_csv(index=False).lower(),
@@ -767,12 +775,12 @@ try:
 
         # ---- 19-20: the artifact guard's st.stop() keeps the banners; the temp folder goes with its session ----
         gdir=os.path.join(HDECOY,f"guard_{c}"); os.makedirs(os.path.join(gdir,"models"), exist_ok=True); cwd0=os.getcwd()
-        for _art in GUARD_ARTS: open(os.path.join(gdir,"models",_art),"w").close()
+        _touch_arts(os.path.join(gdir,"models"))
         os.environ["ECRF_HOSTED"]="1"
         try:
             os.chdir(gdir)   # hosted mode pins models_dir to the cwd-relative "models", here full of guarded artifacts
             ag = AppTest.from_file(path, default_timeout=120); ag.run()
-            guard=[e.value for e in ag.error if "present but" in e.value]
+            guard=_guard_msgs(ag)
             check(f"{P}19 hosted: the artifact guard's st.stop() still leaves both banners on the page",
                   bool(guard) and len(_banners(ag.main))==1 and len(_banners(ag.sidebar))==1,
                   dict(guard=guard or "did not fire (is the runtime installed?)", banners=(len(_banners(ag.main)),len(_banners(ag.sidebar)))))
@@ -945,6 +953,281 @@ try:
           not miss and nloc["readme"]>=1 and nloc["index"]>=1 and not unused, dict(local_refs=nloc, missing=miss, unused_images=unused))
 except Exception as e: check("D3 docs references block raised", False, repr(e))
 
-print("\n==== SUMMARY:", len(PASS), "passed,", len(FAIL), "failed ====")
+# ---------------------------------------------------------------- real model path (RM / RW checks)
+# Two kinds of check for the coding and PHI apps' REAL path (Needle3 + hnswlib + Laya + XGBoost):
+#   RM  real models. Run ONLY when ECRF_MODELS_DIR names a models dir holding the trained artifacts
+#       (layout: eval/README.md) and the real runtimes import; otherwise each is reported SKIPPED, never
+#       passed. They assert the REAL banner/audit and that the Deck B worked rows reproduce the measured
+#       values recorded in eval/results/deck_b_worked.json.
+#   RW  wiring, ALWAYS run (CI has no models): small stub packages named needle/hnswlib/laya/xgboost
+#       (plus torch/transformers) are put first on sys.path, and the apps are driven with models dirs in
+#       different states. They pin the fixes for the defects in docs/FEASIBILITY.md: modules bound (no
+#       NameError), REAL only when an artifact LOADS, Laya probed with its torch/transformers runtime,
+#       an unrelated 'needle' rejected, a trained gate refused when its feature contract is not met, a
+#       corrupt artifact stopping the run, a Laya calibration fitted for another checkpoint refused (one
+#       fitted on another machine accepted), a changed models dir reloaded rather than served from a stale
+#       cache, the risk/anomaly apps never claiming a model they cannot load.
+# RM runs first: the RW block swaps the stub packages in and the real modules back out afterwards
+# (sys.modules is restored, so a real torch is never re-imported in this process).
+SKIP = []
+def skip(name, why):
+    SKIP.append((name, why)); print("SKIP " + name + " | " + why)
+
+RP_MODULES = ("needle","hnswlib","laya","xgboost","torch","transformers")
+def _rp_find(at, kind, label):
+    for w in getattr(at, kind):
+        if w.label == label: return w
+    return None
+def _rp_banner(at):
+    return next((i.value for i in at.info if "Mode banner" in i.value), "")
+def _rp_run(app, folder, models, out, execute=True):
+    A = AppTest.from_file(os.path.join(APP_DIR, app), default_timeout=1800); A.run()
+    lab = {"meddra_app.py":"Cut folder path (domain CSVs)","phi_app.py":"Cut folder path (domain CSVs)",
+           "risk_app.py":"Cut folder path (safety domains)","anomaly_app.py":"Cut folder path (CSV or SAS .sas7bdat)"}[app]
+    find(A,"text_input",lab).set_value(folder).run()
+    mlabel = "Models dir (optional real weights)" if app in ("meddra_app.py","phi_app.py") else "Models dir (optional real model)"
+    find(A,"text_input",mlabel).set_value(models).run()
+    find(A,"text_input","Output folder").set_value(out).run()
+    if execute and not A.exception and not [e for e in A.error if "cannot run" in e.value or "failed to load" in e.value
+                                             or "present but" in e.value or "found, but" in e.value]:
+        btn = next((b for b in A.button if b.label.startswith("🚀")), None)
+        if btn is not None and not btn.disabled: btn.set_value(True).run()
+    return A
+def _rp_audit(out):
+    p = os.path.join(out, "audit_log.csv"); return pd.read_csv(p).iloc[0] if os.path.exists(p) else None
+
+# ---- RM: real models (skip cleanly when absent) ----
+RM_DIR = os.environ.get("ECRF_MODELS_DIR", "")
+def _real_runtimes():
+    try:
+        import importlib
+        for m, a in (("needle","Needle"),("hnswlib","Index"),("laya","load"),("xgboost","Booster"),("torch",None),("transformers",None)):
+            mod = importlib.import_module(m)
+            if a and not hasattr(mod, a): return f"'{m}' has no {a}"
+        return None
+    except Exception as e: return f"{type(e).__name__}: {e}"
+_need = ["needle3/needle3.cact","laya/model.safetensors","meddra_coder.json","phi_token_classifier.json",
+         "laya_calibration_coding.json","laya_calibration_phi.json"]
+_why = ("ECRF_MODELS_DIR not set" if not RM_DIR else
+        f"ECRF_MODELS_DIR={RM_DIR} lacks {[n for n in _need if not os.path.exists(os.path.join(RM_DIR,n))]}"
+        if any(not os.path.exists(os.path.join(RM_DIR,n)) for n in _need) else _real_runtimes())
+RM_NAMES = ["RM1 coding real path: banner + audit REAL on every tier, artifacts hashed in the audit",
+            "RM2 coding real path: Deck B worked rows reproduce the recorded measured values",
+            "RM3 coding real path: bit-identical ae_coded.csv across two runs",
+            "RM4 PHI real path: banner + audit REAL on every tier",
+            "RM5 PHI real path: Deck B worked fields reproduce the recorded measured values"]
+WORKED = os.path.join(APP_DIR, "eval", "results", "deck_b_worked.json")
+if _why:
+    for n in RM_NAMES: skip(n, _why)
+else:
+    try:
+        rec = json.load(open(WORKED)) if os.path.exists(WORKED) else {}
+        o1, o2 = os.path.join(SCRATCH,"rm_meddra1"), os.path.join(SCRATCH,"rm_meddra2")
+        A = _rp_run("meddra_app.py", SAMPLE, RM_DIR, o1); aud = _rp_audit(o1)
+        check(RM_NAMES[0], not A.exception and aud is not None and (aud["mode_T2"],aud["mode_T3"],aud["mode_T4"])==("REAL","REAL","REAL")
+              and "sha256:" in str(aud["real_artifacts"]) and "UNCALIBRATED" not in _rp_banner(A),
+              dict(exc=[str(e.value)[:150] for e in A.exception], banner=_rp_banner(A)[:160]))
+        cod = pd.read_csv(os.path.join(o1,"ae_coded.csv")) if os.path.exists(os.path.join(o1,"ae_coded.csv")) else None
+        got = {} if cod is None else {r.VERBATIM: [round(float(r.S),4), r.AEDECOD, r.AECODSTAT] for r in cod[cod["rank"]==1].itertuples()}
+        want = rec.get("coding", {})
+        check(RM_NAMES[1], bool(want) and all(v in got and abs(got[v][0]-w["S"])<1e-3 and got[v][1]==w["AEDECOD"] for v,w in want.items()),
+              dict(want=want, got={v:got.get(v) for v in want}))
+        _rp_run("meddra_app.py", SAMPLE, RM_DIR, o2)
+        check(RM_NAMES[2], os.path.exists(os.path.join(o2,"ae_coded.csv")) and sha(os.path.join(o1,"ae_coded.csv"))==sha(os.path.join(o2,"ae_coded.csv")), "")
+        o3 = os.path.join(SCRATCH,"rm_phi"); A = _rp_run("phi_app.py", SAMPLE, RM_DIR, o3); aud = _rp_audit(o3)
+        check(RM_NAMES[3], not A.exception and aud is not None and (aud["mode_T2"],aud["mode_T3"],aud["mode_T4"])==("REAL","REAL","REAL"),
+              dict(exc=[str(e.value)[:150] for e in A.exception], banner=_rp_banner(A)[:160]))
+        fl = pd.read_csv(os.path.join(o3,"phi_flags.csv")) if os.path.exists(os.path.join(o3,"phi_flags.csv")) else pd.DataFrame()
+        gotp = {f"{r.DOMAIN}|{r.ROW}|{r.FIELD}|{r.SPAN}": round(float(r.P_REDACT),4) for r in fl.itertuples()} if len(fl) else {}
+        wantp = rec.get("phi_redact", {})
+        check(RM_NAMES[4], bool(wantp) and all(k in gotp and abs(gotp[k]-v)<1e-3 for k,v in wantp.items()),
+              dict(missing=[k for k in wantp if k not in gotp][:5], diff={k:(gotp.get(k),v) for k,v in wantp.items() if k in gotp and abs(gotp[k]-v)>=1e-3}))
+    except Exception as e: check("RM real-path block raised", False, repr(e))
+
+# ---- RW: wiring with stub packages (always run) ----
+STUB_SRC = {
+ "needle/__init__.py": '''
+import numpy as np, re, zlib
+class Needle:
+    def __init__(self, tools=None, system=None, weights=None, auto_date=True, stateless=False, **kw):
+        self.weights = weights; self.tools = tools
+    def embed(self, text=""):
+        v = np.zeros(32)
+        t = str(text).lower()
+        for i in range(len(t) - 2): v[zlib.crc32(t[i:i+3].encode()) % 32] += 1.0
+        n = np.linalg.norm(v); return list(v / n if n else v)
+    def complete(self, text="", max_new_tokens=512):
+        m = re.search(r"Patient ([A-Z][a-z]+ [A-Z][a-z]+)", text)
+        return {"function_calls": [{"name": "record_identifiers", "arguments": {"person_name": m.group(1) if m else None}}]}
+''',
+ "hnswlib/__init__.py": '''
+import numpy as np
+class Index:
+    def __init__(self, space, dim): self.dim = dim; self.V = np.zeros((0, dim)); self.ef = 10
+    def init_index(self, max_elements, ef_construction=200, M=16): pass
+    def add_items(self, V, ids=None, num_threads=-1): self.V = np.asarray(V, np.float32)
+    def set_ef(self, ef): self.ef = ef
+    def knn_query(self, q, k=1):
+        s = self.V @ np.asarray(q, np.float32).reshape(-1); o = np.argsort(-s)[:k]
+        return o.reshape(1, -1), (1.0 - s[o]).reshape(1, -1)
+    def save_index(self, p): np.save(p + ".npy", self.V); open(p, "w").write("stub")
+    def load_index(self, p, max_elements=0): self.V = np.load(p + ".npy")
+''',
+ "laya/__init__.py": '''
+import json, warnings
+def load(path, device=None, calibration=None, **kw):
+    d = json.load(open(calibration)) if calibration else {}
+    if d.get("model_id_or_path"):            # Laya's identity warning, path-only or config too
+        warnings.warn("calibration was fitted for model_id_or_path=%r subfolder=None but this agent is "
+                      "model_id_or_path=%r subfolder=None.%s Loading the temperatures anyway."
+                      % (d["model_id_or_path"], path, " Checkpoint config identity differs." if d.get("config") == "other" else ""), UserWarning)
+    return _Agent()
+class _Agent:
+    temperature_by_options = {"noul:2": 1.0}
+    def predict_batch(self, states, questions):
+        out = []
+        for s in states:
+            neg = any(w in str(s).lower() for w in ("denies", "no ", "ruled out", "negative"))
+            out.append({"answers": {q: {"type": "noul", "noul": (0.1 if neg else 0.9) if q == "unambiguous" else 0.5} for q in questions}})
+        return out
+    def predict(self, state, questions): return self.predict_batch([state], questions)[0]
+''',
+ "xgboost/__init__.py": '''
+import json, math
+class DMatrix:
+    def __init__(self, X, label=None, feature_names=None): self.X = X; self.names = feature_names
+class Booster:
+    def load_model(self, p):
+        self.w = json.load(open(p))["stub_weights"]
+    def predict(self, d):
+        out = []
+        for row in d.X:
+            z = sum(self.w.get(n, 0.0) * (0.0 if v != v else v) for n, v in zip(d.names, row)) + self.w.get("bias", 0.0)
+            out.append(1.0 / (1.0 + math.exp(-z)))
+        return out
+''',
+ "torch/__init__.py": "\n", "transformers/__init__.py": "\n"}
+RW = os.path.join(SCRATCH, "realpath_stubs")
+def _rw_pkgs(variant):
+    """Write one stub package set. variant: 'full' | 'no_torch' (torch import fails) | 'css_needle' (an
+    unrelated 'needle' without the Needle class)."""
+    root = os.path.join(RW, "pkgs_" + variant); shutil.rmtree(root, ignore_errors=True)
+    for rel, src in STUB_SRC.items():
+        if variant == "no_torch" and rel.startswith("torch"): src = "raise ImportError('stub: torch absent')\n"
+        if variant == "css_needle" and rel.startswith("needle"): src = "__version__ = '0.5.0'  # unrelated CSS-testing package\n"
+        os.makedirs(os.path.dirname(os.path.join(root, rel)), exist_ok=True); open(os.path.join(root, rel), "w").write(src)
+    return root
+def _rw_models(name, arts):
+    """A models dir holding the named artifacts (empty weight files; stub-readable booster JSON)."""
+    md = os.path.join(RW, "models_" + name); shutil.rmtree(md, ignore_errors=True)
+    for a in arts:
+        p = os.path.join(md, a); os.makedirs(os.path.dirname(p), exist_ok=True)
+        if a.endswith("coder.json") or a.endswith("classifier.json"):
+            w = ({"cosine": 6.0, "p_unambiguous": 3.0, "bias": -5.0} if "coder" in a else {"src_pattern": 6.0, "bias": -3.0})
+            open(p, "w").write(json.dumps({"stub_weights": w}))
+            feats = (["cosine","lev","jaro","soc_match","p_unambiguous","ret_rank"] if "coder" in a else
+                     ["src_needle","src_pattern","p_direct","p_quasi","n_indirect","digit_ratio","capitalized","rel_pos","span_len","cue"]
+                     + [f"ent_{e}" for e in ("PERSON_NAME","PHONE","EMAIL","MRN","DOB","ZIP","INITIALS","AGE")])
+            open(p.replace(".json", ".meta.json"), "w").write(json.dumps({"features": feats, "requires": {"T2": "needle3", "T3": "laya"}}))
+        elif a in ("CAL_OTHER_PATH", "CAL_OTHER_CKPT"):    # a calibration fitted elsewhere / for another checkpoint
+            open(os.path.join(md, "laya_calibration_coding.json"), "w").write(json.dumps(
+                {"model_id_or_path": "/elsewhere/laya", "config": "other" if a == "CAL_OTHER_CKPT" else "same"}))
+        elif a == "BROKEN_coder":
+            open(os.path.join(md, "meddra_coder.json"), "w").write("{not json")
+        elif a.endswith(".json"): open(p, "w").write("{}")
+        else: open(p, "wb").write(b"stub")
+    return md
+FULL_CODING = ["needle3/needle3.cact", "needle3/libneedle.so", "needle3/libneedle.dylib", "needle3/libneedle.dll",
+               "laya/model.safetensors", "laya_calibration_coding.json", "meddra_coder.json"]
+FULL_PHI = ["needle3/needle3.cact", "needle3/libneedle.so", "needle3/libneedle.dylib", "needle3/libneedle.dll",
+            "laya/model.safetensors", "laya_calibration_phi.json", "phi_token_classifier.json"]
+_saved = {m: sys.modules[m] for m in list(sys.modules) if m.split(".")[0] in RP_MODULES}
+_env0 = {k: os.environ.get(k) for k in ("HF_HUB_OFFLINE","NEEDLE_TELEMETRY","DO_NOT_TRACK","NEEDLE3_LIB_PATH")}
+def _rw_use(variant):
+    for m in [m for m in list(sys.modules) if m.split(".")[0] in RP_MODULES]: del sys.modules[m]
+    sys.path[:] = [p for p in sys.path if not p.startswith(RW)]
+    if variant: sys.path.insert(0, _rw_pkgs(variant))
+try:
+    n_verb = int(pd.read_csv(os.path.join(SAMPLE,"ae.csv"))["AETERM"].notna().sum())
+    _rw_use("full")
+    for k in ("HF_HUB_OFFLINE","NEEDLE_TELEMETRY","DO_NOT_TRACK"): os.environ.pop(k, None)   # the app must set them itself
+    o = os.path.join(SCRATCH,"rw1"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("empty", []), o); aud = _rp_audit(o)
+    check("RW5 air gap: the app sets HF_HUB_OFFLINE=1, NEEDLE_TELEMETRY=0 and DO_NOT_TRACK=1 before any runtime loads",
+          (os.environ.get("HF_HUB_OFFLINE"), os.environ.get("NEEDLE_TELEMETRY"), os.environ.get("DO_NOT_TRACK"))==("1","0","1"),
+          {k: os.environ.get(k) for k in ("HF_HUB_OFFLINE","NEEDLE_TELEMETRY","DO_NOT_TRACK")})
+    check("RW1 coding: runtimes installed but no artifacts -> every tier STAND-IN (a library alone never flips REAL)",
+          not A.exception and aud is not None and (aud["mode_T2"],aud["mode_T3"],aud["mode_T4"])==("STAND-IN",)*3
+          and "STAND-IN [SI] (lexical)" in _rp_banner(A), dict(exc=[str(e.value)[:150] for e in A.exception], banner=_rp_banner(A)[:120]))
+    o = os.path.join(SCRATCH,"rw2"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("coding_full", FULL_CODING), o); aud = _rp_audit(o)
+    cod = pd.read_csv(os.path.join(o,"ae_coded.csv")) if os.path.exists(os.path.join(o,"ae_coded.csv")) else None
+    check("RW2 coding: full models dir -> modules bound (no NameError), REAL on every tier in banner and audit",
+          not A.exception and aud is not None and (aud["mode_T2"],aud["mode_T3"],aud["mode_T4"])==("REAL",)*3
+          and "REAL needle3+hnsw" in _rp_banner(A) and "REAL xgboost re-ranker" in _rp_banner(A),
+          dict(exc=[str(e.value)[:200] for e in A.exception], banner=_rp_banner(A)[:160]))
+    check("RW3 coding real path: re-ranked export keeps the stand-in's shape (top 3 per verbatim, S in [0,1]) and hashes the artifacts",
+          cod is not None and len(cod)==n_verb*3 and cod["S"].between(0,1).all() and set(cod["rank"])=={1,2,3}
+          and "sha256:" in str(aud["real_artifacts"]), None if cod is None else (len(cod), n_verb*3))
+    # A two-row cut: the stub Laya scores "denies ..." low through predict_batch(), and the stub re-ranker
+    # weighs that scalar, so the plain verbatim auto-codes and the negated one routes to a human.
+    neg = os.path.join(SCRATCH,"rw_negcut"); shutil.rmtree(neg, ignore_errors=True); os.makedirs(neg)
+    shutil.copy(os.path.join(SAMPLE,"meddra_demo.csv"), neg)
+    pd.DataFrame(dict(STUDYID=["S"]*2, USUBJID=["U1","U2"], AESEQ=[1,2], AETERM=["headache","denies headache"])).to_csv(os.path.join(neg,"ae.csv"), index=False)
+    o = os.path.join(SCRATCH,"rw4"); _rp_run("meddra_app.py", neg, _rw_models("coding_full_neg", FULL_CODING), o)
+    c4 = pd.read_csv(os.path.join(o,"ae_coded.csv")) if os.path.exists(os.path.join(o,"ae_coded.csv")) else None
+    st4 = {} if c4 is None else dict(zip(c4[c4["rank"]==1]["VERBATIM"], c4[c4["rank"]==1]["AECODSTAT"]))
+    check("RW4 coding real path: Tier 3 (Laya predict_batch) feeds the re-ranker: 'headache' auto-codes, 'denies headache' routes to a human",
+          st4.get("headache")=="AUTO_COMMIT_TO_SDTM" and st4.get("denies headache")=="FLAGGED_FOR_HUMAN_CODER", st4)
+    o = os.path.join(SCRATCH,"rw6"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("coder_only", ["meddra_coder.json"]), o)
+    check("RW6 coding: a re-ranker whose feature contract the loaded tiers miss STOPS the run",
+          any("re-ranker cannot run" in e.value for e in A.error) and not os.path.exists(os.path.join(o,"ae_coded.csv")), [e.value[:120] for e in A.error])
+    o = os.path.join(SCRATCH,"rw7"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("broken", ["BROKEN_coder"]), o)
+    check("RW7 coding: a present but unreadable artifact STOPS the run (no fallback to a stand-in)",
+          any("failed to load" in e.value for e in A.error), [e.value[:120] for e in A.error])
+    md16 = _rw_models("reload", [])            # one models dir path, two states, one process
+    o = os.path.join(SCRATCH,"rw16a"); _rp_run("meddra_app.py", SAMPLE, md16, o); aud_a = _rp_audit(o)
+    _rw_models("reload", FULL_CODING)
+    o = os.path.join(SCRATCH,"rw16b"); _rp_run("meddra_app.py", SAMPLE, md16, o); aud_b = _rp_audit(o)
+    check("RW16 coding: artifacts added to the same models dir in a running process are loaded on the next run (no stale cache)",
+          aud_a is not None and aud_b is not None and aud_a["mode_T2"]=="STAND-IN" and aud_b["mode_T2"]=="REAL",
+          None if aud_a is None or aud_b is None else (aud_a["mode_T2"], aud_b["mode_T2"]))
+    cal_arts = [x for x in FULL_CODING if x != "laya_calibration_coding.json"]
+    o = os.path.join(SCRATCH,"rw14"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("cal_path", cal_arts + ["CAL_OTHER_PATH"]), o); aud = _rp_audit(o)
+    check("RW14 coding: a Laya calibration fitted on another machine (checkpoint path differs, config same) loads and runs REAL",
+          not A.exception and not A.error and aud is not None and aud["mode_T3"]=="REAL", dict(err=[e.value[:140] for e in A.error]))
+    o = os.path.join(SCRATCH,"rw15"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("cal_ckpt", cal_arts + ["CAL_OTHER_CKPT"]), o)
+    check("RW15 coding: a Laya calibration fitted for a DIFFERENT checkpoint config STOPS the run",
+          any("fitted for a different Laya checkpoint" in e.value for e in A.error) and not os.path.exists(os.path.join(o,"ae_coded.csv")),
+          [e.value[:160] for e in A.error])
+    _rw_use("no_torch")
+    o = os.path.join(SCRATCH,"rw8"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("coding_full_b", FULL_CODING), o)
+    check("RW8 coding: laya importable but torch missing -> laya NOT bound, and its checkpoint in the models dir STOPS the run",
+          any("laya/model.safetensors present but" in e.value for e in A.error), [e.value[:140] for e in A.error])
+    _rw_use("css_needle")
+    o = os.path.join(SCRATCH,"rw9"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("coding_full_c", FULL_CODING), o)
+    check("RW9 coding: an unrelated package named 'needle' is not taken for Needle3 (its weights then STOP the run)",
+          any("needle3/needle3.cact present but" in e.value and "'needle'" in e.value for e in A.error), [e.value[:140] for e in A.error])
+    _rw_use("full")
+    o = os.path.join(SCRATCH,"rw10"); A = _rp_run("phi_app.py", SAMPLE, _rw_models("phi_full", FULL_PHI), o); aud = _rp_audit(o)
+    check("RW10 PHI: full models dir -> REAL on every tier, no exception, flags + sanitized domains written",
+          not A.exception and aud is not None and (aud["mode_T2"],aud["mode_T3"],aud["mode_T4"])==("REAL",)*3
+          and os.path.exists(os.path.join(o,"phi_flags.csv")), dict(exc=[str(e.value)[:200] for e in A.exception], banner=_rp_banner(A)[:160]))
+    o = os.path.join(SCRATCH,"rw11"); A = _rp_run("phi_app.py", SAMPLE, _rw_models("phi_nogate", [a for a in FULL_PHI if "classifier" not in a]), o); aud = _rp_audit(o)
+    check("RW11 PHI: Needle3 without its trained gate is NOT used (Tier 2 stays STAND-IN and the audit says why)",
+          aud is not None and aud["mode_T2"]=="STAND-IN" and "loaded but NOT used" in str(aud["real_artifacts"]), None if aud is None else aud["real_artifacts"])
+    o = os.path.join(SCRATCH,"rw12"); A = _rp_run("risk_app.py", SAMPLE, _rw_models("risk", ["risk_model.json"]), o)
+    check("RW12 risk: a risk_model.json STOPS the run even with xgboost installed (no trained-model path to load it)",
+          any("found, but" in e.value for e in A.error) and not os.path.exists(os.path.join(o,"audit_log.csv")), [e.value[:120] for e in A.error])
+    o = os.path.join(SCRATCH,"rw13"); A = _rp_run("anomaly_app.py", ANOM, _rw_models("anom_empty", []), o); aud = _rp_audit(o)
+    check("RW13 anomaly: with needle + laya installed the text tier still reports its [SI] stand-in (no real text path wired)",
+          aud is not None and "STAND-IN [SI] bag-of-words" in str(aud["text_path"]), None if aud is None else aud["text_path"])
+except Exception as e: check("RW wiring block raised", False, repr(e))
+finally:
+    _rw_use(None); sys.modules.update(_saved)
+    for k, v in _env0.items():
+        if v is None: os.environ.pop(k, None)
+        else: os.environ[k] = v
+
+print("\n==== SUMMARY:", len(PASS), "passed,", len(FAIL), "failed,", len(SKIP), "skipped ====")
+for n,d in SKIP: print("  SKIPPED:", n, "|", str(d)[:160])
 for n,d in FAIL: print("  FAILED:", n, "|", str(d)[:200])
 sys.exit(1 if FAIL else 0)

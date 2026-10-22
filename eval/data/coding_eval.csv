@@ -1,0 +1,1921 @@
+id,verbatim,variant,negated,pt_code,pt_name,split
+C00001,abdominal distension,exact,N,99300445,Abdominal distension,calib
+C00002,tummy feels blown up,colloquial,N,99300445,Abdominal distension,calib
+C00003,bloatning,misspelled,N,99300445,Abdominal distension,calib
+C00004,no evidence of bloating,negated,Y,99300445,Abdominal distension,calib
+C00005,abscess of knee,exact,N,99300289,Abscess,calib
+C00006,pus-filled lump on hand,colloquial,N,99300289,Abscess,calib
+C00007,fonger abscess,misspelled,N,99300289,Abscess,calib
+C00008,patient reports no abscess of wrist,negated,Y,99300289,Abscess,calib
+C00009,restlessness,exact,N,99300465,Agitation,train
+C00010,can't sit still,colloquial,N,99300465,Agitation,train
+C00011,restlsssness,misspelled,N,99300465,Agitation,train
+C00012,no feeling agitated,negated,Y,99300465,Agitation,train
+C00013,low alanine aminotransferase,exact,N,99300291,Alanine aminotransferase decreased,train
+C00014,alanine aminotransferase down on bloods,colloquial,N,99300291,Alanine aminotransferase decreased,train
+C00015,alanine aminotransferase beluw noormal,misspelled,N,99300291,Alanine aminotransferase decreased,train
+C00016,no evidence of decreased alanine aminotransferase,negated,Y,99300291,Alanine aminotransferase decreased,train
+C00017,elevated alanine aminotransferase,exact,N,99300290,Alanine aminotransferase increased,calib
+C00018,alanine aminotransferase up on bloods,colloquial,N,99300290,Alanine aminotransferase increased,calib
+C00019,alanine aminotranssferase increased,misspelled,N,99300290,Alanine aminotransferase increased,calib
+C00020,denies elevated alanine aminotransferase,negated,Y,99300290,Alanine aminotransferase increased,calib
+C00021,alkaline phosphatase abnormal,exact,N,99300301,Alkaline phosphatase abnormal,train
+C00022,alkaline phosphatase off on labs,colloquial,N,99300301,Alkaline phosphatase abnormal,train
+C00023,abnormel alkaline phosphatase,misspelled,N,99300301,Alkaline phosphatase abnormal,train
+C00024,no evidence of alkaline phosphatase out of range,negated,Y,99300301,Alkaline phosphatase abnormal,train
+C00025,low alkaline phosphatase,exact,N,99300300,Alkaline phosphatase decreased,train
+C00026,alkaline phosphatase below lower limit,colloquial,N,99300300,Alkaline phosphatase decreased,train
+C00027,decreased alaline pohsphatase,misspelled,N,99300300,Alkaline phosphatase decreased,train
+C00028,no evidence of alkaline phosphatase below normal,negated,Y,99300300,Alkaline phosphatase decreased,train
+C00029,alkaline phosphatase increased,exact,N,99300299,Alkaline phosphatase increased,train
+C00030,ALP up on bloods,colloquial,N,99300299,Alkaline phosphatase increased,train
+C00031,elevated alkalune phosphatase,misspelled,N,99300299,Alkaline phosphatase increased,train
+C00032,patient reports no raised alp,negated,Y,99300299,Alkaline phosphatase increased,train
+C00033,hair thinning,exact,N,99300473,Alopecia,calib
+C00034,losing hair,colloquial,N,99300473,Alopecia,calib
+C00035,aliecia,misspelled,N,99300473,Alopecia,calib
+C00036,no evidence of alopecia,negated,Y,99300473,Alopecia,calib
+C00037,amylase out of range,exact,N,99300364,Amylase abnormal,train
+C00038,amylase out of range on bloods,colloquial,N,99300364,Amylase abnormal,train
+C00039,abormal amyalse,misspelled,N,99300364,Amylase abnormal,train
+C00040,no evidence of amylase out of range,negated,Y,99300364,Amylase abnormal,train
+C00041,amylase decreased,exact,N,99300363,Amylase decreased,train
+C00042,amylase below lower limit,colloquial,N,99300363,Amylase decreased,train
+C00043,amylasa belaw normal,misspelled,N,99300363,Amylase decreased,train
+C00044,patient reports no low amylase,negated,Y,99300363,Amylase decreased,train
+C00045,high amylase,exact,N,99300362,Amylase increased,train
+C00046,amylase came back high,colloquial,N,99300362,Amylase increased,train
+C00047,elevated amyylse,misspelled,N,99300362,Amylase increased,train
+C00048,no evidence of high amylase,negated,Y,99300362,Amylase increased,train
+C00049,ankle stiffness,exact,N,99300256,Ankle stiffness,train
+C00050,ankle feels locked,colloquial,N,99300256,Ankle stiffness,train
+C00051,stff ankle,misspelled,N,99300256,Ankle stiffness,train
+C00052,denies stiffness of ankle,negated,Y,99300256,Ankle stiffness,train
+C00053,abnormal aspartate aminotransferase,exact,N,99300295,Aspartate aminotransferase abnormal,train
+C00054,AST out of range on bloods,colloquial,N,99300295,Aspartate aminotransferase abnormal,train
+C00055,aspartate aminatransferase abnormal,misspelled,N,99300295,Aspartate aminotransferase abnormal,train
+C00056,no evidence of ast abnormal,negated,Y,99300295,Aspartate aminotransferase abnormal,train
+C00057,low aspartate aminotransferase,exact,N,99300294,Aspartate aminotransferase decreased,train
+C00058,aspartate aminotransferase came back low,colloquial,N,99300294,Aspartate aminotransferase decreased,train
+C00059,aspartate aminotransferase dcereased,misspelled,N,99300294,Aspartate aminotransferase decreased,train
+C00060,denies aspartate aminotransferase below normal,negated,Y,99300294,Aspartate aminotransferase decreased,train
+C00061,elevated aspartate aminotransferase,exact,N,99300293,Aspartate aminotransferase increased,train
+C00062,aspartate aminotransferase came back high,colloquial,N,99300293,Aspartate aminotransferase increased,train
+C00063,elevated asparttae aminotransferase,misspelled,N,99300293,Aspartate aminotransferase increased,train
+C00064,patient reports no elevated aspartate aminotransferase,negated,Y,99300293,Aspartate aminotransferase increased,train
+C00065,generalised weakness,exact,N,99300468,Asthenia,train
+C00066,feels weak all over,colloquial,N,99300468,Asthenia,train
+C00067,geneeralised weakness,misspelled,N,99300468,Asthenia,train
+C00068,denies weakness,negated,Y,99300468,Asthenia,train
+C00069,back stiffness,exact,N,99300258,Back stiffness,train
+C00070,back feels locked,colloquial,N,99300258,Back stiffness,train
+C00071,siffnesss of back,misspelled,N,99300258,Back stiffness,train
+C00072,negative for back stiffness,negated,Y,99300258,Back stiffness,train
+C00073,scalp blister,exact,N,99300288,Blister,test
+C00074,blister came up on chin,colloquial,N,99300288,Blister,test
+C00075,lip blluster,misspelled,N,99300288,Blister,test
+C00076,wrist blister ruled out,negated,Y,99300288,Blister,test
+C00077,blood albumin abnormal,exact,N,99300379,Blood albumin abnormal,test
+C00078,albumin off on labs,colloquial,N,99300379,Blood albumin abnormal,test
+C00079,blood albumin abnormmal,misspelled,N,99300379,Blood albumin abnormal,test
+C00080,patient reports no blood albumin out of range,negated,Y,99300379,Blood albumin abnormal,test
+C00081,low blood albumin,exact,N,99300378,Blood albumin decreased,calib
+C00082,albumin down on bloods,colloquial,N,99300378,Blood albumin decreased,calib
+C00083,low blood alubin,misspelled,N,99300378,Blood albumin decreased,calib
+C00084,no evidence of reduced blood albumin,negated,Y,99300378,Blood albumin decreased,calib
+C00085,blood bicarbonate out of range,exact,N,99300337,Blood bicarbonate abnormal,train
+C00086,bicarbonate out of range on bloods,colloquial,N,99300337,Blood bicarbonate abnormal,train
+C00087,blood bicarbnate abnormal,misspelled,N,99300337,Blood bicarbonate abnormal,train
+C00088,no evidence of abnormal blood bicarbonate,negated,Y,99300337,Blood bicarbonate abnormal,train
+C00089,decreased blood bicarbonate,exact,N,99300336,Blood bicarbonate decreased,train
+C00090,bicarbonate dropped on labs,colloquial,N,99300336,Blood bicarbonate decreased,train
+C00091,decreased blood bicaorbnate,misspelled,N,99300336,Blood bicarbonate decreased,train
+C00092,no low blood bicarbonate,negated,Y,99300336,Blood bicarbonate decreased,train
+C00093,high blood bicarbonate,exact,N,99300335,Blood bicarbonate increased,test
+C00094,bicarbonate above upper limit,colloquial,N,99300335,Blood bicarbonate increased,test
+C00095,raised bliod bacarbonate,misspelled,N,99300335,Blood bicarbonate increased,test
+C00096,negative for increased blood bicarbonate,negated,Y,99300335,Blood bicarbonate increased,test
+C00097,blood bilirubin abnormal,exact,N,99300298,Blood bilirubin abnormal,calib
+C00098,bilirubin out of range on bloods,colloquial,N,99300298,Blood bilirubin abnormal,calib
+C00099,blood bilirubbiin out of range,misspelled,N,99300298,Blood bilirubin abnormal,calib
+C00100,blood bilirubin abnormal ruled out,negated,Y,99300298,Blood bilirubin abnormal,calib
+C00101,blood bilirubin decreased,exact,N,99300297,Blood bilirubin decreased,train
+C00102,bilirubin came back low,colloquial,N,99300297,Blood bilirubin decreased,train
+C00103,blid bilirubin decreased,misspelled,N,99300297,Blood bilirubin decreased,train
+C00104,denies blood bilirubin decreased,negated,Y,99300297,Blood bilirubin decreased,train
+C00105,elevated blood bilirubin,exact,N,99300296,Blood bilirubin increased,train
+C00106,bilirubin above upper limit,colloquial,N,99300296,Blood bilirubin increased,train
+C00107,elevated bood bilirubin,misspelled,N,99300296,Blood bilirubin increased,train
+C00108,blood bilirubin above normal ruled out,negated,Y,99300296,Blood bilirubin increased,train
+C00109,abnormal blood calcium,exact,N,99300325,Blood calcium abnormal,calib
+C00110,calcium out of range on bloods,colloquial,N,99300325,Blood calcium abnormal,calib
+C00111,blood calcium out of ragne,misspelled,N,99300325,Blood calcium abnormal,calib
+C00112,denies blood calcium out of range,negated,Y,99300325,Blood calcium abnormal,calib
+C00113,decreased blood calcium,exact,N,99300324,Blood calcium decreased,test
+C00114,calcium down on bloods,colloquial,N,99300324,Blood calcium decreased,test
+C00115,low blood cacluim,misspelled,N,99300324,Blood calcium decreased,test
+C00116,denies low blood calcium,negated,Y,99300324,Blood calcium decreased,test
+C00117,high blood calcium,exact,N,99300323,Blood calcium increased,train
+C00118,calcium came back high,colloquial,N,99300323,Blood calcium increased,train
+C00119,inccreased blood calcium,misspelled,N,99300323,Blood calcium increased,train
+C00120,denies blood calcium increased,negated,Y,99300323,Blood calcium increased,train
+C00121,abnormal blood chloride,exact,N,99300334,Blood chloride abnormal,test
+C00122,chloride out of range on bloods,colloquial,N,99300334,Blood chloride abnormal,test
+C00123,blood chloride out of rango,misspelled,N,99300334,Blood chloride abnormal,test
+C00124,patient reports no blood chloride abnormal,negated,Y,99300334,Blood chloride abnormal,test
+C00125,decreased blood chloride,exact,N,99300333,Blood chloride decreased,test
+C00126,chloride came back low,colloquial,N,99300333,Blood chloride decreased,test
+C00127,redduced blood chloride,misspelled,N,99300333,Blood chloride decreased,test
+C00128,negative for blood chloride below normal,negated,Y,99300333,Blood chloride decreased,test
+C00129,blood chloride increased,exact,N,99300332,Blood chloride increased,train
+C00130,chloride above upper limit,colloquial,N,99300332,Blood chloride increased,train
+C00131,bloud chloride increased,misspelled,N,99300332,Blood chloride increased,train
+C00132,blood chloride above normal ruled out,negated,Y,99300332,Blood chloride increased,train
+C00133,abnormal blood cholesterol,exact,N,99300373,Blood cholesterol abnormal,train
+C00134,cholesterol out of range on bloods,colloquial,N,99300373,Blood cholesterol abnormal,train
+C00135,blood cholesterol out of raagne,misspelled,N,99300373,Blood cholesterol abnormal,train
+C00136,negative for blood cholesterol out of range,negated,Y,99300373,Blood cholesterol abnormal,train
+C00137,blood cholesterol decreased,exact,N,99300372,Blood cholesterol decreased,train
+C00138,cholesterol down on bloods,colloquial,N,99300372,Blood cholesterol decreased,train
+C00139,blood choleterol below normal,misspelled,N,99300372,Blood cholesterol decreased,train
+C00140,denies blood cholesterol below normal,negated,Y,99300372,Blood cholesterol decreased,train
+C00141,blood cholesterol increased,exact,N,99300371,Blood cholesterol increased,test
+C00142,raised cholesterol on labs,colloquial,N,99300371,Blood cholesterol increased,test
+C00143,increased bload cholesterol,misspelled,N,99300371,Blood cholesterol increased,test
+C00144,patient reports no blood cholesterol above normal,negated,Y,99300371,Blood cholesterol increased,test
+C00145,ck abnormal,exact,N,99300367,Blood creatine phosphokinase abnormal,train
+C00146,creatine phosphokinase out of range on bloods,colloquial,N,99300367,Blood creatine phosphokinase abnormal,train
+C00147,abnormal blodo creatine phosphokinase,misspelled,N,99300367,Blood creatine phosphokinase abnormal,train
+C00148,negative for blood creatine phosphokinase out of range,negated,Y,99300367,Blood creatine phosphokinase abnormal,train
+C00149,low ck,exact,N,99300366,Blood creatine phosphokinase decreased,train
+C00150,creatine phosphokinase came back low,colloquial,N,99300366,Blood creatine phosphokinase decreased,train
+C00151,blood creatine phosphokinase duceased,misspelled,N,99300366,Blood creatine phosphokinase decreased,train
+C00152,decreased blood creatine phosphokinase ruled out,negated,Y,99300366,Blood creatine phosphokinase decreased,train
+C00153,increased blood creatine phosphokinase,exact,N,99300365,Blood creatine phosphokinase increased,calib
+C00154,raised creatine phosphokinase on labs,colloquial,N,99300365,Blood creatine phosphokinase increased,calib
+C00155,ck incruesed,misspelled,N,99300365,Blood creatine phosphokinase increased,calib
+C00156,high blood creatine phosphokinase ruled out,negated,Y,99300365,Blood creatine phosphokinase increased,calib
+C00157,blood creatinine abnormal,exact,N,99300307,Blood creatinine abnormal,train
+C00158,creatinine off on labs,colloquial,N,99300307,Blood creatinine abnormal,train
+C00159,blood creatinine abnarmal,misspelled,N,99300307,Blood creatinine abnormal,train
+C00160,no blood creatinine out of range,negated,Y,99300307,Blood creatinine abnormal,train
+C00161,decreased blood creatinine,exact,N,99300306,Blood creatinine decreased,train
+C00162,creatinine down on bloods,colloquial,N,99300306,Blood creatinine decreased,train
+C00163,low blod creatinine,misspelled,N,99300306,Blood creatinine decreased,train
+C00164,low blood creatinine ruled out,negated,Y,99300306,Blood creatinine decreased,train
+C00165,raised blood creatinine,exact,N,99300305,Blood creatinine increased,calib
+C00166,creatinine up on bloods,colloquial,N,99300305,Blood creatinine increased,calib
+C00167,blood creaatinine above normal,misspelled,N,99300305,Blood creatinine increased,calib
+C00168,patient reports no blood creatinine above normal,negated,Y,99300305,Blood creatinine increased,calib
+C00169,reduced blood glucose,exact,N,99300315,Blood glucose decreased,train
+C00170,glucose down on bloods,colloquial,N,99300315,Blood glucose decreased,train
+C00171,blood glucose below normall,misspelled,N,99300315,Blood glucose decreased,train
+C00172,negative for blood glucose decreased,negated,Y,99300315,Blood glucose decreased,train
+C00173,high blood glucose,exact,N,99300314,Blood glucose increased,test
+C00174,raised glucose on labs,colloquial,N,99300314,Blood glucose increased,test
+C00175,increased bluod glecose,misspelled,N,99300314,Blood glucose increased,test
+C00176,denies elevated blood glucose,negated,Y,99300314,Blood glucose increased,test
+C00177,blood insulin abnormal,exact,N,99300421,Blood insulin abnormal,train
+C00178,insulin out of range on bloods,colloquial,N,99300421,Blood insulin abnormal,train
+C00179,bloood insulin out of runge,misspelled,N,99300421,Blood insulin abnormal,train
+C00180,patient reports no blood insulin abnormal,negated,Y,99300421,Blood insulin abnormal,train
+C00181,decreased blood insulin,exact,N,99300420,Blood insulin decreased,test
+C00182,insulin dropped on labs,colloquial,N,99300420,Blood insulin decreased,test
+C00183,reduced blod unsulin,misspelled,N,99300420,Blood insulin decreased,test
+C00184,denies decreased blood insulin,negated,Y,99300420,Blood insulin decreased,test
+C00185,raised blood insulin,exact,N,99300419,Blood insulin increased,test
+C00186,insulin up on bloods,colloquial,N,99300419,Blood insulin increased,test
+C00187,raised bod insulin,misspelled,N,99300419,Blood insulin increased,test
+C00188,patient reports no increased blood insulin,negated,Y,99300419,Blood insulin increased,test
+C00189,blood iron abnormal,exact,N,99300394,Blood iron abnormal,train
+C00190,iron off on labs,colloquial,N,99300394,Blood iron abnormal,train
+C00191,blood iron abnomral,misspelled,N,99300394,Blood iron abnormal,train
+C00192,negative for abnormal blood iron,negated,Y,99300394,Blood iron abnormal,train
+C00193,low blood iron,exact,N,99300393,Blood iron decreased,calib
+C00194,iron below lower limit,colloquial,N,99300393,Blood iron decreased,calib
+C00195,blood iron bolow narmal,misspelled,N,99300393,Blood iron decreased,calib
+C00196,no decreased blood iron,negated,Y,99300393,Blood iron decreased,calib
+C00197,blood iron increased,exact,N,99300392,Blood iron increased,train
+C00198,iron came back high,colloquial,N,99300392,Blood iron increased,train
+C00199,high blood oron,misspelled,N,99300392,Blood iron increased,train
+C00200,denies blood iron above normal,negated,Y,99300392,Blood iron increased,train
+C00201,blood lactate dehydrogenase out of range,exact,N,99300370,Blood lactate dehydrogenase abnormal,calib
+C00202,LDH off on labs,colloquial,N,99300370,Blood lactate dehydrogenase abnormal,calib
+C00203,blood latcati dehydrogenase out of range,misspelled,N,99300370,Blood lactate dehydrogenase abnormal,calib
+C00204,patient reports no ldh abnormal,negated,Y,99300370,Blood lactate dehydrogenase abnormal,calib
+C00205,low ldh,exact,N,99300369,Blood lactate dehydrogenase decreased,calib
+C00206,LDH below lower limit,colloquial,N,99300369,Blood lactate dehydrogenase decreased,calib
+C00207,low ld,misspelled,N,99300369,Blood lactate dehydrogenase decreased,calib
+C00208,no blood lactate dehydrogenase decreased,negated,Y,99300369,Blood lactate dehydrogenase decreased,calib
+C00209,raised blood lactate dehydrogenase,exact,N,99300368,Blood lactate dehydrogenase increased,calib
+C00210,raised LDH on labs,colloquial,N,99300368,Blood lactate dehydrogenase increased,calib
+C00211,bloood lactate dehydrogenae above normal,misspelled,N,99300368,Blood lactate dehydrogenase increased,calib
+C00212,patient reports no increased blood lactate dehydrogenase,negated,Y,99300368,Blood lactate dehydrogenase increased,calib
+C00213,blood magnesium out of range,exact,N,99300328,Blood magnesium abnormal,train
+C00214,magnesium out of range on bloods,colloquial,N,99300328,Blood magnesium abnormal,train
+C00215,bleod magnesiuum out of range,misspelled,N,99300328,Blood magnesium abnormal,train
+C00216,no evidence of blood magnesium out of range,negated,Y,99300328,Blood magnesium abnormal,train
+C00217,decreased blood magnesium,exact,N,99300327,Blood magnesium decreased,train
+C00218,magnesium dropped on labs,colloquial,N,99300327,Blood magnesium decreased,train
+C00219,decreased blood magneesium,misspelled,N,99300327,Blood magnesium decreased,train
+C00220,denies reduced blood magnesium,negated,Y,99300327,Blood magnesium decreased,train
+C00221,raised blood magnesium,exact,N,99300326,Blood magnesium increased,calib
+C00222,magnesium came back high,colloquial,N,99300326,Blood magnesium increased,calib
+C00223,increaed bllood magnesium,misspelled,N,99300326,Blood magnesium increased,calib
+C00224,patient reports no elevated blood magnesium,negated,Y,99300326,Blood magnesium increased,calib
+C00225,blood phosphate out of range,exact,N,99300331,Blood phosphate abnormal,train
+C00226,phosphate off on labs,colloquial,N,99300331,Blood phosphate abnormal,train
+C00227,blood phosphate out of raneg,misspelled,N,99300331,Blood phosphate abnormal,train
+C00228,blood phosphate abnormal ruled out,negated,Y,99300331,Blood phosphate abnormal,train
+C00229,blood phosphate below normal,exact,N,99300330,Blood phosphate decreased,test
+C00230,phosphate dropped on labs,colloquial,N,99300330,Blood phosphate decreased,test
+C00231,blood phesphate decreased,misspelled,N,99300330,Blood phosphate decreased,test
+C00232,no reduced blood phosphate,negated,Y,99300330,Blood phosphate decreased,test
+C00233,elevated blood phosphate,exact,N,99300329,Blood phosphate increased,calib
+C00234,raised phosphate on labs,colloquial,N,99300329,Blood phosphate increased,calib
+C00235,blood phosphatte increaseed,misspelled,N,99300329,Blood phosphate increased,calib
+C00236,denies high blood phosphate,negated,Y,99300329,Blood phosphate increased,calib
+C00237,abnormal blood potassium,exact,N,99300319,Blood potassium abnormal,calib
+C00238,potassium off on labs,colloquial,N,99300319,Blood potassium abnormal,calib
+C00239,abnormal bllood potsasium,misspelled,N,99300319,Blood potassium abnormal,calib
+C00240,patient reports no abnormal blood potassium,negated,Y,99300319,Blood potassium abnormal,calib
+C00241,low blood potassium,exact,N,99300318,Blood potassium decreased,train
+C00242,potassium dropped on labs,colloquial,N,99300318,Blood potassium decreased,train
+C00243,decreased blood pitsasium,misspelled,N,99300318,Blood potassium decreased,train
+C00244,patient reports no blood potassium decreased,negated,Y,99300318,Blood potassium decreased,train
+C00245,raised blood potassium,exact,N,99300317,Blood potassium increased,train
+C00246,potassium came back high,colloquial,N,99300317,Blood potassium increased,train
+C00247,raaised blood petassium,misspelled,N,99300317,Blood potassium increased,train
+C00248,no evidence of blood potassium above normal,negated,Y,99300317,Blood potassium increased,train
+C00249,abnormal blood pressure,exact,N,99300406,Blood pressure abnormal,train
+C00250,pressure off on labs,colloquial,N,99300406,Blood pressure abnormal,train
+C00251,blood presssure out of range,misspelled,N,99300406,Blood pressure abnormal,train
+C00252,negative for blood pressure out of range,negated,Y,99300406,Blood pressure abnormal,train
+C00253,reduced blood pressure,exact,N,99300405,Blood pressure decreased,train
+C00254,pressure down on bloods,colloquial,N,99300405,Blood pressure decreased,train
+C00255,reduced blodo pressure,misspelled,N,99300405,Blood pressure decreased,train
+C00256,no evidence of reduced blood pressure,negated,Y,99300405,Blood pressure decreased,train
+C00257,high blood pressure,exact,N,99300404,Blood pressure increased,calib
+C00258,raised pressure on labs,colloquial,N,99300404,Blood pressure increased,calib
+C00259,bloood prossure above normal,misspelled,N,99300404,Blood pressure increased,calib
+C00260,patient reports no raised blood pressure,negated,Y,99300404,Blood pressure increased,calib
+C00261,blood sodium abnormal,exact,N,99300322,Blood sodium abnormal,test
+C00262,sodium off on labs,colloquial,N,99300322,Blood sodium abnormal,test
+C00263,bleod sodium abnormla,misspelled,N,99300322,Blood sodium abnormal,test
+C00264,denies blood sodium abnormal,negated,Y,99300322,Blood sodium abnormal,test
+C00265,blood sodium decreased,exact,N,99300321,Blood sodium decreased,train
+C00266,sodium below lower limit,colloquial,N,99300321,Blood sodium decreased,train
+C00267,reducd blood sodium,misspelled,N,99300321,Blood sodium decreased,train
+C00268,patient reports no blood sodium decreased,negated,Y,99300321,Blood sodium decreased,train
+C00269,blood sodium increased,exact,N,99300320,Blood sodium increased,test
+C00270,raised sodium on labs,colloquial,N,99300320,Blood sodium increased,test
+C00271,blood soium increased,misspelled,N,99300320,Blood sodium increased,test
+C00272,patient reports no elevated blood sodium,negated,Y,99300320,Blood sodium increased,test
+C00273,blood thyroid stimulating hormone abnormal,exact,N,99300397,Blood thyroid stimulating hormone abnormal,train
+C00274,thyroid stimulating hormone off on labs,colloquial,N,99300397,Blood thyroid stimulating hormone abnormal,train
+C00275,abnrmal blood thyroid stimulating hormone,misspelled,N,99300397,Blood thyroid stimulating hormone abnormal,train
+C00276,patient reports no blood thyroid stimulating hormone out of range,negated,Y,99300397,Blood thyroid stimulating hormone abnormal,train
+C00277,blood thyroid stimulating hormone below normal,exact,N,99300396,Blood thyroid stimulating hormone decreased,train
+C00278,TSH below lower limit,colloquial,N,99300396,Blood thyroid stimulating hormone decreased,train
+C00279,blood thyroid stimulating hormoone dcereased,misspelled,N,99300396,Blood thyroid stimulating hormone decreased,train
+C00280,patient reports no low blood thyroid stimulating hormone,negated,Y,99300396,Blood thyroid stimulating hormone decreased,train
+C00281,blood thyroid stimulating hormone increased,exact,N,99300395,Blood thyroid stimulating hormone increased,train
+C00282,thyroid stimulating hormone up on bloods,colloquial,N,99300395,Blood thyroid stimulating hormone increased,train
+C00283,blood thyroid stimulating hromona above normal,misspelled,N,99300395,Blood thyroid stimulating hormone increased,train
+C00284,no evidence of tsh increased,negated,Y,99300395,Blood thyroid stimulating hormone increased,train
+C00285,abnormal blood triglycerides,exact,N,99300376,Blood triglycerides abnormal,train
+C00286,triglycerides off on labs,colloquial,N,99300376,Blood triglycerides abnormal,train
+C00287,bllood triglycerides abnormal,misspelled,N,99300376,Blood triglycerides abnormal,train
+C00288,patient reports no blood triglycerides out of range,negated,Y,99300376,Blood triglycerides abnormal,train
+C00289,reduced blood triglycerides,exact,N,99300375,Blood triglycerides decreased,calib
+C00290,triglycerides dropped on labs,colloquial,N,99300375,Blood triglycerides decreased,calib
+C00291,low bluod traglycerides,misspelled,N,99300375,Blood triglycerides decreased,calib
+C00292,low blood triglycerides ruled out,negated,Y,99300375,Blood triglycerides decreased,calib
+C00293,high blood triglycerides,exact,N,99300374,Blood triglycerides increased,test
+C00294,triglycerides up on bloods,colloquial,N,99300374,Blood triglycerides increased,test
+C00295,raised bloood triglycerides,misspelled,N,99300374,Blood triglycerides increased,test
+C00296,negative for elevated blood triglycerides,negated,Y,99300374,Blood triglycerides increased,test
+C00297,blood urea abnormal,exact,N,99300310,Blood urea abnormal,calib
+C00298,urea off on labs,colloquial,N,99300310,Blood urea abnormal,calib
+C00299,boold urea out of range,misspelled,N,99300310,Blood urea abnormal,calib
+C00300,negative for blood urea out of range,negated,Y,99300310,Blood urea abnormal,calib
+C00301,elevated blood urea,exact,N,99300308,Blood urea increased,calib
+C00302,urea above upper limit,colloquial,N,99300308,Blood urea increased,calib
+C00303,increased blood urae,misspelled,N,99300308,Blood urea increased,calib
+C00304,no evidence of elevated blood urea,negated,Y,99300308,Blood urea increased,calib
+C00305,blood uric acid out of range,exact,N,99300313,Blood uric acid abnormal,test
+C00306,uric acid out of range on bloods,colloquial,N,99300313,Blood uric acid abnormal,test
+C00307,blood uric aciid out of range,misspelled,N,99300313,Blood uric acid abnormal,test
+C00308,denies blood uric acid out of range,negated,Y,99300313,Blood uric acid abnormal,test
+C00309,reduced blood uric acid,exact,N,99300312,Blood uric acid decreased,calib
+C00310,uric acid below lower limit,colloquial,N,99300312,Blood uric acid decreased,calib
+C00311,blood urric accid decreased,misspelled,N,99300312,Blood uric acid decreased,calib
+C00312,patient reports no blood uric acid decreased,negated,Y,99300312,Blood uric acid decreased,calib
+C00313,high blood uric acid,exact,N,99300311,Blood uric acid increased,train
+C00314,uric acid came back high,colloquial,N,99300311,Blood uric acid increased,train
+C00315,inccreased blood uriic acid,misspelled,N,99300311,Blood uric acid increased,train
+C00316,denies blood uric acid increased,negated,Y,99300311,Blood uric acid increased,train
+C00317,abnormal body temperature,exact,N,99300412,Body temperature abnormal,train
+C00318,body temperature out of range on bloods,colloquial,N,99300412,Body temperature abnormal,train
+C00319,abnormal body tmeperature,misspelled,N,99300412,Body temperature abnormal,train
+C00320,negative for body temperature out of range,negated,Y,99300412,Body temperature abnormal,train
+C00321,body temperature decreased,exact,N,99300411,Body temperature decreased,test
+C00322,body temperature down on bloods,colloquial,N,99300411,Body temperature decreased,test
+C00323,low body temppearture,misspelled,N,99300411,Body temperature decreased,test
+C00324,denies body temperature decreased,negated,Y,99300411,Body temperature decreased,test
+C00325,body temperature increased,exact,N,99300410,Body temperature increased,train
+C00326,body temperature came back high,colloquial,N,99300410,Body temperature increased,train
+C00327,raised budy temperature,misspelled,N,99300410,Body temperature increased,train
+C00328,no evidence of elevated body temperature,negated,Y,99300410,Body temperature increased,train
+C00329,bradycardia,exact,N,99300486,Bradycardia,train
+C00330,pulse very slow,colloquial,N,99300486,Bradycardia,train
+C00331,slwa heart rate,misspelled,N,99300486,Bradycardia,train
+C00332,denies bradycardia,negated,Y,99300486,Bradycardia,train
+C00333,c-reactive protein out of range,exact,N,99300388,C-reactive protein abnormal,calib
+C00334,C-reactive protein off on labs,colloquial,N,99300388,C-reactive protein abnormal,calib
+C00335,c-reactive protein out of rnige,misspelled,N,99300388,C-reactive protein abnormal,calib
+C00336,no evidence of c-reactive protein abnormal,negated,Y,99300388,C-reactive protein abnormal,calib
+C00337,low c-reactive protein,exact,N,99300387,C-reactive protein decreased,train
+C00338,CRP dropped on labs,colloquial,N,99300387,C-reactive protein decreased,train
+C00339,reduced c-reactive pritein,misspelled,N,99300387,C-reactive protein decreased,train
+C00340,patient reports no decreased c-reactive protein,negated,Y,99300387,C-reactive protein decreased,train
+C00341,raised c-reactive protein,exact,N,99300386,C-reactive protein increased,train
+C00342,CRP up on bloods,colloquial,N,99300386,C-reactive protein increased,train
+C00343,raised c-reactive proteon,misspelled,N,99300386,C-reactive protein increased,train
+C00344,denies raised c-reactive protein,negated,Y,99300386,C-reactive protein increased,train
+C00345,chest tightness,exact,N,99300487,Chest discomfort,train
+C00346,chest feels tight,colloquial,N,99300487,Chest discomfort,train
+C00347,tigght chhest,misspelled,N,99300487,Chest discomfort,train
+C00348,no chest tightness,negated,Y,99300487,Chest discomfort,train
+C00349,shivering,exact,N,99300467,Chills,train
+C00350,shivery and cold,colloquial,N,99300467,Chills,train
+C00351,shiering,misspelled,N,99300467,Chills,train
+C00352,no chills,negated,Y,99300467,Chills,train
+C00353,clavicle fractured,exact,N,99300274,Clavicle fracture,train
+C00354,clavicle broken after fall,colloquial,N,99300274,Clavicle fracture,train
+C00355,closed fracture of clvaicle,misspelled,N,99300274,Clavicle fracture,train
+C00356,no stress fracture of clavicle,negated,Y,99300274,Clavicle fracture,train
+C00357,confusional state,exact,N,99300463,Confusional state,train
+C00358,didn't know where he was,colloquial,N,99300463,Confusional state,train
+C00359,dusorientatiion,misspelled,N,99300463,Confusional state,train
+C00360,disorientation ruled out,negated,Y,99300463,Confusional state,train
+C00361,conjunctivitis,exact,N,99300496,Conjunctivitis,test
+C00362,eye red and weepy,colloquial,N,99300496,Conjunctivitis,test
+C00363,red ey,misspelled,N,99300496,Conjunctivitis,test
+C00364,denies pink eye,negated,Y,99300496,Conjunctivitis,test
+C00365,difficulty passing stool,exact,N,99300443,Constipation,train
+C00366,bowels blocked up,colloquial,N,99300443,Constipation,train
+C00367,constpiation,misspelled,N,99300443,Constipation,train
+C00368,negative for constipation,negated,Y,99300443,Constipation,train
+C00369,bruised wrist,exact,N,99300285,Contusion,train
+C00370,"banged eyebrow, now bruised",colloquial,N,99300285,Contusion,train
+C00371,bruied eyebrew,misspelled,N,99300285,Contusion,train
+C00372,denies bruised forearm,negated,Y,99300285,Contusion,train
+C00373,ankle cramp,exact,N,99300048,Cramp in ankle,calib
+C00374,cramp in my ankle at night,colloquial,N,99300048,Cramp in ankle,calib
+C00375,camping of ankle,misspelled,N,99300048,Cramp in ankle,calib
+C00376,negative for cramp in ankle,negated,Y,99300048,Cramp in ankle,calib
+C00377,cramp in arm,exact,N,99300066,Cramp in arm,train
+C00378,arm cramping up,colloquial,N,99300066,Cramp in arm,train
+C00379,crremp in arm,misspelled,N,99300066,Cramp in arm,train
+C00380,denies cramping of arm,negated,Y,99300066,Cramp in arm,train
+C00381,cramping of calf,exact,N,99300084,Cramp in calf,train
+C00382,cramp in my calf at night,colloquial,N,99300084,Cramp in calf,train
+C00383,crmmap in calf,misspelled,N,99300084,Cramp in calf,train
+C00384,negative for cramping of calf,negated,Y,99300084,Cramp in calf,train
+C00385,elbow cramp,exact,N,99300012,Cramp in elbow,train
+C00386,cramp in my elbow at night,colloquial,N,99300012,Cramp in elbow,train
+C00387,cramp in elbew,misspelled,N,99300012,Cramp in elbow,train
+C00388,negative for elbow cramp,negated,Y,99300012,Cramp in elbow,train
+C00389,finger cramp,exact,N,99300030,Cramp in finger,test
+C00390,finger cramping up,colloquial,N,99300030,Cramp in finger,test
+C00391,finger crampp,misspelled,N,99300030,Cramp in finger,test
+C00392,cramping of finger ruled out,negated,Y,99300030,Cramp in finger,test
+C00393,cramp in foot,exact,N,99300054,Cramp in foot,test
+C00394,foot cramping up,colloquial,N,99300054,Cramp in foot,test
+C00395,crmap in foot,misspelled,N,99300054,Cramp in foot,test
+C00396,patient reports no foot cramp,negated,Y,99300054,Cramp in foot,test
+C00397,forearm cramp,exact,N,99300090,Cramp in forearm,train
+C00398,forearm cramping up,colloquial,N,99300090,Cramp in forearm,train
+C00399,feream cramp,misspelled,N,99300090,Cramp in forearm,train
+C00400,negative for cramping of forearm,negated,Y,99300090,Cramp in forearm,train
+C00401,cramp in hand,exact,N,99300024,Cramp in hand,test
+C00402,cramp in my hand at night,colloquial,N,99300024,Cramp in hand,test
+C00403,cramping of hind,misspelled,N,99300024,Cramp in hand,test
+C00404,cramping of hand ruled out,negated,Y,99300024,Cramp in hand,test
+C00405,cramp in knee,exact,N,99300042,Cramp in knee,train
+C00406,cramp in my knee at night,colloquial,N,99300042,Cramp in knee,train
+C00407,knnee crimp,misspelled,N,99300042,Cramp in knee,train
+C00408,denies knee cramp,negated,Y,99300042,Cramp in knee,train
+C00409,cramping of lower leg,exact,N,99300108,Cramp in lower leg,train
+C00410,cramp in my lower leg at night,colloquial,N,99300108,Cramp in lower leg,train
+C00411,loewr leg cramp,misspelled,N,99300108,Cramp in lower leg,train
+C00412,no cramping of lower leg,negated,Y,99300108,Cramp in lower leg,train
+C00413,cramping of palm,exact,N,99300120,Cramp in palm,test
+C00414,palm cramping up,colloquial,N,99300120,Cramp in palm,test
+C00415,crampping of palm,misspelled,N,99300120,Cramp in palm,test
+C00416,denies cramping of palm,negated,Y,99300120,Cramp in palm,test
+C00417,cramp in shin,exact,N,99300114,Cramp in shin,test
+C00418,cramp in my shin at night,colloquial,N,99300114,Cramp in shin,test
+C00419,shni carmp,misspelled,N,99300114,Cramp in shin,test
+C00420,cramp in shin ruled out,negated,Y,99300114,Cramp in shin,test
+C00421,shoulder cramp,exact,N,99300006,Cramp in shoulder,train
+C00422,cramp in my shoulder at night,colloquial,N,99300006,Cramp in shoulder,train
+C00423,crump in shoulder,misspelled,N,99300006,Cramp in shoulder,train
+C00424,no evidence of shoulder cramp,negated,Y,99300006,Cramp in shoulder,train
+C00425,cramp in thigh,exact,N,99300078,Cramp in thigh,train
+C00426,thigh cramping up,colloquial,N,99300078,Cramp in thigh,train
+C00427,crmop in thigh,misspelled,N,99300078,Cramp in thigh,train
+C00428,denies cramp in thigh,negated,Y,99300078,Cramp in thigh,train
+C00429,cramping of thumb,exact,N,99300132,Cramp in thumb,train
+C00430,cramp in my thumb at night,colloquial,N,99300132,Cramp in thumb,train
+C00431,cramp in thubm,misspelled,N,99300132,Cramp in thumb,train
+C00432,negative for thumb cramp,negated,Y,99300132,Cramp in thumb,train
+C00433,toe cramp,exact,N,99300060,Cramp in toe,calib
+C00434,toe cramping up,colloquial,N,99300060,Cramp in toe,calib
+C00435,toe crmap,misspelled,N,99300060,Cramp in toe,calib
+C00436,patient reports no cramping of toe,negated,Y,99300060,Cramp in toe,calib
+C00437,cramp in upper arm,exact,N,99300102,Cramp in upper arm,calib
+C00438,cramp in my upper arm at night,colloquial,N,99300102,Cramp in upper arm,calib
+C00439,cramp in upper armm,misspelled,N,99300102,Cramp in upper arm,calib
+C00440,no evidence of cramping of upper arm,negated,Y,99300102,Cramp in upper arm,calib
+C00441,cramp in wrist,exact,N,99300018,Cramp in wrist,train
+C00442,cramp in my wrist at night,colloquial,N,99300018,Cramp in wrist,train
+C00443,crapming of wirst,misspelled,N,99300018,Cramp in wrist,train
+C00444,patient reports no wrist cramp,negated,Y,99300018,Cramp in wrist,train
+C00445,decreased appetite,exact,N,99300448,Decreased appetite,test
+C00446,not hungry at all,colloquial,N,99300448,Decreased appetite,test
+C00447,apeptite reducud,misspelled,N,99300448,Decreased appetite,test
+C00448,negative for decreased appetite,negated,Y,99300448,Decreased appetite,test
+C00449,dehydrated,exact,N,99300449,Dehydration,calib
+C00450,dried out,colloquial,N,99300449,Dehydration,calib
+C00451,deehydrated,misspelled,N,99300449,Dehydration,calib
+C00452,fluid loss ruled out,negated,Y,99300449,Dehydration,calib
+C00453,feeling down,exact,N,99300461,Depressed mood,train
+C00454,mood very low,colloquial,N,99300461,Depressed mood,train
+C00455,feelling down,misspelled,N,99300461,Depressed mood,train
+C00456,denies low mood,negated,Y,99300461,Depressed mood,train
+C00457,loose stools,exact,N,99012735,Diarrhoea,calib
+C00458,frequent watery bowel movements,colloquial,N,99012735,Diarrhoea,calib
+C00459,diarrhioa,misspelled,N,99012735,Diarrhoea,calib
+C00460,denies runny stools,negated,Y,99012735,Diarrhoea,calib
+C00461,dizziness,exact,N,99300450,Dizziness,train
+C00462,felt woozy,colloquial,N,99300450,Dizziness,train
+C00463,feeling dizzyy,misspelled,N,99300450,Dizziness,train
+C00464,denies dizzy spell,negated,Y,99300450,Dizziness,train
+C00465,orthostatic dizziness,exact,N,99013575,Dizziness postural,train
+C00466,woozy getting out of bed,colloquial,N,99013575,Dizziness postural,train
+C00467,postoraal dizziness,misspelled,N,99013575,Dizziness postural,train
+C00468,patient reports no postural dizziness,negated,Y,99013575,Dizziness postural,train
+C00469,eye dryness,exact,N,99300494,Dry eye,train
+C00470,eyes feel gritty,colloquial,N,99300494,Dry eye,train
+C00471,dry ey,misspelled,N,99300494,Dry eye,train
+C00472,negative for gritty eyes,negated,Y,99300494,Dry eye,train
+C00473,mouth dryness,exact,N,99300447,Dry mouth,train
+C00474,no saliva,colloquial,N,99300447,Dry mouth,train
+C00475,xirostomia,misspelled,N,99300447,Dry mouth,train
+C00476,denies dry mouth,negated,Y,99300447,Dry mouth,train
+C00477,xerosis,exact,N,99300475,Dry skin,train
+C00478,rough dry skin,colloquial,N,99300475,Dry skin,train
+C00479,skon dyness,misspelled,N,99300475,Dry skin,train
+C00480,patient reports no skin dryness,negated,Y,99300475,Dry skin,train
+C00481,metallic taste,exact,N,99300456,Dysgeusia,calib
+C00482,food tastes wrong,colloquial,N,99300456,Dysgeusia,calib
+C00483,tsote disturbance,misspelled,N,99300456,Dysgeusia,calib
+C00484,taste disturbance ruled out,negated,Y,99300456,Dysgeusia,calib
+C00485,indigestion,exact,N,99300444,Dyspepsia,test
+C00486,stomach upset after eating,colloquial,N,99300444,Dyspepsia,test
+C00487,opset stmoach,misspelled,N,99300444,Dyspepsia,test
+C00488,denies upset stomach,negated,Y,99300444,Dyspepsia,test
+C00489,dyspnoea,exact,N,99300477,Dyspnoea,test
+C00490,short of breath on stairs,colloquial,N,99300477,Dyspnoea,test
+C00491,shortness of breth,misspelled,N,99300477,Dyspnoea,test
+C00492,negative for shortness of breath,negated,Y,99300477,Dyspnoea,test
+C00493,painful urination,exact,N,99300497,Dysuria,test
+C00494,stings when passing water,colloquial,N,99300497,Dysuria,test
+C00495,dyuria,misspelled,N,99300497,Dysuria,test
+C00496,no dysuria,negated,Y,99300497,Dysuria,test
+C00497,blocked ear sensation,exact,N,99300492,Ear discomfort,test
+C00498,popping in ears,colloquial,N,99300492,Ear discomfort,test
+C00499,ear prressre,misspelled,N,99300492,Ear discomfort,test
+C00500,no evidence of ear pressure,negated,Y,99300492,Ear discomfort,test
+C00501,infection of ear,exact,N,99300425,Ear infection,train
+C00502,infection in ear,colloquial,N,99300425,Ear infection,train
+C00503,inffecteon of ear,misspelled,N,99300425,Ear infection,train
+C00504,patient reports no ear infection bacterial,negated,Y,99300425,Ear infection,train
+C00505,reduced movement of elbow,exact,N,99300252,Elbow stiffness,train
+C00506,elbow feels locked,colloquial,N,99300252,Elbow stiffness,train
+C00507,elow stiffness,misspelled,N,99300252,Elbow stiffness,train
+C00508,no stiff elbow,negated,Y,99300252,Elbow stiffness,train
+C00509,qt prolongation,exact,N,99014387,Electrocardiogram QT prolonged,train
+C00510,marked prolonged heart rhythm interval,colloquial,N,99014387,Electrocardiogram QT prolonged,train
+C00511,proonged qt intterval,misspelled,N,99014387,Electrocardiogram QT prolonged,train
+C00512,patient reports no qt prolongation,negated,Y,99014387,Electrocardiogram QT prolonged,train
+C00513,decreased eosinophil count,exact,N,99300354,Eosinophil count decreased,train
+C00514,eosinophil count below lower limit,colloquial,N,99300354,Eosinophil count decreased,train
+C00515,reduceed eosinophil count,misspelled,N,99300354,Eosinophil count decreased,train
+C00516,patient reports no decreased eosinophil count,negated,Y,99300354,Eosinophil count decreased,train
+C00517,elevated eosinophil count,exact,N,99300353,Eosinophil count increased,train
+C00518,eosinophil count came back high,colloquial,N,99300353,Eosinophil count increased,train
+C00519,elevated eosinophil cuunnt,misspelled,N,99300353,Eosinophil count increased,train
+C00520,negative for eosinophil count increased,negated,Y,99300353,Eosinophil count increased,train
+C00521,nose bleed,exact,N,99300481,Epistaxis,train
+C00522,nose started bleeding,colloquial,N,99300481,Epistaxis,train
+C00523,noselbeud,misspelled,N,99300481,Epistaxis,train
+C00524,no evidence of epistaxis,negated,Y,99300481,Epistaxis,train
+C00525,erythema of leg,exact,N,99300262,Erythema,train
+C00526,face looks flushed red,colloquial,N,99300262,Erythema,train
+C00527,eryteam of leg,misspelled,N,99300262,Erythema,train
+C00528,erythema of forearm ruled out,negated,Y,99300262,Erythema,train
+C00529,infection of eye,exact,N,99300426,Eye infection,train
+C00530,"eye infection, on antibiotics",colloquial,N,99300426,Eye infection,train
+C00531,eye inefctien viral,misspelled,N,99300426,Eye infection,train
+C00532,no eye infection viral,negated,Y,99300426,Eye infection,train
+C00533,itchy eyes,exact,N,99300495,Eye pruritus,test
+C00534,itchy eyelids,colloquial,N,99300495,Eye pruritus,test
+C00535,eye itchong,misspelled,N,99300495,Eye pruritus,test
+C00536,no evidence of eye itching,negated,Y,99300495,Eye pruritus,test
+C00537,fall,exact,N,99300506,Fall,train
+C00538,slipped on stairs,colloquial,N,99300506,Fall,train
+C00539,feeell,misspelled,N,99300506,Fall,train
+C00540,no evidence of fell,negated,Y,99300506,Fall,train
+C00541,tiredness,exact,N,99016250,Fatigue,test
+C00542,so tired,colloquial,N,99016250,Fatigue,test
+C00543,exhaaustion,misspelled,N,99016250,Fatigue,test
+C00544,negative for lack of energy,negated,Y,99016250,Fatigue,test
+C00545,open fracture of femur,exact,N,99300268,Femur fracture,train
+C00546,femur broken after fall,colloquial,N,99300268,Femur fracture,train
+C00547,brooken femir,misspelled,N,99300268,Femur fracture,train
+C00548,patient reports no closed fracture of femur,negated,Y,99300268,Femur fracture,train
+C00549,fibula fracture,exact,N,99300270,Fibula fracture,calib
+C00550,broke my fibula,colloquial,N,99300270,Fibula fracture,calib
+C00551,apen fractuure of fibula,misspelled,N,99300270,Fibula fracture,calib
+C00552,denies fibula fracture,negated,Y,99300270,Fibula fracture,calib
+C00553,hairline fracture of finger,exact,N,99300275,Finger fracture,train
+C00554,finger broken after fall,colloquial,N,99300275,Finger fracture,train
+C00555,rigt finer fracture,misspelled,N,99300275,Finger fracture,train
+C00556,no evidence of stress fracture of finger,negated,Y,99300275,Finger fracture,train
+C00557,stiff finger,exact,N,99300259,Finger stiffness,train
+C00558,can't move my finger freely,colloquial,N,99300259,Finger stiffness,train
+C00559,stiff finrge,misspelled,N,99300259,Finger stiffness,train
+C00560,no evidence of stiff finger,negated,Y,99300259,Finger stiffness,train
+C00561,passing wind,exact,N,99300446,Flatulence,train
+C00562,lots of gas,colloquial,N,99300446,Flatulence,train
+C00563,passing wned,misspelled,N,99300446,Flatulence,train
+C00564,denies passing wind,negated,Y,99300446,Flatulence,train
+C00565,closed fracture of foot,exact,N,99300277,Foot fracture,train
+C00566,broke my foot,colloquial,N,99300277,Foot fracture,train
+C00567,broken fat,misspelled,N,99300277,Foot fracture,train
+C00568,negative for foot fracture,negated,Y,99300277,Foot fracture,train
+C00569,fungal skin infection bacterial,exact,N,99300436,Fungal skin infection,calib
+C00570,infection in feet,colloquial,N,99300436,Fungal skin infection,calib
+C00571,fungal skin infection viaal,misspelled,N,99300436,Fungal skin infection,calib
+C00572,negative for fungal skin infection viral,negated,Y,99300436,Fungal skin infection,calib
+C00573,gamma-glutamyltransferase out of range,exact,N,99300304,Gamma-glutamyltransferase abnormal,train
+C00574,gamma-glutamyltransferase off on labs,colloquial,N,99300304,Gamma-glutamyltransferase abnormal,train
+C00575,gamma-glutamyltransferase abnourmal,misspelled,N,99300304,Gamma-glutamyltransferase abnormal,train
+C00576,gamma-glutamyltransferase abnormal ruled out,negated,Y,99300304,Gamma-glutamyltransferase abnormal,train
+C00577,gamma-glutamyltransferase below normal,exact,N,99300303,Gamma-glutamyltransferase decreased,calib
+C00578,gamma-glutamyltransferase came back low,colloquial,N,99300303,Gamma-glutamyltransferase decreased,calib
+C00579,low gg,misspelled,N,99300303,Gamma-glutamyltransferase decreased,calib
+C00580,no evidence of gamma-glutamyltransferase decreased,negated,Y,99300303,Gamma-glutamyltransferase decreased,calib
+C00581,increased gamma-glutamyltransferase,exact,N,99300302,Gamma-glutamyltransferase increased,train
+C00582,GGT above upper limit,colloquial,N,99300302,Gamma-glutamyltransferase increased,train
+C00583,higgh gamma-glutamyltransferase,misspelled,N,99300302,Gamma-glutamyltransferase increased,train
+C00584,negative for raised gamma-glutamyltransferase,negated,Y,99300302,Gamma-glutamyltransferase increased,train
+C00585,gastrointestinal infection bacterial,exact,N,99300437,Gastrointestinal infection,test
+C00586,"stomach bug infection, on antibiotics",colloquial,N,99300437,Gastrointestinal infection,test
+C00587,gtrointestinal infection viral,misspelled,N,99300437,Gastrointestinal infection,test
+C00588,negative for gastrointestinal infection bacterial,negated,Y,99300437,Gastrointestinal infection,test
+C00589,gum infection,exact,N,99300430,Gum infection,train
+C00590,"gums infection, on antibiotics",colloquial,N,99300430,Gum infection,train
+C00591,ifecton of gum,misspelled,N,99300430,Gum infection,train
+C00592,no evidence of infection of gum,negated,Y,99300430,Gum infection,train
+C00593,haematocrit abnormal,exact,N,99300358,Haematocrit abnormal,train
+C00594,haematocrit off on labs,colloquial,N,99300358,Haematocrit abnormal,train
+C00595,haemtaocrit abnormla,misspelled,N,99300358,Haematocrit abnormal,train
+C00596,no haematocrit abnormal,negated,Y,99300358,Haematocrit abnormal,train
+C00597,haematocrit below normal,exact,N,99300357,Haematocrit decreased,train
+C00598,haematocrit came back low,colloquial,N,99300357,Haematocrit decreased,train
+C00599,low haematocritt,misspelled,N,99300357,Haematocrit decreased,train
+C00600,haematocrit decreased ruled out,negated,Y,99300357,Haematocrit decreased,train
+C00601,high haematocrit,exact,N,99300356,Haematocrit increased,calib
+C00602,haematocrit up on bloods,colloquial,N,99300356,Haematocrit increased,calib
+C00603,haematocrit aobvo normal,misspelled,N,99300356,Haematocrit increased,calib
+C00604,negative for haematocrit above normal,negated,Y,99300356,Haematocrit increased,calib
+C00605,blood in urine,exact,N,99300499,Haematuria,test
+C00606,blood when peeing,colloquial,N,99300499,Haematuria,test
+C00607,haematuroa,misspelled,N,99300499,Haematuria,test
+C00608,denies haematuria,negated,Y,99300499,Haematuria,test
+C00609,abnormal haemoglobin,exact,N,99300340,Haemoglobin abnormal,train
+C00610,haemoglobin off on labs,colloquial,N,99300340,Haemoglobin abnormal,train
+C00611,hb abbnirmal,misspelled,N,99300340,Haemoglobin abnormal,train
+C00612,abnormal haemoglobin ruled out,negated,Y,99300340,Haemoglobin abnormal,train
+C00613,haemoglobin decreased,exact,N,99300339,Haemoglobin decreased,train
+C00614,haemoglobin dropped on labs,colloquial,N,99300339,Haemoglobin decreased,train
+C00615,decreased haemolobin,misspelled,N,99300339,Haemoglobin decreased,train
+C00616,no evidence of low haemoglobin,negated,Y,99300339,Haemoglobin decreased,train
+C00617,high haemoglobin,exact,N,99300338,Haemoglobin increased,train
+C00618,haemoglobin came back high,colloquial,N,99300338,Haemoglobin increased,train
+C00619,hgh haemoglobon,misspelled,N,99300338,Haemoglobin increased,train
+C00620,no evidence of raised haemoglobin,negated,Y,99300338,Haemoglobin increased,train
+C00621,right hand fracture,exact,N,99300278,Hand fracture,train
+C00622,cracked hand,colloquial,N,99300278,Hand fracture,train
+C00623,hairline fracture of hend,misspelled,N,99300278,Hand fracture,train
+C00624,patient reports no closed fracture of hand,negated,Y,99300278,Hand fracture,train
+C00625,cephalgia,exact,N,99019211,Headache,train
+C00626,head is pounding,colloquial,N,99019211,Headache,train
+C00627,piin in back of head,misspelled,N,99019211,Headache,train
+C00628,negative for pain in back of head,negated,Y,99019211,Headache,train
+C00629,heart rate abnormal,exact,N,99300409,Heart rate abnormal,test
+C00630,heart rate off on labs,colloquial,N,99300409,Heart rate abnormal,test
+C00631,hert rate out of runge,misspelled,N,99300409,Heart rate abnormal,test
+C00632,negative for heart rate abnormal,negated,Y,99300409,Heart rate abnormal,test
+C00633,decreased heart rate,exact,N,99300408,Heart rate decreased,train
+C00634,heart rate down on bloods,colloquial,N,99300408,Heart rate decreased,train
+C00635,heart rate derceased,misspelled,N,99300408,Heart rate decreased,train
+C00636,denies low heart rate,negated,Y,99300408,Heart rate decreased,train
+C00637,hip fractured,exact,N,99300267,Hip fracture,train
+C00638,cracked hip,colloquial,N,99300267,Hip fracture,train
+C00639,closde fracture of hip,misspelled,N,99300267,Hip fracture,train
+C00640,left hip fracture ruled out,negated,Y,99300267,Hip fracture,train
+C00641,reduced movement of hip,exact,N,99300254,Hip stiffness,test
+C00642,hip won't bend properly,colloquial,N,99300254,Hip stiffness,test
+C00643,stiffnaass of hip,misspelled,N,99300254,Hip stiffness,test
+C00644,denies reduced movement of hip,negated,Y,99300254,Hip stiffness,test
+C00645,hot flush,exact,N,99300490,Hot flush,train
+C00646,face going red and hot,colloquial,N,99300490,Hot flush,train
+C00647,hot fulsh,misspelled,N,99300490,Hot flush,train
+C00648,hot flashes ruled out,negated,Y,99300490,Hot flush,train
+C00649,open fracture of humerus,exact,N,99300273,Humerus fracture,train
+C00650,cracked humerus,colloquial,N,99300273,Humerus fracture,train
+C00651,opeen fracture of humerus,misspelled,N,99300273,Humerus fracture,train
+C00652,no humerus fracture,negated,Y,99300273,Humerus fracture,train
+C00653,excessive sweating,exact,N,99300471,Hyperhidrosis,train
+C00654,sweating buckets,colloquial,N,99300471,Hyperhidrosis,train
+C00655,eexssive sweating,misspelled,N,99300471,Hyperhidrosis,train
+C00656,no evidence of sweating increased,negated,Y,99300471,Hyperhidrosis,train
+C00657,hypersensitivity,exact,N,99300503,Hypersensitivity,train
+C00658,had an allergic reaction,colloquial,N,99300503,Hypersensitivity,train
+C00659,allergic reacion,misspelled,N,99300503,Hypersensitivity,train
+C00660,patient reports no allergic reaction,negated,Y,99300503,Hypersensitivity,train
+C00661,hypertension,exact,N,99300488,Hypertension,test
+C00662,pressure up today,colloquial,N,99300488,Hypertension,test
+C00663,hypertensioon,misspelled,N,99300488,Hypertension,test
+C00664,no hypertension,negated,Y,99300488,Hypertension,test
+C00665,hypoaesthesia,exact,N,99300455,Hypoaesthesia,train
+C00666,can't feel my fingertips,colloquial,N,99300455,Hypoaesthesia,train
+C00667,nmbnoss,misspelled,N,99300455,Hypoaesthesia,train
+C00668,negative for reduced sensation,negated,Y,99300455,Hypoaesthesia,train
+C00669,hypotension,exact,N,99300489,Hypotension,test
+C00670,bp low on standing,colloquial,N,99300489,Hypotension,test
+C00671,hypottunsion,misspelled,N,99300489,Hypotension,test
+C00672,negative for blood pressure low,negated,Y,99300489,Hypotension,test
+C00673,flu-like symptoms,exact,N,99300470,Influenza like illness,train
+C00674,feels like flu,colloquial,N,99300470,Influenza like illness,train
+C00675,infulenza loke illness,misspelled,N,99300470,Influenza like illness,train
+C00676,no evidence of flu-like symptoms,negated,Y,99300470,Influenza like illness,train
+C00677,infusion reaction,exact,N,99300504,Infusion related reaction,test
+C00678,reaction while drip running,colloquial,N,99300504,Infusion related reaction,test
+C00679,inusion reactino,misspelled,N,99300504,Infusion related reaction,test
+C00680,no evidence of infusion reaction,negated,Y,99300504,Infusion related reaction,test
+C00681,injection site bruising,exact,N,99300510,Injection site bruising,test
+C00682,bruise at the needle site,colloquial,N,99300510,Injection site bruising,test
+C00683,bruisign at injection site,misspelled,N,99300510,Injection site bruising,test
+C00684,negative for injection site bruising,negated,Y,99300510,Injection site bruising,test
+C00685,erythema at injection site,exact,N,99300509,Injection site erythema,train
+C00686,red patch around the jab,colloquial,N,99300509,Injection site erythema,train
+C00687,injection site erytthema,misspelled,N,99300509,Injection site erythema,train
+C00688,no evidence of injection site erythema,negated,Y,99300509,Injection site erythema,train
+C00689,injection site induration mild,exact,N,99300512,Injection site induration,train
+C00690,hard bump at injection spot,colloquial,N,99300512,Injection site induration,train
+C00691,injection suute induration,misspelled,N,99300512,Injection site induration,train
+C00692,injection site induration ruled out,negated,Y,99300512,Injection site induration,train
+C00693,infection of injection site,exact,N,99300441,Injection site infection,test
+C00694,infection in shot site,colloquial,N,99300441,Injection site infection,test
+C00695,injecteon site infection,misspelled,N,99300441,Injection site infection,test
+C00696,no injection site infection bacterial,negated,Y,99300441,Injection site infection,test
+C00697,injection site pain,exact,N,99300507,Injection site pain,train
+C00698,sore where the needle went in,colloquial,N,99300507,Injection site pain,train
+C00699,pain at injecttion site,misspelled,N,99300507,Injection site pain,train
+C00700,injection site pain mild ruled out,negated,Y,99300507,Injection site pain,train
+C00701,pruritus at injection site,exact,N,99300511,Injection site pruritus,calib
+C00702,itchy spot where injected,colloquial,N,99300511,Injection site pruritus,calib
+C00703,injection site prritus mild,misspelled,N,99300511,Injection site pruritus,calib
+C00704,negative for pruritus at injection site,negated,Y,99300511,Injection site pruritus,calib
+C00705,injection site swelling mild,exact,N,99300508,Injection site swelling,train
+C00706,lump where the shot was given,colloquial,N,99300508,Injection site swelling,train
+C00707,swelling at injection stie,misspelled,N,99300508,Injection site swelling,train
+C00708,negative for injection site swelling,negated,Y,99300508,Injection site swelling,train
+C00709,insomnia,exact,N,99300459,Insomnia,test
+C00710,awake most of the night,colloquial,N,99300459,Insomnia,test
+C00711,insomna,misspelled,N,99300459,Insomnia,test
+C00712,denies insomnia,negated,Y,99300459,Insomnia,test
+C00713,international normalised ratio out of range,exact,N,99300403,International normalised ratio abnormal,test
+C00714,INR out of range on bloods,colloquial,N,99300403,International normalised ratio abnormal,test
+C00715,anternational normalised ratiio out of range,misspelled,N,99300403,International normalised ratio abnormal,test
+C00716,denies international normalised ratio out of range,negated,Y,99300403,International normalised ratio abnormal,test
+C00717,reduced international normalised ratio,exact,N,99300402,International normalised ratio decreased,calib
+C00718,INR below lower limit,colloquial,N,99300402,International normalised ratio decreased,calib
+C00719,decreased interrnational normalised ratio,misspelled,N,99300402,International normalised ratio decreased,calib
+C00720,international normalised ratio below normal ruled out,negated,Y,99300402,International normalised ratio decreased,calib
+C00721,raised inr,exact,N,99300401,International normalised ratio increased,train
+C00722,INR came back high,colloquial,N,99300401,International normalised ratio increased,train
+C00723,riaised inr,misspelled,N,99300401,International normalised ratio increased,train
+C00724,no evidence of raised inr,negated,Y,99300401,International normalised ratio increased,train
+C00725,irritability,exact,N,99300462,Irritability,calib
+C00726,very cranky,colloquial,N,99300462,Irritability,calib
+C00727,feoling irritable,misspelled,N,99300462,Irritability,calib
+C00728,patient reports no feeling irritable,negated,Y,99300462,Irritability,calib
+C00729,broken jaw,exact,N,99300283,Jaw fracture,train
+C00730,broke my jaw,colloquial,N,99300283,Jaw fracture,train
+C00731,hairline farctrue of jaw,misspelled,N,99300283,Jaw fracture,train
+C00732,no jaw fractured,negated,Y,99300283,Jaw fracture,train
+C00733,infection of joint,exact,N,99300440,Joint infection,train
+C00734,"joint infection, on antibiotics",colloquial,N,99300440,Joint infection,train
+C00735,jonnt infection,misspelled,N,99300440,Joint infection,train
+C00736,no evidence of joint infection,negated,Y,99300440,Joint infection,train
+C00737,infection of kidney,exact,N,99300431,Kidney infection,train
+C00738,infection in kidney,colloquial,N,99300431,Kidney infection,train
+C00739,kidny infection bacterial,misspelled,N,99300431,Kidney infection,train
+C00740,denies kidney infection bacterial,negated,Y,99300431,Kidney infection,train
+C00741,stiffness of knee,exact,N,99300255,Knee stiffness,train
+C00742,knee feels locked,colloquial,N,99300255,Knee stiffness,train
+C00743,knee stifniss,misspelled,N,99300255,Knee stiffness,train
+C00744,negative for stiffness of knee,negated,Y,99300255,Knee stiffness,train
+C00745,cut on chin,exact,N,99300284,Laceration,test
+C00746,sliced face with knife,colloquial,N,99300284,Laceration,test
+C00747,lacceration of toe,misspelled,N,99300284,Laceration,test
+C00748,no eyebrow laceration,negated,Y,99300284,Laceration,test
+C00749,lipase out of range,exact,N,99300361,Lipase abnormal,train
+C00750,lipase off on labs,colloquial,N,99300361,Lipase abnormal,train
+C00751,liipase out of ragne,misspelled,N,99300361,Lipase abnormal,train
+C00752,no evidence of lipase abnormal,negated,Y,99300361,Lipase abnormal,train
+C00753,lipase decreased,exact,N,99300360,Lipase decreased,calib
+C00754,lipase came back low,colloquial,N,99300360,Lipase decreased,calib
+C00755,lipasu below normal,misspelled,N,99300360,Lipase decreased,calib
+C00756,denies decreased lipase,negated,Y,99300360,Lipase decreased,calib
+C00757,elevated lipase,exact,N,99300359,Lipase increased,test
+C00758,raised lipase on labs,colloquial,N,99300359,Lipase increased,test
+C00759,lipase oncreased,misspelled,N,99300359,Lipase increased,test
+C00760,no evidence of lipase above normal,negated,Y,99300359,Lipase increased,test
+C00761,infection of lower respiratory tract,exact,N,99300424,Lower respiratory tract infection,train
+C00762,infection in lung,colloquial,N,99300424,Lower respiratory tract infection,train
+C00763,lower respiratory tract inection,misspelled,N,99300424,Lower respiratory tract infection,train
+C00764,lower respiratory tract infection bacterial ruled out,negated,Y,99300424,Lower respiratory tract infection,train
+C00765,lung infection bacterial,exact,N,99300434,Lung infection,train
+C00766,lungs infected,colloquial,N,99300434,Lung infection,train
+C00767,lunng infection,misspelled,N,99300434,Lung infection,train
+C00768,no evidence of lung infection bacterial,negated,Y,99300434,Lung infection,train
+C00769,lymphocyte count abnormal,exact,N,99300352,Lymphocyte count abnormal,train
+C00770,lymphocyte count off on labs,colloquial,N,99300352,Lymphocyte count abnormal,train
+C00771,lymphocye cunt abnormal,misspelled,N,99300352,Lymphocyte count abnormal,train
+C00772,abnormal lymphocyte count ruled out,negated,Y,99300352,Lymphocyte count abnormal,train
+C00773,lymphocyte count decreased,exact,N,99300351,Lymphocyte count decreased,train
+C00774,lymphocyte count dropped on labs,colloquial,N,99300351,Lymphocyte count decreased,train
+C00775,reduced lympphocytte count,misspelled,N,99300351,Lymphocyte count decreased,train
+C00776,reduced lymphocyte count ruled out,negated,Y,99300351,Lymphocyte count decreased,train
+C00777,raised lymphocyte count,exact,N,99300350,Lymphocyte count increased,train
+C00778,lymphocyte count above upper limit,colloquial,N,99300350,Lymphocyte count increased,train
+C00779,lymphocyte couunt abovi normal,misspelled,N,99300350,Lymphocyte count increased,train
+C00780,lymphocyte count above normal ruled out,negated,Y,99300350,Lymphocyte count increased,train
+C00781,generally unwell,exact,N,99300469,Malaise,train
+C00782,under the weather,colloquial,N,99300469,Malaise,train
+C00783,generlly unwell,misspelled,N,99300469,Malaise,train
+C00784,negative for malaise,negated,Y,99300469,Malaise,train
+C00785,forgetfulness,exact,N,99300458,Memory impairment,train
+C00786,memory not great,colloquial,N,99300458,Memory impairment,train
+C00787,poor memroy,misspelled,N,99300458,Memory impairment,train
+C00788,no evidence of poor memory,negated,Y,99300458,Memory impairment,train
+C00789,migraine,exact,N,99027599,Migraine,train
+C00790,one of my bad migraines,colloquial,N,99027599,Migraine,train
+C00791,migraie,misspelled,N,99027599,Migraine,train
+C00792,negative for migraine,negated,Y,99027599,Migraine,train
+C00793,muscle pain,exact,N,99300501,Myalgia,train
+C00794,muscles aching all over,colloquial,N,99300501,Myalgia,train
+C00795,muscle pnai,misspelled,N,99300501,Myalgia,train
+C00796,no myalgia,negated,Y,99300501,Myalgia,train
+C00797,stuffy nose,exact,N,99300479,Nasal congestion,train
+C00798,stuffed up,colloquial,N,99300479,Nasal congestion,train
+C00799,blocked nase,misspelled,N,99300479,Nasal congestion,train
+C00800,denies nasal congestion,negated,Y,99300479,Nasal congestion,train
+C00801,common cold,exact,N,99300505,Nasopharyngitis,train
+C00802,caught a cold,colloquial,N,99300505,Nasopharyngitis,train
+C00803,head cid,misspelled,N,99300505,Nasopharyngitis,train
+C00804,no evidence of common cold,negated,Y,99300505,Nasopharyngitis,train
+C00805,feeling sick,exact,N,99028280,Nausea,calib
+C00806,feel like throwing up,colloquial,N,99028280,Nausea,calib
+C00807,qoeasines,misspelled,N,99028280,Nausea,calib
+C00808,negative for sick to stomach,negated,Y,99028280,Nausea,calib
+C00809,stiff neck,exact,N,99300257,Neck stiffness,train
+C00810,neck won't bend properly,colloquial,N,99300257,Neck stiffness,train
+C00811,sttiff neck,misspelled,N,99300257,Neck stiffness,train
+C00812,negative for neck stiffness,negated,Y,99300257,Neck stiffness,train
+C00813,neutrophil count out of range,exact,N,99300349,Neutrophil count abnormal,train
+C00814,neutrophil count off on labs,colloquial,N,99300349,Neutrophil count abnormal,train
+C00815,neutrophil count out of rnge,misspelled,N,99300349,Neutrophil count abnormal,train
+C00816,neutrophil count out of range ruled out,negated,Y,99300349,Neutrophil count abnormal,train
+C00817,neutrophil count decreased,exact,N,99300348,Neutrophil count decreased,calib
+C00818,neutrophil count down on bloods,colloquial,N,99300348,Neutrophil count decreased,calib
+C00819,low neutrophel count,misspelled,N,99300348,Neutrophil count decreased,calib
+C00820,negative for low neutrophil count,negated,Y,99300348,Neutrophil count decreased,calib
+C00821,high neutrophil count,exact,N,99300347,Neutrophil count increased,train
+C00822,raised neutrophil count on labs,colloquial,N,99300347,Neutrophil count increased,train
+C00823,raised neutrophil cunt,misspelled,N,99300347,Neutrophil count increased,train
+C00824,increased neutrophil count ruled out,negated,Y,99300347,Neutrophil count increased,train
+C00825,night sweats,exact,N,99300472,Night sweats,calib
+C00826,sweaty nights,colloquial,N,99300472,Night sweats,calib
+C00827,night swoets,misspelled,N,99300472,Night sweats,calib
+C00828,patient reports no sweating at night,negated,Y,99300472,Night sweats,calib
+C00829,bad dreams,exact,N,99300464,Nightmare,train
+C00830,horrible dreams,colloquial,N,99300464,Nightmare,train
+C00831,distubring dreams,misspelled,N,99300464,Nightmare,train
+C00832,no disturbing dreams,negated,Y,99300464,Nightmare,train
+C00833,fracture of nose,exact,N,99300279,Nose fracture,train
+C00834,cracked nose,colloquial,N,99300279,Nose fracture,train
+C00835,open fractue of nosi,misspelled,N,99300279,Nose fracture,train
+C00836,patient reports no fracture of nose,negated,Y,99300279,Nose fracture,train
+C00837,numbness of abdomen,exact,N,99300161,Numbness of abdomen,train
+C00838,abdomen gone numb,colloquial,N,99300161,Numbness of abdomen,train
+C00839,loss of feelnig in abdomen,misspelled,N,99300161,Numbness of abdomen,train
+C00840,abdomen numbness ruled out,negated,Y,99300161,Numbness of abdomen,train
+C00841,numbness of back,exact,N,99300145,Numbness of back,train
+C00842,can't feel my back,colloquial,N,99300145,Numbness of back,train
+C00843,loss of feeling in backk,misspelled,N,99300145,Numbness of back,train
+C00844,patient reports no back numbness,negated,Y,99300145,Numbness of back,train
+C00845,numb big toe,exact,N,99300135,Numbness of big toe,calib
+C00846,big toe gone numb,colloquial,N,99300135,Numbness of big toe,calib
+C00847,big toe numbneuss,misspelled,N,99300135,Numbness of big toe,calib
+C00848,patient reports no left big toe numb,negated,Y,99300135,Numbness of big toe,calib
+C00849,buttock numbness,exact,N,99300185,Numbness of buttock,test
+C00850,buttock gone numb,colloquial,N,99300185,Numbness of buttock,test
+C00851,numb buttok,misspelled,N,99300185,Numbness of buttock,test
+C00852,no evidence of buttock numbness,negated,Y,99300185,Numbness of buttock,test
+C00853,numb calf,exact,N,99300081,Numbness of calf,train
+C00854,calf gone numb,colloquial,N,99300081,Numbness of calf,train
+C00855,calf nmnbess,misspelled,N,99300081,Numbness of calf,train
+C00856,no numbness of left calf,negated,Y,99300081,Numbness of calf,train
+C00857,numbness of cheek,exact,N,99300241,Numbness of cheek,test
+C00858,can't feel my cheek,colloquial,N,99300241,Numbness of cheek,test
+C00859,looss of feeling in cheek,misspelled,N,99300241,Numbness of cheek,test
+C00860,patient reports no numb cheek,negated,Y,99300241,Numbness of cheek,test
+C00861,loss of feeling in chest,exact,N,99300157,Numbness of chest,test
+C00862,chest gone numb,colloquial,N,99300157,Numbness of chest,test
+C00863,nubm chets,misspelled,N,99300157,Numbness of chest,test
+C00864,loss of feeling in chest ruled out,negated,Y,99300157,Numbness of chest,test
+C00865,loss of feeling in elbow,exact,N,99300009,Numbness of elbow,test
+C00866,can't feel my elbow,colloquial,N,99300009,Numbness of elbow,test
+C00867,liss of feeling in elbaw,misspelled,N,99300009,Numbness of elbow,test
+C00868,negative for left elbow numb,negated,Y,99300009,Numbness of elbow,test
+C00869,numbness of face,exact,N,99300193,Numbness of face,train
+C00870,face feels dead,colloquial,N,99300193,Numbness of face,train
+C00871,namb facce,misspelled,N,99300193,Numbness of face,train
+C00872,patient reports no numbness of face,negated,Y,99300193,Numbness of face,train
+C00873,numb finger,exact,N,99300027,Numbness of finger,train
+C00874,finger gone numb,colloquial,N,99300027,Numbness of finger,train
+C00875,numb finggr,misspelled,N,99300027,Numbness of finger,train
+C00876,patient reports no right finger numb,negated,Y,99300027,Numbness of finger,train
+C00877,numb flank,exact,N,99300213,Numbness of flank,calib
+C00878,flank feels dead,colloquial,N,99300213,Numbness of flank,calib
+C00879,flenk numbness,misspelled,N,99300213,Numbness of flank,calib
+C00880,no numbness of flank,negated,Y,99300213,Numbness of flank,calib
+C00881,right foot numb,exact,N,99300051,Numbness of foot,train
+C00882,can't feel my foot,colloquial,N,99300051,Numbness of foot,train
+C00883,numbness of right fooot,misspelled,N,99300051,Numbness of foot,train
+C00884,no numbness of foot,negated,Y,99300051,Numbness of foot,train
+C00885,left forearm numb,exact,N,99300087,Numbness of forearm,train
+C00886,forearm feels dead,colloquial,N,99300087,Numbness of forearm,train
+C00887,numneess of left forearm,misspelled,N,99300087,Numbness of forearm,train
+C00888,negative for numb forearm,negated,Y,99300087,Numbness of forearm,train
+C00889,numbness of forehead,exact,N,99300237,Numbness of forehead,train
+C00890,forehead feels dead,colloquial,N,99300237,Numbness of forehead,train
+C00891,ferehead numbness,misspelled,N,99300237,Numbness of forehead,train
+C00892,patient reports no loss of feeling in forehead,negated,Y,99300237,Numbness of forehead,train
+C00893,numbness of groin,exact,N,99300177,Numbness of groin,calib
+C00894,can't feel my groin,colloquial,N,99300177,Numbness of groin,calib
+C00895,grin nmbness,misspelled,N,99300177,Numbness of groin,calib
+C00896,no evidence of groin numbness,negated,Y,99300177,Numbness of groin,calib
+C00897,gum numbness,exact,N,99300205,Numbness of gum,train
+C00898,can't feel my gum,colloquial,N,99300205,Numbness of gum,train
+C00899,nmb gum,misspelled,N,99300205,Numbness of gum,train
+C00900,no evidence of numb gum,negated,Y,99300205,Numbness of gum,train
+C00901,numb hand,exact,N,99300021,Numbness of hand,train
+C00902,hand feels dead,colloquial,N,99300021,Numbness of hand,train
+C00903,lss of feeling in had,misspelled,N,99300021,Numbness of hand,train
+C00904,denies numbness of right hand,negated,Y,99300021,Numbness of hand,train
+C00905,numbness of left heel,exact,N,99300093,Numbness of heel,train
+C00906,heel gone numb,colloquial,N,99300093,Numbness of heel,train
+C00907,numnbess of left heel,misspelled,N,99300093,Numbness of heel,train
+C00908,no numbness of heel,negated,Y,99300093,Numbness of heel,train
+C00909,hip numbness,exact,N,99300033,Numbness of hip,train
+C00910,hip feels dead,colloquial,N,99300033,Numbness of hip,train
+C00911,numbnass of hip,misspelled,N,99300033,Numbness of hip,train
+C00912,no right hip numb,negated,Y,99300033,Numbness of hip,train
+C00913,numbness of jaw,exact,N,99300173,Numbness of jaw,calib
+C00914,can't feel my jaw,colloquial,N,99300173,Numbness of jaw,calib
+C00915,looss of feelung in jaw,misspelled,N,99300173,Numbness of jaw,calib
+C00916,loss of feeling in jaw ruled out,negated,Y,99300173,Numbness of jaw,calib
+C00917,right knee numb,exact,N,99300039,Numbness of knee,train
+C00918,can't feel my knee,colloquial,N,99300039,Numbness of knee,train
+C00919,kne numbness,misspelled,N,99300039,Numbness of knee,train
+C00920,denies knee numbness,negated,Y,99300039,Numbness of knee,train
+C00921,numbness of lip,exact,N,99300249,Numbness of lip,train
+C00922,lip feels dead,colloquial,N,99300249,Numbness of lip,train
+C00923,numb lipp,misspelled,N,99300249,Numbness of lip,train
+C00924,lip numbness ruled out,negated,Y,99300249,Numbness of lip,train
+C00925,lower abdomen numbness,exact,N,99300169,Numbness of lower abdomen,calib
+C00926,can't feel my lower abdomen,colloquial,N,99300169,Numbness of lower abdomen,calib
+C00927,numb lower abbdmen,misspelled,N,99300169,Numbness of lower abdomen,calib
+C00928,denies lower abdomen numbness,negated,Y,99300169,Numbness of lower abdomen,calib
+C00929,loss of feeling in lower back,exact,N,99300149,Numbness of lower back,train
+C00930,lower back gone numb,colloquial,N,99300149,Numbness of lower back,train
+C00931,ls of feeling in lower back,misspelled,N,99300149,Numbness of lower back,train
+C00932,negative for loss of feeling in lower back,negated,Y,99300149,Numbness of lower back,train
+C00933,lower leg numbness,exact,N,99300105,Numbness of lower leg,train
+C00934,lower leg gone numb,colloquial,N,99300105,Numbness of lower leg,train
+C00935,numness of lowre leg,misspelled,N,99300105,Numbness of lower leg,train
+C00936,denies numbness of lower leg,negated,Y,99300105,Numbness of lower leg,train
+C00937,numbness of mouth,exact,N,99300197,Numbness of mouth,test
+C00938,mouth gone numb,colloquial,N,99300197,Numbness of mouth,test
+C00939,loss of feeliing in mouht,misspelled,N,99300197,Numbness of mouth,test
+C00940,denies numbness of mouth,negated,Y,99300197,Numbness of mouth,test
+C00941,neck numbness,exact,N,99300141,Numbness of neck,calib
+C00942,neck gone numb,colloquial,N,99300141,Numbness of neck,calib
+C00943,nkc numbness,misspelled,N,99300141,Numbness of neck,calib
+C00944,no loss of feeling in neck,negated,Y,99300141,Numbness of neck,calib
+C00945,numbness of nose,exact,N,99300245,Numbness of nose,train
+C00946,nose gone numb,colloquial,N,99300245,Numbness of nose,train
+C00947,nimbness of nose,misspelled,N,99300245,Numbness of nose,train
+C00948,no numbness of nose,negated,Y,99300245,Numbness of nose,train
+C00949,numbness of pelvis,exact,N,99300181,Numbness of pelvis,calib
+C00950,pelvis gone numb,colloquial,N,99300181,Numbness of pelvis,calib
+C00951,lss of feeling in pelvis,misspelled,N,99300181,Numbness of pelvis,calib
+C00952,denies pelvis numbness,negated,Y,99300181,Numbness of pelvis,calib
+C00953,numbness of rib cage,exact,N,99300221,Numbness of rib cage,calib
+C00954,rib cage gone numb,colloquial,N,99300221,Numbness of rib cage,calib
+C00955,numbness of rib caage,misspelled,N,99300221,Numbness of rib cage,calib
+C00956,no numbness of rib cage,negated,Y,99300221,Numbness of rib cage,calib
+C00957,numbness of sacrum,exact,N,99300225,Numbness of sacrum,train
+C00958,sacrum feels dead,colloquial,N,99300225,Numbness of sacrum,train
+C00959,nmub sacrm,misspelled,N,99300225,Numbness of sacrum,train
+C00960,no evidence of loss of feeling in sacrum,negated,Y,99300225,Numbness of sacrum,train
+C00961,numb scalp,exact,N,99300189,Numbness of scalp,train
+C00962,scalp feels dead,colloquial,N,99300189,Numbness of scalp,train
+C00963,numbness of scelp,misspelled,N,99300189,Numbness of scalp,train
+C00964,no numb scalp,negated,Y,99300189,Numbness of scalp,train
+C00965,right shin numb,exact,N,99300111,Numbness of shin,train
+C00966,shin gone numb,colloquial,N,99300111,Numbness of shin,train
+C00967,left shin nubm,misspelled,N,99300111,Numbness of shin,train
+C00968,denies numbness of left shin,negated,Y,99300111,Numbness of shin,train
+C00969,right shoulder numb,exact,N,99300003,Numbness of shoulder,calib
+C00970,shoulder feels dead,colloquial,N,99300003,Numbness of shoulder,calib
+C00971,nambnses of shoulder,misspelled,N,99300003,Numbness of shoulder,calib
+C00972,no evidence of numb shoulder,negated,Y,99300003,Numbness of shoulder,calib
+C00973,numb side,exact,N,99300217,Numbness of side,train
+C00974,side gone numb,colloquial,N,99300217,Numbness of side,train
+C00975,numbness of sidee,misspelled,N,99300217,Numbness of side,train
+C00976,denies numb side,negated,Y,99300217,Numbness of side,train
+C00977,numb sole,exact,N,99300123,Numbness of sole,train
+C00978,sole feels dead,colloquial,N,99300123,Numbness of sole,train
+C00979,liss of feeling in sole,misspelled,N,99300123,Numbness of sole,train
+C00980,no evidence of loss of feeling in sole,negated,Y,99300123,Numbness of sole,train
+C00981,numbness of tailbone,exact,N,99300229,Numbness of tailbone,train
+C00982,can't feel my tailbone,colloquial,N,99300229,Numbness of tailbone,train
+C00983,taiilbone numnbess,misspelled,N,99300229,Numbness of tailbone,train
+C00984,negative for loss of feeling in tailbone,negated,Y,99300229,Numbness of tailbone,train
+C00985,numb temple,exact,N,99300233,Numbness of temple,train
+C00986,temple gone numb,colloquial,N,99300233,Numbness of temple,train
+C00987,nimb temple,misspelled,N,99300233,Numbness of temple,train
+C00988,numb temple ruled out,negated,Y,99300233,Numbness of temple,train
+C00989,left thigh numb,exact,N,99300075,Numbness of thigh,train
+C00990,thigh gone numb,colloquial,N,99300075,Numbness of thigh,train
+C00991,thgih numbness,misspelled,N,99300075,Numbness of thigh,train
+C00992,no loss of feeling in thigh,negated,Y,99300075,Numbness of thigh,train
+C00993,left thumb numb,exact,N,99300129,Numbness of thumb,calib
+C00994,can't feel my thumb,colloquial,N,99300129,Numbness of thumb,calib
+C00995,numbnness of left thumb,misspelled,N,99300129,Numbness of thumb,calib
+C00996,negative for loss of feeling in thumb,negated,Y,99300129,Numbness of thumb,calib
+C00997,numbness of right toe,exact,N,99300057,Numbness of toe,calib
+C00998,can't feel my toe,colloquial,N,99300057,Numbness of toe,calib
+C00999,let toe numb,misspelled,N,99300057,Numbness of toe,calib
+C01000,denies numbness of toe,negated,Y,99300057,Numbness of toe,calib
+C01001,loss of feeling in tongue,exact,N,99300201,Numbness of tongue,calib
+C01002,can't feel my tongue,colloquial,N,99300201,Numbness of tongue,calib
+C01003,tongae numbness,misspelled,N,99300201,Numbness of tongue,calib
+C01004,no evidence of tongue numbness,negated,Y,99300201,Numbness of tongue,calib
+C01005,numb tooth,exact,N,99300209,Numbness of tooth,test
+C01006,tooth gone numb,colloquial,N,99300209,Numbness of tooth,test
+C01007,numb taoth,misspelled,N,99300209,Numbness of tooth,test
+C01008,patient reports no numb tooth,negated,Y,99300209,Numbness of tooth,test
+C01009,numbness of upper abdomen,exact,N,99300165,Numbness of upper abdomen,test
+C01010,upper abdomen gone numb,colloquial,N,99300165,Numbness of upper abdomen,test
+C01011,uppper ibdomen numbness,misspelled,N,99300165,Numbness of upper abdomen,test
+C01012,negative for loss of feeling in upper abdomen,negated,Y,99300165,Numbness of upper abdomen,test
+C01013,right upper arm numb,exact,N,99300099,Numbness of upper arm,calib
+C01014,upper arm feels dead,colloquial,N,99300099,Numbness of upper arm,calib
+C01015,numbness of upper armm,misspelled,N,99300099,Numbness of upper arm,calib
+C01016,denies numbness of upper arm,negated,Y,99300099,Numbness of upper arm,calib
+C01017,numb upper back,exact,N,99300153,Numbness of upper back,calib
+C01018,can't feel my upper back,colloquial,N,99300153,Numbness of upper back,calib
+C01019,numbness of uppeer back,misspelled,N,99300153,Numbness of upper back,calib
+C01020,patient reports no numb upper back,negated,Y,99300153,Numbness of upper back,calib
+C01021,numb wrist,exact,N,99300015,Numbness of wrist,train
+C01022,can't feel my wrist,colloquial,N,99300015,Numbness of wrist,train
+C01023,numbness of lft wrist,misspelled,N,99300015,Numbness of wrist,train
+C01024,patient reports no right wrist numb,negated,Y,99300015,Numbness of wrist,train
+C01025,sore throat,exact,N,99300482,Oropharyngeal pain,train
+C01026,throat really sore,colloquial,N,99300482,Oropharyngeal pain,train
+C01027,oropharyngeal pani,misspelled,N,99300482,Oropharyngeal pain,train
+C01028,negative for throat pain,negated,Y,99300482,Oropharyngeal pain,train
+C01029,intermittent ankle pain,exact,N,99300043,Pain in ankle,train
+C01030,ankle killing me,colloquial,N,99300043,Pain in ankle,train
+C01031,pain in left ankli,misspelled,N,99300043,Pain in ankle,train
+C01032,no evidence of acute ankle pain,negated,Y,99300043,Pain in ankle,train
+C01033,back ache,exact,N,99300143,Pain in back,test
+C01034,back hurts a lot,colloquial,N,99300143,Pain in back,test
+C01035,bakc pain,misspelled,N,99300143,Pain in back,test
+C01036,sore back ruled out,negated,Y,99300143,Pain in back,test
+C01037,big toe pain,exact,N,99300133,Pain in big toe,calib
+C01038,aching in my big toe,colloquial,N,99300133,Pain in big toe,calib
+C01039,intermittent big toe pian,misspelled,N,99300133,Pain in big toe,calib
+C01040,no pain in left big toe,negated,Y,99300133,Pain in big toe,calib
+C01041,buttock discomfort,exact,N,99300183,Pain in buttock,train
+C01042,buttock hurts a lot,colloquial,N,99300183,Pain in buttock,train
+C01043,severa butttock pain,misspelled,N,99300183,Pain in buttock,train
+C01044,no buttock discomfort,negated,Y,99300183,Pain in buttock,train
+C01045,right calf pain,exact,N,99300079,Pain in calf,test
+C01046,sharp pain in the calf,colloquial,N,99300079,Pain in calf,test
+C01047,severe calf pn,misspelled,N,99300079,Pain in calf,test
+C01048,negative for pain in left calf,negated,Y,99300079,Pain in calf,test
+C01049,cheek discomfort,exact,N,99300239,Pain in cheek,train
+C01050,sharp pain in the cheek,colloquial,N,99300239,Pain in cheek,train
+C01051,chornic cheek pani,misspelled,N,99300239,Pain in cheek,train
+C01052,no sore cheek,negated,Y,99300239,Pain in cheek,train
+C01053,intermittent elbow pain,exact,N,99300007,Pain in elbow,train
+C01054,elbow killing me,colloquial,N,99300007,Pain in elbow,train
+C01055,elbow disccomfort,misspelled,N,99300007,Pain in elbow,train
+C01056,negative for chronic elbow pain,negated,Y,99300007,Pain in elbow,train
+C01057,face discomfort,exact,N,99300191,Pain in face,train
+C01058,face has been sore all week,colloquial,N,99300191,Pain in face,train
+C01059,intermittent face paain,misspelled,N,99300191,Pain in face,train
+C01060,no evidence of acute face pain,negated,Y,99300191,Pain in face,train
+C01061,finger pain,exact,N,99300025,Pain in finger,test
+C01062,aching in my finger,colloquial,N,99300025,Pain in finger,test
+C01063,finger discofmort,misspelled,N,99300025,Pain in finger,test
+C01064,negative for acute finger pain,negated,Y,99300025,Pain in finger,test
+C01065,acute flank pain,exact,N,99300211,Pain in flank,train
+C01066,sharp pain in the flank,colloquial,N,99300211,Pain in flank,train
+C01067,paon in flink,misspelled,N,99300211,Pain in flank,train
+C01068,no evidence of chronic flank pain,negated,Y,99300211,Pain in flank,train
+C01069,severe foot pain,exact,N,99300049,Pain in foot,train
+C01070,foot hurts a lot,colloquial,N,99300049,Pain in foot,train
+C01071,foot pani,misspelled,N,99300049,Pain in foot,train
+C01072,denies intermittent foot pain,negated,Y,99300049,Pain in foot,train
+C01073,forearm ache,exact,N,99300085,Pain in forearm,train
+C01074,sharp pain in the forearm,colloquial,N,99300085,Pain in forearm,train
+C01075,foreerm ache,misspelled,N,99300085,Pain in forearm,train
+C01076,no evidence of pain in right forearm,negated,Y,99300085,Pain in forearm,train
+C01077,forehead ache,exact,N,99300235,Pain in forehead,train
+C01078,forehead killing me,colloquial,N,99300235,Pain in forehead,train
+C01079,miild forehead pain,misspelled,N,99300235,Pain in forehead,train
+C01080,no forehead discomfort,negated,Y,99300235,Pain in forehead,train
+C01081,mild groin pain,exact,N,99300175,Pain in groin,test
+C01082,groin killing me,colloquial,N,99300175,Pain in groin,test
+C01083,sveere groin paiin,misspelled,N,99300175,Pain in groin,test
+C01084,no evidence of sore groin,negated,Y,99300175,Pain in groin,test
+C01085,severe gum pain,exact,N,99300203,Pain in gum,train
+C01086,sharp pain in the gum,colloquial,N,99300203,Pain in gum,train
+C01087,gum oche,misspelled,N,99300203,Pain in gum,train
+C01088,negative for sore gum,negated,Y,99300203,Pain in gum,train
+C01089,mild hand pain,exact,N,99300019,Pain in hand,train
+C01090,aching in my hand,colloquial,N,99300019,Pain in hand,train
+C01091,chrronic hand pain,misspelled,N,99300019,Pain in hand,train
+C01092,denies mild hand pain,negated,Y,99300019,Pain in hand,train
+C01093,sore heel,exact,N,99300091,Pain in heel,calib
+C01094,heel hurts a lot,colloquial,N,99300091,Pain in heel,calib
+C01095,hel paiin,misspelled,N,99300091,Pain in heel,calib
+C01096,left heel pain ruled out,negated,Y,99300091,Pain in heel,calib
+C01097,intermittent hip pain,exact,N,99300031,Pain in hip,calib
+C01098,aching in my hip,colloquial,N,99300031,Pain in hip,calib
+C01099,mild hip paen,misspelled,N,99300031,Pain in hip,calib
+C01100,pain in left hip ruled out,negated,Y,99300031,Pain in hip,calib
+C01101,acute jaw pain,exact,N,99300171,Pain in jaw,train
+C01102,aching in my jaw,colloquial,N,99300171,Pain in jaw,train
+C01103,chronic jaw pan,misspelled,N,99300171,Pain in jaw,train
+C01104,patient reports no acute jaw pain,negated,Y,99300171,Pain in jaw,train
+C01105,mild lip pain,exact,N,99300247,Pain in lip,train
+C01106,lip killing me,colloquial,N,99300247,Pain in lip,train
+C01107,milld lip pain,misspelled,N,99300247,Pain in lip,train
+C01108,patient reports no sore lip,negated,Y,99300247,Pain in lip,train
+C01109,severe lower abdomen pain,exact,N,99300167,Pain in lower abdomen,train
+C01110,lower abdomen killing me,colloquial,N,99300167,Pain in lower abdomen,train
+C01111,soe lower abdomen,misspelled,N,99300167,Pain in lower abdomen,train
+C01112,no lower abdomen ache,negated,Y,99300167,Pain in lower abdomen,train
+C01113,lower back ache,exact,N,99300147,Pain in lower back,calib
+C01114,aching in my lower back,colloquial,N,99300147,Pain in lower back,calib
+C01115,icute lower bakc pain,misspelled,N,99300147,Pain in lower back,calib
+C01116,denies mild lower back pain,negated,Y,99300147,Pain in lower back,calib
+C01117,pain in left lower leg,exact,N,99300103,Pain in lower leg,calib
+C01118,sharp pain in the lower leg,colloquial,N,99300103,Pain in lower leg,calib
+C01119,pain in letf luwer leg,misspelled,N,99300103,Pain in lower leg,calib
+C01120,no intermittent lower leg pain,negated,Y,99300103,Pain in lower leg,calib
+C01121,sore mouth,exact,N,99300195,Pain in mouth,train
+C01122,mouth killing me,colloquial,N,99300195,Pain in mouth,train
+C01123,soore mouth,misspelled,N,99300195,Pain in mouth,train
+C01124,patient reports no mouth discomfort,negated,Y,99300195,Pain in mouth,train
+C01125,nose pain,exact,N,99300243,Pain in nose,test
+C01126,nose has been sore all week,colloquial,N,99300243,Pain in nose,test
+C01127,nose pn,misspelled,N,99300243,Pain in nose,test
+C01128,patient reports no sore nose,negated,Y,99300243,Pain in nose,test
+C01129,palm pain,exact,N,99300115,Pain in palm,train
+C01130,sharp pain in the palm,colloquial,N,99300115,Pain in palm,train
+C01131,acute plam paiin,misspelled,N,99300115,Pain in palm,train
+C01132,acute palm pain ruled out,negated,Y,99300115,Pain in palm,train
+C01133,pelvis ache,exact,N,99300179,Pain in pelvis,test
+C01134,pelvis has been sore all week,colloquial,N,99300179,Pain in pelvis,test
+C01135,paon in plvis,misspelled,N,99300179,Pain in pelvis,test
+C01136,negative for pelvis discomfort,negated,Y,99300179,Pain in pelvis,test
+C01137,sore rib cage,exact,N,99300219,Pain in rib cage,train
+C01138,rib cage hurts a lot,colloquial,N,99300219,Pain in rib cage,train
+C01139,mald rib cage pian,misspelled,N,99300219,Pain in rib cage,train
+C01140,severe rib cage pain ruled out,negated,Y,99300219,Pain in rib cage,train
+C01141,sacrum discomfort,exact,N,99300223,Pain in sacrum,train
+C01142,aching in my sacrum,colloquial,N,99300223,Pain in sacrum,train
+C01143,seere sacrum pain,misspelled,N,99300223,Pain in sacrum,train
+C01144,denies mild sacrum pain,negated,Y,99300223,Pain in sacrum,train
+C01145,acute scalp pain,exact,N,99300187,Pain in scalp,train
+C01146,sharp pain in the scalp,colloquial,N,99300187,Pain in scalp,train
+C01147,acute scelp paain,misspelled,N,99300187,Pain in scalp,train
+C01148,no scalp ache,negated,Y,99300187,Pain in scalp,train
+C01149,pain in shin,exact,N,99300109,Pain in shin,train
+C01150,shin killing me,colloquial,N,99300109,Pain in shin,train
+C01151,pain in shiin,misspelled,N,99300109,Pain in shin,train
+C01152,no sore shin,negated,Y,99300109,Pain in shin,train
+C01153,mild shoulder pain,exact,N,99300001,Pain in shoulder,test
+C01154,shoulder hurts a lot,colloquial,N,99300001,Pain in shoulder,test
+C01155,mild soulder pain,misspelled,N,99300001,Pain in shoulder,test
+C01156,patient reports no shoulder pain,negated,Y,99300001,Pain in shoulder,test
+C01157,mild side pain,exact,N,99300215,Pain in side,train
+C01158,aching in my side,colloquial,N,99300215,Pain in side,train
+C01159,mild sied pain,misspelled,N,99300215,Pain in side,train
+C01160,negative for acute side pain,negated,Y,99300215,Pain in side,train
+C01161,pain in sole,exact,N,99300121,Pain in sole,train
+C01162,aching in my sole,colloquial,N,99300121,Pain in sole,train
+C01163,soole ache,misspelled,N,99300121,Pain in sole,train
+C01164,patient reports no sole pain,negated,Y,99300121,Pain in sole,train
+C01165,pain in tailbone,exact,N,99300227,Pain in tailbone,train
+C01166,tailbone has been sore all week,colloquial,N,99300227,Pain in tailbone,train
+C01167,sorre tailbbone,misspelled,N,99300227,Pain in tailbone,train
+C01168,negative for tailbone discomfort,negated,Y,99300227,Pain in tailbone,train
+C01169,temple pain,exact,N,99300231,Pain in temple,calib
+C01170,sharp pain in the temple,colloquial,N,99300231,Pain in temple,calib
+C01171,tempple pain,misspelled,N,99300231,Pain in temple,calib
+C01172,chronic temple pain ruled out,negated,Y,99300231,Pain in temple,calib
+C01173,pain in thigh,exact,N,99300073,Pain in thigh,test
+C01174,thigh hurts a lot,colloquial,N,99300073,Pain in thigh,test
+C01175,pain in let thiigh,misspelled,N,99300073,Pain in thigh,test
+C01176,no right thigh pain,negated,Y,99300073,Pain in thigh,test
+C01177,thumb discomfort,exact,N,99300127,Pain in thumb,train
+C01178,aching in my thumb,colloquial,N,99300127,Pain in thumb,train
+C01179,acute thumb pon,misspelled,N,99300127,Pain in thumb,train
+C01180,no evidence of pain in right thumb,negated,Y,99300127,Pain in thumb,train
+C01181,pain in right toe,exact,N,99300055,Pain in toe,train
+C01182,toe hurts a lot,colloquial,N,99300055,Pain in toe,train
+C01183,severe toe paon,misspelled,N,99300055,Pain in toe,train
+C01184,no toe pain,negated,Y,99300055,Pain in toe,train
+C01185,tongue discomfort,exact,N,99300199,Pain in tongue,calib
+C01186,aching in my tongue,colloquial,N,99300199,Pain in tongue,calib
+C01187,pain in tonngue,misspelled,N,99300199,Pain in tongue,calib
+C01188,negative for tongue discomfort,negated,Y,99300199,Pain in tongue,calib
+C01189,intermittent tooth pain,exact,N,99300207,Pain in tooth,test
+C01190,tooth has been sore all week,colloquial,N,99300207,Pain in tooth,test
+C01191,chronic toooth pain,misspelled,N,99300207,Pain in tooth,test
+C01192,no evidence of severe tooth pain,negated,Y,99300207,Pain in tooth,test
+C01193,severe upper abdomen pain,exact,N,99300163,Pain in upper abdomen,calib
+C01194,upper abdomen has been sore all week,colloquial,N,99300163,Pain in upper abdomen,calib
+C01195,upper ebodmen pain,misspelled,N,99300163,Pain in upper abdomen,calib
+C01196,negative for sore upper abdomen,negated,Y,99300163,Pain in upper abdomen,calib
+C01197,right upper arm pain,exact,N,99300097,Pain in upper arm,test
+C01198,upper arm has been sore all week,colloquial,N,99300097,Pain in upper arm,test
+C01199,pin in right upper arm,misspelled,N,99300097,Pain in upper arm,test
+C01200,pain in right upper arm ruled out,negated,Y,99300097,Pain in upper arm,test
+C01201,upper back pain,exact,N,99300151,Pain in upper back,calib
+C01202,sharp pain in the upper back,colloquial,N,99300151,Pain in upper back,calib
+C01203,intermittent uppir bcak pain,misspelled,N,99300151,Pain in upper back,calib
+C01204,no evidence of pain in upper back,negated,Y,99300151,Pain in upper back,calib
+C01205,left wrist pain,exact,N,99300013,Pain in wrist,test
+C01206,aching in my wrist,colloquial,N,99300013,Pain in wrist,test
+C01207,severe wist pain,misspelled,N,99300013,Pain in wrist,test
+C01208,patient reports no pain in right wrist,negated,Y,99300013,Pain in wrist,test
+C01209,pounding heart,exact,N,99300484,Palpitations,train
+C01210,heart pounding in chest,colloquial,N,99300484,Palpitations,train
+C01211,palpitaitns,misspelled,N,99300484,Palpitations,train
+C01212,negative for palpitations,negated,Y,99300484,Palpitations,train
+C01213,paraesthesia,exact,N,99300454,Paraesthesia,test
+C01214,tingly feeling in feet,colloquial,N,99300454,Paraesthesia,test
+C01215,tinglign,misspelled,N,99300454,Paraesthesia,test
+C01216,negative for tingling,negated,Y,99300454,Paraesthesia,test
+C01217,abnormal platelet count,exact,N,99300343,Platelet count abnormal,train
+C01218,platelet count off on labs,colloquial,N,99300343,Platelet count abnormal,train
+C01219,platelet cuonnt out of range,misspelled,N,99300343,Platelet count abnormal,train
+C01220,no abnormal platelet count,negated,Y,99300343,Platelet count abnormal,train
+C01221,decreased platelet count,exact,N,99300342,Platelet count decreased,train
+C01222,platelet count dropped on labs,colloquial,N,99300342,Platelet count decreased,train
+C01223,platelet count beoow normal,misspelled,N,99300342,Platelet count decreased,train
+C01224,no low platelet count,negated,Y,99300342,Platelet count decreased,train
+C01225,platelet count above normal,exact,N,99300341,Platelet count increased,test
+C01226,platelet count came back high,colloquial,N,99300341,Platelet count increased,test
+C01227,high platelet cunt,misspelled,N,99300341,Platelet count increased,test
+C01228,negative for elevated platelet count,negated,Y,99300341,Platelet count increased,test
+C01229,urinary frequency,exact,N,99300498,Pollakiuria,train
+C01230,always running to the toilet,colloquial,N,99300498,Pollakiuria,train
+C01231,frequeunt urination,misspelled,N,99300498,Pollakiuria,train
+C01232,negative for frequent urination,negated,Y,99300498,Pollakiuria,train
+C01233,prothrombin time out of range,exact,N,99300400,Prothrombin time abnormal,train
+C01234,prothrombin time off on labs,colloquial,N,99300400,Prothrombin time abnormal,train
+C01235,abnormal prithrombin time,misspelled,N,99300400,Prothrombin time abnormal,train
+C01236,no evidence of prothrombin time out of range,negated,Y,99300400,Prothrombin time abnormal,train
+C01237,low prothrombin time,exact,N,99300399,Prothrombin time decreased,test
+C01238,prothrombin time below lower limit,colloquial,N,99300399,Prothrombin time decreased,test
+C01239,decreased proothrombin tame,misspelled,N,99300399,Prothrombin time decreased,test
+C01240,decreased prothrombin time ruled out,negated,Y,99300399,Prothrombin time decreased,test
+C01241,elevated prothrombin time,exact,N,99300398,Prothrombin time increased,train
+C01242,prothrombin time up on bloods,colloquial,N,99300398,Prothrombin time increased,train
+C01243,high prothrombn time,misspelled,N,99300398,Prothrombin time increased,train
+C01244,raised prothrombin time ruled out,negated,Y,99300398,Prothrombin time increased,train
+C01245,itching of trunk,exact,N,99300261,Pruritus,train
+C01246,itchy patch on face,colloquial,N,99300261,Pruritus,train
+C01247,icthiing of arm,misspelled,N,99300261,Pruritus,train
+C01248,negative for itching of back,negated,Y,99300261,Pruritus,train
+C01249,fever,exact,N,99300466,Pyrexia,train
+C01250,felt hot and feverish,colloquial,N,99300466,Pyrexia,train
+C01251,fevre,misspelled,N,99300466,Pyrexia,train
+C01252,pyrexia ruled out,negated,Y,99300466,Pyrexia,train
+C01253,hairline fracture of radius,exact,N,99300271,Radius fracture,train
+C01254,radius broken after fall,colloquial,N,99300271,Radius fracture,train
+C01255,oppen farcture of radius,misspelled,N,99300271,Radius fracture,train
+C01256,radius fracture ruled out,negated,Y,99300271,Radius fracture,train
+C01257,rash on arm,exact,N,99300260,Rash,test
+C01258,blotchy patch on leg,colloquial,N,99300260,Rash,test
+C01259,cest rash,misspelled,N,99300260,Rash,test
+C01260,rash ruled out,negated,Y,99300260,Rash,test
+C01261,respiratory rate abnormal,exact,N,99300418,Respiratory rate abnormal,calib
+C01262,respiratory rate out of range on bloods,colloquial,N,99300418,Respiratory rate abnormal,calib
+C01263,respiratory rae out of range,misspelled,N,99300418,Respiratory rate abnormal,calib
+C01264,denies respiratory rate abnormal,negated,Y,99300418,Respiratory rate abnormal,calib
+C01265,respiratory rate below normal,exact,N,99300417,Respiratory rate decreased,train
+C01266,respiratory rate down on bloods,colloquial,N,99300417,Respiratory rate decreased,train
+C01267,rduced respiratory rete,misspelled,N,99300417,Respiratory rate decreased,train
+C01268,denies respiratory rate below normal,negated,Y,99300417,Respiratory rate decreased,train
+C01269,respiratory rate above normal,exact,N,99300416,Respiratory rate increased,train
+C01270,respiratory rate up on bloods,colloquial,N,99300416,Respiratory rate increased,train
+C01271,respiratary ratte above normal,misspelled,N,99300416,Respiratory rate increased,train
+C01272,no evidence of raised respiratory rate,negated,Y,99300416,Respiratory rate increased,train
+C01273,nasal discharge,exact,N,99300478,Rhinorrhoea,train
+C01274,nose running,colloquial,N,99300478,Rhinorrhoea,train
+C01275,rhinurrhoa,misspelled,N,99300478,Rhinorrhoea,train
+C01276,runny nose ruled out,negated,Y,99300478,Rhinorrhoea,train
+C01277,rib fracture,exact,N,99300266,Rib fracture,calib
+C01278,broke my rib,colloquial,N,99300266,Rib fracture,calib
+C01279,rigt rib fracture,misspelled,N,99300266,Rib fracture,calib
+C01280,patient reports no rib fractured,negated,Y,99300266,Rib fracture,calib
+C01281,serum ferritin abnormal,exact,N,99300391,Serum ferritin abnormal,test
+C01282,serum ferritin off on labs,colloquial,N,99300391,Serum ferritin abnormal,test
+C01283,abnormal serum ferritinn,misspelled,N,99300391,Serum ferritin abnormal,test
+C01284,patient reports no serum ferritin out of range,negated,Y,99300391,Serum ferritin abnormal,test
+C01285,serum ferritin below normal,exact,N,99300390,Serum ferritin decreased,test
+C01286,serum ferritin down on bloods,colloquial,N,99300390,Serum ferritin decreased,test
+C01287,low serum furritin,misspelled,N,99300390,Serum ferritin decreased,test
+C01288,no evidence of reduced serum ferritin,negated,Y,99300390,Serum ferritin decreased,test
+C01289,elevated serum ferritin,exact,N,99300389,Serum ferritin increased,train
+C01290,serum ferritin up on bloods,colloquial,N,99300389,Serum ferritin increased,train
+C01291,sarum ferritin increased,misspelled,N,99300389,Serum ferritin increased,train
+C01292,denies serum ferritin above normal,negated,Y,99300389,Serum ferritin increased,train
+C01293,stiff shoulder,exact,N,99300251,Shoulder stiffness,test
+C01294,can't move my shoulder freely,colloquial,N,99300251,Shoulder stiffness,test
+C01295,shoullder stiffness,misspelled,N,99300251,Shoulder stiffness,test
+C01296,patient reports no stiffness of shoulder,negated,Y,99300251,Shoulder stiffness,test
+C01297,sinus infection bacterial,exact,N,99300428,Sinus infection,train
+C01298,infection in sinuses,colloquial,N,99300428,Sinus infection,train
+C01299,sins infection viral,misspelled,N,99300428,Sinus infection,train
+C01300,denies sinus infection bacterial,negated,Y,99300428,Sinus infection,train
+C01301,graze on chin,exact,N,99300286,Skin abrasion,train
+C01302,grazed toe on pavement,colloquial,N,99300286,Skin abrasion,train
+C01303,goze on lip,misspelled,N,99300286,Skin abrasion,train
+C01304,patient reports no abrasion of leg,negated,Y,99300286,Skin abrasion,train
+C01305,skin infection,exact,N,99300427,Skin infection,calib
+C01306,"skin infection, on antibiotics",colloquial,N,99300427,Skin infection,calib
+C01307,skin infectin viral,misspelled,N,99300427,Skin infection,calib
+C01308,negative for skin infection bacterial,negated,Y,99300427,Skin infection,calib
+C01309,lesion on chest,exact,N,99300263,Skin lesion,train
+C01310,odd mark on arm,colloquial,N,99300263,Skin lesion,train
+C01311,skin lesin of foot,misspelled,N,99300263,Skin lesion,train
+C01312,no evidence of lesion on abdomen,negated,Y,99300263,Skin lesion,train
+C01313,sneezing,exact,N,99300480,Sneezing,train
+C01314,sneezing a lot,colloquial,N,99300480,Sneezing,train
+C01315,sneezng,misspelled,N,99300480,Sneezing,train
+C01316,no evidence of sneezing,negated,Y,99300480,Sneezing,train
+C01317,severe swelling of abdomen,exact,N,99300160,Swelling of abdomen,test
+C01318,abdomen blown up and tender,colloquial,N,99300160,Swelling of abdomen,test
+C01319,severe swelllng of abdomen,misspelled,N,99300160,Swelling of abdomen,test
+C01320,puffiness of abdomen ruled out,negated,Y,99300160,Swelling of abdomen,test
+C01321,mild swelling of ankle,exact,N,99300044,Swelling of ankle,calib
+C01322,ankle is swollen up,colloquial,N,99300044,Swelling of ankle,calib
+C01323,severe swelling of anlle,misspelled,N,99300044,Swelling of ankle,calib
+C01324,no swelling of right ankle,negated,Y,99300044,Swelling of ankle,calib
+C01325,puffiness of arm,exact,N,99300062,Swelling of arm,calib
+C01326,arm blown up and tender,colloquial,N,99300062,Swelling of arm,calib
+C01327,swolleen arm,misspelled,N,99300062,Swelling of arm,calib
+C01328,negative for left arm swollen,negated,Y,99300062,Swelling of arm,calib
+C01329,swollen back,exact,N,99300144,Swelling of back,calib
+C01330,back blown up and tender,colloquial,N,99300144,Swelling of back,calib
+C01331,severe sewlling of bacck,misspelled,N,99300144,Swelling of back,calib
+C01332,denies puffiness of back,negated,Y,99300144,Swelling of back,calib
+C01333,mild swelling of big toe,exact,N,99300134,Swelling of big toe,train
+C01334,big toe looks puffy,colloquial,N,99300134,Swelling of big toe,train
+C01335,swolen big toe,misspelled,N,99300134,Swelling of big toe,train
+C01336,swollen big toe ruled out,negated,Y,99300134,Swelling of big toe,train
+C01337,painful swelling of buttock,exact,N,99300184,Swelling of buttock,train
+C01338,buttock is swollen up,colloquial,N,99300184,Swelling of buttock,train
+C01339,swollen buttockk,misspelled,N,99300184,Swelling of buttock,train
+C01340,swollen buttock ruled out,negated,Y,99300184,Swelling of buttock,train
+C01341,puffiness of cheek,exact,N,99300240,Swelling of cheek,test
+C01342,cheek looks puffy,colloquial,N,99300240,Swelling of cheek,test
+C01343,severe swelling of choek,misspelled,N,99300240,Swelling of cheek,test
+C01344,negative for swelling of cheek,negated,Y,99300240,Swelling of cheek,test
+C01345,chest swelling,exact,N,99300156,Swelling of chest,train
+C01346,puffy chest since yesterday,colloquial,N,99300156,Swelling of chest,train
+C01347,puffineess of chets,misspelled,N,99300156,Swelling of chest,train
+C01348,no severe swelling of chest,negated,Y,99300156,Swelling of chest,train
+C01349,swelling of elbow,exact,N,99300008,Swelling of elbow,train
+C01350,elbow is swollen up,colloquial,N,99300008,Swelling of elbow,train
+C01351,swoollen eblow,misspelled,N,99300008,Swelling of elbow,train
+C01352,no mild swelling of elbow,negated,Y,99300008,Swelling of elbow,train
+C01353,swelling of face,exact,N,99300192,Swelling of face,train
+C01354,face looks puffy,colloquial,N,99300192,Swelling of face,train
+C01355,puffiness of facce,misspelled,N,99300192,Swelling of face,train
+C01356,no mild swelling of face,negated,Y,99300192,Swelling of face,train
+C01357,swelling of right finger,exact,N,99300026,Swelling of finger,train
+C01358,finger blown up and tender,colloquial,N,99300026,Swelling of finger,train
+C01359,finnger swellig,misspelled,N,99300026,Swelling of finger,train
+C01360,patient reports no finger swelling,negated,Y,99300026,Swelling of finger,train
+C01361,swollen flank,exact,N,99300212,Swelling of flank,train
+C01362,flank blown up and tender,colloquial,N,99300212,Swelling of flank,train
+C01363,pufifnesss of flank,misspelled,N,99300212,Swelling of flank,train
+C01364,patient reports no mild swelling of flank,negated,Y,99300212,Swelling of flank,train
+C01365,severe swelling of foot,exact,N,99300050,Swelling of foot,test
+C01366,puffy foot since yesterday,colloquial,N,99300050,Swelling of foot,test
+C01367,leeft fooot swollen,misspelled,N,99300050,Swelling of foot,test
+C01368,no swelling of right foot,negated,Y,99300050,Swelling of foot,test
+C01369,swelling of left forearm,exact,N,99300086,Swelling of forearm,calib
+C01370,puffy forearm since yesterday,colloquial,N,99300086,Swelling of forearm,calib
+C01371,swellinng of left forearm,misspelled,N,99300086,Swelling of forearm,calib
+C01372,no evidence of painful swelling of forearm,negated,Y,99300086,Swelling of forearm,calib
+C01373,swelling of forehead,exact,N,99300236,Swelling of forehead,calib
+C01374,forehead is swollen up,colloquial,N,99300236,Swelling of forehead,calib
+C01375,foreheead swellong,misspelled,N,99300236,Swelling of forehead,calib
+C01376,patient reports no swollen forehead,negated,Y,99300236,Swelling of forehead,calib
+C01377,severe swelling of groin,exact,N,99300176,Swelling of groin,train
+C01378,puffy groin since yesterday,colloquial,N,99300176,Swelling of groin,train
+C01379,puffiness of gron,misspelled,N,99300176,Swelling of groin,train
+C01380,severe swelling of groin ruled out,negated,Y,99300176,Swelling of groin,train
+C01381,gum swelling,exact,N,99300204,Swelling of gum,train
+C01382,gum looks puffy,colloquial,N,99300204,Swelling of gum,train
+C01383,mld swelling of gum,misspelled,N,99300204,Swelling of gum,train
+C01384,negative for puffiness of gum,negated,Y,99300204,Swelling of gum,train
+C01385,left hand swollen,exact,N,99300020,Swelling of hand,train
+C01386,hand is swollen up,colloquial,N,99300020,Swelling of hand,train
+C01387,swellling of left hnd,misspelled,N,99300020,Swelling of hand,train
+C01388,denies left hand swollen,negated,Y,99300020,Swelling of hand,train
+C01389,left heel swollen,exact,N,99300092,Swelling of heel,calib
+C01390,heel looks puffy,colloquial,N,99300092,Swelling of heel,calib
+C01391,mild swellung of hel,misspelled,N,99300092,Swelling of heel,calib
+C01392,no evidence of right heel swollen,negated,Y,99300092,Swelling of heel,calib
+C01393,hip swelling,exact,N,99300032,Swelling of hip,train
+C01394,puffy hip since yesterday,colloquial,N,99300032,Swelling of hip,train
+C01395,swollne hip,misspelled,N,99300032,Swelling of hip,train
+C01396,negative for swelling of right hip,negated,Y,99300032,Swelling of hip,train
+C01397,jaw swelling,exact,N,99300172,Swelling of jaw,calib
+C01398,jaw looks puffy,colloquial,N,99300172,Swelling of jaw,calib
+C01399,painful swellinng of jaw,misspelled,N,99300172,Swelling of jaw,calib
+C01400,patient reports no jaw swelling,negated,Y,99300172,Swelling of jaw,calib
+C01401,puffiness of knee,exact,N,99300038,Swelling of knee,train
+C01402,puffy knee since yesterday,colloquial,N,99300038,Swelling of knee,train
+C01403,severre swelling of knie,misspelled,N,99300038,Swelling of knee,train
+C01404,negative for mild swelling of knee,negated,Y,99300038,Swelling of knee,train
+C01405,puffiness of leg,exact,N,99300068,Swelling of leg,train
+C01406,leg blown up and tender,colloquial,N,99300068,Swelling of leg,train
+C01407,lfet leg swollen,misspelled,N,99300068,Swelling of leg,train
+C01408,patient reports no swelling of right leg,negated,Y,99300068,Swelling of leg,train
+C01409,puffiness of lip,exact,N,99300248,Swelling of lip,train
+C01410,lip looks puffy,colloquial,N,99300248,Swelling of lip,train
+C01411,painful swilling of lip,misspelled,N,99300248,Swelling of lip,train
+C01412,no mild swelling of lip,negated,Y,99300248,Swelling of lip,train
+C01413,severe swelling of lower abdomen,exact,N,99300168,Swelling of lower abdomen,calib
+C01414,lower abdomen blown up and tender,colloquial,N,99300168,Swelling of lower abdomen,calib
+C01415,mild swellign of lower abdomen,misspelled,N,99300168,Swelling of lower abdomen,calib
+C01416,patient reports no puffiness of lower abdomen,negated,Y,99300168,Swelling of lower abdomen,calib
+C01417,swelling of lower back,exact,N,99300148,Swelling of lower back,train
+C01418,lower back looks puffy,colloquial,N,99300148,Swelling of lower back,train
+C01419,painful swelling of lwer back,misspelled,N,99300148,Swelling of lower back,train
+C01420,negative for severe swelling of lower back,negated,Y,99300148,Swelling of lower back,train
+C01421,swelling of left lower leg,exact,N,99300104,Swelling of lower leg,train
+C01422,lower leg blown up and tender,colloquial,N,99300104,Swelling of lower leg,train
+C01423,right lower leg swlolen,misspelled,N,99300104,Swelling of lower leg,train
+C01424,swelling of right lower leg ruled out,negated,Y,99300104,Swelling of lower leg,train
+C01425,mild swelling of neck,exact,N,99300140,Swelling of neck,train
+C01426,neck is swollen up,colloquial,N,99300140,Swelling of neck,train
+C01427,painful swellling of neeck,misspelled,N,99300140,Swelling of neck,train
+C01428,puffiness of neck ruled out,negated,Y,99300140,Swelling of neck,train
+C01429,nose swelling,exact,N,99300244,Swelling of nose,test
+C01430,nose looks puffy,colloquial,N,99300244,Swelling of nose,test
+C01431,painfful swelling of nose,misspelled,N,99300244,Swelling of nose,test
+C01432,nose swelling ruled out,negated,Y,99300244,Swelling of nose,test
+C01433,swollen palm,exact,N,99300116,Swelling of palm,calib
+C01434,palm blown up and tender,colloquial,N,99300116,Swelling of palm,calib
+C01435,swelling of leftf palm,misspelled,N,99300116,Swelling of palm,calib
+C01436,no swollen palm,negated,Y,99300116,Swelling of palm,calib
+C01437,severe swelling of pelvis,exact,N,99300180,Swelling of pelvis,calib
+C01438,pelvis looks puffy,colloquial,N,99300180,Swelling of pelvis,calib
+C01439,swolln plevis,misspelled,N,99300180,Swelling of pelvis,calib
+C01440,denies swollen pelvis,negated,Y,99300180,Swelling of pelvis,calib
+C01441,severe swelling of rib cage,exact,N,99300220,Swelling of rib cage,test
+C01442,rib cage looks puffy,colloquial,N,99300220,Swelling of rib cage,test
+C01443,swwollen rib caage,misspelled,N,99300220,Swelling of rib cage,test
+C01444,no evidence of painful swelling of rib cage,negated,Y,99300220,Swelling of rib cage,test
+C01445,swollen sacrum,exact,N,99300224,Swelling of sacrum,train
+C01446,sacrum blown up and tender,colloquial,N,99300224,Swelling of sacrum,train
+C01447,painful swelling of saram,misspelled,N,99300224,Swelling of sacrum,train
+C01448,patient reports no painful swelling of sacrum,negated,Y,99300224,Swelling of sacrum,train
+C01449,scalp swelling,exact,N,99300188,Swelling of scalp,test
+C01450,scalp is swollen up,colloquial,N,99300188,Swelling of scalp,test
+C01451,painful swelling of scelp,misspelled,N,99300188,Swelling of scalp,test
+C01452,no swollen scalp,negated,Y,99300188,Swelling of scalp,test
+C01453,swelling of left shin,exact,N,99300110,Swelling of shin,test
+C01454,shin is swollen up,colloquial,N,99300110,Swelling of shin,test
+C01455,mild swleling of shhin,misspelled,N,99300110,Swelling of shin,test
+C01456,no evidence of swelling of left shin,negated,Y,99300110,Swelling of shin,test
+C01457,swelling of left shoulder,exact,N,99300002,Swelling of shoulder,test
+C01458,shoulder looks puffy,colloquial,N,99300002,Swelling of shoulder,test
+C01459,lefft shoulder swolln,misspelled,N,99300002,Swelling of shoulder,test
+C01460,no evidence of swollen shoulder,negated,Y,99300002,Swelling of shoulder,test
+C01461,severe swelling of side,exact,N,99300216,Swelling of side,train
+C01462,side blown up and tender,colloquial,N,99300216,Swelling of side,train
+C01463,side sweling,misspelled,N,99300216,Swelling of side,train
+C01464,patient reports no severe swelling of side,negated,Y,99300216,Swelling of side,train
+C01465,severe swelling of sole,exact,N,99300122,Swelling of sole,train
+C01466,sole blown up and tender,colloquial,N,99300122,Swelling of sole,train
+C01467,swelling of lft sle,misspelled,N,99300122,Swelling of sole,train
+C01468,denies swelling of right sole,negated,Y,99300122,Swelling of sole,train
+C01469,swollen tailbone,exact,N,99300228,Swelling of tailbone,test
+C01470,tailbone blown up and tender,colloquial,N,99300228,Swelling of tailbone,test
+C01471,paiinful swelling of tailbone,misspelled,N,99300228,Swelling of tailbone,test
+C01472,patient reports no swollen tailbone,negated,Y,99300228,Swelling of tailbone,test
+C01473,temple swelling,exact,N,99300232,Swelling of temple,train
+C01474,temple looks puffy,colloquial,N,99300232,Swelling of temple,train
+C01475,swollen temlpe,misspelled,N,99300232,Swelling of temple,train
+C01476,no evidence of swollen temple,negated,Y,99300232,Swelling of temple,train
+C01477,swelling of right thigh,exact,N,99300074,Swelling of thigh,train
+C01478,puffy thigh since yesterday,colloquial,N,99300074,Swelling of thigh,train
+C01479,puffiness of tigh,misspelled,N,99300074,Swelling of thigh,train
+C01480,denies painful swelling of thigh,negated,Y,99300074,Swelling of thigh,train
+C01481,swollen thumb,exact,N,99300128,Swelling of thumb,train
+C01482,thumb is swollen up,colloquial,N,99300128,Swelling of thumb,train
+C01483,painful swelling of tuhmb,misspelled,N,99300128,Swelling of thumb,train
+C01484,no right thumb swollen,negated,Y,99300128,Swelling of thumb,train
+C01485,painful swelling of toe,exact,N,99300056,Swelling of toe,train
+C01486,puffy toe since yesterday,colloquial,N,99300056,Swelling of toe,train
+C01487,sollen toe,misspelled,N,99300056,Swelling of toe,train
+C01488,no evidence of swollen toe,negated,Y,99300056,Swelling of toe,train
+C01489,severe swelling of tongue,exact,N,99300200,Swelling of tongue,train
+C01490,puffy tongue since yesterday,colloquial,N,99300200,Swelling of tongue,train
+C01491,painful swellng of tongue,misspelled,N,99300200,Swelling of tongue,train
+C01492,patient reports no tongue swelling,negated,Y,99300200,Swelling of tongue,train
+C01493,tooth swelling,exact,N,99300208,Swelling of tooth,train
+C01494,tooth is swollen up,colloquial,N,99300208,Swelling of tooth,train
+C01495,swellinng of tooht,misspelled,N,99300208,Swelling of tooth,train
+C01496,no severe swelling of tooth,negated,Y,99300208,Swelling of tooth,train
+C01497,severe swelling of upper abdomen,exact,N,99300164,Swelling of upper abdomen,train
+C01498,upper abdomen is swollen up,colloquial,N,99300164,Swelling of upper abdomen,train
+C01499,mild swalling of upper abdomen,misspelled,N,99300164,Swelling of upper abdomen,train
+C01500,no severe swelling of upper abdomen,negated,Y,99300164,Swelling of upper abdomen,train
+C01501,swollen upper arm,exact,N,99300098,Swelling of upper arm,calib
+C01502,upper arm looks puffy,colloquial,N,99300098,Swelling of upper arm,calib
+C01503,sweling of upper arm,misspelled,N,99300098,Swelling of upper arm,calib
+C01504,patient reports no swelling of upper arm,negated,Y,99300098,Swelling of upper arm,calib
+C01505,upper back swelling,exact,N,99300152,Swelling of upper back,train
+C01506,upper back looks puffy,colloquial,N,99300152,Swelling of upper back,train
+C01507,opper back swellling,misspelled,N,99300152,Swelling of upper back,train
+C01508,no evidence of puffiness of upper back,negated,Y,99300152,Swelling of upper back,train
+C01509,swollen wrist,exact,N,99300014,Swelling of wrist,train
+C01510,wrist looks puffy,colloquial,N,99300014,Swelling of wrist,train
+C01511,swelling of let wrist,misspelled,N,99300014,Swelling of wrist,train
+C01512,denies right wrist swollen,negated,Y,99300014,Swelling of wrist,train
+C01513,syncope,exact,N,99300457,Syncope,calib
+C01514,blacked out for a moment,colloquial,N,99300457,Syncope,calib
+C01515,lsos of consciousness transient,misspelled,N,99300457,Syncope,calib
+C01516,patient reports no fainting,negated,Y,99300457,Syncope,calib
+C01517,tender abdomen,exact,N,99300162,Tenderness of abdomen,test
+C01518,abdomen sore to touch,colloquial,N,99300162,Tenderness of abdomen,test
+C01519,tenderneess of abdmoen,misspelled,N,99300162,Tenderness of abdomen,test
+C01520,tenderness of abdomen ruled out,negated,Y,99300162,Tenderness of abdomen,test
+C01521,tender arm,exact,N,99300064,Tenderness of arm,train
+C01522,arm tender when pressed,colloquial,N,99300064,Tenderness of arm,train
+C01523,tendornuss of arm,misspelled,N,99300064,Tenderness of arm,train
+C01524,patient reports no right arm tender,negated,Y,99300064,Tenderness of arm,train
+C01525,tenderness of back,exact,N,99300146,Tenderness of back,train
+C01526,back tender when pressed,colloquial,N,99300146,Tenderness of back,train
+C01527,tenderniss of back,misspelled,N,99300146,Tenderness of back,train
+C01528,denies back tenderness,negated,Y,99300146,Tenderness of back,train
+C01529,tenderness of big toe,exact,N,99300136,Tenderness of big toe,train
+C01530,big toe tender when pressed,colloquial,N,99300136,Tenderness of big toe,train
+C01531,rihgt big toe tender,misspelled,N,99300136,Tenderness of big toe,train
+C01532,denies left big toe tender,negated,Y,99300136,Tenderness of big toe,train
+C01533,tender buttock,exact,N,99300186,Tenderness of buttock,train
+C01534,buttock tender when pressed,colloquial,N,99300186,Tenderness of buttock,train
+C01535,buttock tendeerness,misspelled,N,99300186,Tenderness of buttock,train
+C01536,denies tenderness of buttock,negated,Y,99300186,Tenderness of buttock,train
+C01537,calf tenderness,exact,N,99300082,Tenderness of calf,train
+C01538,calf tender when pressed,colloquial,N,99300082,Tenderness of calf,train
+C01539,tenar calf,misspelled,N,99300082,Tenderness of calf,train
+C01540,denies tenderness of calf,negated,Y,99300082,Tenderness of calf,train
+C01541,tenderness of cheek,exact,N,99300242,Tenderness of cheek,train
+C01542,cheek sore to touch,colloquial,N,99300242,Tenderness of cheek,train
+C01543,tenderess of cheek,misspelled,N,99300242,Tenderness of cheek,train
+C01544,negative for cheek tenderness,negated,Y,99300242,Tenderness of cheek,train
+C01545,chest tenderness,exact,N,99300158,Tenderness of chest,calib
+C01546,chest sore to touch,colloquial,N,99300158,Tenderness of chest,calib
+C01547,tneder chist,misspelled,N,99300158,Tenderness of chest,calib
+C01548,patient reports no tender chest,negated,Y,99300158,Tenderness of chest,calib
+C01549,tenderness of elbow,exact,N,99300010,Tenderness of elbow,train
+C01550,elbow tender when pressed,colloquial,N,99300010,Tenderness of elbow,train
+C01551,rigt elobw tender,misspelled,N,99300010,Tenderness of elbow,train
+C01552,left elbow tender ruled out,negated,Y,99300010,Tenderness of elbow,train
+C01553,tender face,exact,N,99300194,Tenderness of face,train
+C01554,face sore to touch,colloquial,N,99300194,Tenderness of face,train
+C01555,tenderness of faec,misspelled,N,99300194,Tenderness of face,train
+C01556,patient reports no tender face,negated,Y,99300194,Tenderness of face,train
+C01557,tenderness of finger,exact,N,99300028,Tenderness of finger,test
+C01558,finger tender when pressed,colloquial,N,99300028,Tenderness of finger,test
+C01559,tender finnegr,misspelled,N,99300028,Tenderness of finger,test
+C01560,no evidence of finger tenderness,negated,Y,99300028,Tenderness of finger,test
+C01561,tender flank,exact,N,99300214,Tenderness of flank,train
+C01562,flank sore to touch,colloquial,N,99300214,Tenderness of flank,train
+C01563,tendar flank,misspelled,N,99300214,Tenderness of flank,train
+C01564,negative for tender flank,negated,Y,99300214,Tenderness of flank,train
+C01565,left foot tender,exact,N,99300052,Tenderness of foot,calib
+C01566,foot tender when pressed,colloquial,N,99300052,Tenderness of foot,calib
+C01567,foot tedeerness,misspelled,N,99300052,Tenderness of foot,calib
+C01568,no tenderness of foot,negated,Y,99300052,Tenderness of foot,calib
+C01569,right forearm tender,exact,N,99300088,Tenderness of forearm,test
+C01570,forearm sore to touch,colloquial,N,99300088,Tenderness of forearm,test
+C01571,left forearm teeder,misspelled,N,99300088,Tenderness of forearm,test
+C01572,no left forearm tender,negated,Y,99300088,Tenderness of forearm,test
+C01573,forehead tenderness,exact,N,99300238,Tenderness of forehead,train
+C01574,forehead sore to touch,colloquial,N,99300238,Tenderness of forehead,train
+C01575,tednerness of forehead,misspelled,N,99300238,Tenderness of forehead,train
+C01576,patient reports no forehead tenderness,negated,Y,99300238,Tenderness of forehead,train
+C01577,tender groin,exact,N,99300178,Tenderness of groin,train
+C01578,groin tender when pressed,colloquial,N,99300178,Tenderness of groin,train
+C01579,tenderness of grooiin,misspelled,N,99300178,Tenderness of groin,train
+C01580,no evidence of groin tenderness,negated,Y,99300178,Tenderness of groin,train
+C01581,tenderness of gum,exact,N,99300206,Tenderness of gum,train
+C01582,gum sore to touch,colloquial,N,99300206,Tenderness of gum,train
+C01583,gum tuenderness,misspelled,N,99300206,Tenderness of gum,train
+C01584,tenderness of gum ruled out,negated,Y,99300206,Tenderness of gum,train
+C01585,hand tenderness,exact,N,99300022,Tenderness of hand,test
+C01586,hand sore to touch,colloquial,N,99300022,Tenderness of hand,test
+C01587,left had teender,misspelled,N,99300022,Tenderness of hand,test
+C01588,patient reports no right hand tender,negated,Y,99300022,Tenderness of hand,test
+C01589,left heel tender,exact,N,99300094,Tenderness of heel,train
+C01590,heel tender when pressed,colloquial,N,99300094,Tenderness of heel,train
+C01591,tender heiil,misspelled,N,99300094,Tenderness of heel,train
+C01592,no evidence of right heel tender,negated,Y,99300094,Tenderness of heel,train
+C01593,tender hip,exact,N,99300034,Tenderness of hip,test
+C01594,hip sore to touch,colloquial,N,99300034,Tenderness of hip,test
+C01595,tennderness of hip,misspelled,N,99300034,Tenderness of hip,test
+C01596,no tenderness of hip,negated,Y,99300034,Tenderness of hip,test
+C01597,tender jaw,exact,N,99300174,Tenderness of jaw,test
+C01598,jaw tender when pressed,colloquial,N,99300174,Tenderness of jaw,test
+C01599,jaw tendernesss,misspelled,N,99300174,Tenderness of jaw,test
+C01600,no tender jaw,negated,Y,99300174,Tenderness of jaw,test
+C01601,tender knee,exact,N,99300040,Tenderness of knee,calib
+C01602,knee sore to touch,colloquial,N,99300040,Tenderness of knee,calib
+C01603,tendernses of kneee,misspelled,N,99300040,Tenderness of knee,calib
+C01604,negative for left knee tender,negated,Y,99300040,Tenderness of knee,calib
+C01605,left leg tender,exact,N,99300070,Tenderness of leg,train
+C01606,leg sore to touch,colloquial,N,99300070,Tenderness of leg,train
+C01607,rigght leg tendder,misspelled,N,99300070,Tenderness of leg,train
+C01608,patient reports no tenderness of leg,negated,Y,99300070,Tenderness of leg,train
+C01609,tender lip,exact,N,99300250,Tenderness of lip,test
+C01610,lip tender when pressed,colloquial,N,99300250,Tenderness of lip,test
+C01611,lip tenderesss,misspelled,N,99300250,Tenderness of lip,test
+C01612,tender lip ruled out,negated,Y,99300250,Tenderness of lip,test
+C01613,tenderness of lower abdomen,exact,N,99300170,Tenderness of lower abdomen,train
+C01614,lower abdomen tender when pressed,colloquial,N,99300170,Tenderness of lower abdomen,train
+C01615,tenderneess of lowr abdomen,misspelled,N,99300170,Tenderness of lower abdomen,train
+C01616,no tenderness of lower abdomen,negated,Y,99300170,Tenderness of lower abdomen,train
+C01617,tender lower back,exact,N,99300150,Tenderness of lower back,train
+C01618,lower back tender when pressed,colloquial,N,99300150,Tenderness of lower back,train
+C01619,tederness of loower back,misspelled,N,99300150,Tenderness of lower back,train
+C01620,tenderness of lower back ruled out,negated,Y,99300150,Tenderness of lower back,train
+C01621,right lower leg tender,exact,N,99300106,Tenderness of lower leg,test
+C01622,lower leg tender when pressed,colloquial,N,99300106,Tenderness of lower leg,test
+C01623,tenderness of lowwr leg,misspelled,N,99300106,Tenderness of lower leg,test
+C01624,no left lower leg tender,negated,Y,99300106,Tenderness of lower leg,test
+C01625,mouth tenderness,exact,N,99300198,Tenderness of mouth,test
+C01626,mouth sore to touch,colloquial,N,99300198,Tenderness of mouth,test
+C01627,tendrness of muoth,misspelled,N,99300198,Tenderness of mouth,test
+C01628,denies tender mouth,negated,Y,99300198,Tenderness of mouth,test
+C01629,tenderness of neck,exact,N,99300142,Tenderness of neck,train
+C01630,neck sore to touch,colloquial,N,99300142,Tenderness of neck,train
+C01631,neick tenderness,misspelled,N,99300142,Tenderness of neck,train
+C01632,no tenderness of neck,negated,Y,99300142,Tenderness of neck,train
+C01633,tender nose,exact,N,99300246,Tenderness of nose,calib
+C01634,nose tender when pressed,colloquial,N,99300246,Tenderness of nose,calib
+C01635,tenedrness of nose,misspelled,N,99300246,Tenderness of nose,calib
+C01636,denies tenderness of nose,negated,Y,99300246,Tenderness of nose,calib
+C01637,right palm tender,exact,N,99300118,Tenderness of palm,train
+C01638,palm tender when pressed,colloquial,N,99300118,Tenderness of palm,train
+C01639,tendor pam,misspelled,N,99300118,Tenderness of palm,train
+C01640,no evidence of tenderness of palm,negated,Y,99300118,Tenderness of palm,train
+C01641,rib cage tenderness,exact,N,99300222,Tenderness of rib cage,train
+C01642,rib cage sore to touch,colloquial,N,99300222,Tenderness of rib cage,train
+C01643,tenedr rib cagge,misspelled,N,99300222,Tenderness of rib cage,train
+C01644,denies tenderness of rib cage,negated,Y,99300222,Tenderness of rib cage,train
+C01645,sacrum tenderness,exact,N,99300226,Tenderness of sacrum,calib
+C01646,sacrum tender when pressed,colloquial,N,99300226,Tenderness of sacrum,calib
+C01647,tendar sacum,misspelled,N,99300226,Tenderness of sacrum,calib
+C01648,denies tenderness of sacrum,negated,Y,99300226,Tenderness of sacrum,calib
+C01649,tender scalp,exact,N,99300190,Tenderness of scalp,train
+C01650,scalp sore to touch,colloquial,N,99300190,Tenderness of scalp,train
+C01651,tender sap,misspelled,N,99300190,Tenderness of scalp,train
+C01652,scalp tenderness ruled out,negated,Y,99300190,Tenderness of scalp,train
+C01653,tender shin,exact,N,99300112,Tenderness of shin,train
+C01654,shin sore to touch,colloquial,N,99300112,Tenderness of shin,train
+C01655,tendderness of shan,misspelled,N,99300112,Tenderness of shin,train
+C01656,denies tender shin,negated,Y,99300112,Tenderness of shin,train
+C01657,tenderness of shoulder,exact,N,99300004,Tenderness of shoulder,train
+C01658,shoulder tender when pressed,colloquial,N,99300004,Tenderness of shoulder,train
+C01659,sohluder tenderness,misspelled,N,99300004,Tenderness of shoulder,train
+C01660,no left shoulder tender,negated,Y,99300004,Tenderness of shoulder,train
+C01661,tender side,exact,N,99300218,Tenderness of side,calib
+C01662,side tender when pressed,colloquial,N,99300218,Tenderness of side,calib
+C01663,sdoe tenderness,misspelled,N,99300218,Tenderness of side,calib
+C01664,no evidence of tender side,negated,Y,99300218,Tenderness of side,calib
+C01665,tender sole,exact,N,99300124,Tenderness of sole,calib
+C01666,sole tender when pressed,colloquial,N,99300124,Tenderness of sole,calib
+C01667,tender sle,misspelled,N,99300124,Tenderness of sole,calib
+C01668,denies sole tenderness,negated,Y,99300124,Tenderness of sole,calib
+C01669,tender tailbone,exact,N,99300230,Tenderness of tailbone,test
+C01670,tailbone sore to touch,colloquial,N,99300230,Tenderness of tailbone,test
+C01671,tendeerness of tialbone,misspelled,N,99300230,Tenderness of tailbone,test
+C01672,negative for tailbone tenderness,negated,Y,99300230,Tenderness of tailbone,test
+C01673,tender temple,exact,N,99300234,Tenderness of temple,train
+C01674,temple tender when pressed,colloquial,N,99300234,Tenderness of temple,train
+C01675,tempel tenderness,misspelled,N,99300234,Tenderness of temple,train
+C01676,patient reports no tenderness of temple,negated,Y,99300234,Tenderness of temple,train
+C01677,right thigh tender,exact,N,99300076,Tenderness of thigh,calib
+C01678,thigh tender when pressed,colloquial,N,99300076,Tenderness of thigh,calib
+C01679,tendernoss of tihgh,misspelled,N,99300076,Tenderness of thigh,calib
+C01680,no tender thigh,negated,Y,99300076,Tenderness of thigh,calib
+C01681,left thumb tender,exact,N,99300130,Tenderness of thumb,calib
+C01682,thumb sore to touch,colloquial,N,99300130,Tenderness of thumb,calib
+C01683,left thumb tendeer,misspelled,N,99300130,Tenderness of thumb,calib
+C01684,denies right thumb tender,negated,Y,99300130,Tenderness of thumb,calib
+C01685,tender toe,exact,N,99300058,Tenderness of toe,calib
+C01686,toe sore to touch,colloquial,N,99300058,Tenderness of toe,calib
+C01687,tenderniss of toe,misspelled,N,99300058,Tenderness of toe,calib
+C01688,left toe tender ruled out,negated,Y,99300058,Tenderness of toe,calib
+C01689,tender tongue,exact,N,99300202,Tenderness of tongue,train
+C01690,tongue sore to touch,colloquial,N,99300202,Tenderness of tongue,train
+C01691,tenderness of tnogue,misspelled,N,99300202,Tenderness of tongue,train
+C01692,tongue tenderness ruled out,negated,Y,99300202,Tenderness of tongue,train
+C01693,tender tooth,exact,N,99300210,Tenderness of tooth,test
+C01694,tooth sore to touch,colloquial,N,99300210,Tenderness of tooth,test
+C01695,tendder tooh,misspelled,N,99300210,Tenderness of tooth,test
+C01696,denies tooth tenderness,negated,Y,99300210,Tenderness of tooth,test
+C01697,tenderness of upper abdomen,exact,N,99300166,Tenderness of upper abdomen,train
+C01698,upper abdomen tender when pressed,colloquial,N,99300166,Tenderness of upper abdomen,train
+C01699,upper abdomun tenderness,misspelled,N,99300166,Tenderness of upper abdomen,train
+C01700,patient reports no tenderness of upper abdomen,negated,Y,99300166,Tenderness of upper abdomen,train
+C01701,upper arm tenderness,exact,N,99300100,Tenderness of upper arm,train
+C01702,upper arm tender when pressed,colloquial,N,99300100,Tenderness of upper arm,train
+C01703,right upper arm tendder,misspelled,N,99300100,Tenderness of upper arm,train
+C01704,negative for tenderness of upper arm,negated,Y,99300100,Tenderness of upper arm,train
+C01705,tenderness of upper back,exact,N,99300154,Tenderness of upper back,calib
+C01706,upper back sore to touch,colloquial,N,99300154,Tenderness of upper back,calib
+C01707,tender uppper back,misspelled,N,99300154,Tenderness of upper back,calib
+C01708,patient reports no tenderness of upper back,negated,Y,99300154,Tenderness of upper back,calib
+C01709,tenderness of wrist,exact,N,99300016,Tenderness of wrist,train
+C01710,wrist sore to touch,colloquial,N,99300016,Tenderness of wrist,train
+C01711,wrrsit tenderness,misspelled,N,99300016,Tenderness of wrist,train
+C01712,negative for wrist tenderness,negated,Y,99300016,Tenderness of wrist,train
+C01713,scald on leg,exact,N,99300287,Thermal burn,test
+C01714,scalded shin with hot water,colloquial,N,99300287,Thermal burn,test
+C01715,burnnnt lip,misspelled,N,99300287,Thermal burn,test
+C01716,denies burn of finger,negated,Y,99300287,Thermal burn,test
+C01717,infection of throat,exact,N,99300433,Throat infection,train
+C01718,"throat infection, on antibiotics",colloquial,N,99300433,Throat infection,train
+C01719,thorat infection,misspelled,N,99300433,Throat infection,train
+C01720,no evidence of throat infection,negated,Y,99300433,Throat infection,train
+C01721,closed fracture of tibia,exact,N,99300269,Tibia fracture,train
+C01722,broke my tibia,colloquial,N,99300269,Tibia fracture,train
+C01723,tibai frracture,misspelled,N,99300269,Tibia fracture,train
+C01724,denies hairline fracture of tibia,negated,Y,99300269,Tibia fracture,train
+C01725,tinnitus,exact,N,99300491,Tinnitus,test
+C01726,buzzing in ears,colloquial,N,99300491,Tinnitus,test
+C01727,ear ringagn,misspelled,N,99300491,Tinnitus,test
+C01728,negative for ear ringing,negated,Y,99300491,Tinnitus,test
+C01729,left toe fracture,exact,N,99300276,Toe fracture,train
+C01730,broke my toe,colloquial,N,99300276,Toe fracture,train
+C01731,hairlie fracture of toe,misspelled,N,99300276,Toe fracture,train
+C01732,patient reports no right toe fracture,negated,Y,99300276,Toe fracture,train
+C01733,tooth infection,exact,N,99300429,Tooth infection,train
+C01734,"tooth infection, on antibiotics",colloquial,N,99300429,Tooth infection,train
+C01735,tooth infectoin,misspelled,N,99300429,Tooth infection,train
+C01736,negative for tooth infection bacterial,negated,Y,99300429,Tooth infection,train
+C01737,total protein out of range,exact,N,99300382,Total protein abnormal,train
+C01738,total protein out of range on bloods,colloquial,N,99300382,Total protein abnormal,train
+C01739,ttal protein out of rannge,misspelled,N,99300382,Total protein abnormal,train
+C01740,negative for abnormal total protein,negated,Y,99300382,Total protein abnormal,train
+C01741,total protein decreased,exact,N,99300381,Total protein decreased,train
+C01742,total protein down on bloods,colloquial,N,99300381,Total protein decreased,train
+C01743,reduced totil prottein,misspelled,N,99300381,Total protein decreased,train
+C01744,patient reports no total protein decreased,negated,Y,99300381,Total protein decreased,train
+C01745,high total protein,exact,N,99300380,Total protein increased,train
+C01746,total protein up on bloods,colloquial,N,99300380,Total protein increased,train
+C01747,toatl protein abave normal,misspelled,N,99300380,Total protein increased,train
+C01748,patient reports no high total protein,negated,Y,99300380,Total protein increased,train
+C01749,shaking,exact,N,99300453,Tremor,test
+C01750,hands shaking,colloquial,N,99300453,Tremor,test
+C01751,shaikng,misspelled,N,99300453,Tremor,test
+C01752,negative for shaking,negated,Y,99300453,Tremor,test
+C01753,troponin out of range,exact,N,99300385,Troponin abnormal,train
+C01754,troponin off on labs,colloquial,N,99300385,Troponin abnormal,train
+C01755,abnormal troonin,misspelled,N,99300385,Troponin abnormal,train
+C01756,no troponin abnormal,negated,Y,99300385,Troponin abnormal,train
+C01757,reduced troponin,exact,N,99300384,Troponin decreased,train
+C01758,troponin below lower limit,colloquial,N,99300384,Troponin decreased,train
+C01759,low troponeen,misspelled,N,99300384,Troponin decreased,train
+C01760,no evidence of low troponin,negated,Y,99300384,Troponin decreased,train
+C01761,raised troponin,exact,N,99300383,Troponin increased,train
+C01762,troponin came back high,colloquial,N,99300383,Troponin increased,train
+C01763,traponin abave normal,misspelled,N,99300383,Troponin increased,train
+C01764,no troponin increased,negated,Y,99300383,Troponin increased,train
+C01765,broken ulna,exact,N,99300272,Ulna fracture,train
+C01766,cracked ulna,colloquial,N,99300272,Ulna fracture,train
+C01767,ulna fractrue,misspelled,N,99300272,Ulna fracture,train
+C01768,fracture of ulna ruled out,negated,Y,99300272,Ulna fracture,train
+C01769,upper respiratory tract infection bacterial,exact,N,99300423,Upper respiratory tract infection,train
+C01770,infection in chest,colloquial,N,99300423,Upper respiratory tract infection,train
+C01771,uppar respiratory tract infection,misspelled,N,99300423,Upper respiratory tract infection,train
+C01772,no upper respiratory tract infection viral,negated,Y,99300423,Upper respiratory tract infection,train
+C01773,urinary tract infection bacterial,exact,N,99300422,Urinary tract infection,train
+C01774,bladder infected,colloquial,N,99300422,Urinary tract infection,train
+C01775,urinary truct infection,misspelled,N,99300422,Urinary tract infection,train
+C01776,infection of urinary tract ruled out,negated,Y,99300422,Urinary tract infection,train
+C01777,nettle rash,exact,N,99300474,Urticaria,test
+C01778,welts on skin,colloquial,N,99300474,Urticaria,test
+C01779,urtiaria,misspelled,N,99300474,Urticaria,test
+C01780,no evidence of nettle rash,negated,Y,99300474,Urticaria,test
+C01781,vaginal infection,exact,N,99300435,Vaginal infection,calib
+C01782,infection in vaginal,colloquial,N,99300435,Vaginal infection,calib
+C01783,vaganal infection,misspelled,N,99300435,Vaginal infection,calib
+C01784,denies vaginal infection viral,negated,Y,99300435,Vaginal infection,calib
+C01785,vertebra fracture,exact,N,99300280,Vertebra fracture,calib
+C01786,vertebra broken after fall,colloquial,N,99300280,Vertebra fracture,calib
+C01787,stress fratcure of vertebra,misspelled,N,99300280,Vertebra fracture,calib
+C01788,fracture of vertebra ruled out,negated,Y,99300280,Vertebra fracture,calib
+C01789,spinning sensation,exact,N,99300451,Vertigo,train
+C01790,everything spinning,colloquial,N,99300451,Vertigo,train
+C01791,vrtigo,misspelled,N,99300451,Vertigo,train
+C01792,no vertigo,negated,Y,99300451,Vertigo,train
+C01793,blurry vision,exact,N,99300493,Vision blurred,calib
+C01794,eyes blurry,colloquial,N,99300493,Vision blurred,calib
+C01795,vsion blurred,misspelled,N,99300493,Vision blurred,calib
+C01796,patient reports no blurred vision,negated,Y,99300493,Vision blurred,calib
+C01797,throwing up,exact,N,99300442,Vomiting,train
+C01798,threw up twice overnight,colloquial,N,99300442,Vomiting,train
+C01799,thriwing up,misspelled,N,99300442,Vomiting,train
+C01800,no vomiting,negated,Y,99300442,Vomiting,train
+C01801,weakness of ankle,exact,N,99300047,Weakness of ankle,train
+C01802,ankle feels weak,colloquial,N,99300047,Weakness of ankle,train
+C01803,left ankle wok,misspelled,N,99300047,Weakness of ankle,train
+C01804,no ankle weakness,negated,Y,99300047,Weakness of ankle,train
+C01805,right arm weak,exact,N,99300065,Weakness of arm,train
+C01806,arm feels weak,colloquial,N,99300065,Weakness of arm,train
+C01807,weakeenss of arm,misspelled,N,99300065,Weakness of arm,train
+C01808,negative for right arm weak,negated,Y,99300065,Weakness of arm,train
+C01809,big toe weakness,exact,N,99300137,Weakness of big toe,train
+C01810,big toe feels weak,colloquial,N,99300137,Weakness of big toe,train
+C01811,rihgt big toe weka,misspelled,N,99300137,Weakness of big toe,train
+C01812,no left big toe weak,negated,Y,99300137,Weakness of big toe,train
+C01813,weakness of calf,exact,N,99300083,Weakness of calf,train
+C01814,no strength in calf,colloquial,N,99300083,Weakness of calf,train
+C01815,weaakness of calf,misspelled,N,99300083,Weakness of calf,train
+C01816,weak calf ruled out,negated,Y,99300083,Weakness of calf,train
+C01817,weak finger,exact,N,99300029,Weakness of finger,train
+C01818,finger feels weak,colloquial,N,99300029,Weakness of finger,train
+C01819,finegr weakkness,misspelled,N,99300029,Weakness of finger,train
+C01820,negative for right finger weak,negated,Y,99300029,Weakness of finger,train
+C01821,weak foot,exact,N,99300053,Weakness of foot,train
+C01822,foot feels weak,colloquial,N,99300053,Weakness of foot,train
+C01823,weaakness of foot,misspelled,N,99300053,Weakness of foot,train
+C01824,negative for weak foot,negated,Y,99300053,Weakness of foot,train
+C01825,weakness of forearm,exact,N,99300089,Weakness of forearm,test
+C01826,forearm feels weak,colloquial,N,99300089,Weakness of forearm,test
+C01827,weaak forearm,misspelled,N,99300089,Weakness of forearm,test
+C01828,patient reports no right forearm weak,negated,Y,99300089,Weakness of forearm,test
+C01829,weak hand,exact,N,99300023,Weakness of hand,train
+C01830,hand feels weak,colloquial,N,99300023,Weakness of hand,train
+C01831,left hand wak,misspelled,N,99300023,Weakness of hand,train
+C01832,weakness of hand ruled out,negated,Y,99300023,Weakness of hand,train
+C01833,left heel weak,exact,N,99300095,Weakness of heel,train
+C01834,no strength in heel,colloquial,N,99300095,Weakness of heel,train
+C01835,left heel weakk,misspelled,N,99300095,Weakness of heel,train
+C01836,no right heel weak,negated,Y,99300095,Weakness of heel,train
+C01837,left hip weak,exact,N,99300035,Weakness of hip,test
+C01838,hip feels weak,colloquial,N,99300035,Weakness of hip,test
+C01839,rght hip weik,misspelled,N,99300035,Weakness of hip,test
+C01840,no hip weakness,negated,Y,99300035,Weakness of hip,test
+C01841,weakness of knee,exact,N,99300041,Weakness of knee,train
+C01842,no strength in knee,colloquial,N,99300041,Weakness of knee,train
+C01843,wekaness of knee,misspelled,N,99300041,Weakness of knee,train
+C01844,knee weakness ruled out,negated,Y,99300041,Weakness of knee,train
+C01845,weak leg,exact,N,99300071,Weakness of leg,calib
+C01846,leg feels weak,colloquial,N,99300071,Weakness of leg,calib
+C01847,wekness of leg,misspelled,N,99300071,Weakness of leg,calib
+C01848,no left leg weak,negated,Y,99300071,Weakness of leg,calib
+C01849,weak lower leg,exact,N,99300107,Weakness of lower leg,calib
+C01850,lower leg feels weak,colloquial,N,99300107,Weakness of lower leg,calib
+C01851,rgt lower leg weak,misspelled,N,99300107,Weakness of lower leg,calib
+C01852,no evidence of weakness of lower leg,negated,Y,99300107,Weakness of lower leg,calib
+C01853,weak palm,exact,N,99300119,Weakness of palm,calib
+C01854,no strength in palm,colloquial,N,99300119,Weakness of palm,calib
+C01855,weak paml,misspelled,N,99300119,Weakness of palm,calib
+C01856,patient reports no weak palm,negated,Y,99300119,Weakness of palm,calib
+C01857,shin weakness,exact,N,99300113,Weakness of shin,train
+C01858,no strength in shin,colloquial,N,99300113,Weakness of shin,train
+C01859,wiakness of shin,misspelled,N,99300113,Weakness of shin,train
+C01860,patient reports no weakness of shin,negated,Y,99300113,Weakness of shin,train
+C01861,weak shoulder,exact,N,99300005,Weakness of shoulder,train
+C01862,shoulder feels weak,colloquial,N,99300005,Weakness of shoulder,train
+C01863,weaakness of shoullder,misspelled,N,99300005,Weakness of shoulder,train
+C01864,weak shoulder ruled out,negated,Y,99300005,Weakness of shoulder,train
+C01865,right sole weak,exact,N,99300125,Weakness of sole,train
+C01866,no strength in sole,colloquial,N,99300125,Weakness of sole,train
+C01867,sale weakness,misspelled,N,99300125,Weakness of sole,train
+C01868,no weakness of sole,negated,Y,99300125,Weakness of sole,train
+C01869,weakness of thigh,exact,N,99300077,Weakness of thigh,test
+C01870,thigh feels weak,colloquial,N,99300077,Weakness of thigh,test
+C01871,wek thgih,misspelled,N,99300077,Weakness of thigh,test
+C01872,no evidence of left thigh weak,negated,Y,99300077,Weakness of thigh,test
+C01873,thumb weakness,exact,N,99300131,Weakness of thumb,train
+C01874,no strength in thumb,colloquial,N,99300131,Weakness of thumb,train
+C01875,raght thumb weak,misspelled,N,99300131,Weakness of thumb,train
+C01876,patient reports no weak thumb,negated,Y,99300131,Weakness of thumb,train
+C01877,weakness of toe,exact,N,99300059,Weakness of toe,test
+C01878,toe feels weak,colloquial,N,99300059,Weakness of toe,test
+C01879,weak toee,misspelled,N,99300059,Weakness of toe,test
+C01880,no left toe weak,negated,Y,99300059,Weakness of toe,test
+C01881,weak upper arm,exact,N,99300101,Weakness of upper arm,train
+C01882,no strength in upper arm,colloquial,N,99300101,Weakness of upper arm,train
+C01883,uper arm weaknes,misspelled,N,99300101,Weakness of upper arm,train
+C01884,denies weakness of upper arm,negated,Y,99300101,Weakness of upper arm,train
+C01885,weak wrist,exact,N,99300017,Weakness of wrist,test
+C01886,wrist feels weak,colloquial,N,99300017,Weakness of wrist,test
+C01887,weakness of wits,misspelled,N,99300017,Weakness of wrist,test
+C01888,patient reports no weakness of wrist,negated,Y,99300017,Weakness of wrist,test
+C01889,weight below normal,exact,N,99300414,Weight decreased,train
+C01890,weight down on bloods,colloquial,N,99300414,Weight decreased,train
+C01891,weight below nrmal,misspelled,N,99300414,Weight decreased,train
+C01892,patient reports no reduced weight,negated,Y,99300414,Weight decreased,train
+C01893,weight above normal,exact,N,99300413,Weight increased,train
+C01894,weight above upper limit,colloquial,N,99300413,Weight increased,train
+C01895,ellevated weight,misspelled,N,99300413,Weight increased,train
+C01896,denies high weight,negated,Y,99300413,Weight increased,train
+C01897,wheeze,exact,N,99300483,Wheezing,train
+C01898,wheezy chest,colloquial,N,99300483,Wheezing,train
+C01899,whiezing,misspelled,N,99300483,Wheezing,train
+C01900,negative for wheezing,negated,Y,99300483,Wheezing,train
+C01901,wbc decreased,exact,N,99300345,White blood cell count decreased,train
+C01902,white cell count below lower limit,colloquial,N,99300345,White blood cell count decreased,train
+C01903,whhite blood cull count below normal,misspelled,N,99300345,White blood cell count decreased,train
+C01904,patient reports no decreased white blood cell count,negated,Y,99300345,White blood cell count decreased,train
+C01905,raised white blood cell count,exact,N,99300344,White blood cell count increased,calib
+C01906,WBC up on bloods,colloquial,N,99300344,White blood cell count increased,calib
+C01907,raised whiet blood cell cont,misspelled,N,99300344,White blood cell count increased,calib
+C01908,denies high white blood cell count,negated,Y,99300344,White blood cell count increased,calib
+C01909,wound infection viral,exact,N,99300432,Wound infection,calib
+C01910,infection in wound,colloquial,N,99300432,Wound infection,calib
+C01911,wound infecttion bacteriaal,misspelled,N,99300432,Wound infection,calib
+C01912,no wound infection viral,negated,Y,99300432,Wound infection,calib
+C01913,wrist fracture,exact,N,99300264,Wrist fracture,train
+C01914,cracked wrist,colloquial,N,99300264,Wrist fracture,train
+C01915,srtress fracture of wrist,misspelled,N,99300264,Wrist fracture,train
+C01916,denies stress fracture of wrist,negated,Y,99300264,Wrist fracture,train
+C01917,reduced movement of wrist,exact,N,99300253,Wrist stiffness,train
+C01918,can't move my wrist freely,colloquial,N,99300253,Wrist stiffness,train
+C01919,stiff wrirst,misspelled,N,99300253,Wrist stiffness,train
+C01920,negative for stiff wrist,negated,Y,99300253,Wrist stiffness,train

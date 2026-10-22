@@ -1,0 +1,409 @@
+{
+ "coding_banner": "**Mode banner** \u2014 Tier 2: REAL needle3+hnsw | Tier 3: REAL laya | Tier 4: REAL xgboost re-ranker \u00b7 a [SI] stand-in is never the component; the audit records which path ran per tier. Without the trained encoder, Tier-2 retrieval is lexical and will not reproduce semantic MedDRA mappings.",
+ "coding_artifacts": "{\"needle3\": \"needle3.cact sha256:c9d915eca282ed42\", \"laya\": \"laya/ sha256:891102d372688fc2; calibration laya_calibration_coding.json sha256:65878775a7be16aa\", \"coder\": \"meddra_coder.json sha256:09bdcf8c766536e2\"}",
+ "coding_gate": 0.9,
+ "coding_top3": {
+  "feeling lightheaded when standing up": [
+   {
+    "rank": 1,
+    "LLT": "Lightheadedness",
+    "PT": "Dizziness postural",
+    "PT_CODE": "99013575",
+    "cosine": 0.9582,
+    "S": 0.0913
+   },
+   {
+    "rank": 2,
+    "LLT": "Electrocardiogram QT prolonged",
+    "PT": "Electrocardiogram QT prolonged",
+    "PT_CODE": "99014387",
+    "cosine": 0.9319,
+    "S": 0.0389
+   },
+   {
+    "rank": 3,
+    "LLT": "Throbbing pain in head",
+    "PT": "Headache",
+    "PT_CODE": "99019211",
+    "cosine": 0.9497,
+    "S": 0.0357
+   }
+  ],
+  "frequent watery bowel movements": [
+   {
+    "rank": 1,
+    "LLT": "Watery diarrhoea",
+    "PT": "Diarrhoea",
+    "PT_CODE": "99012735",
+    "cosine": 0.945,
+    "S": 0.0418
+   },
+   {
+    "rank": 2,
+    "LLT": "Fatigue",
+    "PT": "Fatigue",
+    "PT_CODE": "99016250",
+    "cosine": 0.9408,
+    "S": 0.0406
+   },
+   {
+    "rank": 3,
+    "LLT": "Throbbing pain in head",
+    "PT": "Headache",
+    "PT_CODE": "99019211",
+    "cosine": 0.947,
+    "S": 0.0374
+   }
+  ],
+  "marked prolonged heart rhythm interval": [
+   {
+    "rank": 1,
+    "LLT": "Electrocardiogram QT prolonged",
+    "PT": "Electrocardiogram QT prolonged",
+    "PT_CODE": "99014387",
+    "cosine": 0.9397,
+    "S": 0.0901
+   },
+   {
+    "rank": 2,
+    "LLT": "Throbbing pain in head",
+    "PT": "Headache",
+    "PT_CODE": "99019211",
+    "cosine": 0.9449,
+    "S": 0.0426
+   },
+   {
+    "rank": 3,
+    "LLT": "Migraine",
+    "PT": "Migraine",
+    "PT_CODE": "99027599",
+    "cosine": 0.9284,
+    "S": 0.0416
+   }
+  ],
+  "severe throbbing pain in back of head": [
+   {
+    "rank": 1,
+    "LLT": "Throbbing pain in head",
+    "PT": "Headache",
+    "PT_CODE": "99019211",
+    "cosine": 0.9629,
+    "S": 0.1235
+   },
+   {
+    "rank": 2,
+    "LLT": "Pain in back of head",
+    "PT": "Headache",
+    "PT_CODE": "99019211",
+    "cosine": 0.9605,
+    "S": 0.1209
+   },
+   {
+    "rank": 3,
+    "LLT": "Electrocardiogram QT prolonged",
+    "PT": "Electrocardiogram QT prolonged",
+    "PT_CODE": "99014387",
+    "cosine": 0.9326,
+    "S": 0.0457
+   }
+  ]
+ },
+ "coding": {
+  "severe throbbing pain in back of head": {
+   "AEDECOD": "Headache",
+   "AEPTCD": "99019211",
+   "AESOC": "Nervous system disorders",
+   "S": 0.1235,
+   "AECODSTAT": "FLAGGED_FOR_HUMAN_CODER"
+  },
+  "feeling lightheaded when standing up": {
+   "AEDECOD": "Dizziness postural",
+   "AEPTCD": "99013575",
+   "AESOC": "Nervous system disorders",
+   "S": 0.0913,
+   "AECODSTAT": "FLAGGED_FOR_HUMAN_CODER"
+  },
+  "frequent watery bowel movements": {
+   "AEDECOD": "Diarrhoea",
+   "AEPTCD": "99012735",
+   "AESOC": "Gastrointestinal disorders",
+   "S": 0.0418,
+   "AECODSTAT": "FLAGGED_FOR_HUMAN_CODER"
+  },
+  "marked prolonged heart rhythm interval": {
+   "AEDECOD": "Electrocardiogram QT prolonged",
+   "AEPTCD": "99014387",
+   "AESOC": "Investigations",
+   "S": 0.0901,
+   "AECODSTAT": "FLAGGED_FOR_HUMAN_CODER"
+  }
+ },
+ "coding_p_unambiguous": {
+  "severe throbbing pain in back of head": 0.9105,
+  "feeling lightheaded when standing up": 0.8715,
+  "frequent watery bowel movements": 0.9192,
+  "marked prolonged heart rhythm interval": 0.8614
+ },
+ "phi_banner": "**Mode banner** \u2014 Tier 2: REAL needle3 extraction + [SI] patterns | Tier 3: REAL laya | Tier 4: REAL xgboost span gate \u00b7 a [SI] stand-in is never the component; the audit records which path ran per tier. eCRF path = string scrub + flag; the bounding-box burn-in is the PDF path and is not exercised here.",
+ "phi_redact": {
+  "ae|1|AECOM|(617) 555-0192": 0.9618,
+  "ae|1|AECOM|Jane Miller": 0.9624,
+  "ae|2|AECOM|Jane Miller": 0.9493,
+  "pr|1|PRDSC|884-019-22": 0.9493,
+  "pr|1|PRDSC|04/12/1972": 0.949,
+  "pr|1|PRDSC|02114": 0.9293,
+  "pr|1|PRDSC|J.M.": 0.9181
+ },
+ "phi_flags_total": 68,
+ "phi_sanitized_ae": {
+  "SUBJ-3092|1": "CRC Note: Patient [REDACTED_PATIENT_NAME] called site cell phone [REDACTED_PHONE] at 10:15 AM.",
+  "SUBJ-3092|2": "Patient [REDACTED_PATIENT_NAME] tolerating well; continued Alanine 50 mg; repeat glucose 120 mg/dL."
+ },
+ "phi_tier3": {
+  "AE|1|AECOM": {
+   "P_DIRECT": 0.6726,
+   "P_QUASI": 0.4038
+  },
+  "AE|2|AECOM": {
+   "P_DIRECT": 0.0134,
+   "P_QUASI": 0.0476
+  },
+  "PR|1|PRDSC": {
+   "P_DIRECT": 0.0357,
+   "P_QUASI": 0.713
+  },
+  "EG|1|EGCOM": {
+   "P_DIRECT": 0.0122,
+   "P_QUASI": 0.0857
+  }
+ },
+ "phi_tier2_sources": {
+  "AE|1|AECOM": [
+   [
+    "Jane Miller",
+    "PERSON_NAME",
+    18,
+    29,
+    "both"
+   ],
+   [
+    "(617) 555-0192",
+    "PHONE",
+    53,
+    67,
+    "both"
+   ],
+   [
+    "10:15 AM",
+    "DOB",
+    71,
+    79,
+    "needle"
+   ]
+  ],
+  "AE|2|AECOM": [
+   [
+    "Jane Miller",
+    "PERSON_NAME",
+    8,
+    19,
+    "both"
+   ],
+   [
+    "50",
+    "DOB",
+    55,
+    57,
+    "needle"
+   ],
+   [
+    "120",
+    "ZIP",
+    77,
+    80,
+    "needle"
+   ]
+  ],
+  "PR|1|PRDSC": [
+   [
+    "J.M.",
+    "INITIALS",
+    8,
+    12,
+    "both"
+   ],
+   [
+    "884-019-22",
+    "MRN",
+    18,
+    28,
+    "pattern"
+   ],
+   [
+    "04/12/1972",
+    "DOB",
+    35,
+    45,
+    "both"
+   ],
+   [
+    "02114",
+    "ZIP",
+    56,
+    61,
+    "both"
+   ]
+  ],
+  "EG|1|EGCOM": [
+   [
+    "Sinus rhythm",
+    "PERSON_NAME",
+    0,
+    12,
+    "needle"
+   ]
+  ]
+ },
+ "per_record_ms": {
+  "coding": {
+   "severe throbbing pain in back of head": {
+    "t2_embed_search": {
+     "median": 39.53,
+     "p90": 52.96,
+     "n": 25
+    },
+    "t3_laya": {
+     "median": 338.48,
+     "p90": 362.57,
+     "n": 25
+    },
+    "t4_xgboost": {
+     "median": 8.5,
+     "p90": 26.72,
+     "n": 25
+    }
+   },
+   "feeling lightheaded when standing up": {
+    "t2_embed_search": {
+     "median": 43.66,
+     "p90": 54.42,
+     "n": 25
+    },
+    "t3_laya": {
+     "median": 346.32,
+     "p90": 376.34,
+     "n": 25
+    },
+    "t4_xgboost": {
+     "median": 7.22,
+     "p90": 7.72,
+     "n": 25
+    }
+   },
+   "frequent watery bowel movements": {
+    "t2_embed_search": {
+     "median": 40.89,
+     "p90": 52.31,
+     "n": 25
+    },
+    "t3_laya": {
+     "median": 340.91,
+     "p90": 393.79,
+     "n": 25
+    },
+    "t4_xgboost": {
+     "median": 7.58,
+     "p90": 10.64,
+     "n": 25
+    }
+   },
+   "marked prolonged heart rhythm interval": {
+    "t2_embed_search": {
+     "median": 48.12,
+     "p90": 58.8,
+     "n": 25
+    },
+    "t3_laya": {
+     "median": 327.86,
+     "p90": 362.38,
+     "n": 25
+    },
+    "t4_xgboost": {
+     "median": 8.1,
+     "p90": 9.14,
+     "n": 25
+    }
+   }
+  },
+  "phi": {
+   "AE|1|AECOM": {
+    "t2_needle_plus_patterns": {
+     "median": 704.31,
+     "p90": 784.27,
+     "n": 25
+    },
+    "t3_laya": {
+     "median": 461.96,
+     "p90": 490.44,
+     "n": 25
+    },
+    "t4_xgboost": {
+     "median": 0.53,
+     "p90": 0.77,
+     "n": 25
+    }
+   },
+   "AE|2|AECOM": {
+    "t2_needle_plus_patterns": {
+     "median": 759.7,
+     "p90": 810.39,
+     "n": 25
+    },
+    "t3_laya": {
+     "median": 452.95,
+     "p90": 520.99,
+     "n": 25
+    },
+    "t4_xgboost": {
+     "median": 0.45,
+     "p90": 0.54,
+     "n": 25
+    }
+   },
+   "PR|1|PRDSC": {
+    "t2_needle_plus_patterns": {
+     "median": 1077.26,
+     "p90": 1225.87,
+     "n": 25
+    },
+    "t3_laya": {
+     "median": 523.33,
+     "p90": 565.19,
+     "n": 25
+    },
+    "t4_xgboost": {
+     "median": 0.45,
+     "p90": 0.61,
+     "n": 25
+    }
+   },
+   "EG|1|EGCOM": {
+    "t2_needle_plus_patterns": {
+     "median": 434.06,
+     "p90": 475.52,
+     "n": 25
+    },
+    "t3_laya": {
+     "median": 448.5,
+     "p90": 466.27,
+     "n": 25
+    },
+    "t4_xgboost": {
+     "median": 0.35,
+     "p90": 0.47,
+     "n": 25
+    }
+   }
+  }
+ }
+}

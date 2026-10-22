@@ -8,6 +8,8 @@
 
 **Update, 2026-10-21:** the harness now runs 247 checks with the optional extras installed and 244 with `requirements.txt` only, all passing; see [New this pass: hosted-demo safety mode, CI and docs checks](#new-this-pass-hosted-demo-safety-mode-ci-and-docs-checks).
 
+**Update, 2026-10-22:** the coding and PHI apps' real model path is wired and measured, and the harness adds 16 always-run wiring checks and 5 real-model checks that are reported as skipped when no models dir is given; see [New this pass: the real model path](#new-this-pass-the-real-model-path).
+
 **Sample-cut enrichment (this pass):** every domain in `sample_data/` now carries an `AVISIT` + `VISITNUM` visit/timepoint dimension, assigned deterministically from row position — deliberately *not* the seeded RNG stream — so no existing value, anchor subject, or PHI-bearing note moved. Labs keep their file-provided reference range (`LBNRHI`), which is exactly what the risk app scores each lab against (option: ranges live in a column of the lab file). All 95 checks still pass on the enriched cut.
 
 ## Bugs found and fixed
@@ -125,6 +127,25 @@ Each new check was also seen to fail when what it guards is broken: the hosted c
 
 The "Verified working" list below still describes the 95 app checks; all of them pass in this pass too.
 
+## New this pass: the real model path
+
+**Date:** 2026-10-22 · **Method:** the same harness, plus the evaluation scripts in [`eval/`](eval/README.md), on Python 3.12.3, Streamlit 1.66.1, an Intel Xeon @ 2.80GHz with 4 vCPU and no GPU. The coding and PHI apps now run their real Tiers 2 to 4 (Cactus Needle3 `cactus-needle` 3.2.8, hnswlib 0.8.0, Laya 0.4.13, XGBoost 3.4.1) from a models dir; what that path does on synthetic data is in [`docs/EVALUATION.md`](docs/EVALUATION.md). The five wiring defects that [`docs/FEASIBILITY.md`](docs/FEASIBILITY.md) found at Stage 0 are fixed, and building and measuring the path found more:
+
+- **Needle3's embedding is case-sensitive.** "insomnia" scored 0.948 against "Insomnia", below several unrelated terms, and verbatims are typed lower-case while dictionary terms are capitalized. The coding app now embeds a lower-cased copy of both, like its stand-in and its string features already did (retrieval top-1 0.622 to 0.747 on the held-out set).
+- **The real-path load was cached on the typed models-dir string.** A relative path such as hosted mode's `models`, or a models dir whose files changed while the app ran, could be served a stale load for the life of the process. The cache key is now the absolute path plus each artifact's size and modification time (found by HM19/HP19 failing in an environment with the real runtimes; pinned by RW16).
+- **Laya warns on every load when a calibration file was fitted under another path,** which is always the case once a models dir is copied to another machine. The apps now drop that path-only warning and stop on a calibration fitted for a different checkpoint config (RW14, RW15). The evaluation script also reads the temperature Laya actually applies: Laya fits a per-bucket temperature only from 2,000 records, and otherwise its type-level one.
+- **Needle3's PHI extraction is noisy** (it proposed "Sinus rhythm" as a name and "120" from "120 mg/dL" as a ZIP code; extraction alone had precision 0.42 on held-out notes), so the PHI app uses Needle3's proposals only behind the trained span gate, and keeps Tier 2 on its stand-in when there is no gate.
+
+**New checks.** RW1 to RW16 run always, including in CI, with small stub packages named `needle`, `hnswlib`, `laya` and `xgboost` put first on the path. They drive the apps with models dirs in different states and pin: modules bound, REAL only when an artifact loads, Laya probed with torch and transformers, an unrelated `needle` package rejected, a trained gate refused when its inputs did not load, a corrupt artifact or a missing runtime stopping the run, the calibration identity rule, a changed models dir reloaded, the PHI app's Needle3 kept behind its gate, Tier 3 feeding the re-ranker (a negated verbatim routed to a human), and the risk and anomaly apps never claiming a model they cannot load. RM1 to RM5 run only when `ECRF_MODELS_DIR` names a models dir holding the trained artifacts and the real runtimes import; otherwise each is reported **SKIPPED**, never passed. They assert REAL on every tier in the banner and audit, artifact hashes in the audit, a bit-identical `ae_coded.csv` across two runs, and that the Deck B worked rows reproduce the values in `eval/results/deck_b_worked.json`.
+
+**Results.**
+
+| Configuration | Result |
+|---|---|
+| `requirements.txt` plus the optional extras (CI variant `optional-extras`) | **263 passed, 0 failed, 5 skipped** (247 earlier checks + 16 RW; RM1 to RM5 skipped: no models dir) |
+| `requirements.txt` only (CI variant `stand-in`) | **260 passed, 0 failed, 5 skipped** (244 + 16 RW; RM skipped) |
+| the real runtimes, no optional extras, `ECRF_MODELS_DIR` set to a models dir built with `eval/fetch_models.py` and trained with `eval/run_eval.py` | **265 passed, 0 failed, 0 skipped** (244 + 16 RW + 5 RM) |
+
 ## Verified working (95 checks)
 
 **meddra_app.py:** domain + dictionary load from folder and via upload · verbatim
@@ -170,7 +191,7 @@ derive from its own location). With the app dependencies installed:
 
     pip install -r requirements.txt && python tests/qc_test.py
 
-Exit code 0 = every check passes: 247 checks with the optional extras (`pyreadstat`, `scikit-learn`, `POT`, `scipy`) installed, or 244 with `requirements.txt` only, where SAS2, SAS3 and A16 do not run. It drives each app end-to-end via
+Exit code 0 = every check passes: 263 checks with the optional extras (`pyreadstat`, `scikit-learn`, `POT`, `scipy`) installed, or 260 with `requirements.txt` only, where SAS2, SAS3 and A16 do not run; in both, the 5 real-model checks (RM1 to RM5) are reported as skipped. To run them, build a models dir as in [`eval/README.md`](eval/README.md) and run `ECRF_MODELS_DIR=<models dir> python tests/qc_test.py` with the real runtimes installed. It drives each app end-to-end via
 `streamlit.testing.v1.AppTest.from_file(...)`, points the coding/PHI/risk apps at `sample_data/`
 and the anomaly app at `anomaly_data/`, clicks Execute, and asserts on the rendered dataframes and
 written CSVs — including a synthetic `.asc` release (HLT/HLGT + currency filter), content-based
@@ -180,7 +201,9 @@ PHI discovery, SAS `.sas7bdat` input routing, the risk-app anchor subjects, and 
 
 - Coding stand-in retrieval is lexical: `[SI]` scores will not match trained-run
   (`[RM]`) numbers on semantically-gapped verbatims — documented in-app and in
-  the audit, never hidden.
+  the audit, never hidden. The real path is measured on synthetic data only
+  ([`docs/EVALUATION.md`](docs/EVALUATION.md)); it is not validated on a licensed
+  MedDRA release or on real site notes.
 - eCRF path only; no scanned-document/bounding-box capability exists here.
 - The risk app is **decision support**, not a clinical determination: its `[SI]` weighted
   engine ranks and flags subjects for human review but does not predict outcomes with validated

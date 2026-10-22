@@ -160,9 +160,12 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <h3 style="margin-top:20px">Stand-in <code>[SI]</code> versus real</h3>
   <p>No trained weights ship with this repository, so the model tiers run as labeled deterministic stand-ins, tagged
     <code>[SI]</code> in the banner and in every audit row, with the same output columns the real components would
-    produce. Installing the real runtimes (open-source Needle3 and Laya, hnswlib, XGBoost) flips the banner tier by tier; if a
-    trained artifact is present but its runtime is missing, the app stops rather than substitute a stand-in. Optional
-    packages also turn on real paths in the anomaly app: <code>scikit-learn</code> adds an Isolation Forest, and
+    produce. Run locally with the open-source runtimes (Cactus Needle3, hnswlib, Laya, XGBoost) and a models dir, and the
+    coding and PHI apps switch to their real path tier by tier, air-gapped; a tier shows REAL only when its artifact loads,
+    and an artifact that cannot be used stops the run rather than being replaced by a stand-in. What the real path does on
+    synthetic data is measured in <a href="EVALUATION.md">the evaluation</a>: better than the stand-in on misspellings and
+    untitled names, no better on colloquial verbatims, and about 0.4 s per verbatim on a CPU. Optional packages also turn on
+    real paths in the anomaly app: <code>scikit-learn</code> adds an Isolation Forest, and
     <code>POT</code> with <code>scipy</code> runs Sinkhorn optimal-transport drift.</p>
 </section>
 

@@ -3,10 +3,16 @@ numpy>=1.24        # meddra_app.py + anomaly_app.py (stand-in encoder/index math
 pandas>=2.0        # all four apps (risk_app.py uses pandas only)
 streamlit>=1.49    # all four apps (floor: oldest release accepting st.dataframe(width="stretch"); 1.36-1.48 raise TypeError)
 
-# Real path — install these and the mode banner flips tier-by-tier to REAL:
-#   pip install cactus-needle hnswlib laya xgboost
-# (open-source Needle3 by Cactus Compute and Laya; not bundled here. If a trained artifact is dropped into the models dir but
-#  its runtime is missing, the app hard-stops instead of substituting a stand-in)
+# Real path (coding + PHI apps). Pinned: both model packages release several times a week. CPU torch FIRST,
+# or pip pulls about 1.8 GB of CUDA wheels:
+#   pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
+#   pip install cactus-needle==3.2.8 laya==0.4.13 hnswlib==0.8.0 transformers==5.20.2 \
+#               "xgboost-cpu==3.4.1; platform_system == 'Linux'" "xgboost==3.4.1; platform_system != 'Linux'"
+# Then build a models dir (weights + the trained synthetic-data artifacts): python eval/fetch_models.py --out models
+# and set it as the Models dir in the sidebar (eval/README.md). A tier flips to REAL only when its artifact LOADS;
+# installing a library alone changes nothing. An artifact whose runtime is missing, or that fails to load, stops
+# the app instead of letting it substitute a stand-in. Never "pip install needle": an unrelated CSS-testing package.
+# hnswlib ships no wheels (needs a C++ compiler); xgboost 3.4.1 needs Python 3.12+.
 
 # Optional — SAS .sas7bdat input (SDTM/ADaM dumps). CSV-only users can skip this;
 # every app probes for it and reads .csv without it. Install to also load .sas7bdat:
@@ -20,5 +26,5 @@ streamlit>=1.49    # all four apps (floor: oldest release accepting st.dataframe
 # tier runs its labelled [SI] robust-z gate alone; install to add the REAL detector and flip the banner:
 #   pip install scikit-learn
 
-# Optional — real Needle3/Laya text-outlier detection for anomaly_app.py (Tier 3b) and the coding/PHI apps.
-# Open-source Needle3/Laya runtimes, not bundled here; without them those tiers run labelled [SI] stand-ins with identical output columns.
+# Note: anomaly_app.py's text-outlier tier (Tier 3b) has no real Needle3/Laya path wired yet; it always runs its labeled
+# [SI] bag-of-words stand-in, whatever is installed (the real path above is for the coding and PHI apps).
