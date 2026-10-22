@@ -33,33 +33,71 @@
 #                      specified list of column names is guaranteed to have gaps;
 #                      scanning everything non-numeric does not. The operator still
 #                      confirms/deselects columns before Run (see the multiselect).
-#   Tier 2 Needle3  -> typed Pydantic-schema span extraction (entity + in-field
-#                      offsets). Stand-in: guarded regex patterns returning the
-#                      SAME (span, entity, start, end) tuple shape.
+#   Tier 2 Needle3  -> typed-schema extraction; each extracted value is kept only
+#                      if it appears VERBATIM in the field (its in-field offsets
+#                      are then exact), and the declared patterns run as a second
+#                      proposer so recall is not capped by either one. Stand-in:
+#                      the guarded patterns alone. Same (span, entity, start, end,
+#                      source) tuple shape either way.
 #   Tier 3 Laya     -> P(Direct_PHI), P(Quasi_Identifier), risk tier. Stand-in:
 #                      a direct-span rule + a mosaic (>=2 indirect) rule.
 #   Tier 4 XGBoost  -> per-span P(Redact); >= gate -> string scrub + AEPHI flag.
+#                      Real path: a trained per-span booster (binary:logistic).
 #
 #   streamlit run phi_app.py
 #   stand-in path (runs anywhere):     pip install pandas streamlit
-#       (QC note: this program does not use numpy or hashlib -- meddra_app.py
-#        needs both; the imports were removed so each file's dependencies are
-#        exactly what it uses.)
-#   real path (flips banner to REAL):  pip install cactus-needle laya xgboost
+#   real path: install the pinned runtimes (requirements.txt, real-path block) AND
+#   put the trained artifacts in the models dir (layout below, steps in
+#   eval/README.md). A tier flips to REAL only when its artifact LOADS.
+#   (hashlib hashes the loaded artifacts for the audit; numpy builds the Tier-4
+#    feature matrix on the real path. Both ship with pandas.)
 
-import json, os, re, tempfile, time
-import pandas as pd, streamlit as st
+import hashlib, importlib, json, os, platform, re, tempfile, time, warnings
+import numpy as np, pandas as pd, streamlit as st
 
-# Runtime probe -- same pattern as meddra_app.py (see the comment there). PHI
-# Tier 2 needs ONLY the extractor (no graph index), so REAL_T2 keys on needle
-# alone; that asymmetry vs meddra_app.py is correct, not a copy-paste bug.
+# Air gap -- same as meddra_app.py: set BEFORE any optional runtime is imported, so
+# the Hugging Face client never reaches the network and Needle3's default-on usage
+# telemetry is off. setdefault, so an operator can override one deliberately.
+for _k, _v in (("HF_HUB_OFFLINE", "1"), ("NEEDLE_TELEMETRY", "0"), ("DO_NOT_TRACK", "1")):
+    os.environ.setdefault(_k, _v)
+
+# Runtime probe -- same pattern as meddra_app.py (see the comments there): bind each
+# optional runtime and check it exposes the API this file calls. PHI Tier 2 needs
+# ONLY the extractor (no graph index), so it keys on needle alone; that asymmetry vs
+# meddra_app.py is correct, not a copy-paste bug.
 def _have(m):
     try: __import__(m); return True
     except Exception: return False
-HAVE={m:_have(m) for m in ("needle","laya","xgboost","pyreadstat")}
-REAL_T2=HAVE["needle"]
-REAL_T3=HAVE["laya"]
-REAL_T4=HAVE["xgboost"]
+def _mod(m, *attrs):
+    try:
+        mod = importlib.import_module(m)
+        return mod if all(hasattr(mod, a) for a in attrs) else None
+    except Exception: return None
+needle  = _mod("needle", "Needle")
+laya    = _mod("laya", "load") if (_have("torch") and _have("transformers")) else None
+xgboost = _mod("xgboost", "Booster", "DMatrix")
+HAVE={"needle": needle is not None, "laya": laya is not None, "xgboost": xgboost is not None,
+      "pyreadstat": _have("pyreadstat")}
+# REAL only once an artifact LOADS from the models dir (load_real); never on import.
+REAL_T2=REAL_T3=REAL_T4=False
+_agent=_router=_gatebooster=None
+
+# Models-dir CONVENTION (same folder the coding app reads; this head's files only):
+#   needle3/needle3.cact + needle3/libneedle.so (.dylib/.dll)   Tier 2 extractor
+#   laya/                                                        Tier 3 checkpoint
+#   laya_calibration_phi.json    Tier-3 temperatures fitted for THIS head's questions
+#   phi_token_classifier.json + phi_token_classifier.meta.json   Tier 4 gate + contract
+ART_NEEDLE=os.path.join("needle3","needle3.cact")
+ART_LAYA=os.path.join("laya","model.safetensors")
+ART_LAYA_CAL="laya_calibration_phi.json"
+ART_GATE="phi_token_classifier.json"
+def _engine_file():
+    return {"Darwin":"libneedle.dylib","Windows":"libneedle.dll"}.get(platform.system(),"libneedle.so")
+def _sha_file(p,n=16):
+    h=hashlib.sha256()
+    with open(p,"rb") as f:
+        for b in iter(lambda: f.read(1<<20), b""): h.update(b)
+    return h.hexdigest()[:n]
 
 # Reviewer-set starting values; the effective values are written to the audit.
 DEF_REDACT_GATE=0.85
@@ -219,15 +257,15 @@ RE_AGE=r"\b[0-9]{2,3}[- ]?(?:year-old|year old|yo)\b"
 # (same heuristic as before for chained initials).
 RE_INIT=r"\b[A-Z]\.[A-Z](?:\.(?=[^0-9a-zA-Z]|$))?"
 RE_NAME=r"\b(?:Patient|Mr|Ms|Mrs|Dr\.?)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)|\b([A-Z][a-z]+,\s*[A-Z][a-z]+)\b"
-def t2_phi(text):
-    """Locate typed identifier spans with in-field character offsets. eCRF input
-    has NO page, so offsets are positions WITHIN the string, not bounding boxes.
+def _t2_patterns(text):
+    """[SI] proposer: locate typed identifier spans with in-field character offsets.
+    eCRF input has NO page, so offsets are positions WITHIN the string, not bounding boxes.
     add() runs each pattern, extracts the matched text (group(1) or group(2) for
     the two-group NAME pattern -- whichever actually matched; group(0) for the
     single/no-group patterns), and records (start,end). The seen-set de-overlaps
     so one character range = one span = one downstream decision (nested/overlapping
     matches would otherwise double-count and double-replace). Returns a list of
-    4-tuples (span_text, entity, start, end)."""
+    5-tuples (span_text, entity, start, end, source) with source='pattern'."""
     spans=[]
     def add(pat,ent,flags=0):
         for mm in re.finditer(pat,text,flags):
@@ -246,8 +284,58 @@ def t2_phi(text):
     seen,out=set(),[]
     for sp,ent,a,b in spans:
         if (a,b) in seen: continue
-        seen.add((a,b)); out.append((sp,ent,a,b))
+        seen.add((a,b)); out.append((sp,ent,a,b,"pattern"))
     return out
+
+# Real proposer: Needle3 extraction with a typed schema. The engine is a small
+# tool-calling model, measured to fill a field with the wrong thing (a clock time
+# as a date of birth, a phone number copied into the MRN field) and to "repair"
+# values, so its output is never trusted as-is: a value is kept only if it occurs
+# VERBATIM in the field (then its offsets are exact), titles are stripped from
+# names, and Tier 4 decides every candidate. stateless + complete() resets the
+# engine between fields (the internal _complete() does not, and leaked values from
+# one note into the next in testing); auto_date=False stops it adding a date fact
+# that it then reports as a birth date.
+PHI_EXTRACT_SCHEMA={"name":"record_identifiers","description":(
+    "Record personal identifiers that appear verbatim in a clinical trial note. Leave a field empty if "
+    "the note has none. Drug names, lab values, times, doses and kit numbers are not identifiers."),
+    "parameters":{"type":"object","properties":{
+    "person_name":{"type":"string","description":"a person's name exactly as written, e.g. Jane Miller"},
+    "phone":{"type":"string","description":"a telephone number exactly as written"},
+    "email":{"type":"string","description":"an email address exactly as written"},
+    "mrn":{"type":"string","description":"a medical record number exactly as written"},
+    "date_of_birth":{"type":"string","description":"a date of birth exactly as written"},
+    "zip_code":{"type":"string","description":"a 5-digit postal code exactly as written"},
+    "initials":{"type":"string","description":"a person's initials exactly as written, e.g. J.M."},
+    "age":{"type":"string","description":"a person's age exactly as written, e.g. 54-year-old"}}}}
+NEEDLE_FIELDS={"person_name":"PERSON_NAME","phone":"PHONE","email":"EMAIL","mrn":"MRN",
+               "date_of_birth":"DOB","zip_code":"ZIP","initials":"INITIALS","age":"AGE"}
+_TITLE=re.compile(r"^(?:patient|subject|participant|mr|mrs|ms|dr|daughter|son|husband|wife|caregiver)\.?\s+",re.I)
+def _t2_needle(text):
+    """Needle3 extraction -> grounded 5-tuples (source='needle'). An ungrounded value
+    (not found verbatim in the field) is dropped, never guessed into place."""
+    r=_agent.complete(text,256); calls=r.get("function_calls") or r.get("suppressed_calls") or []
+    args=(calls[0].get("arguments") or {}) if calls else {}
+    out=[]
+    for fld,ent in NEEDLE_FIELDS.items():
+        vals=args.get(fld); vals=vals if isinstance(vals,list) else [vals]
+        for v in vals:
+            if not isinstance(v,str): continue
+            v=_TITLE.sub("",v.strip()).rstrip(",;:)").strip()
+            if len(v)<2: continue
+            out += [(v,ent,mm.start(),mm.end(),"needle") for mm in re.finditer(re.escape(v),text)]
+    return out
+def t2_phi(text):
+    """Tier 2. Stand-in: the patterns. Real: Needle3 candidates UNION the pattern
+    candidates, merged per character range; a range both proposed is source 'both',
+    and its entity is the pattern's (patterns are typed by construction)."""
+    pat=_t2_patterns(text)
+    if not REAL_T2: return pat
+    merged={(a,b):[sp,ent,a,b,src] for sp,ent,a,b,src in _t2_needle(text)}
+    for sp,ent,a,b,src in pat:
+        if (a,b) in merged: merged[(a,b)][1]=ent; merged[(a,b)][4]="both"
+        else: merged[(a,b)]=[sp,ent,a,b,src]
+    return [tuple(v) for _,v in sorted(merged.items())]
 
 # ============================ TIER 3 ============================
 # CONSUMES: a free-text string + the Tier-2 spans (to count indirect attrs).
@@ -257,10 +345,22 @@ def t2_phi(text):
 #           alone and none is a DIRECT span, yet together they re-identify. That
 #           is a field-level judgement and must come back as its own number so
 #           Tier 4 can weigh it explicitly rather than as a hidden weight.
-# Router warmed once (preload=True) so the model load is not paid per field.
-_router = laya.Router(preload=True) if REAL_T3 else None
-PHI_SCHEMA={"direct_pii":{"type":"noul","instructions":"Contains a direct safe-harbour identifier?"},
-            "reident_risk":{"type":"noul","instructions":"Do indirect attributes jointly re-identify?"}}
+# ONE local English checkpoint, loaded once per process by load_real (not Laya's
+# Router, which sends short English text to the uncalibrated multilingual model).
+# The temperatures in laya_calibration_phi.json are fitted for exactly this wording.
+PHI_SCHEMA={"direct_pii":{"type":"noul",
+    "instructions":"Does this clinical-trial note contain a direct identifier of a person: a name, phone number, email address, medical record number or date of birth?",
+    "criteria":{"false":"no direct identifier","true":"at least one direct identifier"}},
+    "reident_risk":{"type":"noul",
+    "instructions":"Does this note contain two or more indirect details about the participant, such as initials, a postal code or an exact age, that together could identify them?",
+    "criteria":{"false":"fewer than two indirect details","true":"two or more indirect details"}}}
+def t3_phi_batch(texts,spans_list):
+    """Tier 3 for many fields in one batched pass. Real: Laya's calibrated P(true) for
+    both questions. Stand-in: the direct-span and mosaic rules in t3_phi."""
+    if not REAL_T3: return [t3_phi(t,sp) for t,sp in zip(texts,spans_list)]
+    out=_router.predict_batch([str(t) for t in texts],PHI_SCHEMA)
+    return [dict(P_DIRECT=round(float(o["answers"]["direct_pii"]["noul"]),4),
+                 P_QUASI=round(float(o["answers"]["reident_risk"]["noul"]),4)) for o in out]
 def t3_phi(text,spans):
     """Field-level PHI risk. Real: route the text against PHI_SCHEMA -> two
     calibrated probabilities (one non-autoregressive pass, no text generated, so
@@ -271,9 +371,8 @@ def t3_phi(text,spans):
     computed low probability', so Tier 4's mosaic branch cannot fire on a field
     that has no indirect attributes. The eCRF worked rows are typically
     direct-only, so P(quasi) is often None here -- that is correct, not missing."""
-    if REAL_T3:
-        r=_router.route(text,PHI_SCHEMA); return dict(P_DIRECT=float(r.direct_pii),P_QUASI=float(r.reident_risk))
-    direct=any(e in DIRECT for _,e,_,_ in spans); nq=sum(1 for _,e,_,_ in spans if e in INDIRECT)
+    if REAL_T3: return t3_phi_batch([text],[spans])[0]
+    direct=any(sp[1] in DIRECT for sp in spans); nq=sum(1 for sp in spans if sp[1] in INDIRECT)
     return dict(P_DIRECT=0.99 if direct else 0.05, P_QUASI=(0.96 if nq>=2 else 0.55 if nq==1 else None))
 
 # ============================ TIER 4 ============================
@@ -309,8 +408,12 @@ def t4_phi(text,spans,ctx,gate):
     AEPHI) where AEPHI is 'Y' iff the text actually changed -- so a field whose
     spans all fell below the gate correctly reports 'N', not a false positive."""
     san=text; flags=[]
-    for sp,ent,a,b in sorted(spans,key=lambda x:-len(x[0])):   # longest-first
-        pr=0.99 if ent in DIRECT else (0.99 if (ctx["P_QUASI"] or 0)>0.8 else 0.01)
+    prs=_t4_real_scores(text,spans,ctx) if REAL_T4 else None
+    order=sorted(range(len(spans)),key=lambda i:-len(spans[i][0]))   # longest-first
+    for i in order:
+        sp,ent,a,b=spans[i][:4]
+        if prs is not None: pr=prs[i]   # trained per-span booster
+        else: pr=0.99 if ent in DIRECT else (0.99 if (ctx["P_QUASI"] or 0)>0.8 else 0.01)
         if pr>=gate:
             san=san.replace(sp,TAG.get(ent,"[REDACTED]"))
             flags.append(dict(SPAN=sp,ENTITY=ent,START=a,END=b,P_REDACT=round(pr,4),
@@ -318,16 +421,101 @@ def t4_phi(text,spans,ctx,gate):
                               CAPITALIZED=1 if sp[:1].isupper() else 0,ACTION="MASK_AND_FLAG"))
     return san,flags,("Y" if san!=text else "N")
 
+# Tier-4 feature row per candidate span (names are the booster's contract; the
+# order comes from phi_token_classifier.meta.json). Lexical cue = a label word for
+# the candidate's entity in the 24 characters before it ("MRN", "DOB", "call" ...).
+ENTS=["PERSON_NAME","PHONE","EMAIL","MRN","DOB","ZIP","INITIALS","AGE"]
+CUES={"PERSON_NAME":r"patient|mr|ms|mrs|dr|daughter|son|husband|wife|caregiver|spouse|spoke with|called|reached|coordinator|belongs to",
+      "PHONE":r"phone|cell|call|callback|contact|tel|reached|on ","EMAIL":r"email|emailed|at ","MRN":r"mrn|record",
+      "DOB":r"dob|born|birth","ZIP":r"zip|postal|residing|lives|from","INITIALS":r"initials|subject|participant","AGE":r"age|aged"}
+def _span_features(text,spans,ctx):
+    nind=sum(1 for sp in spans if sp[1] in INDIRECT); L=max(len(text),1); rows=[]
+    for sp,ent,a,b,src in spans:
+        r=dict(src_needle=int(src in ("needle","both")),src_pattern=int(src in ("pattern","both")),
+               p_direct=ctx["P_DIRECT"] if ctx["P_DIRECT"] is not None else np.nan,
+               p_quasi=ctx["P_QUASI"] if ctx["P_QUASI"] is not None else np.nan,n_indirect=nind,
+               digit_ratio=sum(c.isdigit() for c in sp)/max(len(sp),1),capitalized=int(sp[:1].isupper()),
+               rel_pos=a/L,span_len=len(sp),cue=int(bool(re.search(CUES.get(ent,"$^"),text[max(0,a-24):a].lower()))))
+        r.update({f"ent_{e}":int(ent==e) for e in ENTS}); rows.append(r)
+    return rows
+def _t4_real_scores(text,spans,ctx):
+    if not spans: return []
+    booster,meta=_gatebooster; rows=_span_features(text,spans,ctx)
+    X=np.array([[r[f] for f in meta["features"]] for r in rows],float)
+    return [round(float(v),4) for v in booster.predict(xgboost.DMatrix(X,feature_names=meta["features"]))]
+
 def _guard_artifacts(models_dir):
     """HARD STOP, never a silent fallback (same discipline as meddra_app.py; the
-    artifact names differ because this head's real model is a per-token redaction
-    classifier, not a coding ranker). Filenames are a CONVENTION the operator
-    must match when dropping real weights."""
+    artifact names differ because this head's real model is a per-span redaction
+    gate, not a coding ranker). Filenames are a CONVENTION the operator must match
+    when dropping real weights (see the models-dir layout at the top)."""
     if not os.path.isdir(models_dir): return
-    for art,lib in [("phi_token_classifier.json","xgboost"),("needle3.onnx","needle"),("laya.onnx","laya")]:
-        if os.path.exists(os.path.join(models_dir,art)) and not HAVE.get(lib,False):
-            st.error(f"{art} present but '{lib}' not installed. Install '{lib}' or remove "
-                     f"the artifact -- the engine will NOT silently substitute a stand-in."); st.stop()
+    for art,libs in [(ART_GATE,("xgboost",)),(ART_NEEDLE,("needle",)),(ART_LAYA,("laya",))]:
+        miss=[l for l in libs if not HAVE.get(l,False)]
+        if os.path.exists(os.path.join(models_dir,art)) and miss:
+            st.error(f"{art} present but {', '.join(repr(m) for m in miss)} not installed (laya also needs "
+                     f"torch and transformers). Install it or remove the artifact -- the engine will NOT "
+                     f"silently substitute a stand-in."); st.stop()
+
+@st.cache_resource(show_spinner="Loading the real models from the models dir...")
+def load_real(models_dir):
+    """Same contract as meddra_app.py's load_real (duplicated on purpose): load each
+    artifact whose runtime is installed, once per process, from local paths only; an
+    artifact that is present but fails to load goes to errors and the UI stops on it."""
+    R=dict(T2=None,T3=None,T4=None,info={},errors=[]); md=os.path.abspath(models_dir)
+    w,eng=os.path.join(md,ART_NEEDLE),os.path.join(md,"needle3",_engine_file())
+    try:
+        if needle and os.path.isfile(w) and os.path.isfile(eng):
+            os.environ["NEEDLE3_LIB_PATH"]=eng
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")      # "no confidence head": unused here
+                R["T2"]=needle.Needle(tools=[PHI_EXTRACT_SCHEMA],weights=w,auto_date=False,stateless=True)
+            R["info"]["needle3"]=f"needle3.cact sha256:{_sha_file(w)}"
+    except Exception as e: R["errors"].append(f"{os.path.relpath(w,md)}: {type(e).__name__}: {e}")
+    if R["T2"] is None and needle and os.path.isfile(w) and not os.path.isfile(eng):
+        R["errors"].append(f"{ART_NEEDLE}: its engine {os.path.relpath(eng,md)} is missing")
+    lp=os.path.join(md,ART_LAYA)
+    try:
+        if laya and os.path.isfile(lp):
+            cal=os.path.join(md,ART_LAYA_CAL)
+            R["T3"]=laya.load(os.path.dirname(lp),device="cpu",calibration=cal if os.path.isfile(cal) else None)
+            R["info"]["laya"]=(f"laya/ sha256:{_sha_file(lp)}; calibration "
+                               +(f"{ART_LAYA_CAL} sha256:{_sha_file(cal)}" if os.path.isfile(cal) else "NONE (uncalibrated)"))
+    except Exception as e: R["errors"].append(f"{os.path.relpath(lp,md)}: {type(e).__name__}: {e}")
+    bp=os.path.join(md,ART_GATE)
+    try:
+        if xgboost and os.path.isfile(bp):
+            b=xgboost.Booster(); b.load_model(bp)
+            mp=bp.replace(".json",".meta.json"); meta=json.load(open(mp)) if os.path.isfile(mp) else None
+            R["T4"]=(b,meta); R["info"]["gate"]=f"{ART_GATE} sha256:{_sha_file(bp)}"
+    except Exception as e: R["errors"].append(f"{os.path.relpath(bp,md)}: {type(e).__name__}: {e}")
+    # Measured: Needle3's proposals pushed through the stand-in rule read a study ID
+    # ("PROTO-2026-X89") as a person's name on every row (1,212 flags on the sample cut,
+    # against the patterns' 80). So the extractor is used ONLY behind the trained Tier-4
+    # gate; without the gate, Tier 2 stays on its stand-in and the audit says why.
+    if R["T2"] is not None and R["T4"] is None:
+        R["T2"]=None; R["info"]["needle3"]+=" (loaded but NOT used: its proposals run only behind the trained Tier-4 gate)"
+    return R
+
+def _activate(R):
+    global _agent,_router,_gatebooster,REAL_T2,REAL_T3,REAL_T4
+    _agent,_router,_gatebooster=R["T2"],R["T3"],R["T4"]
+    REAL_T2,REAL_T3,REAL_T4=_agent is not None,_router is not None,_gatebooster is not None
+
+def _contract_error(R):
+    """The gate was trained on features from SPECIFIC upstream tiers (Needle3 as a
+    proposer, Laya's two probabilities); scoring stand-in inputs with it would be a
+    silent wrong answer. Returns a reason when the loaded tiers do not match."""
+    if R["T4"] is None: return None
+    meta=R["T4"][1]
+    if not meta: return f"{ART_GATE} has no {ART_GATE.replace('.json','.meta.json')} feature contract next to it."
+    need=meta.get("requires",{})
+    if need.get("T2") and R["T2"] is None: return "the gate was trained with Needle3 proposals, but no Needle3 artifact loaded."
+    if need.get("T3") and R["T3"] is None: return "the gate was trained with Laya's probabilities, but no Laya checkpoint loaded."
+    q=hashlib.sha256(json.dumps(PHI_SCHEMA,sort_keys=True).encode()).hexdigest()[:16]
+    if need.get("T3") and meta.get("tier3_question_sha") not in (None,q):
+        return "the Tier-3 question text changed since the gate was trained (refit it, eval/README.md)."
+    return None
 
 # ============================ UI ============================
 # Same deliberate order as meddra_app.py: locate data (1), explain how columns are
@@ -373,7 +561,7 @@ A *direct* identifier (name, phone, MRN, DOB, address, SSN) scrubs on its own me
 - **`sanitized/<domain>.csv`** — a copy of each scanned domain carrying the original columns plus `SAN_<field>` (scrubbed text) and `<field>_PHI_FLAG` (`Y` if that cell changed, else `N`). Missing values stay missing — never `"nan"`.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
-Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[SI]` in the banner and audit): guarded regexes for spans + rule-based probabilities. It reproduces its worked trace exactly because identifier detection is pattern-shaped and the scrub is a string replace. Install `cactus-needle`, `laya`, `xgboost` and the banner flips tier-by-tier; columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
+Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[SI]` in the banner and audit): guarded regexes for spans + rule-based probabilities. It reproduces its worked trace exactly because identifier detection is pattern-shaped and the scrub is a string replace. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
 ### Troubleshooting
 - **A date / ID column got flagged:** that is content-based discovery working as designed — it scans every non-numeric field. If you know that column is safe, deselect it in step 4 and re-run; review any flags before trusting a scrub.
@@ -444,6 +632,17 @@ models_dir = st.sidebar.text_input("Models dir (optional real weights)","models"
          "the app STOPS rather than silently substituting a stand-in.")
 if HOSTED: models_dir = "models"
 _guard_artifacts(models_dir)
+# Load the models dir's trained artifacts (cached: once per process), point the tiers
+# at them, and refuse to run a gate whose feature contract the loaded tiers miss.
+_R=load_real(models_dir)
+if _R["errors"]:
+    st.error("A trained artifact in the models dir is present but failed to load, so the run stops rather than "
+             "fall back to a stand-in: "+" | ".join(_R["errors"])); st.stop()
+_activate(_R)
+_cerr=_contract_error(_R)
+if _cerr:
+    st.error(f"Tier 4 gate cannot run: {_cerr} Fix the models dir; the engine will NOT score with a "
+             f"mismatched model."); st.stop()
 
 # ---- LOAD so the pre-flight panel + the multi-select are live. Errors captured
 #      into load_err and surfaced in the panel, not as a stack trace. ----
@@ -478,9 +677,9 @@ ft_sel = st.sidebar.multiselect("Columns to scan for PHI (this program reads ONL
 #      the same discipline). Notes the eCRF-vs-document scope so the bounding-box
 #      capability is not over-claimed by silence. ----
 banner = "Tier 2: %s | Tier 3: %s | Tier 4: %s" % (
-    "REAL needle" if REAL_T2 else "STAND-IN [SI] (guarded regex)",
-    "REAL laya" if REAL_T3 else "STAND-IN [SI]",
-    "REAL xgboost" if REAL_T4 else "STAND-IN [SI]")
+    "REAL needle3 extraction + [SI] patterns" if REAL_T2 else "STAND-IN [SI] (guarded regex)",
+    ("REAL laya" + ("" if "calibration NONE" not in _R["info"].get("laya","") else " (UNCALIBRATED)")) if REAL_T3 else "STAND-IN [SI]",
+    "REAL xgboost span gate" if REAL_T4 else "STAND-IN [SI]")
 st.info("**Mode banner** — "+banner+" · a [SI] stand-in is never the component; the "
         "audit records which path ran per tier. eCRF path = string scrub + flag; the "
         "bounding-box burn-in is the PDF path and is not exercised here.")
@@ -520,7 +719,7 @@ t0=time.perf_counter()
 sel_by_dom={}
 for item in ft_sel:
     d,c=item.split("::",1); sel_by_dom.setdefault(d,[]).append(c)
-phi_rows=[]; san_dfs={}; log=[]
+phi_rows=[]; san_dfs={}; log=[]; memo={}
 for d,df in domains.items():
     cols=[c for c in sel_by_dom.get(d,[]) if c in df.columns]
     if not cols: continue
@@ -530,18 +729,22 @@ for d,df in domains.items():
     sdf=df.copy()
     for col in cols:
         sancol="SAN_"+col; aephi=["N"]*len(df); san_vals=[None]*len(df)
-        for i in range(len(df)):
-            raw=df[col].iloc[i]
-            # QC FIX: missing stays missing. The old code initialized the
-            # sanitized column with df[col].astype(str), which turned every NaN
-            # into the literal string "nan" -- a fake value that would scan,
-            # export, and join as if it were real text (and violate the Tier-1
-            # invariant stated above). None here writes back as an empty cell.
-            if pd.isna(raw): continue          # absent is not a clean scan
-            txt=str(raw)
-            if not txt: continue               # blank string: nothing to scan
-            spans=t2_phi(txt)                  # Tier 2: typed spans + offsets
-            ctx=t3_phi(txt,spans)              # Tier 3: P(direct)/P(quasi)
+        # QC FIX: missing stays missing. The old code initialized the sanitized
+        # column with df[col].astype(str), which turned every NaN into the literal
+        # string "nan" -- a fake value that would scan, export, and join as if it
+        # were real text (and violate the Tier-1 invariant stated above). Missing
+        # and blank cells are skipped here, so they write back as empty cells.
+        rows_i=[i for i in range(len(df)) if not pd.isna(df[col].iloc[i]) and str(df[col].iloc[i])]
+        texts=[str(df[col].iloc[i]) for i in rows_i]
+        # Tiers 2-3 depend only on the text, so each DISTINCT text is processed once
+        # per run (a cut repeats STUDYID, visit labels and flags thousands of times;
+        # on the real path every model call costs a fraction of a second).
+        new=[t for t in dict.fromkeys(texts) if t not in memo]
+        new_spans=[t2_phi(t) for t in new]                             # Tier 2: typed spans + offsets
+        for t,sp,cx in zip(new,new_spans,t3_phi_batch(new,new_spans)):  # Tier 3: one batched pass
+            memo[t]=(sp,cx)
+        for i,txt in zip(rows_i,texts):
+            spans,ctx=memo[txt]
             san,flags,flag=t4_phi(txt,spans,ctx,redact_gate)  # Tier 4: scrub
             san_vals[i]=san; aephi[i]=flag
             # One flag row PER SCRUBBED SPAN (not per field), so phi_flags.csv is
@@ -590,6 +793,7 @@ audit=pd.DataFrame([dict(program="phi_scanner", timestamp=pd.Timestamp.now().iso
     phi_tag_scheme="; ".join(sorted(set(TAG.values()))),
     phi_scope="eCRF direct-identifier scrub; joint re-identification (P_QUASI) fires "
         "only on co-occurring indirect spans; page geometry absent (no PDF)",
+    real_artifacts=json.dumps(_R["info"]) if _R["info"] else "none (all tiers stand-in)",
     n_phi_flags=len(phi_rows), measured_latency_ms=round(elapsed,2),
     audit_policy="logs redacted spans WITHOUT retaining raw PHI in secondary storage")])
 os.makedirs(out_dir, exist_ok=True)

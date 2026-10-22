@@ -6,6 +6,14 @@ and recommendations only. The first pass (2026-10-21) stopped at a failed networ
 second pass (2026-10-22), after the Hugging Face and PyTorch hosts were allowed, downloaded both
 models, loaded them offline and measured them. Stage 0 is complete.
 
+> **Update, 2026-10-22: Stages 1 to 4 were then built on this branch.** The five wiring defects
+> below are fixed in the apps, the recommended corrections were applied (pins in
+> `requirements.txt`, bound and API-checked probes, `predict()` instead of `route()`, real artifact
+> names, REAL only when an artifact loads), and the measured results are in
+> [`EVALUATION.md`](EVALUATION.md); how to build the models dir and rerun everything is in
+> [`../eval/README.md`](../eval/README.md). This file is kept as the Stage 0 record; where it says
+> "not applied" it describes the state before those stages.
+
 ## Date and environment
 
 | Item | Value |
@@ -367,7 +375,10 @@ Not in the table but checked in passing: `POT` imports as `ot`, `scikit-learn` a
 Found while reading the probes on 2026-10-21; defects 1 to 4 were reproduced with Streamlit's
 `AppTest` and stub modules on `sys.path`, and defect 5 with the real `laya` 0.4.13 package and no
 torch. On 2026-10-22 defect 2 was re-verified against the real loaded Laya checkpoint, and the
-Hub file lists behind defect 4 were checked. No app file was changed.
+Hub file lists behind defect 4 were checked. No app file was changed at Stage 0. All five are
+fixed in Stages 1 to 4, and each fix is pinned by an always-run `RW` check in `tests/qc_test.py`
+(stub packages, no models needed): defect 1 by RW2, 2 by RW4, 3 by RW1 and RW11, 4 by the guard and
+loader using the real artifact names (RW8, RW9), 5 by RW8.
 
 1. **The module names are never bound.** `_have()` calls `__import__(m)` and discards the result;
    no app has an `import needle`, `import laya`, `import hnswlib` or `import xgboost`. With
@@ -407,7 +418,8 @@ Hub file lists behind defect 4 were checked. No app file was changed.
 
 ## Recommended corrections (not applied; for the build stages)
 
-Nothing below has been applied; Stage 0 changes this file only.
+Nothing below was applied at Stage 0. All of it was applied in Stages 1 to 4 (see the update at
+the top of this file).
 
 `requirements.txt`, real-path comment block (versions as installed and measured on 2026-10-22):
 

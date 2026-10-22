@@ -68,11 +68,14 @@ import numpy as np, pandas as pd, streamlit as st
 def _have(m):
     try: __import__(m); return True
     except Exception: return False
-HAVE = {m: _have(m) for m in ("ot","scipy","sklearn","pyreadstat","cactus-needle","laya")}
+HAVE = {m: _have(m) for m in ("ot","scipy","sklearn","pyreadstat")}
 REAL_OT   = HAVE["ot"] and HAVE["scipy"]     # Sinkhorn needs BOTH the library and scipy (for ot.dist)
 REAL_IF   = HAVE["sklearn"]                  # Isolation Forest numeric-outlier corroborator
-# Needle3 (Cactus Compute) and Laya are open-source models not bundled with this repository; when absent the text tier runs its labelled [SI] stand-in.
-REAL_TEXT = HAVE.get("cactus-needle", False) and HAVE.get("laya", False)
+# The text tier's REAL path (Needle3/Laya retrieval-isolation) is NOT wired in this build, so it is
+# pinned to its labeled [SI] stand-in. An earlier probe keyed it on an import name ("cactus-needle")
+# that can never import; that kept the label honest by accident. The coding and PHI apps carry the
+# wired Needle3/Laya paths (see their load_real); this flag stays False until this tier gets one.
+REAL_TEXT = False
 
 # Reviewer-set starting values; the effective thresholds are written to the audit. These are the
 # BUILT-IN [SI] CRITERIA this transparent engine always uses -- declared constants, not hidden magic.
@@ -558,9 +561,13 @@ def _guard_artifacts(models_dir):
     substituting the [SI] stand-in for a model the operator believes is loaded."""
     if not os.path.isdir(models_dir): return
     art=os.path.join(models_dir,"anomaly_model.json")
-    if os.path.exists(art) and not HAVE.get("xgboost",False):
-        st.error(f"anomaly_model.json present but 'xgboost' not installed. Install it or remove "
-                 f"the artifact -- the engine will NOT silently substitute a stand-in."); st.stop()
+    # This build has NO code that loads a trained anomaly model: the [SI] engine is the only
+    # scorer. So the file stops the run whether or not xgboost is installed -- running on
+    # while the operator believes a model is in use (an earlier build even wrote REAL to
+    # the audit here) would be exactly the silent substitution this guard exists to refuse.
+    if os.path.exists(art):
+        st.error(f"anomaly_model.json found, but this build has no trained-anomaly-model path: the labeled "
+                 f"[SI] engine is the only scorer. Remove the file to run."); st.stop()
 
 # ============================ UI ============================
 st.set_page_config(page_title="Data Anomaly & Drift Detection", layout="wide")
@@ -651,8 +658,8 @@ out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"]
          "written on Run (also offered as downloads).")
 if HOSTED: out_dir = st.session_state["_hosted_out"]
 models_dir = st.sidebar.text_input("Models dir (optional real model)","models", disabled=HOSTED,
-    help="If a trained anomaly_model.json is present here but its runtime is not installed, the app STOPS "
-         "rather than silently substituting the [SI] stand-in.")
+    help="This build has no trained-model path for this app: the labeled [SI] engine is the only scorer, "
+         "and a anomaly_model.json found here STOPS the run rather than being silently ignored.")
 if HOSTED: models_dir = "models"
 _guard_artifacts(models_dir)   # runs on every rerun, before any compute
 

@@ -1,0 +1,881 @@
+field_id,template,split,text,has_direct,has_quasi
+P00001,T01,calib,CRC Note: Patient Elena Tanaka called site cell phone 415.555.0138 at 16:30.,Y,N
+P00002,T01,calib,CRC Note: Patient Laura Larsen called site cell phone 800-555-0124 at 07:15.,Y,N
+P00003,T01,calib,CRC Note: Patient Oscar Novak called site cell phone 646-555-0142 at 16:00.,Y,N
+P00004,T01,calib,CRC Note: Patient Ana Larsen called site cell phone (415) 555-0108 at 11:45.,Y,N
+P00005,T01,calib,CRC Note: Patient James Romero called site cell phone 206.555.0140 at 13:30.,Y,N
+P00006,T01,calib,CRC Note: Patient Nadia Tanaka called site cell phone (415) 555-0122 at 06:45.,Y,N
+P00007,T01,calib,CRC Note: Patient Irene Novak called site cell phone 312.555.0193 at 10:15.,Y,N
+P00008,T01,calib,CRC Note: Patient Felix Chen called site cell phone (206) 555-0166 at 08:30.,Y,N
+P00009,T01,calib,CRC Note: Patient Nadia Chen called site cell phone 206-555-0195 at 16:15.,Y,N
+P00010,T01,calib,CRC Note: Patient Ana Tanaka called site cell phone 415-555-0198 at 14:00.,Y,N
+P00011,T01,calib,CRC Note: Patient Jane Romero called site cell phone 617.555.0126 at 15:15.,Y,N
+P00012,T01,calib,CRC Note: Patient James Gonzalez called site cell phone 415-555-0169 at 07:00.,Y,N
+P00013,T01,calib,CRC Note: Patient Laura Chen called site cell phone 312.555.0122 at 15:30.,Y,N
+P00014,T01,calib,CRC Note: Patient Ana Quinn called site cell phone (312) 555-0172 at 20:45.,Y,N
+P00015,T01,calib,CRC Note: Patient Thomas Lindqvist called site cell phone 415-555-0146 at 21:00.,Y,N
+P00016,T01,calib,CRC Note: Patient Maria Duarte called site cell phone (312) 555-0159 at 18:00.,Y,N
+P00017,T01,calib,CRC Note: Patient Helen Mensah called site cell phone 415-555-0168 at 13:15.,Y,N
+P00018,T01,calib,CRC Note: Patient Oscar Kowalski called site cell phone 800.555.0188 at 13:15.,Y,N
+P00019,T01,calib,CRC Note: Patient Martin Quinn called site cell phone 312.555.0114 at 20:15.,Y,N
+P00020,T01,calib,CRC Note: Patient Daniel Kowalski called site cell phone 617.555.0187 at 07:00.,Y,N
+P00021,T01,calib,CRC Note: Patient Ana Novak called site cell phone (617) 555-0196 at 18:45.,Y,N
+P00022,T01,calib,CRC Note: Patient Ana Hughes called site cell phone 415.555.0172 at 06:45.,Y,N
+P00023,T02,train,Patient Linda Tanaka tolerating well; continued Ibuprofen 250 mg; repeat Hb 13.2 g/dL.,Y,N
+P00024,T02,train,Patient Laura Kowalski tolerating well; continued Omeprazole 250 mg; repeat ALT 54 U/L.,Y,N
+P00025,T02,train,Patient Clara Miller tolerating well; continued Atorvastatin 250 mg; repeat temp 37.8 C.,Y,N
+P00026,T02,train,Patient Nadia Kowalski tolerating well; continued Lisinopril 50 mg; repeat HR 88 bpm.,Y,N
+P00027,T02,train,Patient Oscar Silva tolerating well; continued Atorvastatin 10 mg; repeat ALT 54 U/L.,Y,N
+P00028,T02,train,Patient Martin Weber tolerating well; continued Amlodipine 500 mg; repeat QTc 452 ms.,Y,N
+P00029,T02,train,Patient Daniel Patel tolerating well; continued Paracetamol 5 mg; repeat ALT 54 U/L.,Y,N
+P00030,T02,train,Patient Linda Ivanova tolerating well; continued Ondansetron 20 mg; repeat creatinine 1.1 mg/dL.,Y,N
+P00031,T02,train,Patient Grace Lindqvist tolerating well; continued Atorvastatin 250 mg; repeat creatinine 1.1 mg/dL.,Y,N
+P00032,T02,train,Patient Ana Larsen tolerating well; continued Metformin 50 mg; repeat Hb 13.2 g/dL.,Y,N
+P00033,T02,train,Patient Oscar Moreau tolerating well; continued Omeprazole 5 mg; repeat QTc 452 ms.,Y,N
+P00034,T02,train,Patient Helen Moreau tolerating well; continued Sertraline 25 mg; repeat glucose 120 mg/dL.,Y,N
+P00035,T02,train,Patient Martin Miller tolerating well; continued Metformin 50 mg; repeat ALT 54 U/L.,Y,N
+P00036,T02,train,Patient Robert Romero tolerating well; continued Metformin 20 mg; repeat ALT 54 U/L.,Y,N
+P00037,T02,train,Patient Clara Fischer tolerating well; continued Metformin 5 mg; repeat platelets 210.,Y,N
+P00038,T02,train,Patient Ana Romero tolerating well; continued Ibuprofen 50 mg; repeat QTc 452 ms.,Y,N
+P00039,T02,train,Patient Nadia Miller tolerating well; continued Sertraline 5 mg; repeat ALT 54 U/L.,Y,N
+P00040,T02,train,Patient Paul Lindqvist tolerating well; continued Ibuprofen 10 mg; repeat platelets 210.,Y,N
+P00041,T02,train,Patient Daniel Weber tolerating well; continued Alanine 100 mg; repeat creatinine 1.1 mg/dL.,Y,N
+P00042,T02,train,Patient Robert Hughes tolerating well; continued Metformin 500 mg; repeat glucose 120 mg/dL.,Y,N
+P00043,T02,train,Patient Laura Okafor tolerating well; continued Ibuprofen 20 mg; repeat glucose 120 mg/dL.,Y,N
+P00044,T02,train,Patient Thomas Weber tolerating well; continued Ondansetron 10 mg; repeat potassium 4.2 mmol/L.,Y,N
+P00045,T03,test,"Subject V.B. (MRN 658-240-51), DOB 06/03/1960, residing 98478, missed the 07:15 dose window.",Y,Y
+P00046,T03,test,"Subject D.W. (MRN 106-107-32), DOB 07/23/1974, residing 60635, missed the 07:15 dose window.",Y,Y
+P00047,T03,test,"Subject E.D. (MRN 528-104-81), DOB 09/04/1953, residing 98775, missed the 10:45 dose window.",Y,Y
+P00048,T03,test,"Subject O.P. (MRN 472-391-36), DOB 10/26/1980, residing 30280, missed the 08:15 dose window.",Y,Y
+P00049,T03,test,"Subject F.F. (MRN 433-335-24), DOB 04/24/1950, residing 94699, missed the 20:15 dose window.",Y,Y
+P00050,T03,test,"Subject L.S. (MRN 467-376-35), DOB 12/19/1942, residing 94569, missed the 11:15 dose window.",Y,Y
+P00051,T03,test,"Subject R.M. (MRN 982-321-85), DOB 01/24/1973, residing 30327, missed the 07:45 dose window.",Y,Y
+P00052,T03,test,"Subject F.I. (MRN 929-917-22), DOB 02/18/1968, residing 60344, missed the 15:15 dose window.",Y,Y
+P00053,T03,test,"Subject E.F. (MRN 289-908-57), DOB 11/03/1938, residing 60814, missed the 16:00 dose window.",Y,Y
+P00054,T03,test,"Subject I.Q. (MRN 576-733-15), DOB 11/18/1960, residing 10652, missed the 12:15 dose window.",Y,Y
+P00055,T03,test,"Subject H.S. (MRN 155-164-57), DOB 09/17/2000, residing 60919, missed the 08:45 dose window.",Y,Y
+P00056,T03,test,"Subject J.T. (MRN 813-251-73), DOB 05/14/1940, residing 94554, missed the 08:00 dose window.",Y,Y
+P00057,T03,test,"Subject T.I. (MRN 761-905-51), DOB 08/10/1994, residing 60332, missed the 17:30 dose window.",Y,Y
+P00058,T03,test,"Subject N.P. (MRN 279-959-98), DOB 04/04/1958, residing 60288, missed the 17:15 dose window.",Y,Y
+P00059,T03,test,"Subject S.F. (MRN 514-611-28), DOB 01/24/1957, residing 60585, missed the 20:30 dose window.",Y,Y
+P00060,T03,test,"Subject E.O. (MRN 219-415-13), DOB 08/12/1966, residing 10697, missed the 08:45 dose window.",Y,Y
+P00061,T03,test,"Subject M.Q. (MRN 425-717-87), DOB 07/05/1984, residing 02391, missed the 08:15 dose window.",Y,Y
+P00062,T03,test,"Subject F.F. (MRN 846-524-27), DOB 03/07/1949, residing 94190, missed the 20:15 dose window.",Y,Y
+P00063,T03,test,"Subject A.P. (MRN 942-946-48), DOB 09/24/2001, residing 60407, missed the 15:45 dose window.",Y,Y
+P00064,T03,test,"Subject J.D. (MRN 168-713-56), DOB 05/21/1993, residing 98689, missed the 10:30 dose window.",Y,Y
+P00065,T03,test,"Subject N.N. (MRN 529-751-55), DOB 09/21/1975, residing 02713, missed the 15:30 dose window.",Y,Y
+P00066,T03,test,"Subject M.S. (MRN 113-240-76), DOB 07/11/2000, residing 10951, missed the 08:00 dose window.",Y,Y
+P00067,T04,test,Spoke with Linda Miller about the rash; callback 415-555-0188.,Y,N
+P00068,T04,test,Spoke with Linda Fischer about the rash; callback 415.555.0122.,Y,N
+P00069,T04,test,Spoke with Daniel Miller about the rash; callback 800.555.0116.,Y,N
+P00070,T04,test,Spoke with Linda Lindqvist about the rash; callback (800) 555-0116.,Y,N
+P00071,T04,test,Spoke with Victor Okafor about the rash; callback 312-555-0196.,Y,N
+P00072,T04,test,Spoke with Robert Hughes about the rash; callback 206.555.0165.,Y,N
+P00073,T04,test,Spoke with Robert Duarte about the rash; callback 617-555-0108.,Y,N
+P00074,T04,test,Spoke with Martin Miller about the rash; callback 646.555.0126.,Y,N
+P00075,T04,test,Spoke with Ana Patel about the rash; callback (617) 555-0111.,Y,N
+P00076,T04,test,Spoke with Felix Moreau about the rash; callback 415.555.0120.,Y,N
+P00077,T04,test,Spoke with Felix Romero about the rash; callback (646) 555-0108.,Y,N
+P00078,T04,test,Spoke with Rosa Miller about the rash; callback 206-555-0124.,Y,N
+P00079,T04,test,Spoke with James Mensah about the rash; callback 800.555.0164.,Y,N
+P00080,T04,test,Spoke with Oscar Silva about the rash; callback 800.555.0156.,Y,N
+P00081,T04,test,Spoke with David Patel about the rash; callback 312.555.0127.,Y,N
+P00082,T04,test,Spoke with Thomas Haddad about the rash; callback (617) 555-0159.,Y,N
+P00083,T04,test,Spoke with Irene Novak about the rash; callback 206.555.0136.,Y,N
+P00084,T04,test,Spoke with Felix Chen about the rash; callback 312-555-0114.,Y,N
+P00085,T04,test,Spoke with Daniel Fischer about the rash; callback (206) 555-0156.,Y,N
+P00086,T04,test,Spoke with Paul Haddad about the rash; callback 800-555-0108.,Y,N
+P00087,T04,test,Spoke with Martin Silva about the rash; callback 206.555.0162.,Y,N
+P00088,T04,test,Spoke with David Kowalski about the rash; callback (206) 555-0186.,Y,N
+P00089,T05,train,"Sinus rhythm, no artifact.",N,N
+P00090,T05,train,"Sinus rhythm, no artifact.",N,N
+P00091,T05,train,"Sinus rhythm, no artifact.",N,N
+P00092,T05,train,"Sinus rhythm, no artifact.",N,N
+P00093,T05,train,"Sinus rhythm, no artifact.",N,N
+P00094,T05,train,"Sinus rhythm, no artifact.",N,N
+P00095,T05,train,"Sinus rhythm, no artifact.",N,N
+P00096,T05,train,"Sinus rhythm, no artifact.",N,N
+P00097,T05,train,"Sinus rhythm, no artifact.",N,N
+P00098,T05,train,"Sinus rhythm, no artifact.",N,N
+P00099,T05,train,"Sinus rhythm, no artifact.",N,N
+P00100,T05,train,"Sinus rhythm, no artifact.",N,N
+P00101,T05,train,"Sinus rhythm, no artifact.",N,N
+P00102,T05,train,"Sinus rhythm, no artifact.",N,N
+P00103,T05,train,"Sinus rhythm, no artifact.",N,N
+P00104,T05,train,"Sinus rhythm, no artifact.",N,N
+P00105,T05,train,"Sinus rhythm, no artifact.",N,N
+P00106,T05,train,"Sinus rhythm, no artifact.",N,N
+P00107,T05,train,"Sinus rhythm, no artifact.",N,N
+P00108,T05,train,"Sinus rhythm, no artifact.",N,N
+P00109,T05,train,"Sinus rhythm, no artifact.",N,N
+P00110,T05,train,"Sinus rhythm, no artifact.",N,N
+P00111,T06,calib,"32-year-old participant, initials F.P., lives in 94842; headache resolved.",N,Y
+P00112,T06,calib,"64-year-old participant, initials O.Q., lives in 60601; headache resolved.",N,Y
+P00113,T06,calib,"25-year-old participant, initials M.D., lives in 30738; headache resolved.",N,Y
+P00114,T06,calib,"56-year-old participant, initials M.D., lives in 02492; headache resolved.",N,Y
+P00115,T06,calib,"23-year-old participant, initials R.P., lives in 94599; headache resolved.",N,Y
+P00116,T06,calib,"79-year-old participant, initials O.M., lives in 30792; headache resolved.",N,Y
+P00117,T06,calib,"24-year-old participant, initials L.S., lives in 94453; headache resolved.",N,Y
+P00118,T06,calib,"50-year-old participant, initials T.L., lives in 10120; headache resolved.",N,Y
+P00119,T06,calib,"73-year-old participant, initials R.I., lives in 30499; headache resolved.",N,Y
+P00120,T06,calib,"45-year-old participant, initials H.D., lives in 10608; headache resolved.",N,Y
+P00121,T06,calib,"25-year-old participant, initials D.L., lives in 60168; headache resolved.",N,Y
+P00122,T06,calib,"63-year-old participant, initials M.W., lives in 94357; headache resolved.",N,Y
+P00123,T06,calib,"42-year-old participant, initials J.W., lives in 30928; headache resolved.",N,Y
+P00124,T06,calib,"65-year-old participant, initials N.N., lives in 02749; headache resolved.",N,Y
+P00125,T06,calib,"39-year-old participant, initials G.Q., lives in 60575; headache resolved.",N,Y
+P00126,T06,calib,"23-year-old participant, initials A.P., lives in 02839; headache resolved.",N,Y
+P00127,T06,calib,"57-year-old participant, initials M.H., lives in 30852; headache resolved.",N,Y
+P00128,T06,calib,"49-year-old participant, initials H.O., lives in 10209; headache resolved.",N,Y
+P00129,T06,calib,"51-year-old participant, initials R.C., lives in 94799; headache resolved.",N,Y
+P00130,T06,calib,"66-year-old participant, initials D.M., lives in 94416; headache resolved.",N,Y
+P00131,T06,calib,"49-year-old participant, initials N.K., lives in 10549; headache resolved.",N,Y
+P00132,T06,calib,"29-year-old participant, initials O.D., lives in 30167; headache resolved.",N,Y
+P00133,T07,test,Kit 13584 dispensed; Levothyroxine 50 mg taken at 13:15.,N,N
+P00134,T07,test,Kit 72700 dispensed; Paracetamol 100 mg taken at 06:00.,N,N
+P00135,T07,test,Kit 35987 dispensed; Sertraline 20 mg taken at 19:45.,N,N
+P00136,T07,test,Kit 36626 dispensed; Sertraline 50 mg taken at 19:15.,N,N
+P00137,T07,test,Kit 69110 dispensed; Omeprazole 250 mg taken at 07:00.,N,N
+P00138,T07,test,Kit 97921 dispensed; Paracetamol 20 mg taken at 21:30.,N,N
+P00139,T07,test,Kit 79523 dispensed; Lisinopril 250 mg taken at 19:15.,N,N
+P00140,T07,test,Kit 96169 dispensed; Lisinopril 20 mg taken at 07:45.,N,N
+P00141,T07,test,Kit 24744 dispensed; Alanine 50 mg taken at 11:45.,N,N
+P00142,T07,test,Kit 53077 dispensed; Paracetamol 500 mg taken at 14:00.,N,N
+P00143,T07,test,Kit 84600 dispensed; Amlodipine 50 mg taken at 12:15.,N,N
+P00144,T07,test,Kit 95729 dispensed; Sertraline 10 mg taken at 18:45.,N,N
+P00145,T07,test,Kit 65382 dispensed; Sertraline 25 mg taken at 08:30.,N,N
+P00146,T07,test,Kit 29478 dispensed; Sertraline 5 mg taken at 09:45.,N,N
+P00147,T07,test,Kit 86751 dispensed; Levothyroxine 10 mg taken at 20:45.,N,N
+P00148,T07,test,Kit 34259 dispensed; Sertraline 5 mg taken at 18:45.,N,N
+P00149,T07,test,Kit 98487 dispensed; Lisinopril 5 mg taken at 19:15.,N,N
+P00150,T07,test,Kit 65296 dispensed; Cetirizine 500 mg taken at 18:00.,N,N
+P00151,T07,test,Kit 66595 dispensed; Sertraline 5 mg taken at 08:30.,N,N
+P00152,T07,test,Kit 91618 dispensed; Lisinopril 500 mg taken at 16:45.,N,N
+P00153,T07,test,Kit 98225 dispensed; Alanine 25 mg taken at 19:45.,N,N
+P00154,T07,test,Kit 12376 dispensed; Atorvastatin 10 mg taken at 21:30.,N,N
+P00155,T08,train,Dr. Silva reviewed ECG; temp 37.8 C; no action needed.,Y,N
+P00156,T08,train,Dr. Quinn reviewed ECG; ALT 54 U/L; no action needed.,Y,N
+P00157,T08,train,Dr. Romero reviewed ECG; creatinine 1.1 mg/dL; no action needed.,Y,N
+P00158,T08,train,Dr. Okafor reviewed ECG; platelets 210; no action needed.,Y,N
+P00159,T08,train,Dr. Duarte reviewed ECG; BP 128/84; no action needed.,Y,N
+P00160,T08,train,Dr. Okafor reviewed ECG; platelets 210; no action needed.,Y,N
+P00161,T08,train,Dr. Tanaka reviewed ECG; Hb 13.2 g/dL; no action needed.,Y,N
+P00162,T08,train,Dr. Weber reviewed ECG; potassium 4.2 mmol/L; no action needed.,Y,N
+P00163,T08,train,Dr. Haddad reviewed ECG; BP 128/84; no action needed.,Y,N
+P00164,T08,train,Dr. Fischer reviewed ECG; BP 128/84; no action needed.,Y,N
+P00165,T08,train,Dr. Patel reviewed ECG; creatinine 1.1 mg/dL; no action needed.,Y,N
+P00166,T08,train,Dr. Chen reviewed ECG; temp 37.8 C; no action needed.,Y,N
+P00167,T08,train,Dr. Brennan reviewed ECG; creatinine 1.1 mg/dL; no action needed.,Y,N
+P00168,T08,train,Dr. Kowalski reviewed ECG; HR 88 bpm; no action needed.,Y,N
+P00169,T08,train,Dr. Fischer reviewed ECG; ALT 54 U/L; no action needed.,Y,N
+P00170,T08,train,Dr. Mensah reviewed ECG; QTc 452 ms; no action needed.,Y,N
+P00171,T08,train,Dr. Gonzalez reviewed ECG; creatinine 1.1 mg/dL; no action needed.,Y,N
+P00172,T08,train,Dr. Miller reviewed ECG; QTc 452 ms; no action needed.,Y,N
+P00173,T08,train,Dr. Haddad reviewed ECG; temp 37.8 C; no action needed.,Y,N
+P00174,T08,train,Dr. Okafor reviewed ECG; HR 88 bpm; no action needed.,Y,N
+P00175,T08,train,Dr. Miller reviewed ECG; HR 88 bpm; no action needed.,Y,N
+P00176,T08,train,Dr. Weber reviewed ECG; QTc 452 ms; no action needed.,Y,N
+P00177,T09,calib,Daughter Martin Larsen reported a fall at home; contact 206.555.0148.,Y,N
+P00178,T09,calib,Daughter Felix Lindqvist reported a fall at home; contact (646) 555-0174.,Y,N
+P00179,T09,calib,Daughter Samuel Fischer reported a fall at home; contact 206-555-0154.,Y,N
+P00180,T09,calib,Daughter Maria Gonzalez reported a fall at home; contact (800) 555-0160.,Y,N
+P00181,T09,calib,Daughter Nadia Gonzalez reported a fall at home; contact 646.555.0151.,Y,N
+P00182,T09,calib,Daughter Paul Ivanova reported a fall at home; contact 646.555.0163.,Y,N
+P00183,T09,calib,Daughter Victor Fischer reported a fall at home; contact (206) 555-0153.,Y,N
+P00184,T09,calib,Daughter Linda Ivanova reported a fall at home; contact (206) 555-0158.,Y,N
+P00185,T09,calib,Daughter Elena Ivanova reported a fall at home; contact 206-555-0127.,Y,N
+P00186,T09,calib,Daughter Oscar Chen reported a fall at home; contact (646) 555-0147.,Y,N
+P00187,T09,calib,Daughter Henry Haddad reported a fall at home; contact 415-555-0173.,Y,N
+P00188,T09,calib,Daughter Robert Ivanova reported a fall at home; contact 415-555-0139.,Y,N
+P00189,T09,calib,Daughter Daniel Tanaka reported a fall at home; contact 800.555.0118.,Y,N
+P00190,T09,calib,Daughter Victor Chen reported a fall at home; contact 800.555.0123.,Y,N
+P00191,T09,calib,Daughter Oscar Miller reported a fall at home; contact (415) 555-0108.,Y,N
+P00192,T09,calib,Daughter Victor Duarte reported a fall at home; contact 646-555-0157.,Y,N
+P00193,T09,calib,Daughter Laura Duarte reported a fall at home; contact (800) 555-0197.,Y,N
+P00194,T09,calib,Daughter Irene Weber reported a fall at home; contact (206) 555-0157.,Y,N
+P00195,T09,calib,Daughter Felix Brennan reported a fall at home; contact 206-555-0179.,Y,N
+P00196,T09,calib,Daughter Laura Lindqvist reported a fall at home; contact 646.555.0105.,Y,N
+P00197,T09,calib,Daughter Nadia Moreau reported a fall at home; contact (800) 555-0190.,Y,N
+P00198,T09,calib,Daughter Rosa Weber reported a fall at home; contact (646) 555-0182.,Y,N
+P00199,T10,test,MRN: 21428912; participant AR seen for follow-up.,Y,N
+P00200,T10,test,MRN: 77463037; participant JO seen for follow-up.,Y,N
+P00201,T10,test,MRN: 87786253; participant NG seen for follow-up.,Y,N
+P00202,T10,test,MRN: 13122340; participant HH seen for follow-up.,Y,N
+P00203,T10,test,MRN: 61272646; participant GG seen for follow-up.,Y,N
+P00204,T10,test,MRN: 29331950; participant JM seen for follow-up.,Y,N
+P00205,T10,test,MRN: 32708438; participant RR seen for follow-up.,Y,N
+P00206,T10,test,MRN: 50000149; participant LO seen for follow-up.,Y,N
+P00207,T10,test,MRN: 60400522; participant DC seen for follow-up.,Y,N
+P00208,T10,test,MRN: 41741300; participant OI seen for follow-up.,Y,N
+P00209,T10,test,MRN: 52726394; participant NM seen for follow-up.,Y,N
+P00210,T10,test,MRN: 95032473; participant TM seen for follow-up.,Y,N
+P00211,T10,test,MRN: 43059986; participant PW seen for follow-up.,Y,N
+P00212,T10,test,MRN: 21261988; participant CI seen for follow-up.,Y,N
+P00213,T10,test,MRN: 42905017; participant PH seen for follow-up.,Y,N
+P00214,T10,test,MRN: 48822404; participant CP seen for follow-up.,Y,N
+P00215,T10,test,MRN: 43673745; participant MK seen for follow-up.,Y,N
+P00216,T10,test,MRN: 47756962; participant RP seen for follow-up.,Y,N
+P00217,T10,test,MRN: 28743541; participant FM seen for follow-up.,Y,N
+P00218,T10,test,MRN: 52722031; participant MB seen for follow-up.,Y,N
+P00219,T10,test,MRN: 98889317; participant HB seen for follow-up.,Y,N
+P00220,T10,test,MRN: 27948365; participant CM seen for follow-up.,Y,N
+P00221,T11,calib,Lab draw at 21:45; platelets 210; HR 88 bpm; within range.,N,N
+P00222,T11,calib,Lab draw at 09:45; glucose 120 mg/dL; HR 88 bpm; within range.,N,N
+P00223,T11,calib,Lab draw at 17:00; Hb 13.2 g/dL; temp 37.8 C; within range.,N,N
+P00224,T11,calib,Lab draw at 10:00; QTc 452 ms; temp 37.8 C; within range.,N,N
+P00225,T11,calib,Lab draw at 07:30; temp 37.8 C; glucose 120 mg/dL; within range.,N,N
+P00226,T11,calib,Lab draw at 20:30; HR 88 bpm; potassium 4.2 mmol/L; within range.,N,N
+P00227,T11,calib,Lab draw at 09:00; BP 128/84; BP 128/84; within range.,N,N
+P00228,T11,calib,Lab draw at 20:00; glucose 120 mg/dL; platelets 210; within range.,N,N
+P00229,T11,calib,Lab draw at 07:00; Hb 13.2 g/dL; platelets 210; within range.,N,N
+P00230,T11,calib,Lab draw at 06:45; glucose 120 mg/dL; temp 37.8 C; within range.,N,N
+P00231,T11,calib,Lab draw at 20:15; QTc 452 ms; BP 128/84; within range.,N,N
+P00232,T11,calib,Lab draw at 15:30; creatinine 1.1 mg/dL; glucose 120 mg/dL; within range.,N,N
+P00233,T11,calib,Lab draw at 12:00; platelets 210; Hb 13.2 g/dL; within range.,N,N
+P00234,T11,calib,Lab draw at 07:45; platelets 210; BP 128/84; within range.,N,N
+P00235,T11,calib,Lab draw at 06:30; ALT 54 U/L; HR 88 bpm; within range.,N,N
+P00236,T11,calib,Lab draw at 15:15; temp 37.8 C; QTc 452 ms; within range.,N,N
+P00237,T11,calib,Lab draw at 09:30; BP 128/84; ALT 54 U/L; within range.,N,N
+P00238,T11,calib,Lab draw at 18:30; glucose 120 mg/dL; creatinine 1.1 mg/dL; within range.,N,N
+P00239,T11,calib,Lab draw at 14:15; ALT 54 U/L; Hb 13.2 g/dL; within range.,N,N
+P00240,T11,calib,Lab draw at 20:15; platelets 210; HR 88 bpm; within range.,N,N
+P00241,T11,calib,Lab draw at 20:15; HR 88 bpm; creatinine 1.1 mg/dL; within range.,N,N
+P00242,T11,calib,Lab draw at 13:00; platelets 210; QTc 452 ms; within range.,N,N
+P00243,T12,train,Mr. Miller asked to reschedule Visit 3; prefers mornings.,Y,N
+P00244,T12,train,Mr. Gonzalez asked to reschedule Visit 3; prefers mornings.,Y,N
+P00245,T12,train,Mr. Lindqvist asked to reschedule Visit 10; prefers mornings.,Y,N
+P00246,T12,train,Mr. Brennan asked to reschedule Visit 6; prefers mornings.,Y,N
+P00247,T12,train,Mr. Romero asked to reschedule Visit 6; prefers mornings.,Y,N
+P00248,T12,train,Mr. Silva asked to reschedule Visit 10; prefers mornings.,Y,N
+P00249,T12,train,Mr. Kowalski asked to reschedule Visit 10; prefers mornings.,Y,N
+P00250,T12,train,Mr. Mensah asked to reschedule Visit 5; prefers mornings.,Y,N
+P00251,T12,train,Mr. Haddad asked to reschedule Visit 7; prefers mornings.,Y,N
+P00252,T12,train,Mr. Larsen asked to reschedule Visit 7; prefers mornings.,Y,N
+P00253,T12,train,Mr. Lindqvist asked to reschedule Visit 6; prefers mornings.,Y,N
+P00254,T12,train,Mr. Larsen asked to reschedule Visit 7; prefers mornings.,Y,N
+P00255,T12,train,Mr. Weber asked to reschedule Visit 8; prefers mornings.,Y,N
+P00256,T12,train,Mr. Mensah asked to reschedule Visit 11; prefers mornings.,Y,N
+P00257,T12,train,Mr. Weber asked to reschedule Visit 10; prefers mornings.,Y,N
+P00258,T12,train,Mr. Chen asked to reschedule Visit 5; prefers mornings.,Y,N
+P00259,T12,train,Mr. Kowalski asked to reschedule Visit 10; prefers mornings.,Y,N
+P00260,T12,train,Mr. Fischer asked to reschedule Visit 8; prefers mornings.,Y,N
+P00261,T12,train,Mr. Patel asked to reschedule Visit 3; prefers mornings.,Y,N
+P00262,T12,train,Mr. Hughes asked to reschedule Visit 9; prefers mornings.,Y,N
+P00263,T12,train,Mr. Romero asked to reschedule Visit 9; prefers mornings.,Y,N
+P00264,T12,train,Mr. Hughes asked to reschedule Visit 8; prefers mornings.,Y,N
+P00265,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00266,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00267,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00268,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00269,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00270,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00271,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00272,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00273,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00274,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00275,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00276,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00277,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00278,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00279,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00280,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00281,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00282,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00283,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00284,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00285,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00286,T13,test,Repeat ECG ordered; participant resting comfortably.,N,N
+P00287,T14,test,Participant emailed henry.lindqvist@example.org to report nausea after Ondansetron.,Y,N
+P00288,T14,test,Participant emailed clara.fischer@example.org to report nausea after Atorvastatin.,Y,N
+P00289,T14,test,Participant emailed victor.lindqvist@example.org to report nausea after Cetirizine.,Y,N
+P00290,T14,test,Participant emailed rosa.okafor@example.org to report nausea after Ondansetron.,Y,N
+P00291,T14,test,Participant emailed martin.gonzalez@example.org to report nausea after Metformin.,Y,N
+P00292,T14,test,Participant emailed irene.brennan@example.org to report nausea after Lisinopril.,Y,N
+P00293,T14,test,Participant emailed maria.weber@example.org to report nausea after Lisinopril.,Y,N
+P00294,T14,test,Participant emailed grace.okafor@example.org to report nausea after Metformin.,Y,N
+P00295,T14,test,Participant emailed paul.quinn@example.org to report nausea after Lisinopril.,Y,N
+P00296,T14,test,Participant emailed henry.okafor@example.org to report nausea after Lisinopril.,Y,N
+P00297,T14,test,Participant emailed martin.moreau@example.org to report nausea after Alanine.,Y,N
+P00298,T14,test,Participant emailed nadia.chen@example.org to report nausea after Lisinopril.,Y,N
+P00299,T14,test,Participant emailed laura.hughes@example.org to report nausea after Lisinopril.,Y,N
+P00300,T14,test,Participant emailed helen.hughes@example.org to report nausea after Ibuprofen.,Y,N
+P00301,T14,test,Participant emailed david.brennan@example.org to report nausea after Sertraline.,Y,N
+P00302,T14,test,Participant emailed david.lindqvist@example.org to report nausea after Amlodipine.,Y,N
+P00303,T14,test,Participant emailed jane.kowalski@example.org to report nausea after Amlodipine.,Y,N
+P00304,T14,test,Participant emailed robert.gonzalez@example.org to report nausea after Paracetamol.,Y,N
+P00305,T14,test,Participant emailed james.moreau@example.org to report nausea after Levothyroxine.,Y,N
+P00306,T14,test,Participant emailed elena.brennan@example.org to report nausea after Levothyroxine.,Y,N
+P00307,T14,test,Participant emailed felix.lindqvist@example.org to report nausea after Metformin.,Y,N
+P00308,T14,test,Participant emailed daniel.lindqvist@example.org to report nausea after Ondansetron.,Y,N
+P00309,T15,calib,Born 1986-04-21; zip 10384; initials H.W..,Y,Y
+P00310,T15,calib,Born 1974-01-08; zip 30155; initials M.L..,Y,Y
+P00311,T15,calib,Born 1979-03-15; zip 10153; initials C.N..,Y,Y
+P00312,T15,calib,Born 1964-04-17; zip 98302; initials T.H..,Y,Y
+P00313,T15,calib,Born 1995-11-07; zip 94271; initials O.F..,Y,Y
+P00314,T15,calib,Born 1957-08-01; zip 30256; initials P.P..,Y,Y
+P00315,T15,calib,Born 1974-07-18; zip 98580; initials A.N..,Y,Y
+P00316,T15,calib,Born 2000-07-14; zip 98702; initials M.H..,Y,Y
+P00317,T15,calib,Born 1962-07-09; zip 98805; initials S.C..,Y,Y
+P00318,T15,calib,Born 1999-01-27; zip 98251; initials G.R..,Y,Y
+P00319,T15,calib,Born 1958-01-04; zip 30182; initials I.H..,Y,Y
+P00320,T15,calib,Born 1976-09-18; zip 98990; initials M.O..,Y,Y
+P00321,T15,calib,Born 1988-12-10; zip 02892; initials E.H..,Y,Y
+P00322,T15,calib,Born 1959-03-12; zip 30212; initials N.L..,Y,Y
+P00323,T15,calib,Born 1962-05-28; zip 02400; initials M.K..,Y,Y
+P00324,T15,calib,Born 1968-08-16; zip 02781; initials R.C..,Y,Y
+P00325,T15,calib,Born 1972-08-16; zip 98451; initials H.L..,Y,Y
+P00326,T15,calib,Born 1945-06-28; zip 98511; initials F.N..,Y,Y
+P00327,T15,calib,Born 1969-06-15; zip 98292; initials J.W..,Y,Y
+P00328,T15,calib,Born 1979-11-15; zip 30913; initials M.S..,Y,Y
+P00329,T15,calib,Born 1987-05-20; zip 94915; initials M.T..,Y,Y
+P00330,T15,calib,Born 1968-04-07; zip 98129; initials J.B..,Y,Y
+P00331,T16,test,Reached Felix Moreau on 555-0185; symptoms improving.,Y,N
+P00332,T16,test,Reached David Quinn on 555-0181; symptoms improving.,Y,N
+P00333,T16,test,Reached Felix Duarte on 555-0128; symptoms improving.,Y,N
+P00334,T16,test,Reached Rosa Romero on 555-0143; symptoms improving.,Y,N
+P00335,T16,test,Reached Laura Kowalski on 555-0171; symptoms improving.,Y,N
+P00336,T16,test,Reached Victor Lindqvist on 555-0114; symptoms improving.,Y,N
+P00337,T16,test,Reached Daniel Gonzalez on 555-0143; symptoms improving.,Y,N
+P00338,T16,test,Reached Felix Larsen on 555-0173; symptoms improving.,Y,N
+P00339,T16,test,Reached Samuel Novak on 555-0173; symptoms improving.,Y,N
+P00340,T16,test,Reached Felix Miller on 555-0175; symptoms improving.,Y,N
+P00341,T16,test,Reached Paul Hughes on 555-0140; symptoms improving.,Y,N
+P00342,T16,test,Reached Samuel Quinn on 555-0184; symptoms improving.,Y,N
+P00343,T16,test,Reached Henry Larsen on 555-0150; symptoms improving.,Y,N
+P00344,T16,test,Reached Jane Mensah on 555-0118; symptoms improving.,Y,N
+P00345,T16,test,Reached Daniel Lindqvist on 555-0158; symptoms improving.,Y,N
+P00346,T16,test,Reached Linda Romero on 555-0195; symptoms improving.,Y,N
+P00347,T16,test,Reached Martin Chen on 555-0139; symptoms improving.,Y,N
+P00348,T16,test,Reached Irene Okafor on 555-0161; symptoms improving.,Y,N
+P00349,T16,test,Reached Clara Hughes on 555-0190; symptoms improving.,Y,N
+P00350,T16,test,Reached Laura Chen on 555-0191; symptoms improving.,Y,N
+P00351,T16,test,Reached Ana Lindqvist on 555-0199; symptoms improving.,Y,N
+P00352,T16,test,Reached James Duarte on 555-0138; symptoms improving.,Y,N
+P00353,T17,test,DOB 9/13/1940 confirmed against source; Hb 13.2 g/dL.,Y,N
+P00354,T17,test,DOB 5/23/1974 confirmed against source; BP 128/84.,Y,N
+P00355,T17,test,DOB 8/21/1976 confirmed against source; platelets 210.,Y,N
+P00356,T17,test,DOB 4/26/1964 confirmed against source; HR 88 bpm.,Y,N
+P00357,T17,test,DOB 7/14/1956 confirmed against source; platelets 210.,Y,N
+P00358,T17,test,DOB 9/21/1953 confirmed against source; Hb 13.2 g/dL.,Y,N
+P00359,T17,test,DOB 4/13/1953 confirmed against source; Hb 13.2 g/dL.,Y,N
+P00360,T17,test,DOB 8/28/1949 confirmed against source; platelets 210.,Y,N
+P00361,T17,test,DOB 2/3/1953 confirmed against source; HR 88 bpm.,Y,N
+P00362,T17,test,DOB 5/23/1999 confirmed against source; Hb 13.2 g/dL.,Y,N
+P00363,T17,test,DOB 2/11/1954 confirmed against source; glucose 120 mg/dL.,Y,N
+P00364,T17,test,DOB 2/17/2000 confirmed against source; ALT 54 U/L.,Y,N
+P00365,T17,test,DOB 1/18/1961 confirmed against source; HR 88 bpm.,Y,N
+P00366,T17,test,DOB 2/18/1958 confirmed against source; QTc 452 ms.,Y,N
+P00367,T17,test,DOB 7/22/1959 confirmed against source; QTc 452 ms.,Y,N
+P00368,T17,test,DOB 3/19/1994 confirmed against source; temp 37.8 C.,Y,N
+P00369,T17,test,DOB 4/2/1943 confirmed against source; HR 88 bpm.,Y,N
+P00370,T17,test,DOB 5/5/1983 confirmed against source; QTc 452 ms.,Y,N
+P00371,T17,test,DOB 7/15/1958 confirmed against source; temp 37.8 C.,Y,N
+P00372,T17,test,DOB 11/23/1972 confirmed against source; temp 37.8 C.,Y,N
+P00373,T17,test,DOB 3/11/1991 confirmed against source; ALT 54 U/L.,Y,N
+P00374,T17,test,DOB 11/18/1952 confirmed against source; BP 128/84.,Y,N
+P00375,T18,train,Started Lisinopril 10 mg daily; platelets 210 at baseline.,N,N
+P00376,T18,train,Started Ondansetron 100 mg daily; temp 37.8 C at baseline.,N,N
+P00377,T18,train,Started Atorvastatin 20 mg daily; BP 128/84 at baseline.,N,N
+P00378,T18,train,Started Atorvastatin 50 mg daily; ALT 54 U/L at baseline.,N,N
+P00379,T18,train,Started Metformin 5 mg daily; temp 37.8 C at baseline.,N,N
+P00380,T18,train,Started Levothyroxine 25 mg daily; BP 128/84 at baseline.,N,N
+P00381,T18,train,Started Atorvastatin 100 mg daily; platelets 210 at baseline.,N,N
+P00382,T18,train,Started Levothyroxine 500 mg daily; HR 88 bpm at baseline.,N,N
+P00383,T18,train,Started Lisinopril 5 mg daily; ALT 54 U/L at baseline.,N,N
+P00384,T18,train,Started Lisinopril 20 mg daily; QTc 452 ms at baseline.,N,N
+P00385,T18,train,Started Amlodipine 500 mg daily; glucose 120 mg/dL at baseline.,N,N
+P00386,T18,train,Started Lisinopril 5 mg daily; QTc 452 ms at baseline.,N,N
+P00387,T18,train,Started Levothyroxine 250 mg daily; creatinine 1.1 mg/dL at baseline.,N,N
+P00388,T18,train,Started Lisinopril 5 mg daily; ALT 54 U/L at baseline.,N,N
+P00389,T18,train,Started Atorvastatin 25 mg daily; ALT 54 U/L at baseline.,N,N
+P00390,T18,train,Started Paracetamol 20 mg daily; Hb 13.2 g/dL at baseline.,N,N
+P00391,T18,train,Started Lisinopril 25 mg daily; temp 37.8 C at baseline.,N,N
+P00392,T18,train,Started Ondansetron 25 mg daily; glucose 120 mg/dL at baseline.,N,N
+P00393,T18,train,Started Ondansetron 500 mg daily; glucose 120 mg/dL at baseline.,N,N
+P00394,T18,train,Started Cetirizine 50 mg daily; creatinine 1.1 mg/dL at baseline.,N,N
+P00395,T18,train,Started Levothyroxine 100 mg daily; creatinine 1.1 mg/dL at baseline.,N,N
+P00396,T18,train,Started Cetirizine 10 mg daily; temp 37.8 C at baseline.,N,N
+P00397,T19,train,Ms. Jane Patel (26-year-old) withdrew consent at Visit 10.,Y,N
+P00398,T19,train,Ms. Irene Gonzalez (68-year-old) withdrew consent at Visit 2.,Y,N
+P00399,T19,train,Ms. James Larsen (83-year-old) withdrew consent at Visit 5.,Y,N
+P00400,T19,train,Ms. Daniel Moreau (49-year-old) withdrew consent at Visit 6.,Y,N
+P00401,T19,train,Ms. Robert Weber (63-year-old) withdrew consent at Visit 10.,Y,N
+P00402,T19,train,Ms. Grace Novak (20-year-old) withdrew consent at Visit 2.,Y,N
+P00403,T19,train,Ms. Paul Quinn (45-year-old) withdrew consent at Visit 11.,Y,N
+P00404,T19,train,Ms. Clara Kowalski (74-year-old) withdrew consent at Visit 4.,Y,N
+P00405,T19,train,Ms. Nadia Patel (55-year-old) withdrew consent at Visit 8.,Y,N
+P00406,T19,train,Ms. Martin Romero (50-year-old) withdrew consent at Visit 10.,Y,N
+P00407,T19,train,Ms. Linda Miller (33-year-old) withdrew consent at Visit 3.,Y,N
+P00408,T19,train,Ms. Grace Novak (32-year-old) withdrew consent at Visit 9.,Y,N
+P00409,T19,train,Ms. Rosa Fischer (50-year-old) withdrew consent at Visit 3.,Y,N
+P00410,T19,train,Ms. Jane Chen (72-year-old) withdrew consent at Visit 8.,Y,N
+P00411,T19,train,Ms. Laura Novak (68-year-old) withdrew consent at Visit 5.,Y,N
+P00412,T19,train,Ms. David Tanaka (29-year-old) withdrew consent at Visit 10.,Y,N
+P00413,T19,train,Ms. Helen Romero (57-year-old) withdrew consent at Visit 9.,Y,N
+P00414,T19,train,Ms. Martin Silva (37-year-old) withdrew consent at Visit 9.,Y,N
+P00415,T19,train,Ms. Maria Okafor (60-year-old) withdrew consent at Visit 9.,Y,N
+P00416,T19,train,Ms. Victor Duarte (50-year-old) withdrew consent at Visit 9.,Y,N
+P00417,T19,train,Ms. Paul Mensah (72-year-old) withdrew consent at Visit 5.,Y,N
+P00418,T19,train,Ms. Samuel Miller (36-year-old) withdrew consent at Visit 4.,Y,N
+P00419,T20,train,No issues reported; next dose at 13:15.,N,N
+P00420,T20,train,No issues reported; next dose at 10:45.,N,N
+P00421,T20,train,No issues reported; next dose at 09:00.,N,N
+P00422,T20,train,No issues reported; next dose at 17:15.,N,N
+P00423,T20,train,No issues reported; next dose at 19:15.,N,N
+P00424,T20,train,No issues reported; next dose at 15:45.,N,N
+P00425,T20,train,No issues reported; next dose at 06:30.,N,N
+P00426,T20,train,No issues reported; next dose at 11:15.,N,N
+P00427,T20,train,No issues reported; next dose at 14:30.,N,N
+P00428,T20,train,No issues reported; next dose at 08:45.,N,N
+P00429,T20,train,No issues reported; next dose at 13:45.,N,N
+P00430,T20,train,No issues reported; next dose at 21:30.,N,N
+P00431,T20,train,No issues reported; next dose at 07:30.,N,N
+P00432,T20,train,No issues reported; next dose at 09:00.,N,N
+P00433,T20,train,No issues reported; next dose at 15:15.,N,N
+P00434,T20,train,No issues reported; next dose at 06:30.,N,N
+P00435,T20,train,No issues reported; next dose at 13:30.,N,N
+P00436,T20,train,No issues reported; next dose at 21:00.,N,N
+P00437,T20,train,No issues reported; next dose at 17:30.,N,N
+P00438,T20,train,No issues reported; next dose at 18:30.,N,N
+P00439,T20,train,No issues reported; next dose at 09:15.,N,N
+P00440,T20,train,No issues reported; next dose at 07:30.,N,N
+P00441,T21,train,"Caregiver James Novak, phone (617) 555-0180, will bring participant to Visit 4.",Y,N
+P00442,T21,train,"Caregiver Elena Patel, phone 206.555.0177, will bring participant to Visit 6.",Y,N
+P00443,T21,train,"Caregiver Samuel Romero, phone 206.555.0199, will bring participant to Visit 3.",Y,N
+P00444,T21,train,"Caregiver Linda Larsen, phone (617) 555-0101, will bring participant to Visit 9.",Y,N
+P00445,T21,train,"Caregiver Helen Patel, phone 617.555.0135, will bring participant to Visit 9.",Y,N
+P00446,T21,train,"Caregiver Grace Duarte, phone (206) 555-0117, will bring participant to Visit 6.",Y,N
+P00447,T21,train,"Caregiver Laura Haddad, phone 800-555-0156, will bring participant to Visit 8.",Y,N
+P00448,T21,train,"Caregiver Irene Fischer, phone 617.555.0179, will bring participant to Visit 3.",Y,N
+P00449,T21,train,"Caregiver Daniel Kowalski, phone (312) 555-0109, will bring participant to Visit 9.",Y,N
+P00450,T21,train,"Caregiver Clara Mensah, phone 617.555.0123, will bring participant to Visit 7.",Y,N
+P00451,T21,train,"Caregiver Maria Brennan, phone 312.555.0127, will bring participant to Visit 2.",Y,N
+P00452,T21,train,"Caregiver Paul Novak, phone 206-555-0127, will bring participant to Visit 7.",Y,N
+P00453,T21,train,"Caregiver Victor Duarte, phone 800.555.0102, will bring participant to Visit 3.",Y,N
+P00454,T21,train,"Caregiver Linda Gonzalez, phone 617.555.0138, will bring participant to Visit 4.",Y,N
+P00455,T21,train,"Caregiver Robert Gonzalez, phone (415) 555-0121, will bring participant to Visit 4.",Y,N
+P00456,T21,train,"Caregiver Elena Haddad, phone 312.555.0101, will bring participant to Visit 11.",Y,N
+P00457,T21,train,"Caregiver Henry Novak, phone 206.555.0195, will bring participant to Visit 4.",Y,N
+P00458,T21,train,"Caregiver Oscar Brennan, phone 312.555.0133, will bring participant to Visit 9.",Y,N
+P00459,T21,train,"Caregiver Clara Larsen, phone (800) 555-0195, will bring participant to Visit 5.",Y,N
+P00460,T21,train,"Caregiver Samuel Hughes, phone 646-555-0101, will bring participant to Visit 3.",Y,N
+P00461,T21,train,"Caregiver Elena Duarte, phone 312-555-0152, will bring participant to Visit 7.",Y,N
+P00462,T21,train,"Caregiver David Patel, phone 415.555.0122, will bring participant to Visit 8.",Y,N
+P00463,T22,train,Initials C.T. and postal code 02608 noted on the paper CRF.,N,Y
+P00464,T22,train,Initials F.R. and postal code 94316 noted on the paper CRF.,N,Y
+P00465,T22,train,Initials T.F. and postal code 98820 noted on the paper CRF.,N,Y
+P00466,T22,train,Initials F.K. and postal code 60414 noted on the paper CRF.,N,Y
+P00467,T22,train,Initials V.Q. and postal code 60960 noted on the paper CRF.,N,Y
+P00468,T22,train,Initials I.R. and postal code 10731 noted on the paper CRF.,N,Y
+P00469,T22,train,Initials C.K. and postal code 94425 noted on the paper CRF.,N,Y
+P00470,T22,train,Initials I.P. and postal code 30903 noted on the paper CRF.,N,Y
+P00471,T22,train,Initials L.W. and postal code 94111 noted on the paper CRF.,N,Y
+P00472,T22,train,Initials C.L. and postal code 02860 noted on the paper CRF.,N,Y
+P00473,T22,train,Initials F.N. and postal code 60298 noted on the paper CRF.,N,Y
+P00474,T22,train,Initials P.L. and postal code 02753 noted on the paper CRF.,N,Y
+P00475,T22,train,Initials R.O. and postal code 10195 noted on the paper CRF.,N,Y
+P00476,T22,train,Initials M.D. and postal code 94740 noted on the paper CRF.,N,Y
+P00477,T22,train,Initials M.H. and postal code 02282 noted on the paper CRF.,N,Y
+P00478,T22,train,Initials M.L. and postal code 98360 noted on the paper CRF.,N,Y
+P00479,T22,train,Initials D.H. and postal code 60217 noted on the paper CRF.,N,Y
+P00480,T22,train,Initials A.M. and postal code 10194 noted on the paper CRF.,N,Y
+P00481,T22,train,Initials S.M. and postal code 60277 noted on the paper CRF.,N,Y
+P00482,T22,train,Initials A.Q. and postal code 10839 noted on the paper CRF.,N,Y
+P00483,T22,train,Initials O.H. and postal code 30492 noted on the paper CRF.,N,Y
+P00484,T22,train,Initials V.H. and postal code 60700 noted on the paper CRF.,N,Y
+P00485,T23,calib,Medical record 718-946-92 pulled for the SAE narrative.,Y,N
+P00486,T23,calib,Medical record 507-130-24 pulled for the SAE narrative.,Y,N
+P00487,T23,calib,Medical record 539-909-33 pulled for the SAE narrative.,Y,N
+P00488,T23,calib,Medical record 174-320-94 pulled for the SAE narrative.,Y,N
+P00489,T23,calib,Medical record 248-898-50 pulled for the SAE narrative.,Y,N
+P00490,T23,calib,Medical record 426-804-11 pulled for the SAE narrative.,Y,N
+P00491,T23,calib,Medical record 318-576-82 pulled for the SAE narrative.,Y,N
+P00492,T23,calib,Medical record 675-167-59 pulled for the SAE narrative.,Y,N
+P00493,T23,calib,Medical record 317-639-37 pulled for the SAE narrative.,Y,N
+P00494,T23,calib,Medical record 384-833-87 pulled for the SAE narrative.,Y,N
+P00495,T23,calib,Medical record 687-761-63 pulled for the SAE narrative.,Y,N
+P00496,T23,calib,Medical record 425-932-50 pulled for the SAE narrative.,Y,N
+P00497,T23,calib,Medical record 150-921-73 pulled for the SAE narrative.,Y,N
+P00498,T23,calib,Medical record 381-531-25 pulled for the SAE narrative.,Y,N
+P00499,T23,calib,Medical record 275-715-51 pulled for the SAE narrative.,Y,N
+P00500,T23,calib,Medical record 342-690-12 pulled for the SAE narrative.,Y,N
+P00501,T23,calib,Medical record 759-902-83 pulled for the SAE narrative.,Y,N
+P00502,T23,calib,Medical record 391-234-61 pulled for the SAE narrative.,Y,N
+P00503,T23,calib,Medical record 640-140-53 pulled for the SAE narrative.,Y,N
+P00504,T23,calib,Medical record 171-581-22 pulled for the SAE narrative.,Y,N
+P00505,T23,calib,Medical record 381-424-54 pulled for the SAE narrative.,Y,N
+P00506,T23,calib,Medical record 669-893-50 pulled for the SAE narrative.,Y,N
+P00507,T24,train,Kit 69582 and kit 23466 returned unused.,N,N
+P00508,T24,train,Kit 23780 and kit 35055 returned unused.,N,N
+P00509,T24,train,Kit 16880 and kit 19835 returned unused.,N,N
+P00510,T24,train,Kit 32326 and kit 51855 returned unused.,N,N
+P00511,T24,train,Kit 97586 and kit 96673 returned unused.,N,N
+P00512,T24,train,Kit 39600 and kit 56269 returned unused.,N,N
+P00513,T24,train,Kit 19849 and kit 38329 returned unused.,N,N
+P00514,T24,train,Kit 54623 and kit 50871 returned unused.,N,N
+P00515,T24,train,Kit 27047 and kit 91327 returned unused.,N,N
+P00516,T24,train,Kit 46416 and kit 23377 returned unused.,N,N
+P00517,T24,train,Kit 41531 and kit 72421 returned unused.,N,N
+P00518,T24,train,Kit 25509 and kit 29742 returned unused.,N,N
+P00519,T24,train,Kit 16967 and kit 95016 returned unused.,N,N
+P00520,T24,train,Kit 62781 and kit 74699 returned unused.,N,N
+P00521,T24,train,Kit 94717 and kit 14677 returned unused.,N,N
+P00522,T24,train,Kit 23242 and kit 23278 returned unused.,N,N
+P00523,T24,train,Kit 36683 and kit 47745 returned unused.,N,N
+P00524,T24,train,Kit 91542 and kit 99318 returned unused.,N,N
+P00525,T24,train,Kit 28590 and kit 12729 returned unused.,N,N
+P00526,T24,train,Kit 11275 and kit 74003 returned unused.,N,N
+P00527,T24,train,Kit 12279 and kit 75948 returned unused.,N,N
+P00528,T24,train,Kit 53997 and kit 96954 returned unused.,N,N
+P00529,T25,train,"Participant OM, 80-year-old, from 10775, reported dizziness.",N,Y
+P00530,T25,train,"Participant LS, 30-year-old, from 98657, reported dizziness.",N,Y
+P00531,T25,train,"Participant NI, 54-year-old, from 98451, reported dizziness.",N,Y
+P00532,T25,train,"Participant HO, 37-year-old, from 30671, reported dizziness.",N,Y
+P00533,T25,train,"Participant MP, 46-year-old, from 60105, reported dizziness.",N,Y
+P00534,T25,train,"Participant VS, 38-year-old, from 94699, reported dizziness.",N,Y
+P00535,T25,train,"Participant MT, 31-year-old, from 94795, reported dizziness.",N,Y
+P00536,T25,train,"Participant HL, 44-year-old, from 98572, reported dizziness.",N,Y
+P00537,T25,train,"Participant PP, 83-year-old, from 94530, reported dizziness.",N,Y
+P00538,T25,train,"Participant VF, 50-year-old, from 30679, reported dizziness.",N,Y
+P00539,T25,train,"Participant DC, 25-year-old, from 60708, reported dizziness.",N,Y
+P00540,T25,train,"Participant DT, 25-year-old, from 94239, reported dizziness.",N,Y
+P00541,T25,train,"Participant TQ, 44-year-old, from 02632, reported dizziness.",N,Y
+P00542,T25,train,"Participant DL, 34-year-old, from 10961, reported dizziness.",N,Y
+P00543,T25,train,"Participant PM, 42-year-old, from 98816, reported dizziness.",N,Y
+P00544,T25,train,"Participant PH, 66-year-old, from 02575, reported dizziness.",N,Y
+P00545,T25,train,"Participant VH, 57-year-old, from 10579, reported dizziness.",N,Y
+P00546,T25,train,"Participant FF, 68-year-old, from 60771, reported dizziness.",N,Y
+P00547,T25,train,"Participant FL, 80-year-old, from 30894, reported dizziness.",N,Y
+P00548,T25,train,"Participant MI, 70-year-old, from 10198, reported dizziness.",N,Y
+P00549,T25,train,"Participant MO, 68-year-old, from 02138, reported dizziness.",N,Y
+P00550,T25,train,"Participant FG, 76-year-old, from 94548, reported dizziness.",N,Y
+P00551,T26,train,Called Martin Tanaka's spouse at 206-555-0120 about missed Visit 3.,Y,N
+P00552,T26,train,Called Ana Chen's spouse at 415-555-0199 about missed Visit 10.,Y,N
+P00553,T26,train,Called Oscar Hughes's spouse at 312-555-0164 about missed Visit 8.,Y,N
+P00554,T26,train,Called Clara Kowalski's spouse at 617.555.0116 about missed Visit 2.,Y,N
+P00555,T26,train,Called Henry Mensah's spouse at 800-555-0137 about missed Visit 3.,Y,N
+P00556,T26,train,Called Paul Larsen's spouse at 646-555-0164 about missed Visit 3.,Y,N
+P00557,T26,train,Called Rosa Duarte's spouse at 617-555-0104 about missed Visit 2.,Y,N
+P00558,T26,train,Called Linda Hughes's spouse at (206) 555-0107 about missed Visit 8.,Y,N
+P00559,T26,train,Called Henry Romero's spouse at 312-555-0116 about missed Visit 10.,Y,N
+P00560,T26,train,Called Thomas Weber's spouse at (312) 555-0138 about missed Visit 11.,Y,N
+P00561,T26,train,Called Laura Quinn's spouse at (646) 555-0161 about missed Visit 8.,Y,N
+P00562,T26,train,Called Paul Novak's spouse at 617-555-0178 about missed Visit 5.,Y,N
+P00563,T26,train,Called Thomas Gonzalez's spouse at 800.555.0152 about missed Visit 5.,Y,N
+P00564,T26,train,Called Robert Gonzalez's spouse at 312-555-0123 about missed Visit 5.,Y,N
+P00565,T26,train,Called Daniel Novak's spouse at (312) 555-0184 about missed Visit 5.,Y,N
+P00566,T26,train,Called Oscar Silva's spouse at 206-555-0138 about missed Visit 7.,Y,N
+P00567,T26,train,Called Elena Mensah's spouse at 617-555-0144 about missed Visit 5.,Y,N
+P00568,T26,train,Called Linda Ivanova's spouse at (206) 555-0170 about missed Visit 9.,Y,N
+P00569,T26,train,Called Clara Fischer's spouse at 312-555-0104 about missed Visit 3.,Y,N
+P00570,T26,train,Called Robert Moreau's spouse at 312-555-0102 about missed Visit 8.,Y,N
+P00571,T26,train,Called James Quinn's spouse at 617-555-0184 about missed Visit 7.,Y,N
+P00572,T26,train,Called Grace Larsen's spouse at 415.555.0192 about missed Visit 8.,Y,N
+P00573,T27,calib,Sertraline held for platelets 210; restarted after review.,N,N
+P00574,T27,calib,Levothyroxine held for BP 128/84; restarted after review.,N,N
+P00575,T27,calib,Amlodipine held for HR 88 bpm; restarted after review.,N,N
+P00576,T27,calib,Amlodipine held for platelets 210; restarted after review.,N,N
+P00577,T27,calib,Levothyroxine held for ALT 54 U/L; restarted after review.,N,N
+P00578,T27,calib,Atorvastatin held for potassium 4.2 mmol/L; restarted after review.,N,N
+P00579,T27,calib,Lisinopril held for temp 37.8 C; restarted after review.,N,N
+P00580,T27,calib,Cetirizine held for BP 128/84; restarted after review.,N,N
+P00581,T27,calib,Metformin held for potassium 4.2 mmol/L; restarted after review.,N,N
+P00582,T27,calib,Metformin held for BP 128/84; restarted after review.,N,N
+P00583,T27,calib,Amlodipine held for glucose 120 mg/dL; restarted after review.,N,N
+P00584,T27,calib,Alanine held for BP 128/84; restarted after review.,N,N
+P00585,T27,calib,Atorvastatin held for HR 88 bpm; restarted after review.,N,N
+P00586,T27,calib,Metformin held for temp 37.8 C; restarted after review.,N,N
+P00587,T27,calib,Paracetamol held for BP 128/84; restarted after review.,N,N
+P00588,T27,calib,Cetirizine held for BP 128/84; restarted after review.,N,N
+P00589,T27,calib,Omeprazole held for HR 88 bpm; restarted after review.,N,N
+P00590,T27,calib,Paracetamol held for BP 128/84; restarted after review.,N,N
+P00591,T27,calib,Atorvastatin held for glucose 120 mg/dL; restarted after review.,N,N
+P00592,T27,calib,Ibuprofen held for glucose 120 mg/dL; restarted after review.,N,N
+P00593,T27,calib,Ibuprofen held for Hb 13.2 g/dL; restarted after review.,N,N
+P00594,T27,calib,Metformin held for ALT 54 U/L; restarted after review.,N,N
+P00595,T28,train,"Patient Felix Silva, DOB 12/27/1995, MRN 875-588-27, admitted overnight.",Y,N
+P00596,T28,train,"Patient Felix Patel, DOB 02/05/2003, MRN 707-478-96, admitted overnight.",Y,N
+P00597,T28,train,"Patient Clara Fischer, DOB 03/17/1994, MRN 386-891-22, admitted overnight.",Y,N
+P00598,T28,train,"Patient Thomas Tanaka, DOB 10/17/1944, MRN 620-964-64, admitted overnight.",Y,N
+P00599,T28,train,"Patient Daniel Brennan, DOB 03/02/1960, MRN 540-631-45, admitted overnight.",Y,N
+P00600,T28,train,"Patient Rosa Romero, DOB 05/06/1982, MRN 380-598-66, admitted overnight.",Y,N
+P00601,T28,train,"Patient Thomas Patel, DOB 04/22/1951, MRN 198-311-80, admitted overnight.",Y,N
+P00602,T28,train,"Patient Irene Patel, DOB 09/18/1943, MRN 600-952-13, admitted overnight.",Y,N
+P00603,T28,train,"Patient Samuel Hughes, DOB 12/15/1992, MRN 950-564-47, admitted overnight.",Y,N
+P00604,T28,train,"Patient David Okafor, DOB 05/03/2001, MRN 849-784-24, admitted overnight.",Y,N
+P00605,T28,train,"Patient Samuel Gonzalez, DOB 06/06/1947, MRN 382-564-90, admitted overnight.",Y,N
+P00606,T28,train,"Patient Felix Ivanova, DOB 01/14/1978, MRN 425-294-81, admitted overnight.",Y,N
+P00607,T28,train,"Patient Martin Weber, DOB 04/05/1939, MRN 993-325-96, admitted overnight.",Y,N
+P00608,T28,train,"Patient Ana Moreau, DOB 03/24/2000, MRN 234-303-91, admitted overnight.",Y,N
+P00609,T28,train,"Patient Maria Ivanova, DOB 07/03/1938, MRN 725-313-32, admitted overnight.",Y,N
+P00610,T28,train,"Patient Robert Haddad, DOB 11/19/1986, MRN 457-595-77, admitted overnight.",Y,N
+P00611,T28,train,"Patient Martin Patel, DOB 11/16/1975, MRN 501-712-55, admitted overnight.",Y,N
+P00612,T28,train,"Patient Paul Duarte, DOB 02/25/1966, MRN 557-433-41, admitted overnight.",Y,N
+P00613,T28,train,"Patient Martin Haddad, DOB 06/22/1997, MRN 813-507-26, admitted overnight.",Y,N
+P00614,T28,train,"Patient Oscar Duarte, DOB 01/10/1968, MRN 320-971-62, admitted overnight.",Y,N
+P00615,T28,train,"Patient Robert Mensah, DOB 07/13/1978, MRN 508-366-16, admitted overnight.",Y,N
+P00616,T28,train,"Patient Grace Duarte, DOB 11/27/1981, MRN 558-519-38, admitted overnight.",Y,N
+P00617,T29,train,Mild nausea after the 16:15 dose; resolved without treatment.,N,N
+P00618,T29,train,Mild nausea after the 18:00 dose; resolved without treatment.,N,N
+P00619,T29,train,Mild nausea after the 07:15 dose; resolved without treatment.,N,N
+P00620,T29,train,Mild nausea after the 18:15 dose; resolved without treatment.,N,N
+P00621,T29,train,Mild nausea after the 12:15 dose; resolved without treatment.,N,N
+P00622,T29,train,Mild nausea after the 18:45 dose; resolved without treatment.,N,N
+P00623,T29,train,Mild nausea after the 13:15 dose; resolved without treatment.,N,N
+P00624,T29,train,Mild nausea after the 18:15 dose; resolved without treatment.,N,N
+P00625,T29,train,Mild nausea after the 19:00 dose; resolved without treatment.,N,N
+P00626,T29,train,Mild nausea after the 18:15 dose; resolved without treatment.,N,N
+P00627,T29,train,Mild nausea after the 06:30 dose; resolved without treatment.,N,N
+P00628,T29,train,Mild nausea after the 21:45 dose; resolved without treatment.,N,N
+P00629,T29,train,Mild nausea after the 14:45 dose; resolved without treatment.,N,N
+P00630,T29,train,Mild nausea after the 06:45 dose; resolved without treatment.,N,N
+P00631,T29,train,Mild nausea after the 09:45 dose; resolved without treatment.,N,N
+P00632,T29,train,Mild nausea after the 13:45 dose; resolved without treatment.,N,N
+P00633,T29,train,Mild nausea after the 16:15 dose; resolved without treatment.,N,N
+P00634,T29,train,Mild nausea after the 12:45 dose; resolved without treatment.,N,N
+P00635,T29,train,Mild nausea after the 21:15 dose; resolved without treatment.,N,N
+P00636,T29,train,Mild nausea after the 16:15 dose; resolved without treatment.,N,N
+P00637,T29,train,Mild nausea after the 12:45 dose; resolved without treatment.,N,N
+P00638,T29,train,Mild nausea after the 16:45 dose; resolved without treatment.,N,N
+P00639,T30,train,Contact the site coordinator Elena Duarte at irene.mensah@example.org with questions.,Y,N
+P00640,T30,train,Contact the site coordinator Elena Gonzalez at laura.novak@example.org with questions.,Y,N
+P00641,T30,train,Contact the site coordinator Felix Okafor at james.hughes@example.org with questions.,Y,N
+P00642,T30,train,Contact the site coordinator Victor Duarte at james.weber@example.org with questions.,Y,N
+P00643,T30,train,Contact the site coordinator Paul Haddad at laura.miller@example.org with questions.,Y,N
+P00644,T30,train,Contact the site coordinator Daniel Quinn at grace.ivanova@example.org with questions.,Y,N
+P00645,T30,train,Contact the site coordinator Rosa Weber at james.novak@example.org with questions.,Y,N
+P00646,T30,train,Contact the site coordinator Ana Romero at elena.silva@example.org with questions.,Y,N
+P00647,T30,train,Contact the site coordinator Ana Brennan at felix.novak@example.org with questions.,Y,N
+P00648,T30,train,Contact the site coordinator Oscar Miller at helen.haddad@example.org with questions.,Y,N
+P00649,T30,train,Contact the site coordinator Maria Miller at daniel.hughes@example.org with questions.,Y,N
+P00650,T30,train,Contact the site coordinator Paul Fischer at helen.okafor@example.org with questions.,Y,N
+P00651,T30,train,Contact the site coordinator Henry Patel at maria.silva@example.org with questions.,Y,N
+P00652,T30,train,Contact the site coordinator Jane Hughes at grace.tanaka@example.org with questions.,Y,N
+P00653,T30,train,Contact the site coordinator Daniel Silva at henry.kowalski@example.org with questions.,Y,N
+P00654,T30,train,Contact the site coordinator Clara Quinn at ana.gonzalez@example.org with questions.,Y,N
+P00655,T30,train,Contact the site coordinator Ana Moreau at james.moreau@example.org with questions.,Y,N
+P00656,T30,train,Contact the site coordinator Irene Larsen at clara.kowalski@example.org with questions.,Y,N
+P00657,T30,train,Contact the site coordinator Rosa Romero at grace.romero@example.org with questions.,Y,N
+P00658,T30,train,Contact the site coordinator Jane Lindqvist at ana.gonzalez@example.org with questions.,Y,N
+P00659,T30,train,Contact the site coordinator Oscar Miller at helen.gonzalez@example.org with questions.,Y,N
+P00660,T30,train,Contact the site coordinator Nadia Haddad at martin.duarte@example.org with questions.,Y,N
+P00661,T31,test,Seen by Dr. Lindqvist; Omeprazole 25 mg prescribed.,Y,N
+P00662,T31,test,Seen by Dr. Weber; Omeprazole 100 mg prescribed.,Y,N
+P00663,T31,test,Seen by Dr. Miller; Alanine 20 mg prescribed.,Y,N
+P00664,T31,test,Seen by Dr. Miller; Lisinopril 50 mg prescribed.,Y,N
+P00665,T31,test,Seen by Dr. Miller; Levothyroxine 50 mg prescribed.,Y,N
+P00666,T31,test,Seen by Dr. Weber; Paracetamol 10 mg prescribed.,Y,N
+P00667,T31,test,Seen by Dr. Silva; Atorvastatin 500 mg prescribed.,Y,N
+P00668,T31,test,Seen by Dr. Chen; Paracetamol 100 mg prescribed.,Y,N
+P00669,T31,test,Seen by Dr. Patel; Sertraline 20 mg prescribed.,Y,N
+P00670,T31,test,Seen by Dr. Moreau; Paracetamol 5 mg prescribed.,Y,N
+P00671,T31,test,Seen by Dr. Moreau; Paracetamol 10 mg prescribed.,Y,N
+P00672,T31,test,Seen by Dr. Gonzalez; Lisinopril 25 mg prescribed.,Y,N
+P00673,T31,test,Seen by Dr. Quinn; Sertraline 100 mg prescribed.,Y,N
+P00674,T31,test,Seen by Dr. Lindqvist; Ondansetron 100 mg prescribed.,Y,N
+P00675,T31,test,Seen by Dr. Silva; Atorvastatin 25 mg prescribed.,Y,N
+P00676,T31,test,Seen by Dr. Haddad; Cetirizine 25 mg prescribed.,Y,N
+P00677,T31,test,Seen by Dr. Hughes; Levothyroxine 100 mg prescribed.,Y,N
+P00678,T31,test,Seen by Dr. Larsen; Metformin 500 mg prescribed.,Y,N
+P00679,T31,test,Seen by Dr. Brennan; Atorvastatin 500 mg prescribed.,Y,N
+P00680,T31,test,Seen by Dr. Larsen; Alanine 250 mg prescribed.,Y,N
+P00681,T31,test,Seen by Dr. Chen; Ondansetron 20 mg prescribed.,Y,N
+P00682,T31,test,Seen by Dr. Romero; Atorvastatin 50 mg prescribed.,Y,N
+P00683,T32,test,77-year-old with initials J.Q. enrolled at the north site.,N,Y
+P00684,T32,test,45-year-old with initials V.G. enrolled at the north site.,N,Y
+P00685,T32,test,63-year-old with initials D.D. enrolled at the north site.,N,Y
+P00686,T32,test,50-year-old with initials D.K. enrolled at the north site.,N,Y
+P00687,T32,test,73-year-old with initials H.K. enrolled at the north site.,N,Y
+P00688,T32,test,41-year-old with initials T.S. enrolled at the north site.,N,Y
+P00689,T32,test,48-year-old with initials L.D. enrolled at the north site.,N,Y
+P00690,T32,test,42-year-old with initials V.N. enrolled at the north site.,N,Y
+P00691,T32,test,41-year-old with initials J.K. enrolled at the north site.,N,Y
+P00692,T32,test,70-year-old with initials J.P. enrolled at the north site.,N,Y
+P00693,T32,test,70-year-old with initials V.C. enrolled at the north site.,N,Y
+P00694,T32,test,76-year-old with initials I.S. enrolled at the north site.,N,Y
+P00695,T32,test,68-year-old with initials M.G. enrolled at the north site.,N,Y
+P00696,T32,test,77-year-old with initials V.C. enrolled at the north site.,N,Y
+P00697,T32,test,66-year-old with initials G.H. enrolled at the north site.,N,Y
+P00698,T32,test,64-year-old with initials V.M. enrolled at the north site.,N,Y
+P00699,T32,test,23-year-old with initials P.K. enrolled at the north site.,N,Y
+P00700,T32,test,82-year-old with initials V.M. enrolled at the north site.,N,Y
+P00701,T32,test,60-year-old with initials S.C. enrolled at the north site.,N,Y
+P00702,T32,test,29-year-old with initials H.W. enrolled at the north site.,N,Y
+P00703,T32,test,29-year-old with initials V.O. enrolled at the north site.,N,Y
+P00704,T32,test,50-year-old with initials E.C. enrolled at the north site.,N,Y
+P00705,T33,train,"Vitals stable: creatinine 1.1 mg/dL, creatinine 1.1 mg/dL.",N,N
+P00706,T33,train,"Vitals stable: potassium 4.2 mmol/L, platelets 210.",N,N
+P00707,T33,train,"Vitals stable: potassium 4.2 mmol/L, QTc 452 ms.",N,N
+P00708,T33,train,"Vitals stable: HR 88 bpm, glucose 120 mg/dL.",N,N
+P00709,T33,train,"Vitals stable: platelets 210, creatinine 1.1 mg/dL.",N,N
+P00710,T33,train,"Vitals stable: HR 88 bpm, ALT 54 U/L.",N,N
+P00711,T33,train,"Vitals stable: BP 128/84, HR 88 bpm.",N,N
+P00712,T33,train,"Vitals stable: Hb 13.2 g/dL, temp 37.8 C.",N,N
+P00713,T33,train,"Vitals stable: potassium 4.2 mmol/L, creatinine 1.1 mg/dL.",N,N
+P00714,T33,train,"Vitals stable: potassium 4.2 mmol/L, BP 128/84.",N,N
+P00715,T33,train,"Vitals stable: temp 37.8 C, platelets 210.",N,N
+P00716,T33,train,"Vitals stable: QTc 452 ms, creatinine 1.1 mg/dL.",N,N
+P00717,T33,train,"Vitals stable: Hb 13.2 g/dL, HR 88 bpm.",N,N
+P00718,T33,train,"Vitals stable: HR 88 bpm, potassium 4.2 mmol/L.",N,N
+P00719,T33,train,"Vitals stable: BP 128/84, potassium 4.2 mmol/L.",N,N
+P00720,T33,train,"Vitals stable: potassium 4.2 mmol/L, QTc 452 ms.",N,N
+P00721,T33,train,"Vitals stable: platelets 210, creatinine 1.1 mg/dL.",N,N
+P00722,T33,train,"Vitals stable: BP 128/84, glucose 120 mg/dL.",N,N
+P00723,T33,train,"Vitals stable: Hb 13.2 g/dL, ALT 54 U/L.",N,N
+P00724,T33,train,"Vitals stable: glucose 120 mg/dL, temp 37.8 C.",N,N
+P00725,T33,train,"Vitals stable: ALT 54 U/L, ALT 54 U/L.",N,N
+P00726,T33,train,"Vitals stable: BP 128/84, ALT 54 U/L.",N,N
+P00727,T34,train,Record number 19941447 belongs to Nadia Duarte.,Y,N
+P00728,T34,train,Record number 55961908 belongs to Daniel Fischer.,Y,N
+P00729,T34,train,Record number 44617672 belongs to Rosa Moreau.,Y,N
+P00730,T34,train,Record number 28793298 belongs to Linda Ivanova.,Y,N
+P00731,T34,train,Record number 39665008 belongs to Samuel Larsen.,Y,N
+P00732,T34,train,Record number 51159574 belongs to Elena Patel.,Y,N
+P00733,T34,train,Record number 50901693 belongs to Oscar Fischer.,Y,N
+P00734,T34,train,Record number 30728758 belongs to Felix Novak.,Y,N
+P00735,T34,train,Record number 49236254 belongs to Laura Moreau.,Y,N
+P00736,T34,train,Record number 13758727 belongs to Ana Larsen.,Y,N
+P00737,T34,train,Record number 88414664 belongs to Jane Moreau.,Y,N
+P00738,T34,train,Record number 79366132 belongs to Laura Duarte.,Y,N
+P00739,T34,train,Record number 56199559 belongs to Clara Novak.,Y,N
+P00740,T34,train,Record number 52184126 belongs to Irene Silva.,Y,N
+P00741,T34,train,Record number 97023621 belongs to James Ivanova.,Y,N
+P00742,T34,train,Record number 74961168 belongs to Laura Miller.,Y,N
+P00743,T34,train,Record number 55951720 belongs to Thomas Tanaka.,Y,N
+P00744,T34,train,Record number 30144540 belongs to Grace Romero.,Y,N
+P00745,T34,train,Record number 97241075 belongs to Ana Silva.,Y,N
+P00746,T34,train,Record number 86424646 belongs to Clara Miller.,Y,N
+P00747,T34,train,Record number 40651479 belongs to Felix Hughes.,Y,N
+P00748,T34,train,Record number 14407781 belongs to Laura Weber.,Y,N
+P00749,T35,train,Participant lives at zip 30647 and works nights.,N,N
+P00750,T35,train,Participant lives at zip 30635 and works nights.,N,N
+P00751,T35,train,Participant lives at zip 98766 and works nights.,N,N
+P00752,T35,train,Participant lives at zip 30372 and works nights.,N,N
+P00753,T35,train,Participant lives at zip 98950 and works nights.,N,N
+P00754,T35,train,Participant lives at zip 10349 and works nights.,N,N
+P00755,T35,train,Participant lives at zip 30900 and works nights.,N,N
+P00756,T35,train,Participant lives at zip 02552 and works nights.,N,N
+P00757,T35,train,Participant lives at zip 30320 and works nights.,N,N
+P00758,T35,train,Participant lives at zip 30540 and works nights.,N,N
+P00759,T35,train,Participant lives at zip 98729 and works nights.,N,N
+P00760,T35,train,Participant lives at zip 60604 and works nights.,N,N
+P00761,T35,train,Participant lives at zip 30390 and works nights.,N,N
+P00762,T35,train,Participant lives at zip 60381 and works nights.,N,N
+P00763,T35,train,Participant lives at zip 94214 and works nights.,N,N
+P00764,T35,train,Participant lives at zip 94607 and works nights.,N,N
+P00765,T35,train,Participant lives at zip 60196 and works nights.,N,N
+P00766,T35,train,Participant lives at zip 02881 and works nights.,N,N
+P00767,T35,train,Participant lives at zip 60884 and works nights.,N,N
+P00768,T35,train,Participant lives at zip 30315 and works nights.,N,N
+P00769,T35,train,Participant lives at zip 10884 and works nights.,N,N
+P00770,T35,train,Participant lives at zip 10433 and works nights.,N,N
+P00771,T36,train,Reminder sent; Irene Duarte confirmed Visit 5 by phone (415) 555-0147.,Y,N
+P00772,T36,train,Reminder sent; Daniel Brennan confirmed Visit 8 by phone 312-555-0100.,Y,N
+P00773,T36,train,Reminder sent; Robert Haddad confirmed Visit 6 by phone 800.555.0184.,Y,N
+P00774,T36,train,Reminder sent; Grace Tanaka confirmed Visit 8 by phone (646) 555-0194.,Y,N
+P00775,T36,train,Reminder sent; Ana Romero confirmed Visit 5 by phone 206.555.0161.,Y,N
+P00776,T36,train,Reminder sent; Rosa Duarte confirmed Visit 9 by phone 646-555-0175.,Y,N
+P00777,T36,train,Reminder sent; Robert Okafor confirmed Visit 7 by phone (617) 555-0160.,Y,N
+P00778,T36,train,Reminder sent; Felix Gonzalez confirmed Visit 6 by phone 646-555-0111.,Y,N
+P00779,T36,train,Reminder sent; Thomas Brennan confirmed Visit 6 by phone (800) 555-0198.,Y,N
+P00780,T36,train,Reminder sent; Elena Brennan confirmed Visit 9 by phone (415) 555-0142.,Y,N
+P00781,T36,train,Reminder sent; Martin Moreau confirmed Visit 8 by phone 312.555.0106.,Y,N
+P00782,T36,train,Reminder sent; Robert Ivanova confirmed Visit 7 by phone 415-555-0173.,Y,N
+P00783,T36,train,Reminder sent; Clara Gonzalez confirmed Visit 3 by phone 646.555.0111.,Y,N
+P00784,T36,train,Reminder sent; Nadia Romero confirmed Visit 6 by phone 206.555.0119.,Y,N
+P00785,T36,train,Reminder sent; Helen Gonzalez confirmed Visit 8 by phone (646) 555-0137.,Y,N
+P00786,T36,train,Reminder sent; Henry Kowalski confirmed Visit 4 by phone 646-555-0186.,Y,N
+P00787,T36,train,Reminder sent; Paul Fischer confirmed Visit 11 by phone 800-555-0126.,Y,N
+P00788,T36,train,Reminder sent; James Okafor confirmed Visit 7 by phone 415.555.0129.,Y,N
+P00789,T36,train,Reminder sent; Ana Hughes confirmed Visit 5 by phone (800) 555-0156.,Y,N
+P00790,T36,train,Reminder sent; Laura Miller confirmed Visit 9 by phone 800-555-0198.,Y,N
+P00791,T36,train,Reminder sent; Rosa Okafor confirmed Visit 10 by phone 800-555-0115.,Y,N
+P00792,T36,train,Reminder sent; Felix Romero confirmed Visit 3 by phone 312.555.0132.,Y,N
+P00793,T37,train,Dose reduced to 250 mg after ALT 54 U/L.,N,N
+P00794,T37,train,Dose reduced to 10 mg after QTc 452 ms.,N,N
+P00795,T37,train,Dose reduced to 25 mg after creatinine 1.1 mg/dL.,N,N
+P00796,T37,train,Dose reduced to 25 mg after Hb 13.2 g/dL.,N,N
+P00797,T37,train,Dose reduced to 20 mg after creatinine 1.1 mg/dL.,N,N
+P00798,T37,train,Dose reduced to 100 mg after glucose 120 mg/dL.,N,N
+P00799,T37,train,Dose reduced to 20 mg after temp 37.8 C.,N,N
+P00800,T37,train,Dose reduced to 25 mg after platelets 210.,N,N
+P00801,T37,train,Dose reduced to 5 mg after BP 128/84.,N,N
+P00802,T37,train,Dose reduced to 10 mg after temp 37.8 C.,N,N
+P00803,T37,train,Dose reduced to 10 mg after potassium 4.2 mmol/L.,N,N
+P00804,T37,train,Dose reduced to 50 mg after Hb 13.2 g/dL.,N,N
+P00805,T37,train,Dose reduced to 5 mg after glucose 120 mg/dL.,N,N
+P00806,T37,train,Dose reduced to 250 mg after BP 128/84.,N,N
+P00807,T37,train,Dose reduced to 500 mg after QTc 452 ms.,N,N
+P00808,T37,train,Dose reduced to 50 mg after BP 128/84.,N,N
+P00809,T37,train,Dose reduced to 5 mg after ALT 54 U/L.,N,N
+P00810,T37,train,Dose reduced to 100 mg after temp 37.8 C.,N,N
+P00811,T37,train,Dose reduced to 25 mg after creatinine 1.1 mg/dL.,N,N
+P00812,T37,train,Dose reduced to 25 mg after ALT 54 U/L.,N,N
+P00813,T37,train,Dose reduced to 250 mg after Hb 13.2 g/dL.,N,N
+P00814,T37,train,Dose reduced to 20 mg after temp 37.8 C.,N,N
+P00815,T38,train,DOB on ID was 12/20/1964; initials H.G. match the log.,Y,N
+P00816,T38,train,DOB on ID was 04/13/1958; initials J.W. match the log.,Y,N
+P00817,T38,train,DOB on ID was 02/08/1982; initials G.N. match the log.,Y,N
+P00818,T38,train,DOB on ID was 04/15/1957; initials L.Q. match the log.,Y,N
+P00819,T38,train,DOB on ID was 09/04/1977; initials C.R. match the log.,Y,N
+P00820,T38,train,DOB on ID was 09/24/1953; initials H.F. match the log.,Y,N
+P00821,T38,train,DOB on ID was 01/13/1972; initials G.O. match the log.,Y,N
+P00822,T38,train,DOB on ID was 04/17/1975; initials D.G. match the log.,Y,N
+P00823,T38,train,DOB on ID was 07/02/1993; initials C.O. match the log.,Y,N
+P00824,T38,train,DOB on ID was 06/14/2003; initials M.M. match the log.,Y,N
+P00825,T38,train,DOB on ID was 10/16/1969; initials T.L. match the log.,Y,N
+P00826,T38,train,DOB on ID was 10/17/1986; initials M.K. match the log.,Y,N
+P00827,T38,train,DOB on ID was 10/04/1950; initials D.L. match the log.,Y,N
+P00828,T38,train,DOB on ID was 07/23/1991; initials F.C. match the log.,Y,N
+P00829,T38,train,DOB on ID was 07/27/1942; initials C.H. match the log.,Y,N
+P00830,T38,train,DOB on ID was 02/10/1980; initials V.M. match the log.,Y,N
+P00831,T38,train,DOB on ID was 04/09/1983; initials N.C. match the log.,Y,N
+P00832,T38,train,DOB on ID was 04/18/1958; initials P.W. match the log.,Y,N
+P00833,T38,train,DOB on ID was 02/11/2001; initials S.R. match the log.,Y,N
+P00834,T38,train,DOB on ID was 11/13/1949; initials H.R. match the log.,Y,N
+P00835,T38,train,DOB on ID was 12/16/1971; initials S.B. match the log.,Y,N
+P00836,T38,train,DOB on ID was 01/04/1979; initials A.L. match the log.,Y,N
+P00837,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00838,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00839,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00840,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00841,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00842,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00843,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00844,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00845,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00846,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00847,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00848,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00849,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00850,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00851,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00852,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00853,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00854,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00855,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00856,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00857,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00858,T39,calib,"Rash on left forearm, photographed for the file.",N,N
+P00859,T40,train,Husband Clara Mensah says she has been dizzy since Visit 3.,Y,N
+P00860,T40,train,Husband Ana Gonzalez says she has been dizzy since Visit 7.,Y,N
+P00861,T40,train,Husband Paul Silva says she has been dizzy since Visit 6.,Y,N
+P00862,T40,train,Husband Henry Larsen says she has been dizzy since Visit 2.,Y,N
+P00863,T40,train,Husband Thomas Mensah says she has been dizzy since Visit 5.,Y,N
+P00864,T40,train,Husband Elena Lindqvist says she has been dizzy since Visit 5.,Y,N
+P00865,T40,train,Husband Linda Miller says she has been dizzy since Visit 9.,Y,N
+P00866,T40,train,Husband Victor Mensah says she has been dizzy since Visit 10.,Y,N
+P00867,T40,train,Husband Rosa Kowalski says she has been dizzy since Visit 7.,Y,N
+P00868,T40,train,Husband Grace Haddad says she has been dizzy since Visit 7.,Y,N
+P00869,T40,train,Husband Maria Novak says she has been dizzy since Visit 10.,Y,N
+P00870,T40,train,Husband Elena Duarte says she has been dizzy since Visit 7.,Y,N
+P00871,T40,train,Husband Elena Weber says she has been dizzy since Visit 2.,Y,N
+P00872,T40,train,Husband Nadia Romero says she has been dizzy since Visit 2.,Y,N
+P00873,T40,train,Husband Paul Fischer says she has been dizzy since Visit 4.,Y,N
+P00874,T40,train,Husband Maria Quinn says she has been dizzy since Visit 2.,Y,N
+P00875,T40,train,Husband Elena Romero says she has been dizzy since Visit 9.,Y,N
+P00876,T40,train,Husband Daniel Mensah says she has been dizzy since Visit 11.,Y,N
+P00877,T40,train,Husband Irene Haddad says she has been dizzy since Visit 2.,Y,N
+P00878,T40,train,Husband Elena Silva says she has been dizzy since Visit 10.,Y,N
+P00879,T40,train,Husband Victor Patel says she has been dizzy since Visit 4.,Y,N
+P00880,T40,train,Husband James Miller says she has been dizzy since Visit 3.,Y,N
