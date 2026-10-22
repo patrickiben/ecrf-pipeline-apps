@@ -34,17 +34,16 @@ def bench_dict(ns, df, queries, label):
     """Embed + index one dictionary the way the app does, then time every query."""
     hnswlib, ag = ns["hnswlib"], ns["_agent"]
     ag._index_cache = tempfile.mkdtemp(prefix="ecrf_bench_")      # force a fresh build, timed
-    names = [str(x) for x in df["llt_name"]]
     t0 = time.perf_counter(); V, idx = ns["t2_index"](df); build_s = time.perf_counter() - t0
     files = os.listdir(ag._index_cache)
     vec_b = sum(os.path.getsize(os.path.join(ag._index_cache, f)) for f in files if f.endswith(".npy"))
     graph_file_b = sum(os.path.getsize(os.path.join(ag._index_cache, f)) for f in files if f.endswith(".hnsw"))
     emb, srch, brute, rec, Q = [], [], [], [], []
-    k = min(10, len(names))
+    k = min(10, len(df))
     # three separate passes: interleaving the multi-threaded brute-force matmul with the embed calls
     # lets idle BLAS threads compete with the Needle3 worker process and inflates the embed timings
     for q in queries:
-        t = time.perf_counter(); v = np.asarray(ag.embed(q), np.float32); v /= np.linalg.norm(v); emb.append(1000 * (time.perf_counter() - t))
+        t = time.perf_counter(); v = np.asarray(ag.embed(ns["_t2_text"](q)), np.float32); v /= np.linalg.norm(v); emb.append(1000 * (time.perf_counter() - t))
         Q.append(v)
     labs = []
     for v in Q:

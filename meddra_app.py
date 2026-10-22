@@ -488,6 +488,13 @@ def _bow(t, dim=384):
 # Tier-2 call takes the stand-in branch. We do NOT lazy-load inside the request
 # path, because a slow first-call load would look like a hang.
 @st.cache_resource(show_spinner="Embedding the dictionary with Needle3 (once per dictionary)...")
+def _t2_text(s):
+    """The string Needle3 embeds, for a dictionary term and a verbatim alike: lower-cased,
+    like every other matcher in this file (_bow, _lev, _jaro). Needle3's embedding is
+    case-sensitive (measured: "insomnia" vs "Insomnia" scores 0.948, below several
+    unrelated terms), and verbatims are typed in any case. Only the embedded copy is
+    folded; the verbatim itself still reaches the output byte for byte."""
+    return str(s).lower()
 def _real_index(names, cache_dir, weights_tag):
     """Embed every dictionary term with Needle3 and build the HNSW graph, ONCE per
     (dictionary content, weights) pair: cached in memory for the process and on disk
@@ -516,7 +523,7 @@ def t2_index(meddra):
             against V (stand-in) or queries idx (real); either way row i of the
             result maps to meddra.iloc[i], so candidate assembly is shared.
       idx = the HNSW graph (real) or None (stand-in).
-    Real path: embed every llt_name to a unit vector, load into an hnswlib graph
+    Real path: embed every llt_name (lower-cased, _t2_text) to a unit vector, load into an hnswlib graph
     with space='ip' (inner product). Because the vectors are L2-normalized, ip
     distance == 1 - cosine, so the cheap graph search returns EXACT angular
     closeness -- this is why we can use the cheaper metric and still report
@@ -527,7 +534,7 @@ def t2_index(meddra):
     over V is exact and fine at demo scale; on a full 86k dictionary it is slow,
     which is itself a reason to install the real index)."""
     if REAL_T2:
-        return _real_index(tuple(str(x) for x in meddra["llt_name"]), _agent._index_cache, _agent._weights_tag)
+        return _real_index(tuple(_t2_text(x) for x in meddra["llt_name"]), _agent._index_cache, _agent._weights_tag)
     return np.vstack([_bow(s) for s in meddra["llt_name"]]), None
 
 def t2_coding(s, meddra, V, idx, k=3):
@@ -544,7 +551,7 @@ def t2_coding(s, meddra, V, idx, k=3):
     if REAL_T2:
         # The trained re-ranker (when loaded) re-orders a wider pool and keeps the top k.
         kk=min(max(k, RERANK_POOL if REAL_T4 else k), len(V))
-        q=np.asarray(_agent.embed(s),np.float32); q/=np.linalg.norm(q)
+        q=np.asarray(_agent.embed(_t2_text(s)),np.float32); q/=np.linalg.norm(q)
         lab,dist=idx.knn_query(q.reshape(1,-1),k=kk); order=lab[0]; cos=1.0-dist[0]
     else:
         cos=V@_bow(s); order=np.argsort(-cos)[:k]; cos=cos[order]

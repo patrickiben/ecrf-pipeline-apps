@@ -195,14 +195,23 @@ def coding(models, xgb, results):
         c = ns["t2_coding"](r.verbatim, dict_df, V, idx, k=3)
         abl.append(dict(id=r.id, variant=r.variant, negated=r.negated, pt_code=str(r.pt_code), top1_pt=str(c.iloc[0]["PT_CODE"]),
                         top3_pts=[str(x) for x in c["PT_CODE"]], S1=float(c.iloc[0]["cosine"])))
+    # case ablation: the same retrieval on the strings as typed, without the app's lower-casing (_t2_text)
+    Vr, idxr = ns["_real_index"](tuple(str(x) for x in dict_df.llt_name), ns["_agent"]._index_cache, ns["_agent"]._weights_tag)
+    abl_raw = []
+    for r in test.itertuples():
+        q = np.asarray(ns["_agent"].embed(str(r.verbatim)), np.float32); q /= np.linalg.norm(q)
+        pts = [str(dict_df.pt_code.iloc[i]) for i in idxr.knn_query(q.reshape(1, -1), k=3)[0][0]]
+        abl_raw.append(dict(id=r.id, variant=r.variant, negated=r.negated, pt_code=str(r.pt_code), top1_pt=pts[0], top3_pts=pts, S1=0.0))
+    retr = lambda rows, note: dict(top1_acc=coding_metrics(rows, 2.0)["top1_acc"], top3_acc=coding_metrics(rows, 2.0)["top3_acc"],
+                                   top1_by_variant={v: m["top1_acc"] for v, m in coding_metrics(rows, 2.0)["by_variant"].items()}, note=note)
     results["coding"] = dict(
         data=dict(dictionary_terms=len(dict_df), dictionary_pts=int(dict_df.pt_code.nunique()), test_verbatims=len(test),
                   train_candidate_rows=int((S == "train").sum()), splits=data.split.value_counts().to_dict()),
         calibration=cal, reranker=dict(rounds=int(b.num_boosted_rounds()), features=names),
         timing_s=dict(standin_test=round(si_s, 1), real_test=round(real_s, 1), laya_records_all=round(laya_s, 1), features_all=round(feat_s, 1)),
         gates={str(g): dict(standin=coding_metrics(si_rows, g), real=coding_metrics(real_rows, g)) for g in GATES},
-        retrieval_only=dict(top1_acc=coding_metrics(abl, 2.0)["top1_acc"], top3_acc=coding_metrics(abl, 2.0)["top3_acc"],
-                            note="Needle3 cosine order, no re-rank; gate not applicable"))
+        retrieval_only=retr(abl, "Needle3 cosine order, no re-rank; gate not applicable"),
+        retrieval_only_case_sensitive=retr(abl_raw, "as retrieval_only, but dictionary terms and verbatims embedded as typed (no lower-casing)"))
     pd.DataFrame(real_rows).to_csv(os.path.join(ROOT, "eval", "results", out_name("coding_test_real.csv")), index=False)
     pd.DataFrame(si_rows).to_csv(os.path.join(ROOT, "eval", "results", out_name("coding_test_standin.csv")), index=False)
     shutil.rmtree(st_dir, ignore_errors=True)
