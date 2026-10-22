@@ -1,4 +1,4 @@
-# eval/ — the real model path: setup, training and evaluation
+# eval/: the real model path, setup, training and evaluation
 
 This folder holds everything needed to run the coding and PHI apps on their **real** model path (Cactus Needle3, hnswlib, Laya, XGBoost) and to reproduce the measured numbers in [`docs/EVALUATION.md`](../docs/EVALUATION.md) and Deck B. All data here is **synthetic**: invented terms with 99-prefixed placeholder codes (not MedDRA) and invented notes.
 

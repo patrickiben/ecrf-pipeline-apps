@@ -193,8 +193,8 @@ app).
 
 1. **Point at your data** — sidebar section *📂 1* (folder path and/or upload). Every `*.csv`/`.sas7bdat` except one named
    `*meddra*` loads; each is classified by content. No SAP or protocol file is needed.
-2. **Set outputs** — sidebar section *⚖ 2*: output folder (default `risk_output`) and an optional models dir for a
-   real trained model. There is no gate slider here — the operating point is the built-in `[SI]` criteria, recorded in
+2. **Set outputs** — sidebar section *⚖ 2*: output folder (default `risk_output`) and a models dir field. This build
+   has no trained risk model, so leave it empty: a `risk_model.json` there stops the run rather than being ignored. There is no gate slider here — the operating point is the built-in `[SI]` criteria, recorded in
    the audit.
 3. **Confirm the input (pre-flight)** — check which domains loaded and how each classified, plus the subject count.
 4. **Execute** — click **🚀 Execute Risk Scoring**.
@@ -231,7 +231,7 @@ Only **flagged** observations are emitted — normal subjects and routine notes 
 ### Step-by-step
 
 1. **Point at your data** — sidebar section *📂 1* (folder path and/or upload). Every `*.csv`/`.sas7bdat` except one named `*meddra*` loads; columns are located by content/synonym, not file name.
-2. **Set outputs** — sidebar section *⚖ 2*: output folder (default `anomaly_output`) and an optional models dir for a real trained model. There is no gate slider — the operating point is the built-in `[SI]` criteria, recorded in the audit.
+2. **Set outputs** — sidebar section *⚖ 2*: output folder (default `anomaly_output`) and a models dir field. This build has no trained anomaly model, so leave it empty: an `anomaly_model.json` there stops the run rather than being ignored. There is no gate slider — the operating point is the built-in `[SI]` criteria, recorded in the audit.
 3. **Confirm the input (pre-flight)** — check which measurable numeric columns were found, whether a time column was detected (drift on/off), whether a lab/site column was detected (per-lab drift on/off), and which free-text columns will be scanned for text outliers.
 4. **Execute** — click **🚀 Execute Anomaly & Drift Detection**.
 
@@ -268,12 +268,21 @@ banner and recorded per tier in every audit row:
 - **Anomaly & drift:** numeric outliers use a robust z-score (median/MAD) as the interpretable gate, corroborated by
   **Isolation Forest** — install `scikit-learn` and that detector runs for real. Drift uses a labelled **1-D-Wasserstein stand-in**
   by default; install `POT` + `scipy` and it becomes **real Sinkhorn optimal transport** (`ot.sinkhorn2`). Text outliers use a
-  labelled **bag-of-words isolation stand-in**; install the open-source Needle3 (Cactus Compute) and Laya runtimes (not bundled with this repository) for real retrieval-isolation.
-  Each flips its tier to REAL with identical output columns.
+  labelled **bag-of-words isolation stand-in**; this build has no real text-isolation model, so that tier stays `[SI]`
+  whatever is installed. The other two flip their tier to REAL with identical output columns.
 
-Install the real runtimes (`cactus-needle`, `hnswlib`, `laya`, `xgboost`) and the banner flips tier-by-tier to **REAL**;
-columns, gates and exports do not move. If a trained artifact file is present in your models dir but its runtime is missing,
-the app **stops** rather than silently substituting a stand-in — it will never present a `[SI]` number as real.
+**Coding and PHI: the real path.** Install the pinned real runtimes (Cactus Needle3, `hnswlib`, Laya, XGBoost), build a
+models dir with `python eval/fetch_models.py --out models` (see [eval/README.md](eval/README.md)), copy it to the machine
+that runs the app and type its path into **Models dir** in the sidebar. The banner then flips tier by tier to **REAL**, and
+only for a tier whose artifact actually loaded; columns, gates and exports do not move. The apps read only that folder and
+never reach the network. A trained artifact that is present but whose runtime is missing, or that fails to load, or a
+trained gate whose inputs did not load, **stops** the run rather than silently substituting a stand-in: the app never
+presents a `[SI]` number as real. On the PHI app, Needle3's proposals are used only behind the trained gate.
+
+What the real path does on synthetic data, measured, is in [docs/EVALUATION.md](docs/EVALUATION.md). In short: better
+than the stand-in on misspelled verbatims and on names without a title, no better on colloquial verbatims (they still go
+to a human coder), and slow on a CPU (about 0.4 s per verbatim and 1 to 1.6 s per PHI field, one at a time). The risk
+and anomaly apps have no trained-model path; a model file in their models dir stops the run.
 
 ---
 

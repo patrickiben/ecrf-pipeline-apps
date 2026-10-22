@@ -745,8 +745,18 @@ def _load_laya(d,cal):
         if "calibration was fitted for" not in m: warnings.warn_explicit(w.message,w.category,w.filename,w.lineno)
     return ag
 
+def _artifact_stamp(models_dir):
+    """The rest of load_real's cache key: size and mtime of each artifact it reads, so
+    adding, replacing or removing a file is picked up on the next run instead of a
+    stale load being served for the life of the process."""
+    md=os.path.abspath(models_dir); out=[]
+    for a in (ART_NEEDLE,os.path.join("needle3",_engine_file()),ART_LAYA,ART_LAYA_CAL,ART_CODER,ART_CODER.replace(".json",".meta.json")):
+        try: st_=os.stat(os.path.join(md,a)); out.append((a,st_.st_size,st_.st_mtime_ns))
+        except OSError: out.append((a,None,None))
+    return tuple(out)
+
 @st.cache_resource(show_spinner="Loading the real models from the models dir...")
-def load_real(models_dir):
+def load_real(models_dir, stamp=None):
     """Load every trained artifact in models_dir whose runtime is installed, ONCE per
     process (st.cache_resource). Returns dict(T2,T3,T4,info,errors): None for a tier that
     runs its stand-in; info holds what loaded (file names + content hashes) for the audit;
@@ -938,7 +948,7 @@ _guard_artifacts(models_dir)   # runs on every rerun, before any compute
 # Load whatever trained artifacts the models dir holds (cached: once per process),
 # point the tiers at them, and refuse to run on a re-ranker whose feature contract
 # the loaded tiers do not meet -- same "no silent substitution" rule as the guard.
-_R=load_real(models_dir)
+_R=load_real(os.path.abspath(models_dir), _artifact_stamp(models_dir))   # keyed on content, not the typed path
 if _R["errors"]:
     st.error("A trained artifact in the models dir is present but failed to load, so the run stops rather than "
              "fall back to a stand-in: "+" | ".join(_R["errors"])); st.stop()

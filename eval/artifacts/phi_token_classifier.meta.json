@@ -26,9 +26,9 @@
  },
  "tier3_question_sha": "774b67801601d271",
  "label": "candidate (start,end,entity) is a gold redaction target",
- "trained_on": "eval/data/phi_fields.csv split=train (43 candidate spans)",
+ "trained_on": "eval/data/phi_fields.csv split=train (856 candidate spans)",
  "early_stopping": "calib split",
- "rounds": 210,
+ "rounds": 55,
  "xgb_params": {
   "objective": "binary:logistic",
   "eval_metric": "logloss",

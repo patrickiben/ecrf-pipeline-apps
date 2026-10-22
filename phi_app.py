@@ -473,8 +473,18 @@ def _load_laya(d,cal):
         if "calibration was fitted for" not in m: warnings.warn_explicit(w.message,w.category,w.filename,w.lineno)
     return ag
 
+def _artifact_stamp(models_dir):
+    """The rest of load_real's cache key: size and mtime of each artifact it reads, so
+    adding, replacing or removing a file is picked up on the next run instead of a
+    stale load being served for the life of the process."""
+    md=os.path.abspath(models_dir); out=[]
+    for a in (ART_NEEDLE,os.path.join("needle3",_engine_file()),ART_LAYA,ART_LAYA_CAL,ART_GATE,ART_GATE.replace(".json",".meta.json")):
+        try: st_=os.stat(os.path.join(md,a)); out.append((a,st_.st_size,st_.st_mtime_ns))
+        except OSError: out.append((a,None,None))
+    return tuple(out)
+
 @st.cache_resource(show_spinner="Loading the real models from the models dir...")
-def load_real(models_dir):
+def load_real(models_dir, stamp=None):
     """Same contract as meddra_app.py's load_real (duplicated on purpose): load each
     artifact whose runtime is installed, once per process, from local paths only; an
     artifact that is present but fails to load goes to errors and the UI stops on it."""
@@ -650,7 +660,7 @@ if HOSTED: models_dir = "models"
 _guard_artifacts(models_dir)
 # Load the models dir's trained artifacts (cached: once per process), point the tiers
 # at them, and refuse to run a gate whose feature contract the loaded tiers miss.
-_R=load_real(models_dir)
+_R=load_real(os.path.abspath(models_dir), _artifact_stamp(models_dir))   # keyed on content, not the typed path
 if _R["errors"]:
     st.error("A trained artifact in the models dir is present but failed to load, so the run stops rather than "
              "fall back to a stand-in: "+" | ".join(_R["errors"])); st.stop()

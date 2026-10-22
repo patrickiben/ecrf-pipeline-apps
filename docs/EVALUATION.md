@@ -28,10 +28,10 @@ Script: [`eval/bench_index.py`](../eval/bench_index.py), output [`stage1_index.j
 
 | dictionary | terms | embed per term (build) | build total | resident index | embed per verbatim, median / p90 | HNSW search (k = 10), median / p90 | exact brute force, median | recall@10 vs exact |
 |---|---|---|---|---|---|---|---|---|
-| demo, `sample_data/meddra_demo.csv` | 12 | 23.4 ms | 0.3 s | 0.14 MB | 27.6 / 39.4 ms | 0.009 / 0.011 ms | 0.007 ms | 1.000 |
-| generated, `eval/data/dictionary.csv` | 3,371 | 26.0 ms | 87.6 s | 40.4 MB (39.5 MB vectors + 0.9 MB graph) | 26.5 / 38.5 ms | 0.47 / 0.65 ms | 0.59 ms | 0.993 |
+| demo, `sample_data/meddra_demo.csv` | 12 | 22.8 ms | 0.3 s | 0.14 MB | 31.6 / 47.0 ms | 0.009 / 0.012 ms | 0.007 ms | 1.000 |
+| generated, `eval/data/dictionary.csv` | 3,371 | 28.1 ms | 94.7 s | 40.4 MB (39.5 MB vectors + 0.9 MB graph) | 30.9 / 44.1 ms | 0.54 / 0.88 ms | 0.60 ms | 0.994 |
 
-**Index cost at a full release's size.** A MedDRA release has about 86,800 active lowest-level terms. Embedding that many term strings would take about 38 CPU-minutes at the measured 26 ms per term, so the index cost at that size was measured on 86,800 random unit vectors of Needle3's real width, with the same index settings:
+**Index cost at a full release's size.** A MedDRA release has about 86,800 active lowest-level terms. Embedding that many term strings would take about 40 minutes at the measured 28 ms per term, so the index cost at that size was measured on 86,800 random unit vectors of Needle3's real width, with the same index settings:
 
 | terms | dim | build (4 threads) | resident index | HNSW search, median / p90 |
 |---|---|---|---|---|
@@ -41,10 +41,10 @@ Random vectors have no cluster structure, which is the hard case for a graph ind
 
 **What this changes in the decks.**
 - The vectors are **3072-dim**, not 384. At 3072 dims and float32, the vectors alone are 12 KB per term, so a full release is about 1 GB resident, not the 178 MB the decks had illustrated for 384 dims.
-- Per verbatim, the cost is the **embedding** (about 26 ms median on this CPU), not the search: HNSW search is under 1 ms at 3,371 terms and about 6 ms at 86,800.
-- At a few thousand terms, exact brute-force search costs about the same as HNSW (0.59 ms vs 0.47 ms) and is exact; the graph pays off at release scale.
+- Per verbatim, the cost is the **embedding** (about 30 ms median on this CPU), not the search: HNSW search is under 1 ms at 3,371 terms and about 6 ms at 86,800.
+- At a few thousand terms, exact brute-force search costs about the same as HNSW (0.60 ms vs 0.54 ms) and is exact; the graph pays off at release scale.
 
-*Measurement note.* A first run timed the brute-force matmul right after each embed call. Its idle BLAS threads then competed with Needle3's worker process for the 4 cores and inflated the embed median on the 3,371-term dictionary to 65 ms. The script now times the three operations in separate passes; the figures above are from that run. The 86,800-term figures come from the first run's scale phase, which is unaffected (it embeds nothing).
+*Measurement notes.* A first run timed the brute-force matmul right after each embed call. Its idle BLAS threads then competed with Needle3's worker process for the 4 cores and inflated the embed median on the 3,371-term dictionary to 65 ms. The script now times the three operations in separate passes. The table is from the last run, after the app began lower-casing what it embeds (Stage 3); an earlier run of the same script on the same machine gave a 26.5 ms embed median, so treat the embed figures as about ±15% run to run on a shared cloud CPU. The 86,800-term figures come from the first run's scale phase, which embeds nothing and is unaffected by either change.
 
 ## The evaluation data (Stages 2 and 3)
 
@@ -66,7 +66,8 @@ Laya fits a temperature per answer type and option count only from 2,000 records
 | app · question | labeled as true when | temperature, shipped → fitted | test n | ECE before → after | Brier before → after | AUROC |
 |---|---|---|---|---|---|---|
 | coding · `unambiguous` | the verbatim is not negated | 1.98 → 1.45 | 384 | 0.119 → **0.084** | 0.173 → 0.172 | 0.736 |
-<!-- PHI calibration rows -->
+| PHI · `direct_pii` | the field holds a direct identifier | 1.98 → 1.36 (shared) | 220 | 0.445 → **0.485** (worse) | 0.411 → 0.467 | 0.686 |
+| PHI · `reident_risk` | the field holds two or more indirect attributes | 1.98 → 1.36 (shared) | 220 | 0.154 → **0.093** | 0.045 → 0.031 | 0.998 |
 
 Temperature scaling changes how confident the probabilities are, not their order, so AUROC is the same before and after. On coding it moved ECE down by about 30%. The AUROC of 0.74 is the more important number: Laya's "one specific problem the participant actually had" answer separates negated from plain verbatims only moderately. It is the re-ranker, using that answer together with the retrieval features, that keeps negated verbatims below the gate (next section).
 
@@ -110,4 +111,62 @@ What this shows:
 
 Cost on this CPU: the real path coded the 384 test verbatims in 86 s (about 225 ms per verbatim end to end, with Tier 3 batched); the stand-in took 2.5 s.
 
-<!-- PHI results -->
+## Stage 3: PHI, stand-in vs real
+
+Test split: 220 fields from 10 note templates never seen in training, holding 308 redaction targets. A predicted redaction counts as correct only on a **strict match**: same field, same start and end offset, same entity type. **Leaked** counts the gold targets with no overlapping redaction of any type, so they stay readable in the sanitized output; that is the number that matters for privacy, and it forgives a boundary or type slip that the strict scores do not.
+
+| entity | gold | stand-in P / R / F1 | real P / R / F1 | Needle3 extraction alone P / R |
+|---|---|---|---|---|
+| PERSON_NAME | 66 | 1.00 / 0.33 / 0.50 | 0.94 / **0.74** / **0.83** | 0.45 / 0.70 |
+| PHONE | 44 | 1.00 / 0.50 / 0.67 | 0.92 / 0.50 / 0.65 | 0.30 / 0.55 |
+| EMAIL | 22 | 1.00 / 1.00 / 1.00 | 1.00 / 1.00 / 1.00 | 0.95 / 0.86 |
+| MRN | 44 | 1.00 / 0.50 / 0.67 | 1.00 / 0.50 / 0.67 | 0.00 / 0.00 |
+| DOB | 44 | 1.00 / 0.55 / 0.71 | 0.92 / 0.55 / 0.69 | 0.31 / 0.34 |
+| ZIP | 22 | 1.00 / 1.00 / 1.00 | 1.00 / 1.00 / 1.00 | 0.21 / 0.55 |
+| INITIALS | 44 | 1.00 / 1.00 / 1.00 | 0.91 / 0.89 / 0.90 | 0.60 / 0.64 |
+| AGE | 22 | 1.00 / 1.00 / 1.00 | 1.00 / 0.73 / 0.84 | 0.69 / 1.00 |
+| **all** | **308** | **1.00 / 0.65 / 0.79** | **0.95 / 0.70 / 0.81** | 0.42 / 0.54 |
+| **leaked targets** (of 308) | | 108 (all direct identifiers) | **91** (80 direct, 11 indirect) | |
+
+"Needle3 extraction alone" uses Needle3's grounded values directly as redactions, with no patterns and no gate: it shows what the extractor contributes on its own.
+
+What this shows:
+
+- **The real path finds more names.** Needle3 proposes names that have no title before them ("Spoke with Linda Miller", "Reached David Quinn"), which the stand-in's patterns require, and the trained gate keeps most of them: name recall goes from 0.33 to 0.74 at 0.94 precision.
+- **It leaks less, but still leaks 91 of 308.** The leaks are formats that neither proposer covers: 8-digit MRNs ("MRN: 21428912", 22 leaked), 7-digit phone numbers ("555-0185", 22), dates of birth written M/D/YYYY ("9/13/1940", 19) and the untitled names Needle3 missed (17). None of Needle3's 5 MRN proposals was right. The stand-in leaks the same formats plus most untitled names.
+- **It is not clean on look-alikes.** Of the 11 false positives, 3 are drug names passed as patient names ("Alanine" twice, "Levothyroxine", all in one template), 2 are doses passed as phone numbers ("20 mg prescribed", "100 mg"), 2 are bare years passed as dates of birth, 1 is an MRN typed as initials, and 3 are boundary slips on initials (Needle3 returned "H.K. enrolled at the north site" for "H.K."). The stand-in had no false positive here, because its patterns are narrow.
+- **It lost some indirect attributes the stand-in kept**: age recall 1.00 to 0.73 and initials 1.00 to 0.89. The stand-in redacts any indirect attribute when two co-occur; the trained gate learned a softer rule and rejected some.
+- **Laya's direct-identifier answer is weak.** P(direct) has an AUROC of 0.69 and is biased low: fields that do hold a direct identifier get a mean P(direct) of 0.24. A temperature cannot fix a bias, and the temperature it shares with the indirect question made its ECE slightly worse. The indirect question works well (AUROC 0.998, ECE 0.093), but on templated synthetic notes that is an easy task. The gate leans on the span features, not on P(direct).
+
+Cost on this CPU: the real path processed the 220 test fields in 279 s (1.3 s per field, with Tier 3 batched); the stand-in took under 0.1 s.
+
+## Per-record latency
+
+Script: [`eval/deck_b_worked.py`](../eval/deck_b_worked.py), output `per_record_ms` in [`deck_b_worked.json`](../eval/results/deck_b_worked.json). One record at a time through each real tier (the apps' own functions, single-record calls, 25 timed calls after a warm-up), on the Deck B worked rows and the 12-term demo dictionary:
+
+| app | Tier 2 | Tier 3 (Laya, one call) | Tier 4 (XGBoost, incl. features) | per record |
+|---|---|---|---|---|
+| coding (4 verbatims) | Needle3 embed + search: 40 to 48 ms | 328 to 346 ms (1 question) | 7 to 9 ms | **about 390 ms** |
+| PHI (4 fields) | Needle3 extraction + patterns: 434 to 1,077 ms | 449 to 523 ms (2 questions) | under 1 ms | **about 0.9 to 1.6 s** |
+
+Medians; ranges are across the four records. Laya dominates coding, and Needle3's generative extraction dominates PHI. Batching Tier 3, as the apps do over a whole cut, roughly halves its per-record cost (coding: 225 ms per verbatim end to end on the test split). None of this is near the "sub-50 ms target / sub-100 ms ceiling" Deck A used to state; on this 4-vCPU CPU the real path is a batch job, not an interactive one.
+
+## Stage 4: the Deck B worked examples on the real path
+
+Script: [`eval/deck_b_worked.py`](../eval/deck_b_worked.py), output [`deck_b_worked.json`](../eval/results/deck_b_worked.json). It drives both apps end to end with Streamlit's AppTest on `sample_data/` and the models dir, exactly as a user would (coding gate 0.90, the deck's setting), and reads their written outputs. The `RM` checks in `tests/qc_test.py` assert that a real-path run reproduces these values.
+
+**Coding.** All four worked verbatims get the right preferred term at rank 1 on the real path, and **all four are routed to a human coder**: the trained re-ranker scores them 0.04 to 0.12. That matches the held-out result for colloquial verbatims (top-1 0.52, none auto-coded). These four are paraphrases ("feeling lightheaded when standing up"), the re-ranker was trained on a dictionary where most correct matches are lexically close, and its score on a semantically right but lexically distant candidate stays low. The deck's illustrative scores (0.958, 0.971, 0.934, 0.882), its "three auto-code, one flags" routing and its "0.8820 row separates 0.88 from 0.90" story were not reproduced; Deck B now shows the measured values.
+
+**PHI.** The real path redacts every target in the three worked fields, at P(redact) 0.92 to 0.96, and keeps both look-alikes: Needle3 proposed "50" (from "Alanine 50 mg") as a date of birth and "120" (from "120 mg/dL") as a ZIP, and the gate rejected both, so the sanitized text matches the stand-in's. In the clean EG field Needle3 proposed "Sinus rhythm" as a person name, and the gate rejected that too. Laya's field probabilities are where the deck's illustrative numbers fail most: P(direct) is 0.67 on AE row 1 and 0.01 on AE row 2 and the PR row, though all three hold direct identifiers (the deck had 0.998). The redactions are right anyway because the gate leans on the span evidence.
+
+## What ran for real, and what did not
+
+Ran for real, measured here: Needle3 embeddings and the hnswlib index (Stage 1); Laya on both apps' questions, with temperatures fitted (Stage 2); the XGBoost re-ranker and span gate, trained on synthetic train splits (Stage 3); both apps end to end on the real path, air-gapped from the models dir (Stage 4).
+
+Not measured, or still illustrative:
+
+- **Real MedDRA and real site notes.** Everything is synthetic. Accuracy on a licensed release or on real notes is unknown and should be expected to be lower; the dictionary here is 3,371 terms, a release about 86,800.
+- **Retrieval quality at release scale.** The 86,800-term figures are index cost on random vectors only.
+- **The risk and anomaly apps** have no trained model path. They run their labeled stand-ins (and, in the anomaly app, the optional scikit-learn and POT detectors); a trained-model file in their models dir stops the run instead of being half-loaded.
+- **Deck B's §1.2 index costs at full scale** are now the measured random-vector figures, labeled as such. The HLT and HLGT names, the gates and every `[SI]` value are configuration or stand-in output, unchanged.
+- **Laya's per-question temperatures.** With fewer than 2,000 labeled answers, Laya fits one temperature per answer type, so the PHI questions share one. A larger labeled set would let it fit separate ones.

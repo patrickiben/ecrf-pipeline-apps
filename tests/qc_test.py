@@ -965,7 +965,8 @@ except Exception as e: check("D3 docs references block raised", False, repr(e))
 #       NameError), REAL only when an artifact LOADS, Laya probed with its torch/transformers runtime,
 #       an unrelated 'needle' rejected, a trained gate refused when its feature contract is not met, a
 #       corrupt artifact stopping the run, a Laya calibration fitted for another checkpoint refused (one
-#       fitted on another machine accepted), the risk/anomaly apps never claiming a model they cannot load.
+#       fitted on another machine accepted), a changed models dir reloaded rather than served from a stale
+#       cache, the risk/anomaly apps never claiming a model they cannot load.
 # RM runs first: the RW block swaps the stub packages in and the real modules back out afterwards
 # (sys.modules is restored, so a real torch is never re-imported in this process).
 SKIP = []
@@ -1182,6 +1183,13 @@ try:
     o = os.path.join(SCRATCH,"rw7"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("broken", ["BROKEN_coder"]), o)
     check("RW7 coding: a present but unreadable artifact STOPS the run (no fallback to a stand-in)",
           any("failed to load" in e.value for e in A.error), [e.value[:120] for e in A.error])
+    md16 = _rw_models("reload", [])            # one models dir path, two states, one process
+    o = os.path.join(SCRATCH,"rw16a"); _rp_run("meddra_app.py", SAMPLE, md16, o); aud_a = _rp_audit(o)
+    _rw_models("reload", FULL_CODING)
+    o = os.path.join(SCRATCH,"rw16b"); _rp_run("meddra_app.py", SAMPLE, md16, o); aud_b = _rp_audit(o)
+    check("RW16 coding: artifacts added to the same models dir in a running process are loaded on the next run (no stale cache)",
+          aud_a is not None and aud_b is not None and aud_a["mode_T2"]=="STAND-IN" and aud_b["mode_T2"]=="REAL",
+          None if aud_a is None or aud_b is None else (aud_a["mode_T2"], aud_b["mode_T2"]))
     cal_arts = [x for x in FULL_CODING if x != "laya_calibration_coding.json"]
     o = os.path.join(SCRATCH,"rw14"); A = _rp_run("meddra_app.py", SAMPLE, _rw_models("cal_path", cal_arts + ["CAL_OTHER_PATH"]), o); aud = _rp_audit(o)
     check("RW14 coding: a Laya calibration fitted on another machine (checkpoint path differs, config same) loads and runs REAL",

@@ -23,7 +23,7 @@ def load_app(name, models_dir=None):
         warnings.simplefilter("ignore")          # Streamlit's "no ScriptRunContext" outside a run
         exec(compile(src[:cut], path, "exec"), ns)
     if models_dir:
-        R = ns["load_real"](models_dir)
+        R = ns["load_real"](os.path.abspath(models_dir), ns["_artifact_stamp"](models_dir))
         if R["errors"]: raise RuntimeError("; ".join(R["errors"]))
         ns["_activate"](R)
         err = ns["_contract_error"](R)

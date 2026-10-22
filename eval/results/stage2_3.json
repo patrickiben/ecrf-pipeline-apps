@@ -225,5 +225,321 @@
    },
    "note": "as retrieval_only, but dictionary terms and verbatims embedded as typed (no lower-casing)"
   }
+ },
+ "phi": {
+  "data": {
+   "test_fields": 220,
+   "test_targets": 308,
+   "splits": {
+    "train": 484,
+    "test": 220,
+    "calib": 176
+   },
+   "train_candidate_spans": 856,
+   "test_templates": [
+    "T03",
+    "T04",
+    "T07",
+    "T10",
+    "T13",
+    "T14",
+    "T16",
+    "T17",
+    "T31",
+    "T32"
+   ]
+  },
+  "calibration": {
+   "direct_pii": {
+    "temperature_before": 1.9834,
+    "temperature_after": 1.355,
+    "temperature_source_before": "bucket noul:2",
+    "temperature_source_after": "type-level noul scalar",
+    "shared_by": "both PHI questions (Laya calibrates per answer type and option count)",
+    "fitted_on": 176,
+    "test_n": 220,
+    "ece_before": 0.445,
+    "ece_after": 0.4852,
+    "brier_before": 0.4111,
+    "brier_after": 0.4665,
+    "auroc": 0.6862
+   },
+   "reident_risk": {
+    "temperature_before": 1.9834,
+    "temperature_after": 1.355,
+    "temperature_source_before": "bucket noul:2",
+    "temperature_source_after": "type-level noul scalar",
+    "shared_by": "both PHI questions (Laya calibrates per answer type and option count)",
+    "fitted_on": 176,
+    "test_n": 220,
+    "ece_before": 0.154,
+    "ece_after": 0.0927,
+    "brier_before": 0.0452,
+    "brier_after": 0.0306,
+    "auroc": 0.9975
+   }
+  },
+  "gate": {
+   "rounds": 55,
+   "features": [
+    "src_needle",
+    "src_pattern",
+    "p_direct",
+    "p_quasi",
+    "n_indirect",
+    "digit_ratio",
+    "capitalized",
+    "rel_pos",
+    "span_len",
+    "cue",
+    "ent_PERSON_NAME",
+    "ent_PHONE",
+    "ent_EMAIL",
+    "ent_MRN",
+    "ent_DOB",
+    "ent_ZIP",
+    "ent_INITIALS",
+    "ent_AGE"
+   ]
+  },
+  "timing_s": {
+   "standin_test": 0.0,
+   "real_test": 279.1,
+   "laya_records_all": 389.3,
+   "needle_all": 501.1
+  },
+  "standin": {
+   "per_entity": {
+    "AGE": {
+     "gold": 22,
+     "predicted": 22,
+     "tp": 22,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0
+    },
+    "DOB": {
+     "gold": 44,
+     "predicted": 24,
+     "tp": 24,
+     "precision": 1.0,
+     "recall": 0.5455,
+     "f1": 0.7059
+    },
+    "EMAIL": {
+     "gold": 22,
+     "predicted": 22,
+     "tp": 22,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0
+    },
+    "INITIALS": {
+     "gold": 44,
+     "predicted": 44,
+     "tp": 44,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0
+    },
+    "MRN": {
+     "gold": 44,
+     "predicted": 22,
+     "tp": 22,
+     "precision": 1.0,
+     "recall": 0.5,
+     "f1": 0.6667
+    },
+    "PERSON_NAME": {
+     "gold": 66,
+     "predicted": 22,
+     "tp": 22,
+     "precision": 1.0,
+     "recall": 0.3333,
+     "f1": 0.5
+    },
+    "PHONE": {
+     "gold": 44,
+     "predicted": 22,
+     "tp": 22,
+     "precision": 1.0,
+     "recall": 0.5,
+     "f1": 0.6667
+    },
+    "ZIP": {
+     "gold": 22,
+     "predicted": 22,
+     "tp": 22,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0
+    },
+    "ALL": {
+     "gold": 308,
+     "predicted": 200,
+     "tp": 200,
+     "precision": 1.0,
+     "recall": 0.6494,
+     "f1": 0.7874
+    }
+   },
+   "leaked_targets": 108,
+   "leaked_direct": 108
+  },
+  "real": {
+   "per_entity": {
+    "AGE": {
+     "gold": 22,
+     "predicted": 16,
+     "tp": 16,
+     "precision": 1.0,
+     "recall": 0.7273,
+     "f1": 0.8421
+    },
+    "DOB": {
+     "gold": 44,
+     "predicted": 26,
+     "tp": 24,
+     "precision": 0.9231,
+     "recall": 0.5455,
+     "f1": 0.6857
+    },
+    "EMAIL": {
+     "gold": 22,
+     "predicted": 22,
+     "tp": 22,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0
+    },
+    "INITIALS": {
+     "gold": 44,
+     "predicted": 43,
+     "tp": 39,
+     "precision": 0.907,
+     "recall": 0.8864,
+     "f1": 0.8966
+    },
+    "MRN": {
+     "gold": 44,
+     "predicted": 22,
+     "tp": 22,
+     "precision": 1.0,
+     "recall": 0.5,
+     "f1": 0.6667
+    },
+    "PERSON_NAME": {
+     "gold": 66,
+     "predicted": 52,
+     "tp": 49,
+     "precision": 0.9423,
+     "recall": 0.7424,
+     "f1": 0.8305
+    },
+    "PHONE": {
+     "gold": 44,
+     "predicted": 24,
+     "tp": 22,
+     "precision": 0.9167,
+     "recall": 0.5,
+     "f1": 0.6471
+    },
+    "ZIP": {
+     "gold": 22,
+     "predicted": 22,
+     "tp": 22,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0
+    },
+    "ALL": {
+     "gold": 308,
+     "predicted": 227,
+     "tp": 216,
+     "precision": 0.9515,
+     "recall": 0.7013,
+     "f1": 0.8075
+    }
+   },
+   "leaked_targets": 91,
+   "leaked_direct": 80
+  },
+  "needle_extraction_only": {
+   "per_entity": {
+    "AGE": {
+     "gold": 22,
+     "predicted": 32,
+     "tp": 22,
+     "precision": 0.6875,
+     "recall": 1.0,
+     "f1": 0.8148
+    },
+    "DOB": {
+     "gold": 44,
+     "predicted": 49,
+     "tp": 15,
+     "precision": 0.3061,
+     "recall": 0.3409,
+     "f1": 0.3226
+    },
+    "EMAIL": {
+     "gold": 22,
+     "predicted": 20,
+     "tp": 19,
+     "precision": 0.95,
+     "recall": 0.8636,
+     "f1": 0.9048
+    },
+    "INITIALS": {
+     "gold": 44,
+     "predicted": 47,
+     "tp": 28,
+     "precision": 0.5957,
+     "recall": 0.6364,
+     "f1": 0.6154
+    },
+    "MRN": {
+     "gold": 44,
+     "predicted": 5,
+     "tp": 0,
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0
+    },
+    "PERSON_NAME": {
+     "gold": 66,
+     "predicted": 102,
+     "tp": 46,
+     "precision": 0.451,
+     "recall": 0.697,
+     "f1": 0.5476
+    },
+    "PHONE": {
+     "gold": 44,
+     "predicted": 80,
+     "tp": 24,
+     "precision": 0.3,
+     "recall": 0.5455,
+     "f1": 0.3871
+    },
+    "ZIP": {
+     "gold": 22,
+     "predicted": 56,
+     "tp": 12,
+     "precision": 0.2143,
+     "recall": 0.5455,
+     "f1": 0.3077
+    },
+    "ALL": {
+     "gold": 308,
+     "predicted": 391,
+     "tp": 166,
+     "precision": 0.4246,
+     "recall": 0.539,
+     "f1": 0.475
+    }
+   },
+   "note": "grounded Needle3 values used directly as redactions (no gate); shows the extractor alone"
+  }
  }
 }
