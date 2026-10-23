@@ -163,6 +163,6 @@ anomaly_data/            the anomaly app's own SYNTHETIC longitudinal demo (labs
 presentations/           Deck A (conceptual) and Deck B (implementation walkthrough), MD + HTML
 docs/                    GitHub Pages landing page (index.html), byte-identical copies of the two HTML decks, screenshots (img/), .nojekyll
 USER_GUIDE.md            step-by-step instruction manual for running all four apps
-tests/qc_test.py         portable end-to-end test harness (247 checks with the optional extras, 244 with requirements.txt only; `python tests/qc_test.py`)
+tests/qc_test.py         portable end-to-end test harness (`python tests/qc_test.py` reports passed, failed, and skipped checks for the installed dependencies)
 QC_REPORT.md             what was tested, what bugs were found and fixed, how to re-run the tests
 ```
