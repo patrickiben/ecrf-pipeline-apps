@@ -1,0 +1,383 @@
+family,set_id,set_size,role,pt_code,pt_name,n_llt
+lab,Alanine aminotransferase,3,increased,99300290,Alanine aminotransferase increased,8
+lab,Alanine aminotransferase,3,decreased,99300291,Alanine aminotransferase decreased,7
+lab,Alanine aminotransferase,3,abnormal,99300292,Alanine aminotransferase abnormal,4
+lab,Alkaline phosphatase,3,increased,99300299,Alkaline phosphatase increased,8
+lab,Alkaline phosphatase,3,decreased,99300300,Alkaline phosphatase decreased,7
+lab,Alkaline phosphatase,3,abnormal,99300301,Alkaline phosphatase abnormal,4
+lab,Amylase,3,increased,99300362,Amylase increased,6
+lab,Amylase,3,decreased,99300363,Amylase decreased,5
+lab,Amylase,3,abnormal,99300364,Amylase abnormal,3
+lab,Aspartate aminotransferase,3,increased,99300293,Aspartate aminotransferase increased,8
+lab,Aspartate aminotransferase,3,decreased,99300294,Aspartate aminotransferase decreased,7
+lab,Aspartate aminotransferase,3,abnormal,99300295,Aspartate aminotransferase abnormal,4
+lab,Blood albumin,3,increased,99300377,Blood albumin increased,6
+lab,Blood albumin,3,decreased,99300378,Blood albumin decreased,5
+lab,Blood albumin,3,abnormal,99300379,Blood albumin abnormal,3
+lab,Blood bicarbonate,3,increased,99300335,Blood bicarbonate increased,6
+lab,Blood bicarbonate,3,decreased,99300336,Blood bicarbonate decreased,5
+lab,Blood bicarbonate,3,abnormal,99300337,Blood bicarbonate abnormal,3
+lab,Blood bilirubin,3,increased,99300296,Blood bilirubin increased,6
+lab,Blood bilirubin,3,decreased,99300297,Blood bilirubin decreased,5
+lab,Blood bilirubin,3,abnormal,99300298,Blood bilirubin abnormal,3
+lab,Blood calcium,3,increased,99300323,Blood calcium increased,6
+lab,Blood calcium,3,decreased,99300324,Blood calcium decreased,5
+lab,Blood calcium,3,abnormal,99300325,Blood calcium abnormal,3
+lab,Blood chloride,3,increased,99300332,Blood chloride increased,6
+lab,Blood chloride,3,decreased,99300333,Blood chloride decreased,5
+lab,Blood chloride,3,abnormal,99300334,Blood chloride abnormal,3
+lab,Blood cholesterol,3,increased,99300371,Blood cholesterol increased,6
+lab,Blood cholesterol,3,decreased,99300372,Blood cholesterol decreased,5
+lab,Blood cholesterol,3,abnormal,99300373,Blood cholesterol abnormal,3
+lab,Blood creatine phosphokinase,3,increased,99300365,Blood creatine phosphokinase increased,8
+lab,Blood creatine phosphokinase,3,decreased,99300366,Blood creatine phosphokinase decreased,7
+lab,Blood creatine phosphokinase,3,abnormal,99300367,Blood creatine phosphokinase abnormal,4
+lab,Blood creatinine,3,increased,99300305,Blood creatinine increased,6
+lab,Blood creatinine,3,decreased,99300306,Blood creatinine decreased,5
+lab,Blood creatinine,3,abnormal,99300307,Blood creatinine abnormal,3
+lab,Blood glucose,3,increased,99300314,Blood glucose increased,6
+lab,Blood glucose,3,decreased,99300315,Blood glucose decreased,5
+lab,Blood glucose,3,abnormal,99300316,Blood glucose abnormal,3
+lab,Blood insulin,3,increased,99300419,Blood insulin increased,6
+lab,Blood insulin,3,decreased,99300420,Blood insulin decreased,5
+lab,Blood insulin,3,abnormal,99300421,Blood insulin abnormal,3
+lab,Blood iron,3,increased,99300392,Blood iron increased,6
+lab,Blood iron,3,decreased,99300393,Blood iron decreased,5
+lab,Blood iron,3,abnormal,99300394,Blood iron abnormal,3
+lab,Blood lactate dehydrogenase,3,increased,99300368,Blood lactate dehydrogenase increased,8
+lab,Blood lactate dehydrogenase,3,decreased,99300369,Blood lactate dehydrogenase decreased,7
+lab,Blood lactate dehydrogenase,3,abnormal,99300370,Blood lactate dehydrogenase abnormal,4
+lab,Blood magnesium,3,increased,99300326,Blood magnesium increased,6
+lab,Blood magnesium,3,decreased,99300327,Blood magnesium decreased,5
+lab,Blood magnesium,3,abnormal,99300328,Blood magnesium abnormal,3
+lab,Blood phosphate,3,increased,99300329,Blood phosphate increased,6
+lab,Blood phosphate,3,decreased,99300330,Blood phosphate decreased,5
+lab,Blood phosphate,3,abnormal,99300331,Blood phosphate abnormal,3
+lab,Blood potassium,3,increased,99300317,Blood potassium increased,6
+lab,Blood potassium,3,decreased,99300318,Blood potassium decreased,5
+lab,Blood potassium,3,abnormal,99300319,Blood potassium abnormal,3
+lab,Blood pressure,3,increased,99300404,Blood pressure increased,6
+lab,Blood pressure,3,decreased,99300405,Blood pressure decreased,5
+lab,Blood pressure,3,abnormal,99300406,Blood pressure abnormal,3
+lab,Blood sodium,3,increased,99300320,Blood sodium increased,6
+lab,Blood sodium,3,decreased,99300321,Blood sodium decreased,5
+lab,Blood sodium,3,abnormal,99300322,Blood sodium abnormal,3
+lab,Blood thyroid stimulating hormone,3,increased,99300395,Blood thyroid stimulating hormone increased,8
+lab,Blood thyroid stimulating hormone,3,decreased,99300396,Blood thyroid stimulating hormone decreased,7
+lab,Blood thyroid stimulating hormone,3,abnormal,99300397,Blood thyroid stimulating hormone abnormal,4
+lab,Blood triglycerides,3,increased,99300374,Blood triglycerides increased,6
+lab,Blood triglycerides,3,decreased,99300375,Blood triglycerides decreased,5
+lab,Blood triglycerides,3,abnormal,99300376,Blood triglycerides abnormal,3
+lab,Blood urea,3,increased,99300308,Blood urea increased,6
+lab,Blood urea,3,decreased,99300309,Blood urea decreased,5
+lab,Blood urea,3,abnormal,99300310,Blood urea abnormal,3
+lab,Blood uric acid,3,increased,99300311,Blood uric acid increased,6
+lab,Blood uric acid,3,decreased,99300312,Blood uric acid decreased,5
+lab,Blood uric acid,3,abnormal,99300313,Blood uric acid abnormal,3
+lab,Body temperature,3,increased,99300410,Body temperature increased,6
+lab,Body temperature,3,decreased,99300411,Body temperature decreased,5
+lab,Body temperature,3,abnormal,99300412,Body temperature abnormal,3
+lab,C-reactive protein,3,increased,99300386,C-reactive protein increased,8
+lab,C-reactive protein,3,decreased,99300387,C-reactive protein decreased,7
+lab,C-reactive protein,3,abnormal,99300388,C-reactive protein abnormal,4
+lab,Eosinophil count,3,increased,99300353,Eosinophil count increased,6
+lab,Eosinophil count,3,decreased,99300354,Eosinophil count decreased,5
+lab,Eosinophil count,3,abnormal,99300355,Eosinophil count abnormal,3
+lab,Gamma-glutamyltransferase,3,increased,99300302,Gamma-glutamyltransferase increased,8
+lab,Gamma-glutamyltransferase,3,decreased,99300303,Gamma-glutamyltransferase decreased,7
+lab,Gamma-glutamyltransferase,3,abnormal,99300304,Gamma-glutamyltransferase abnormal,4
+lab,Haematocrit,3,increased,99300356,Haematocrit increased,6
+lab,Haematocrit,3,decreased,99300357,Haematocrit decreased,5
+lab,Haematocrit,3,abnormal,99300358,Haematocrit abnormal,3
+lab,Haemoglobin,3,increased,99300338,Haemoglobin increased,8
+lab,Haemoglobin,3,decreased,99300339,Haemoglobin decreased,7
+lab,Haemoglobin,3,abnormal,99300340,Haemoglobin abnormal,4
+lab,Heart rate,3,increased,99300407,Heart rate increased,6
+lab,Heart rate,3,decreased,99300408,Heart rate decreased,5
+lab,Heart rate,3,abnormal,99300409,Heart rate abnormal,3
+lab,International normalised ratio,3,increased,99300401,International normalised ratio increased,8
+lab,International normalised ratio,3,decreased,99300402,International normalised ratio decreased,7
+lab,International normalised ratio,3,abnormal,99300403,International normalised ratio abnormal,4
+lab,Lipase,3,increased,99300359,Lipase increased,6
+lab,Lipase,3,decreased,99300360,Lipase decreased,5
+lab,Lipase,3,abnormal,99300361,Lipase abnormal,3
+lab,Lymphocyte count,3,increased,99300350,Lymphocyte count increased,6
+lab,Lymphocyte count,3,decreased,99300351,Lymphocyte count decreased,5
+lab,Lymphocyte count,3,abnormal,99300352,Lymphocyte count abnormal,3
+lab,Neutrophil count,3,increased,99300347,Neutrophil count increased,6
+lab,Neutrophil count,3,decreased,99300348,Neutrophil count decreased,5
+lab,Neutrophil count,3,abnormal,99300349,Neutrophil count abnormal,3
+lab,Platelet count,3,increased,99300341,Platelet count increased,6
+lab,Platelet count,3,decreased,99300342,Platelet count decreased,5
+lab,Platelet count,3,abnormal,99300343,Platelet count abnormal,3
+lab,Prothrombin time,3,increased,99300398,Prothrombin time increased,6
+lab,Prothrombin time,3,decreased,99300399,Prothrombin time decreased,5
+lab,Prothrombin time,3,abnormal,99300400,Prothrombin time abnormal,3
+lab,Respiratory rate,3,increased,99300416,Respiratory rate increased,6
+lab,Respiratory rate,3,decreased,99300417,Respiratory rate decreased,5
+lab,Respiratory rate,3,abnormal,99300418,Respiratory rate abnormal,3
+lab,Serum ferritin,3,increased,99300389,Serum ferritin increased,6
+lab,Serum ferritin,3,decreased,99300390,Serum ferritin decreased,5
+lab,Serum ferritin,3,abnormal,99300391,Serum ferritin abnormal,3
+lab,Total protein,3,increased,99300380,Total protein increased,6
+lab,Total protein,3,decreased,99300381,Total protein decreased,5
+lab,Total protein,3,abnormal,99300382,Total protein abnormal,3
+lab,Troponin,3,increased,99300383,Troponin increased,6
+lab,Troponin,3,decreased,99300384,Troponin decreased,5
+lab,Troponin,3,abnormal,99300385,Troponin abnormal,3
+lab,Weight,3,increased,99300413,Weight increased,6
+lab,Weight,3,decreased,99300414,Weight decreased,5
+lab,Weight,3,abnormal,99300415,Weight abnormal,3
+lab,White blood cell count,3,increased,99300344,White blood cell count increased,8
+lab,White blood cell count,3,decreased,99300345,White blood cell count decreased,7
+lab,White blood cell count,3,abnormal,99300346,White blood cell count abnormal,4
+site,abdomen,4,pain,99300159,Pain in abdomen,10
+site,abdomen,4,swelling,99300160,Swelling of abdomen,7
+site,abdomen,4,numbness,99300161,Numbness of abdomen,4
+site,abdomen,4,tenderness,99300162,Tenderness of abdomen,3
+site,ankle,6,pain,99300043,Pain in ankle,14
+site,ankle,6,swelling,99300044,Swelling of ankle,11
+site,ankle,6,numbness,99300045,Numbness of ankle,8
+site,ankle,6,tenderness,99300046,Tenderness of ankle,5
+site,ankle,6,weakness,99300047,Weakness of ankle,5
+site,ankle,6,cramp,99300048,Cramp in ankle,3
+site,arm,6,pain,99300061,Pain in arm,14
+site,arm,6,swelling,99300062,Swelling of arm,11
+site,arm,6,numbness,99300063,Numbness of arm,8
+site,arm,6,tenderness,99300064,Tenderness of arm,5
+site,arm,6,weakness,99300065,Weakness of arm,5
+site,arm,6,cramp,99300066,Cramp in arm,3
+site,back,4,pain,99300143,Pain in back,10
+site,back,4,swelling,99300144,Swelling of back,7
+site,back,4,numbness,99300145,Numbness of back,4
+site,back,4,tenderness,99300146,Tenderness of back,3
+site,big toe,6,pain,99300133,Pain in big toe,14
+site,big toe,6,swelling,99300134,Swelling of big toe,11
+site,big toe,6,numbness,99300135,Numbness of big toe,8
+site,big toe,6,tenderness,99300136,Tenderness of big toe,5
+site,big toe,6,weakness,99300137,Weakness of big toe,5
+site,big toe,6,cramp,99300138,Cramp in big toe,3
+site,buttock,4,pain,99300183,Pain in buttock,10
+site,buttock,4,swelling,99300184,Swelling of buttock,7
+site,buttock,4,numbness,99300185,Numbness of buttock,4
+site,buttock,4,tenderness,99300186,Tenderness of buttock,3
+site,calf,6,pain,99300079,Pain in calf,14
+site,calf,6,swelling,99300080,Swelling of calf,11
+site,calf,6,numbness,99300081,Numbness of calf,8
+site,calf,6,tenderness,99300082,Tenderness of calf,5
+site,calf,6,weakness,99300083,Weakness of calf,5
+site,calf,6,cramp,99300084,Cramp in calf,3
+site,cheek,4,pain,99300239,Pain in cheek,10
+site,cheek,4,swelling,99300240,Swelling of cheek,7
+site,cheek,4,numbness,99300241,Numbness of cheek,4
+site,cheek,4,tenderness,99300242,Tenderness of cheek,3
+site,chest,4,pain,99300155,Pain in chest,10
+site,chest,4,swelling,99300156,Swelling of chest,7
+site,chest,4,numbness,99300157,Numbness of chest,4
+site,chest,4,tenderness,99300158,Tenderness of chest,3
+site,elbow,6,pain,99300007,Pain in elbow,14
+site,elbow,6,swelling,99300008,Swelling of elbow,11
+site,elbow,6,numbness,99300009,Numbness of elbow,8
+site,elbow,6,tenderness,99300010,Tenderness of elbow,5
+site,elbow,6,weakness,99300011,Weakness of elbow,5
+site,elbow,6,cramp,99300012,Cramp in elbow,3
+site,face,4,pain,99300191,Pain in face,10
+site,face,4,swelling,99300192,Swelling of face,7
+site,face,4,numbness,99300193,Numbness of face,4
+site,face,4,tenderness,99300194,Tenderness of face,3
+site,finger,6,pain,99300025,Pain in finger,14
+site,finger,6,swelling,99300026,Swelling of finger,11
+site,finger,6,numbness,99300027,Numbness of finger,8
+site,finger,6,tenderness,99300028,Tenderness of finger,5
+site,finger,6,weakness,99300029,Weakness of finger,5
+site,finger,6,cramp,99300030,Cramp in finger,3
+site,flank,4,pain,99300211,Pain in flank,10
+site,flank,4,swelling,99300212,Swelling of flank,7
+site,flank,4,numbness,99300213,Numbness of flank,4
+site,flank,4,tenderness,99300214,Tenderness of flank,3
+site,foot,6,pain,99300049,Pain in foot,14
+site,foot,6,swelling,99300050,Swelling of foot,11
+site,foot,6,numbness,99300051,Numbness of foot,8
+site,foot,6,tenderness,99300052,Tenderness of foot,5
+site,foot,6,weakness,99300053,Weakness of foot,5
+site,foot,6,cramp,99300054,Cramp in foot,3
+site,forearm,6,pain,99300085,Pain in forearm,14
+site,forearm,6,swelling,99300086,Swelling of forearm,11
+site,forearm,6,numbness,99300087,Numbness of forearm,8
+site,forearm,6,tenderness,99300088,Tenderness of forearm,5
+site,forearm,6,weakness,99300089,Weakness of forearm,5
+site,forearm,6,cramp,99300090,Cramp in forearm,3
+site,forehead,4,pain,99300235,Pain in forehead,10
+site,forehead,4,swelling,99300236,Swelling of forehead,7
+site,forehead,4,numbness,99300237,Numbness of forehead,4
+site,forehead,4,tenderness,99300238,Tenderness of forehead,3
+site,groin,4,pain,99300175,Pain in groin,10
+site,groin,4,swelling,99300176,Swelling of groin,7
+site,groin,4,numbness,99300177,Numbness of groin,4
+site,groin,4,tenderness,99300178,Tenderness of groin,3
+site,gum,4,pain,99300203,Pain in gum,10
+site,gum,4,swelling,99300204,Swelling of gum,7
+site,gum,4,numbness,99300205,Numbness of gum,4
+site,gum,4,tenderness,99300206,Tenderness of gum,3
+site,hand,6,pain,99300019,Pain in hand,14
+site,hand,6,swelling,99300020,Swelling of hand,11
+site,hand,6,numbness,99300021,Numbness of hand,8
+site,hand,6,tenderness,99300022,Tenderness of hand,5
+site,hand,6,weakness,99300023,Weakness of hand,5
+site,hand,6,cramp,99300024,Cramp in hand,3
+site,heel,6,pain,99300091,Pain in heel,14
+site,heel,6,swelling,99300092,Swelling of heel,11
+site,heel,6,numbness,99300093,Numbness of heel,8
+site,heel,6,tenderness,99300094,Tenderness of heel,5
+site,heel,6,weakness,99300095,Weakness of heel,5
+site,heel,6,cramp,99300096,Cramp in heel,3
+site,hip,6,pain,99300031,Pain in hip,14
+site,hip,6,swelling,99300032,Swelling of hip,11
+site,hip,6,numbness,99300033,Numbness of hip,8
+site,hip,6,tenderness,99300034,Tenderness of hip,5
+site,hip,6,weakness,99300035,Weakness of hip,5
+site,hip,6,cramp,99300036,Cramp in hip,3
+site,jaw,4,pain,99300171,Pain in jaw,10
+site,jaw,4,swelling,99300172,Swelling of jaw,7
+site,jaw,4,numbness,99300173,Numbness of jaw,4
+site,jaw,4,tenderness,99300174,Tenderness of jaw,3
+site,knee,6,pain,99300037,Pain in knee,14
+site,knee,6,swelling,99300038,Swelling of knee,11
+site,knee,6,numbness,99300039,Numbness of knee,8
+site,knee,6,tenderness,99300040,Tenderness of knee,5
+site,knee,6,weakness,99300041,Weakness of knee,5
+site,knee,6,cramp,99300042,Cramp in knee,3
+site,leg,6,pain,99300067,Pain in leg,14
+site,leg,6,swelling,99300068,Swelling of leg,11
+site,leg,6,numbness,99300069,Numbness of leg,8
+site,leg,6,tenderness,99300070,Tenderness of leg,5
+site,leg,6,weakness,99300071,Weakness of leg,5
+site,leg,6,cramp,99300072,Cramp in leg,3
+site,lip,4,pain,99300247,Pain in lip,10
+site,lip,4,swelling,99300248,Swelling of lip,7
+site,lip,4,numbness,99300249,Numbness of lip,4
+site,lip,4,tenderness,99300250,Tenderness of lip,3
+site,lower abdomen,4,pain,99300167,Pain in lower abdomen,10
+site,lower abdomen,4,swelling,99300168,Swelling of lower abdomen,7
+site,lower abdomen,4,numbness,99300169,Numbness of lower abdomen,4
+site,lower abdomen,4,tenderness,99300170,Tenderness of lower abdomen,3
+site,lower back,4,pain,99300147,Pain in lower back,10
+site,lower back,4,swelling,99300148,Swelling of lower back,7
+site,lower back,4,numbness,99300149,Numbness of lower back,4
+site,lower back,4,tenderness,99300150,Tenderness of lower back,3
+site,lower leg,6,pain,99300103,Pain in lower leg,14
+site,lower leg,6,swelling,99300104,Swelling of lower leg,11
+site,lower leg,6,numbness,99300105,Numbness of lower leg,8
+site,lower leg,6,tenderness,99300106,Tenderness of lower leg,5
+site,lower leg,6,weakness,99300107,Weakness of lower leg,5
+site,lower leg,6,cramp,99300108,Cramp in lower leg,3
+site,mouth,4,pain,99300195,Pain in mouth,10
+site,mouth,4,swelling,99300196,Swelling of mouth,7
+site,mouth,4,numbness,99300197,Numbness of mouth,4
+site,mouth,4,tenderness,99300198,Tenderness of mouth,3
+site,neck,4,pain,99300139,Pain in neck,10
+site,neck,4,swelling,99300140,Swelling of neck,7
+site,neck,4,numbness,99300141,Numbness of neck,4
+site,neck,4,tenderness,99300142,Tenderness of neck,3
+site,nose,4,pain,99300243,Pain in nose,10
+site,nose,4,swelling,99300244,Swelling of nose,7
+site,nose,4,numbness,99300245,Numbness of nose,4
+site,nose,4,tenderness,99300246,Tenderness of nose,3
+site,palm,6,pain,99300115,Pain in palm,14
+site,palm,6,swelling,99300116,Swelling of palm,11
+site,palm,6,numbness,99300117,Numbness of palm,8
+site,palm,6,tenderness,99300118,Tenderness of palm,5
+site,palm,6,weakness,99300119,Weakness of palm,5
+site,palm,6,cramp,99300120,Cramp in palm,3
+site,pelvis,4,pain,99300179,Pain in pelvis,10
+site,pelvis,4,swelling,99300180,Swelling of pelvis,7
+site,pelvis,4,numbness,99300181,Numbness of pelvis,4
+site,pelvis,4,tenderness,99300182,Tenderness of pelvis,3
+site,rib cage,4,pain,99300219,Pain in rib cage,10
+site,rib cage,4,swelling,99300220,Swelling of rib cage,7
+site,rib cage,4,numbness,99300221,Numbness of rib cage,4
+site,rib cage,4,tenderness,99300222,Tenderness of rib cage,3
+site,sacrum,4,pain,99300223,Pain in sacrum,10
+site,sacrum,4,swelling,99300224,Swelling of sacrum,7
+site,sacrum,4,numbness,99300225,Numbness of sacrum,4
+site,sacrum,4,tenderness,99300226,Tenderness of sacrum,3
+site,scalp,4,pain,99300187,Pain in scalp,10
+site,scalp,4,swelling,99300188,Swelling of scalp,7
+site,scalp,4,numbness,99300189,Numbness of scalp,4
+site,scalp,4,tenderness,99300190,Tenderness of scalp,3
+site,shin,6,pain,99300109,Pain in shin,14
+site,shin,6,swelling,99300110,Swelling of shin,11
+site,shin,6,numbness,99300111,Numbness of shin,8
+site,shin,6,tenderness,99300112,Tenderness of shin,5
+site,shin,6,weakness,99300113,Weakness of shin,5
+site,shin,6,cramp,99300114,Cramp in shin,3
+site,shoulder,6,pain,99300001,Pain in shoulder,14
+site,shoulder,6,swelling,99300002,Swelling of shoulder,11
+site,shoulder,6,numbness,99300003,Numbness of shoulder,8
+site,shoulder,6,tenderness,99300004,Tenderness of shoulder,5
+site,shoulder,6,weakness,99300005,Weakness of shoulder,5
+site,shoulder,6,cramp,99300006,Cramp in shoulder,3
+site,side,4,pain,99300215,Pain in side,10
+site,side,4,swelling,99300216,Swelling of side,7
+site,side,4,numbness,99300217,Numbness of side,4
+site,side,4,tenderness,99300218,Tenderness of side,3
+site,sole,6,pain,99300121,Pain in sole,14
+site,sole,6,swelling,99300122,Swelling of sole,11
+site,sole,6,numbness,99300123,Numbness of sole,8
+site,sole,6,tenderness,99300124,Tenderness of sole,5
+site,sole,6,weakness,99300125,Weakness of sole,5
+site,sole,6,cramp,99300126,Cramp in sole,3
+site,tailbone,4,pain,99300227,Pain in tailbone,10
+site,tailbone,4,swelling,99300228,Swelling of tailbone,7
+site,tailbone,4,numbness,99300229,Numbness of tailbone,4
+site,tailbone,4,tenderness,99300230,Tenderness of tailbone,3
+site,temple,4,pain,99300231,Pain in temple,10
+site,temple,4,swelling,99300232,Swelling of temple,7
+site,temple,4,numbness,99300233,Numbness of temple,4
+site,temple,4,tenderness,99300234,Tenderness of temple,3
+site,thigh,6,pain,99300073,Pain in thigh,14
+site,thigh,6,swelling,99300074,Swelling of thigh,11
+site,thigh,6,numbness,99300075,Numbness of thigh,8
+site,thigh,6,tenderness,99300076,Tenderness of thigh,5
+site,thigh,6,weakness,99300077,Weakness of thigh,5
+site,thigh,6,cramp,99300078,Cramp in thigh,3
+site,thumb,6,pain,99300127,Pain in thumb,14
+site,thumb,6,swelling,99300128,Swelling of thumb,11
+site,thumb,6,numbness,99300129,Numbness of thumb,8
+site,thumb,6,tenderness,99300130,Tenderness of thumb,5
+site,thumb,6,weakness,99300131,Weakness of thumb,5
+site,thumb,6,cramp,99300132,Cramp in thumb,3
+site,toe,6,pain,99300055,Pain in toe,14
+site,toe,6,swelling,99300056,Swelling of toe,11
+site,toe,6,numbness,99300057,Numbness of toe,8
+site,toe,6,tenderness,99300058,Tenderness of toe,5
+site,toe,6,weakness,99300059,Weakness of toe,5
+site,toe,6,cramp,99300060,Cramp in toe,3
+site,tongue,4,pain,99300199,Pain in tongue,10
+site,tongue,4,swelling,99300200,Swelling of tongue,7
+site,tongue,4,numbness,99300201,Numbness of tongue,4
+site,tongue,4,tenderness,99300202,Tenderness of tongue,3
+site,tooth,4,pain,99300207,Pain in tooth,10
+site,tooth,4,swelling,99300208,Swelling of tooth,7
+site,tooth,4,numbness,99300209,Numbness of tooth,4
+site,tooth,4,tenderness,99300210,Tenderness of tooth,3
+site,upper abdomen,4,pain,99300163,Pain in upper abdomen,10
+site,upper abdomen,4,swelling,99300164,Swelling of upper abdomen,7
+site,upper abdomen,4,numbness,99300165,Numbness of upper abdomen,4
+site,upper abdomen,4,tenderness,99300166,Tenderness of upper abdomen,3
+site,upper arm,6,pain,99300097,Pain in upper arm,14
+site,upper arm,6,swelling,99300098,Swelling of upper arm,11
+site,upper arm,6,numbness,99300099,Numbness of upper arm,8
+site,upper arm,6,tenderness,99300100,Tenderness of upper arm,5
+site,upper arm,6,weakness,99300101,Weakness of upper arm,5
+site,upper arm,6,cramp,99300102,Cramp in upper arm,3
+site,upper back,4,pain,99300151,Pain in upper back,10
+site,upper back,4,swelling,99300152,Swelling of upper back,7
+site,upper back,4,numbness,99300153,Numbness of upper back,4
+site,upper back,4,tenderness,99300154,Tenderness of upper back,3
+site,wrist,6,pain,99300013,Pain in wrist,14
+site,wrist,6,swelling,99300014,Swelling of wrist,11
+site,wrist,6,numbness,99300015,Numbness of wrist,8
+site,wrist,6,tenderness,99300016,Tenderness of wrist,5
+site,wrist,6,weakness,99300017,Weakness of wrist,5
+site,wrist,6,cramp,99300018,Cramp in wrist,3
