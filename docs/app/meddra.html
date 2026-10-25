@@ -26,8 +26,13 @@
 <body>
 <header class="bar">
   <nav class="crumbs" aria-label="Breadcrumb"><a href="../">eCRF pipeline apps</a> <span aria-hidden="true">/</span> <span aria-current="page">Coding QC assist</span></nav>
-  <p class="privacy"><strong>Privacy:</strong> Runs in your browser; files are processed on your device and not uploaded by the app; the page is downloaded from GitHub Pages and the CDN, which see your IP address; synthetic data only; not a validated or Part 11 system.</p>
-  <p class="limits"><strong>Limits:</strong> The demo dictionary uses 99-prefixed placeholder codes, not MedDRA. Measured on held-out synthetic verbatims, this lexical stand-in ranked the right preferred term first for 54% (the real model path: 78%) and auto-coded 7 of 96 negated verbatims at the default gate; every code needs a coder&#x27;s review. <a href="../evaluation.html#coding">How this was measured</a>.</p>
+  <!-- Open while the app loads. On a small screen launch.js folds it to its one-line summary once the app is up,
+       so the app gets the room; one tap opens it again. Its summary line shows on small screens only. -->
+  <details id="notes" class="notes" open>
+    <summary>Privacy and limits</summary>
+    <p class="privacy"><strong>Privacy:</strong> Runs in your browser; files are processed on your device and not uploaded by the app; the page is downloaded from GitHub Pages and the CDN, which see your IP address; synthetic data only; not a validated or Part 11 system.</p>
+    <p class="limits"><strong>Limits:</strong> The demo dictionary uses 99-prefixed placeholder codes, not MedDRA. Measured on held-out synthetic verbatims, this lexical stand-in ranked the right preferred term first for 54% (the real model path: 78%) and auto-coded 7 of 96 negated verbatims at the default gate; every code needs a coder&#x27;s review. <a href="../evaluation.html#coding">How this was measured</a>.</p>
+  </details>
   <p id="style-error" class="style-error" role="alert" hidden></p>
 </header>
 <main id="stage">

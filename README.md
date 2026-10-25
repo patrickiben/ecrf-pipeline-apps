@@ -98,11 +98,17 @@ checked. Use a local run for real data.
 `docs/app/` holds what GitHub Pages serves for the four apps:
 
 - `meddra.html`, `phi.html`, `risk.html`, `anomaly.html`: one page per app, rendered from
-  `tools/browser_app_template.html`. Each shows a loading notice, its measured limits and a screenshot of the
-  app's results until Python is ready, and keeps the screenshot with a short explanation if the app cannot start.
+  `tools/browser_app_template.html`. Each shows a loading notice, the privacy note, a Limits line linked to the
+  evaluation and a screenshot of the app's results until Python is ready, and keeps the screenshot with a short
+  explanation if the app cannot start. The Limits line gives the measured result where there is one (coding and
+  de-identification); for risk screening and monitoring, which have no labeled evaluation, it says no accuracy was
+  measured and gives the known answers the QC suite checks. On a phone the privacy note and Limits line fold to a
+  one-line "Privacy and limits" summary once the app is up (one tap opens them); they stay open while it loads.
   If stlite's stylesheet does not load (the app then runs unstyled), the page fetches it again, twice at most and
   after a pause, and if that fails shows a notice with a Reload button above the app.
-- `launch.js` and `app.css`: the shared loader and page style.
+- `launch.js` and `app.css`: the shared loader and page style. `launch.js` also passes the apps' color theme,
+  the same as `.streamlit/config.toml`, so the Execute button, captions and banners meet WCAG AA contrast in
+  light and dark mode.
 - Byte-identical copies of the four `.py` files and of every CSV in `sample_data/` and `anomaly_data/`, which the
   pages load from Pages.
 - `wheels/`: three small pure-Python wheels the Streamlit build needs that Pyodide does not ship (`itsdangerous`
@@ -170,8 +176,11 @@ GitHub Pages publishes `docs/` from `main` (Settings > Pages) at https://patrick
 - [`docs/case-study.html`](docs/case-study.html): the four-tier design and two worked examples, with every number
   tagged by the path that produced it and where it was recorded. It replaces the two earlier decks; their old URLs
   (`docs/deck_a_four_tier_pipeline.html`, `docs/deck_b_implementation_walkthrough.html`) are redirect stubs.
+- [`docs/404.html`](docs/404.html): the page GitHub Pages shows for a missing address on the site, with links
+  home, to the evaluation, the case study and the four apps. Its links are site-absolute (`/ecrf-pipeline-apps/...`)
+  because it is served at whatever depth the missing address had.
 
-All three are single static files with inline CSS and no external scripts, stylesheets, fonts or images (QC check
+All four are single static files with inline CSS and no external scripts, stylesheets, fonts or images (QC check
 D2), and every local link in them must resolve (D3).
 
 ## Using your own cut
@@ -249,7 +258,9 @@ run_phi.sh    / .bat     the same, De-identification review assist on port 8502
 run_risk.sh   / .bat     the same, Participant risk screening on port 8503
 run_anomaly.sh/ .bat     the same, Central statistical monitoring on port 8504
 Launch *.command         macOS double-click launchers; Finder runs them in Terminal
-.streamlit/config.toml   disables Streamlit usage stats, so nothing leaves the machine
+.streamlit/config.toml   disables Streamlit usage stats, so nothing leaves the machine, and sets a light and dark
+                         color theme whose text and buttons meet WCAG AA contrast, except a slider's value in dark
+                         mode (3.2:1; the in-browser pages fix it in docs/app/app.css)
 .github/workflows/qc.yml CI: runs tests/qc_test.py and tests/test_sibling.py on every push and pull request in
                          three variants (stand-in and optional-extras on Python 3.12; browser-stack on Python 3.14.0
                          with the Streamlit, pandas, numpy and pyarrow versions the in-browser pages run), and checks
@@ -258,8 +269,8 @@ sample_data/             the one SYNTHETIC cut the coding, de-identification and
 anomaly_data/            the monitoring app's own SYNTHETIC longitudinal demo (labs.csv + generate.py)
 eval/                    the real model path: setup, synthetic evaluation data, training and evaluation scripts, results;
                          and the within-sibling check of the coding assist (registered plan, scripts, results)
-docs/                    GitHub Pages: index.html, evaluation.html, case-study.html, two redirect stubs for the
-                         retired decks, EVALUATION.md, FEASIBILITY.md, screenshots (img/), .nojekyll
+docs/                    GitHub Pages: index.html, evaluation.html, case-study.html, 404.html, two redirect stubs
+                         for the retired decks, EVALUATION.md, FEASIBILITY.md, screenshots (img/), .nojekyll
 docs/app/                the in-browser build: four pages, launch.js, app.css, copies of the apps and data, pinned wheels
 tools/                   sync_browser_apps.py (keeps docs/app/ in step; --check for CI) and the page template
 USER_GUIDE.md            step-by-step instruction manual for running all four apps

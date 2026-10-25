@@ -61,8 +61,10 @@ WHEELS = [
 REQUIREMENTS = ["numpy", "pandas", "toml"]
 
 # What each page must say about its own limits, next to the privacy note, so a visitor reads the measured
-# shortfall before the results (docs/evaluation.html has the numbers; they are synthetic-data results). The link
-# is relative, so it stays on the site and the --check pass verifies the page exists.
+# shortfall before the results (docs/evaluation.html has the numbers; they are synthetic-data results). Risk
+# screening and monitoring have no labeled evaluation, so their lines say so, give the known-answer results the
+# QC suite pins (checks R9b, R10 to R16, A8c and A14), and link the evaluation's "What this does not show" section.
+# Every link is relative, so it stays on the site and the --check pass verifies the page exists.
 EVALUATION = "../evaluation.html"
 APPS = {
     "meddra": dict(entry="meddra_app.py", data="sample_data", title="Coding QC assist",
@@ -81,14 +83,20 @@ APPS = {
     "risk": dict(entry="risk_app.py", data="sample_data", title="Participant risk screening",
         description="Participant risk screening running in your browser on synthetic safety domains: a safety listing that ranks participants against built-in criteria standing in for a protocol's, with the reasons for each flag.",
         img="risk_results.png",
-        limits="Both scores are capped, weighted sums of built-in [SI] rules, not probabilities or a validated model; every "
-               "flag needs clinical review.",
+        limits="Both scores are capped, weighted sums of built-in [SI] rules, not probabilities or a validated model. No "
+               "accuracy was measured: there is no labeled evaluation, and the QC suite checks 5 of the 6 test-case "
+               "participants planted in the 52-participant synthetic cut; all 5 get the category or reason they were "
+               "built for. Every flag needs clinical review.", limits_link=EVALUATION + "#notshown",
+        limits_link_text="What this does not show",
         alt="Participant risk screening results: per-participant safety and discontinuation scores and categories with contributing factors, the fatal participant pinned to the top, and a category summary."),
     "anomaly": dict(entry="anomaly_app.py", data="anomaly_data", title="Central statistical monitoring",
         description="Central statistical monitoring checks running in your browser on a synthetic longitudinal lab cut: numeric outliers, cohort drift, per-lab drift and unusual free-text notes.",
         img="anomaly_results.png",
         limits="Here every detector runs its [SI] stand-in (robust z, 1-D Wasserstein drift, bag-of-words text "
-               "isolation) with built-in thresholds; every flag needs human review.",
+               "isolation) with built-in thresholds. On the 150-participant synthetic demo it flagged all 3 injected "
+               "outliers plus 1 participant with no injected outlier, and exactly the 3 injected unusual notes; with no "
+               "labeled evaluation, no accuracy was measured. Every flag needs human review.",
+        limits_link=EVALUATION + "#notshown", limits_link_text="What this does not show",
         alt="Central statistical monitoring results: flagged per-participant numeric outliers with their extreme columns, a cohort-wide drift table per column, and the start of the per-lab drift table."),
 }
 HAND_EDITED = ["launch.js", "app.css"]          # live in docs/app/ only; must exist
@@ -143,8 +151,8 @@ def render_page(key):
         "CSP": html.escape(csp, quote=False), "STLITE_CSS": f"{STLITE_BUILD}/stlite.css", "STLITE_CSS_SRI": STLITE_SRI["stlite.css"],
         "CDN": CDN, "IMPORTMAP": importmap, "CONFIG": cfg, "IMG": a["img"], "ALT": html.escape(a["alt"]),
         "LOADING_NOTICE": html.escape(LOADING_NOTICE), "PRIVACY_NOTE": html.escape(PRIVACY_NOTE),
-        "LIMITS": html.escape(a["limits"]) + (f' <a href="{a["limits_link"]}">How this was measured</a>.'
-                                               if a.get("limits_link") else ""),
+        "LIMITS": html.escape(a["limits"]) + f' <a href="{a["limits_link"]}">'
+                  + html.escape(a.get("limits_link_text", "How this was measured")) + "</a>.",
         "RUN_LOCALLY": RUN_LOCALLY, "STLITE_VERSION": STLITE_VERSION,
     }
     out = _read(TEMPLATE).decode("utf-8")

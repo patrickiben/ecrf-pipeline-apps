@@ -295,6 +295,9 @@ if res is not None:
     # all four safety categories present across the bulk cut
     cats=set(res["safety_category"])
     check("R9 all four safety categories present", {"LOW","MODERATE","HIGH","CRITICAL"} <= cats, sorted(cats))
+    # The in-browser page's Limits line (tools/sync_browser_apps.py) and docs/evaluation.html give this count.
+    check("R9b one row per participant: 52 in the bundled cut (the count the Limits line states)",
+          len(res)==52 and res["USUBJID"].is_unique, (len(res), int(res["USUBJID"].nunique())))
     def subj(uid): return res[res["USUBJID"].astype(str)==uid]
     # anchor assertions (clinically-meaningful; each lands with margin in its band)
     check("R10 fatal SUBJ-9015 -> CRITICAL", len(subj("SUBJ-9015"))==1 and subj("SUBJ-9015").iloc[0]["safety_category"]=="CRITICAL", "")
@@ -402,6 +405,12 @@ if anomf is not None:
     check("A8 all 3 injected outliers in top-6 anomalies", inj <= top6, sorted(inj & top6))
     # flagged-only: every emitted participant is at least MODERATE (no LOW rows leak into the output)
     check("A8b flagged-only output (no LOW-category participants emitted)", int((anomf["anomaly_category"]=="LOW").sum())==0, sorted(set(anomf["anomaly_category"])))
+    # The in-browser page's Limits line and docs/evaluation.html say the demo flags the 3 injected outliers plus
+    # 1 participant with none injected (SUBJ-A150, MODERATE: a side effect of the injected LAB-C AST shift).
+    check("A8c exactly 4 participants flagged: the 3 injected outliers plus SUBJ-A150 at MODERATE (as the Limits line states)",
+          set(anomf["USUBJID"])==inj|{"SUBJ-A150"} and len(anomf)==4
+          and anomf.loc[anomf["USUBJID"]=="SUBJ-A150","anomaly_category"].tolist()==["MODERATE"],
+          anomf[["USUBJID","anomaly_category"]].values.tolist())
     if HAVE_SKLEARN:
         check("A16 numeric outliers cite the IsolationForest detector", anomf["detectors"].astype(str).str.contains("IsolationForest").all(), list(anomf["detectors"]))
 if driftf is not None:
@@ -865,8 +874,8 @@ finally:
 # ---------------------------------------------------------------- docs / GitHub Pages (D-checks)
 # docs/ is served as-is by GitHub Pages (main branch, /docs; docs/.nojekyll turns Jekyll off). These checks
 # read files only, no app runs:
-#   D1  docs/ holds exactly the published pages (DOC_PAGES: the landing page, the evaluation and the case
-#       study) plus one redirect stub per retired URL (RETIRED: the two old deck pages, merged into the case
+#   D1  docs/ holds exactly the published pages (DOC_PAGES: the landing page, the evaluation, the case
+#       study and the custom 404 page) plus one redirect stub per retired URL (RETIRED: the two old deck pages, merged into the case
 #       study), and each stub's <meta http-equiv=refresh> points at its listed page, which must exist. So a
 #       retired link keeps working and no stray or stale page lingers on the site (fix: add the page to
 #       DOC_PAGES, or delete it, or restore the stub).
@@ -877,7 +886,10 @@ finally:
 #   D3  every LOCAL reference resolves on disk, against its file's folder: in README.md every Markdown link
 #       and image (inline and reference-style) and <img src>; in each docs page every href, src, srcset
 #       entry, poster, data, refresh target and CSS url(). Remote URLs (the CI badge), #anchors and
-#       mailto:/data: are skipped. README.md and each published page must hold at least one local reference,
+#       mailto:/data: are skipped. A site-absolute reference under /ecrf-pipeline-apps/ (the project site's
+#       base path) resolves against docs/. 404.html must use only such site-absolute local links, because
+#       GitHub Pages serves it for a missing address at any depth, where a relative link would point to the
+#       wrong folder. README.md and each published page must hold at least one local reference,
 #       and every docs/img/ file must be used by at least one of them, so the check cannot pass with nothing
 #       to check.
 #   D4  the in-browser build in docs/app/ is in step with its sources: tools/sync_browser_apps.py --check
@@ -887,7 +899,8 @@ finally:
 from html.parser import HTMLParser
 from urllib.parse import unquote
 DOCS = os.path.join(APP_DIR,"docs")
-DOC_PAGES = ["index.html", "evaluation.html", "case-study.html"]                 # published pages
+DOC_PAGES = ["index.html", "evaluation.html", "case-study.html", "404.html"]     # published pages
+SITE_BASE = "/ecrf-pipeline-apps/"   # GitHub Pages serves docs/ at this path (a project site)
 RETIRED = {"deck_a_four_tier_pipeline.html": "case-study.html",                 # retired URL -> where it redirects
            "deck_b_implementation_walkthrough.html": "case-study.html"}
 def _offsite(v): v=(v or "").strip().lower(); return v.startswith(("http:","https:","//")) or "://" in v
@@ -920,8 +933,11 @@ class _Refs(HTMLParser):
         if self._in=="style": self.css.append(data)
         elif self._in=="script": self.js.append(data)
 def _resolve(base_dir, r):
-    """A local reference -> its normalized path on disk (query/fragment stripped, %-escapes decoded)."""
-    return os.path.normpath(os.path.join(base_dir, unquote(re.split(r"[?#]", r.strip())[0])))
+    """A local reference -> its normalized path on disk (query/fragment stripped, %-escapes decoded). A
+    site-absolute one under SITE_BASE resolves against docs/; any other absolute path stays as it is."""
+    r = unquote(re.split(r"[?#]", r.strip())[0])
+    if r.startswith(SITE_BASE): base_dir, r = DOCS, r[len(SITE_BASE):]
+    return os.path.normpath(os.path.join(base_dir, r))
 def _local_missing(base_dir, refs):
     """refs -> the local ones that do not exist (a file, or a folder such as sample_data/)."""
     return [r for r in refs if not _skip(r) and not os.path.exists(_resolve(base_dir, r))]
@@ -969,11 +985,13 @@ try:
     miss = [("README.md",m) for m in _local_missing(APP_DIR, rd_refs)]
     for f,refs in pg_refs.items(): miss += [("docs/"+f,m) for m in _local_missing(DOCS, refs)]
     nloc = dict(readme=sum(1 for r in rd_refs if not _skip(r)), **{f: sum(1 for r in pg_refs[f] if not _skip(r)) for f in DOC_PAGES})
+    rel404 = [r for r in pg_refs.get("404.html", []) if not _skip(r) and not r.strip().startswith(SITE_BASE)]
     used = {_resolve(APP_DIR,r) for r in rd_refs if not _skip(r)} | {_resolve(DOCS,r) for refs in pg_refs.values() for r in refs if not _skip(r)}
     IMG = os.path.join(DOCS,"img")
     unused = sorted(f for f in (os.listdir(IMG) if os.path.isdir(IMG) else []) if os.path.normpath(os.path.join(IMG,f)) not in used)
     check("D3 every local link and image in README.md and the docs pages exists on disk (and every docs/img/ file is used)",
-          not miss and all(n>=1 for n in nloc.values()) and not unused, dict(local_refs=nloc, missing=miss, unused_images=unused))
+          not miss and all(n>=1 for n in nloc.values()) and not unused and not rel404,
+          dict(local_refs=nloc, missing=miss, unused_images=unused, relative_links_in_404=rel404))
 except Exception as e: check("D3 docs references block raised", False, repr(e))
 
 try:
