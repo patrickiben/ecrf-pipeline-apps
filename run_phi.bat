@@ -1,5 +1,5 @@
 @echo off
-rem One-command launcher for the PII/PHI flagging & redaction app (Windows).
+rem One-command launcher for the De-identification review assist, phi_app.py (Windows).
 rem Creates .venv on first run, installs requirements, then starts Streamlit.
 setlocal
 cd /d "%~dp0"
@@ -19,7 +19,7 @@ if not exist ".venv\Scripts\python.exe" (
 ".venv\Scripts\pip.exe" install --quiet --disable-pip-version-check -r requirements.txt || goto :err
 
 if "%PORT%"=="" set PORT=8502
-echo Starting PII/PHI Flagging Engine at http://localhost:%PORT%
+echo Starting De-identification review assist [phi_app.py] at http://localhost:%PORT%
 ".venv\Scripts\streamlit.exe" run phi_app.py --server.port %PORT% %*
 exit /b 0
 :err

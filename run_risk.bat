@@ -1,5 +1,5 @@
 @echo off
-rem One-command launcher for the participant risk-scoring app (Windows).
+rem One-command launcher for Participant risk screening, risk_app.py (Windows).
 rem Creates .venv on first run, installs requirements, then starts Streamlit.
 setlocal
 cd /d "%~dp0"
@@ -19,7 +19,7 @@ if not exist ".venv\Scripts\python.exe" (
 ".venv\Scripts\pip.exe" install --quiet --disable-pip-version-check -r requirements.txt || goto :err
 
 if "%PORT%"=="" set PORT=8503
-echo Starting Participant Risk Scoring Engine at http://localhost:%PORT%
+echo Starting Participant risk screening [risk_app.py] at http://localhost:%PORT%
 ".venv\Scripts\streamlit.exe" run risk_app.py --server.port %PORT% %*
 exit /b 0
 :err

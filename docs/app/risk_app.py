@@ -6,9 +6,10 @@
 #     module. The small helpers near the top (_have, _col) are DELIBERATELY
 #     DUPLICATED from the siblings. Do not "refactor" them into a shared file:
 #     a shared module is a coupling point that would let a change to one head
-#     silently move another's behavior, and each head is validated as its own
-#     computer-system scope with its own audit trail. Duplication is the price
-#     of that independence, and it is intentional.
+#     silently move another's behavior, and each head is kept separate so it could
+#     be validated on its own scope, with its own audit log (none is a validated
+#     system; the audit log is a plain CSV). Duplication is the price of that
+#     independence, and it is intentional.
 #   * This program SCORES RISK ONLY. It never codes a verbatim (that is
 #     meddra_app.py), never scrubs PHI (phi_app.py), and never detects anomalies/drift
 #     (anomaly_app.py). It reads safety domains -- AE / LB / EG / VS / PE -- from raw data
@@ -38,8 +39,8 @@
 #                      file by CONTENT (signature columns, not file name), align rows
 #                      to participants by USUBJID; copy values through UNCHANGED.
 #   Tier 2 signals  -> per participant, extract READABLE risk signals: n_AE, n_SAE, max
-#                      severity, fatal flag, which labs breach their SAP multiple and
-#                      by how much, QTc vs the cardiac limit, vitals vs protocol limits,
+#                      severity, fatal flag, which labs exceed their built-in [SI] ULN multiple
+#                      and by how much, QTc vs the cardiac criterion, vitals vs built-in limits,
 #                      notable physical-exam findings. Proposes nothing; measures only.
 #   Tier 3 aggregate-> weighted sum of those signals -> safety_risk_score (0-100) and
 #                      discontinuation_risk_score (0-1). Weights and thresholds are DECLARED
@@ -75,8 +76,15 @@ HAVE = {m: _have(m) for m in ("xgboost","pyreadstat")}
 # [SI] everywhere they drive a number (banner + audit); a real deployment would replace them
 # with study-specific declared criteria or a validated model.
 DEFAULT_THR = {
-    "ALT_ULN_MULT": 3.0, "AST_ULN_MULT": 3.0, "CREAT_ULN_MULT": 1.5,   # lab stopping multiples (x ULN)
-    "QTC_ABS_MS": 500,                                                 # cardiac criterion (ms)
+    # Lab criteria (x ULN): a value ABOVE the multiple counts. These are [SI] screening criteria, not CTCAE
+    # grades (in CTCAE v5.0, ALT/AST >3.0x ULN and creatinine >1.5x ULN are grade 2 entry points) and not
+    # the discontinuation criteria in FDA's DILI guidance (July 2009): ALT/AST >8x ULN; >5x for more than
+    # 2 weeks; >3x with TBL >2x ULN or INR >1.5; >3x with symptoms.
+    "ALT_ULN_MULT": 3.0, "AST_ULN_MULT": 3.0, "CREAT_ULN_MULT": 1.5,
+    # Cardiac criterion: QTc strictly ABOVE 500 ms, the top ICH E14 categorical tier (>450, >480, >500 ms).
+    # The app applies only this tier, no change from baseline, and does not know whether the column is
+    # QTcF or QTcB.
+    "QTC_ABS_MS": 500,
     "SYSBP_HIGH_MMHG": 180, "DIASTP_HIGH_MMHG": 110, "TEMPC_HIGH_C": 38.5,  # vital-sign limits
     "SAFETY_CAT_MODERATE": 25, "SAFETY_CAT_HIGH": 50, "SAFETY_CAT_CRITICAL": 75,   # safety category cuts (score)
     "DISC_CAT_MODERATE": 0.3, "DISC_CAT_HIGH": 0.6,                    # discontinuation category cuts (prob)
@@ -91,9 +99,9 @@ SEV_WEIGHT = {"MILD": 2, "MODERATE": 6, "SEVERE": 16, "LIFETHREATENING": 28}   #
 SERIOUS_MULT = 1.5        # x a serious AE (AESER=Y)
 FATAL_ADDER = 35          # flat adder for any fatal outcome (AELIFE=Y); added ON TOP of the capped AE load
 AE_CAP = 45               # cap on the non-fatal AE severity load
-LAB_PER_BREACH = lambda ratio, thr: min(15, round((ratio - thr) * 4))   # points per lab breach (x ULN beyond SAP multiple)
+LAB_PER_BREACH = lambda ratio, thr: min(15, round((ratio - thr) * 4))   # points per lab breach (x ULN beyond the [SI] multiple)
 LAB_CAP = 30              # cap on the whole lab component
-ECG_BASE, ECG_SLOPE, ECG_CAP = 6, 4, 12     # QTc>=limit -> min(cap, base + round((qtc-limit)/slope))
+ECG_BASE, ECG_SLOPE, ECG_CAP = 6, 4, 12     # QTc>limit -> min(cap, base + round((qtc-limit)/slope))
 VIT_BASE, VIT_SLOPE, VIT_PER, VIT_CAP = 2, 4, 8, 13   # per vital breach -> min(per, base+round((val-limit)/slope)); cap whole component
 
 # Discontinuation model weights ([SI]): additive contributions squashed to [0,1].
@@ -101,8 +109,8 @@ DISC_SERIOUS_EACH, DISC_SERIOUS_CAP = 0.25, 0.6   # per serious AE, capped
 DISC_RELATED_FRAC = 0.2                           # x (fraction of AEs related)
 DISC_MAXSEV = {"MILD": 0.0, "MODERATE": 0.1, "SEVERE": 0.25, "LIFETHREATENING": 0.4}
 DISC_FATAL = 0.3                                  # any fatal outcome
-DISC_LAB_EACH, DISC_LAB_CAP = 0.15, 0.3           # per analyte breaching its SAP multiple, capped
-DISC_QTC = 0.15                                   # QTc at/over the cardiac limit
+DISC_LAB_EACH, DISC_LAB_CAP = 0.15, 0.3           # per analyte above its [SI] ULN multiple, capped
+DISC_QTC = 0.15                                   # QTc above the cardiac criterion
 DISC_VITAL = 0.1                                  # any vital-sign breach
 DISC_CLINSIG_EACH, DISC_CLINSIG_CAP = 0.1, 0.2    # per source-system clinically-significant finding, capped
 
@@ -113,8 +121,8 @@ VITAL_KEY = {"SYSBP": "SYSBP_HIGH_MMHG", "DIASTP": "DIASTP_HIGH_MMHG", "TEMPC": 
 
 # --------------------------------------------------------------------------- #
 # Hosted-demo safety mode. ON when the environment variable ECRF_HOSTED=1 is set
-# or the Streamlit secret "hosted = true" exists (Streamlit Community Cloud: app
-# Settings > Secrets). A public demo must never take in real data, so in this
+# or the Streamlit secret "hosted = true" exists (.streamlit/secrets.toml on a
+# server you run; the in-browser pages set ECRF_HOSTED=1). A public demo must never take in real data, so in this
 # mode every input that could bring data in (the uploaders, the folder path, the
 # models dir and, in the coding app, the .asc folder) is DISABLED in the UI and
 # its value is also OVERWRITTEN in code: a disabled widget only stops the
@@ -138,10 +146,10 @@ HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real 
 _HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
 # In-browser build (stlite on Pyodide, served from docs/app/ on GitHub Pages): sys.platform is
 # "emscripten" there and nowhere else. The flag only rewords text that would be wrong in a browser
-# tab ("air-gapped", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
+# tab ("runs locally, no network calls", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
 # help); a local run is unchanged.
 IN_BROWSER = sys.platform == "emscripten"
-RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "air-gapped"
+RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "runs locally, no network calls"
 OUT_HELP_BROWSER = ("In this in-browser build the folder lives in the tab's memory, not on your disk, and is "
                     "gone when the tab closes. Save results with the download buttons.")
 def _hosted():
@@ -269,7 +277,7 @@ def _classify_reason(df):
     if has(*SYN["PEFIND"]) or has("PEDECOD"): return "matched PE (finding/present-absent)"
     if has(*SYN["LBNRHI"]): return "matched LB (ULN column)"
     if has(*SYN["VSPAR"],*SYN["VSSTRESN"]): return "matched VS (parameter + value, no ULN)"
-    return ("no signature matched -- looked for AE(severity/term), EG(QTc), PE(finding), LB(ULN column) or "
+    return ("no signature matched; looked for AE(severity/term), EG(QTc), PE(finding), LB(ULN column) or "
             "VS(parameter+value); rename columns to those synonyms (or add a spelling to SYN) and re-run")
 
 # ============================ TIER 1 ============================
@@ -360,14 +368,14 @@ def tier2_signals(views, thr):
                 if pd.isna(val) or pd.isna(uln) or not uln: continue
                 ratio=val/uln
                 if thr_v is not None and ratio>thr_v:
-                    breaches.append(f"{code} {ratio:.1f}x ULN (>{thr_v:g}x SAP)")
+                    breaches.append(f"{code} {ratio:.1f}x ULN ([SI] criterion >{thr_v:g}x ULN)")
         return breaches
 
     def eg_sig(s):
         if eg is not None and s in eg.index:
             q=eg.loc[s,"EGQTC"] if isinstance(eg.loc[s],pd.Series) else eg.loc[s].iloc[0]["EGQTC"]
             lim=thr.get("QTC_ABS_MS")
-            if pd.notna(q) and lim is not None and q>=lim: return f"QTc {q:g} ms (>={lim:g})"
+            if pd.notna(q) and lim is not None and q>lim: return f"QTc {q:g} ms ([SI] criterion >{lim:g} ms)"
         return None
 
     def vs_sig(s):
@@ -421,7 +429,7 @@ def tier2_signals(views, thr):
 #           and discontinuation_risk_score (0-1). [SI] transparent weighted engine.
 # Per-AE severity weighting needs each AE's own severity (not just a participant max), so Tier 3
 # consumes BOTH the readable signal table AND the raw aligned AE view. Every weight is a declared
-# constant above ([SI]); every threshold comes from `thr` (SAP file or labeled default). The
+# constant above ([SI]); every threshold comes from `thr` (the built-in [SI] criteria). The
 # decision is a function of numbers already on screen -- no hidden feature.
 def tier3_scores(sig, views, thr):
     ae=views.get("ae")
@@ -437,7 +445,7 @@ def tier3_scores(sig, views, thr):
         else:
             load=0.0
         ae_comp=min(AE_CAP,load)+(FATAL_ADDER if r["fatal"] else 0)
-        # --- lab component: points per analyte breaching its SAP multiple, capped. Only
+        # --- lab component: points per analyte above its [SI] ULN multiple, capped. Only
         #     BREACHES count (ratio > declared threshold); a sub-threshold lab contributes 0,
         #     never a negative point -- that guard is what keeps every score in [0,100]. ---
         lab_pts=0.0
@@ -445,9 +453,9 @@ def tier3_scores(sig, views, thr):
             t=thr.get(f"{code}_ULN_MULT")
             if t is not None and ratio>t: lab_pts+=LAB_PER_BREACH(ratio,t)
         lab_comp=min(LAB_CAP,lab_pts)
-        # --- ECG component: QTc at/over the cardiac limit ---
+        # --- ECG component: QTc above the cardiac criterion ---
         qtc=_qtc_value(views,s); lim=thr.get("QTC_ABS_MS")
-        ecg_comp=min(ECG_CAP,ECG_BASE+round((qtc-lim)/ECG_SLOPE)) if (pd.notna(qtc) and lim is not None and qtc>=lim) else 0
+        ecg_comp=min(ECG_CAP,ECG_BASE+round((qtc-lim)/ECG_SLOPE)) if (pd.notna(qtc) and lim is not None and qtc>lim) else 0
         # --- vitals component: per vital breach, capped ---
         vit_pts=0
         for par,val in _vital_values(views,s):
@@ -478,7 +486,7 @@ def tier3_scores(sig, views, thr):
 
 def _lab_ratios(views,s):
     """Yield (analyte_code, value/ULN ratio) for participant s -- the raw detail Tier 3 needs to
-    weight each breach by how far past its SAP multiple it is."""
+    weight each breach by how far past its [SI] ULN multiple it is."""
     lb=views.get("lb")
     if lb is None or s not in lb.index: return []
     r=lb.loc[s] if isinstance(lb.loc[s],pd.DataFrame) else pd.DataFrame([lb.loc[s]])
@@ -568,12 +576,12 @@ def _guard_artifacts(models_dir):
 # read and how each file classified, then the banner, then the pre-flight CONTRACT panel, then
 # Run. The operator confirms the input contract BEFORE any compute, so a mis-pointed folder or
 # an unrecognized domain is caught on screen, not after a silent wrong answer.
-st.set_page_config(page_title="Participant Risk Screening", layout="wide")
+st.set_page_config(page_title="Participant risk screening", layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
 if HOSTED: st.set_option("client.showErrorDetails", "none")
-st.title("⚖ Participant Safety & Discontinuation Risk Scoring")
+st.title("⚖ Participant risk screening")
 st.caption("Tier 1 intake → Tier 2 signals → Tier 3 aggregate [SI] → Tier 4 categorize · "
            "decision support, not a clinical determination · " + RUNS_WHERE + " · no sample data in this file")
 # Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
@@ -583,32 +591,33 @@ if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 # panel so the working view stays clean but help is one click away. Self-contained: it refers to
 # nothing outside this program.
 _HELP_MD = """
-**What this app does.** Scores each study participant on two axes — **risk to their safety** (0–100) and **risk of discontinuing from the study** (0–1) — from raw adverse events plus lab, ECG, vital-sign and physical-exam data. It ranks and flags participants for human review; it is **decision support, not a clinical determination**.
+**What this app does.** Scores each study participant on two axes, **risk to their safety** (0 to 100) and **risk of discontinuing from the study** (0 to 1), from raw adverse events plus lab, ECG, vital-sign and physical-exam data. Both scores are capped, weighted sums of built-in rules, not probabilities. It ranks and flags participants for human review; it is **decision support, not a clinical determination**.
 
-**What it needs.** Safety-domain CSVs (`ae`, `lb`, `eg`, `vs`, `pe`) with a participant ID column — that's all. No dictionary, no SAP or protocol file: the app scores raw data against clearly-labeled built-in criteria. Files named `*meddra*` are skipped automatically (reference data for another program).
+**What it needs.** Safety-domain CSVs (`ae`, `lb`, `eg`, `vs`, `pe`) with a participant ID column; nothing else. No dictionary, no SAP or protocol file: the app scores raw data against clearly-labeled built-in criteria. Files named `*meddra*` are skipped automatically (reference data for another program).
 
 ### Step by step
-1. **Point at your data** (sidebar 📂 1) — type a cut-folder path and/or upload safety CSVs. Every `*.csv` except one named `*meddra*` loads; each file is classified by its *content* (signature columns), not its name, so `ae.csv`, `adverse_events.csv`, or an oddly-named dump all work.
-2. **Set outputs** (sidebar ⚖ 2) — output folder (default `risk_output`) and an optional models dir for a real trained model. There is no gate slider: the operating point is the built-in `[SI]` criteria, recorded in the audit.
-3. **Confirm the input** (pre-flight panel) — check which domains loaded, how each file classified, and the participant count.
-4. **Execute** — click 🚀 Execute Risk Scoring. Results render on screen (highest-risk first) and write to the output folder.
+1. **Point at your data** (sidebar 📂 1): type a cut-folder path and/or upload safety CSVs. Every `*.csv` except one named `*meddra*` loads; each file is classified by its *content* (signature columns), not its name, so `ae.csv`, `adverse_events.csv`, or an oddly-named dump all work.
+2. **Set outputs** (sidebar ⚖ 2): output folder (default `risk_output`) and a models dir field. This build has no trained risk model, so leave the models dir empty; a `risk_model.json` there stops the run. There is no gate slider: the operating point is the built-in `[SI]` criteria, recorded in the audit.
+3. **Confirm the input** (pre-flight panel): check which domains loaded, how each file classified, and the participant count.
+4. **Execute**: click 🚀 Execute Risk Scoring. Results render on screen (highest-risk first) and write to the output folder.
 
 ### How scoring works (`[SI]` transparent engine)
-- **Safety score (0–100)** = four capped components: adverse events (severity-weighted, ×1.5 if serious), labs breaching their stopping multiple, QTc at/over the cardiac limit, and vital-sign breaches — all against built-in `[SI]` criteria. A **fatal outcome scores 100** so it always ranks at/above every non-fatal participant; death is by definition the highest safety risk.
-- **Discontinuation score (0–1)** = serious-AE burden + relatedness fraction + max severity + fatal flag + grade≥3 labs + QTc/vital breaches + source-system clinically-significant findings, squashed to [0,1].
+- **Safety score (0 to 100)** = four capped components: adverse events (severity-weighted, times 1.5 if serious), analytes above their built-in ULN multiple, QTc above the cardiac criterion, and vital-sign breaches, all against built-in `[SI]` criteria. A **fatal outcome scores 100** so it always ranks at or above every non-fatal participant; death is by definition the highest safety risk.
+- **Discontinuation score (0 to 1)** = serious-AE burden + relatedness fraction + max severity + fatal flag + analytes above their built-in ULN multiple + QTc/vital breaches + source-system clinically significant findings, capped at 1.
+- **The built-in criteria** (`[SI]`): ALT or AST above 3x ULN and creatinine above 1.5x ULN; QTc above 500 ms; systolic BP above 180 mmHg, diastolic above 110 mmHg, temperature above 38.5 °C. They are screening criteria, not CTCAE grades (in CTCAE v5.0 those lab multiples are grade 2 entry points) and not the FDA DILI discontinuation rules; the QTc cutoff is the top ICH E14 categorical tier only, with no change from baseline, whichever correction (QTcF or QTcB) the column holds.
 - Categories come from built-in `[SI]` cuts; a human-readable **contributing factors** column explains *why* each participant landed where it did.
 
 ### Reading risk_scores.csv
-One row per participant: counts, max severity, fatal flag, both scores + categories, and a human-readable **contributing factors** string. The on-screen table is pre-sorted highest-risk first (fatal participants pinned to the top).
+One row per participant: `USUBJID`, both scores and categories, and a human-readable **contributing factors** string. The counts, maximum severity and fatal flag drive the scores but are not exported. The on-screen table is pre-sorted highest-risk first (fatal participants pinned to the top).
 
-> This build ships as a labeled stand-in (`[SI]`): a transparent weighted rule engine driven by built-in criteria — there is no external SAP/protocol file to import. A real deployment replaces Tier 3 with study-specific declared criteria or a trained, externally-validated survival/risk model and flips the banner to `[RM]`. The weights are declared constants written to the audit — not hidden.
+> This build ships as a labeled stand-in (`[SI]`): a transparent weighted rule engine driven by built-in criteria; there is no external SAP/protocol file to import. A real deployment would replace Tier 3 with the protocol's own criteria or a trained, externally validated model. The weights are declared constants written to the audit, not hidden.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
-Without a validated model installed, Tier 3 runs as the labeled deterministic stand-in (`[SI]` in the banner and every audit row). Install/validate a real risk model (and `xgboost`) to flip it; columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app **stops** rather than silently substituting a stand-in.
+This build has no trained-model path: Tier 3 always runs the labeled deterministic stand-in (`[SI]` in the banner and every audit row). A `risk_model.json` in the models dir **stops** the run rather than being ignored or half-loaded.
 
 ### Troubleshooting
 - **"No safety domains loaded":** point at a folder with at least one of `ae`/`lb`/`eg`/`vs`/`pe`, or upload files. A file is only scored if it has a participant ID column (`USUBJID`).
-- **A domain shows as unrecognized:** its columns don't match the synonyms — rename them (e.g. severity → `AESEV`) or add the spelling to `SYN` at the top of this file.
+- **A domain shows as unrecognized:** its columns do not match the synonyms: rename them (e.g. severity → `AESEV`) or add the spelling to `SYN` at the top of this file.
 
 ### What this build does NOT do
 No free-text PDF/Word protocol or SAP parsing, no clinical determination, nothing leaves the machine. See USER_GUIDE.md §5 for full details and §10 for the complete limits list.
@@ -655,7 +664,7 @@ if HOSTED and "_hosted_out" not in st.session_state:
 out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"] if HOSTED else "risk_output"), disabled=HOSTED,
     help=(OUT_HELP_BROWSER if IN_BROWSER else "Where risk_scores.csv + audit_log.csv are written on Run (also offered as downloads)."))
 if HOSTED: out_dir = st.session_state["_hosted_out"]
-models_dir = st.sidebar.text_input("Models dir (optional real model)","models", disabled=HOSTED,
+models_dir = st.sidebar.text_input("Models dir (no trained model in this build)","models", disabled=HOSTED,
     help="This build has no trained-model path for this app: the labeled [SI] engine is the only scorer, "
          "and a risk_model.json found here STOPS the run rather than being silently ignored.")
 if HOSTED: models_dir = "models"
@@ -673,14 +682,14 @@ except Exception as e: load_err=str(e)
 #      from the runtime probe + artifact presence (never a constant), so if a real model were
 #      ever wired in, the banner would reflect it -- and an orphaned artifact hard-stops above. ----
 banner = "Tier 3: STAND-IN [SI] (transparent weighted rule engine)"
-st.info("**Mode banner** — "+banner+" · decision support only, not a clinical determination; "
+st.info("**Mode banner:** "+banner+" · decision support only, not a clinical determination; "
         "the audit records which path ran and every threshold in force.")
 
 # ---- pre-flight CONTRACT panel: show what loaded + how each file classified + the SAP source,
 #      before any compute. Fixes belong in the sidebar (folder/uploads), NOT in the code. ----
 st.subheader("📋 Input contract (pre-flight)")
 if load_err: st.error(f"Import failed: {load_err}")
-elif not domains: st.warning("No safety-domain CSVs loaded yet — set the folder path or upload files.")
+elif not domains: st.warning("No safety-domain CSVs loaded yet. Set the folder path or upload files.")
 else:
     c1,c2=st.columns(2)
     with c1:
@@ -695,7 +704,7 @@ else:
         present=", ".join(k for k in ("ae","lb","eg","vs","pe") if k in views) or "(none)"
         st.write("Safety domains → "+present)
     st.caption("This program reads ONLY the safety domains above and scores them against built-in [SI] "
-               "criteria -- it flags participants for human review, not a clinical determination. A fatal "
+               "criteria; it flags participants for human review and makes no clinical determination. A fatal "
                "outcome forces a CRITICAL safety category.")
 
 # ---- Run button: disabled until at least one participant is aligned, so an empty input cannot

@@ -575,11 +575,11 @@ HAPPS = [
          btn="🚀 Execute PII/PHI Flagging", out="phi_output", sample=SAMPLE, local_run=outp,
          decoy="cut", src=SRC_AE, pre="PHI scan set = expected_scan(sample)"),
     dict(c="R", app="risk", file="risk_app.py", folder="Cut folder path (safety domains)",
-         up="...or upload safety files (CSV or SAS .sas7bdat)", models="Models dir (optional real model)",
+         up="...or upload safety files (CSV or SAS .sas7bdat)", models="Models dir (no trained model in this build)",
          btn="🚀 Execute Risk Scoring", out="risk_output", sample=SAMPLE, local_run=outr1,
          decoy="cut", src=SRC_AE, pre="pre-flight classifies ae/lb/eg/vs/pe"),
     dict(c="A", app="anomaly", file="anomaly_app.py", folder="Cut folder path (CSV or SAS .sas7bdat)",
-         up="...or upload files (CSV or SAS .sas7bdat)", models="Models dir (optional real model)",
+         up="...or upload files (CSV or SAS .sas7bdat)", models="Models dir (no trained model in this build)",
          btn="🚀 Execute Anomaly & Drift Detection", out="anomaly_output", sample=ANOM, local_run=outa1,
          decoy="labs", src=SRC_LABS, pre="pre-flight detects VISITNUM + ALT"),
 ]
@@ -865,25 +865,31 @@ finally:
 # ---------------------------------------------------------------- docs / GitHub Pages (D-checks)
 # docs/ is served as-is by GitHub Pages (main branch, /docs; docs/.nojekyll turns Jekyll off). These checks
 # read files only, no app runs:
-#   D1  docs/ holds exactly the presentations/*.html decks (plus index.html), each a byte-identical copy, so
-#       a deck edit cannot silently drift from the Pages copy and no stale deck lingers there (fix: copy
-#       the edited deck into docs/, or delete the stray copy)
-#   D2  docs/index.html stays self-contained: no src/srcset/poster/data attribute, no href/xlink:href on a
+#   D1  docs/ holds exactly the published pages (DOC_PAGES: the landing page, the evaluation and the case
+#       study) plus one redirect stub per retired URL (RETIRED: the two old deck pages, merged into the case
+#       study), and each stub's <meta http-equiv=refresh> points at its listed page, which must exist. So a
+#       retired link keeps working and no stray or stale page lingers on the site (fix: add the page to
+#       DOC_PAGES, or delete it, or restore the stub).
+#   D2  every page in D1 stays self-contained: no src/srcset/poster/data attribute, no href/xlink:href on a
 #       non-link tag (<link>, SVG <image>/<use>) and no <meta http-equiv=refresh> target points off-site
 #       (http:, https:, //), its CSS has no @import and no off-site url(), and no inline <script> names a
-#       URL. Plain <a>/<area> links (GitHub, Streamlit) are navigation, not resources, so they are allowed.
+#       URL. Plain <a>/<area> links (GitHub) are navigation, not resources, so they are allowed.
 #   D3  every LOCAL reference resolves on disk, against its file's folder: in README.md every Markdown link
-#       and image (inline and reference-style) and <img src>; in docs/index.html every href, src, srcset
+#       and image (inline and reference-style) and <img src>; in each docs page every href, src, srcset
 #       entry, poster, data, refresh target and CSS url(). Remote URLs (the CI badge), #anchors and
-#       mailto:/data: are skipped. Each file must hold at least one local reference, and every docs/img/
-#       file must be used by at least one of them, so the check cannot pass with nothing to check.
+#       mailto:/data: are skipped. README.md and each published page must hold at least one local reference,
+#       and every docs/img/ file must be used by at least one of them, so the check cannot pass with nothing
+#       to check.
 #   D4  the in-browser build in docs/app/ is in step with its sources: tools/sync_browser_apps.py --check
 #       passes (byte-identical copies of the four apps and of every sample_data/ and anomaly_data/ CSV, the
 #       four pages exactly as rendered from tools/browser_app_template.html, the pinned wheels by sha256,
 #       no stray file). Fix: run python tools/sync_browser_apps.py and commit what it changes.
 from html.parser import HTMLParser
 from urllib.parse import unquote
-DOCS = os.path.join(APP_DIR,"docs"); PRES = os.path.join(APP_DIR,"presentations"); INDEX = os.path.join(DOCS,"index.html")
+DOCS = os.path.join(APP_DIR,"docs")
+DOC_PAGES = ["index.html", "evaluation.html", "case-study.html"]                 # published pages
+RETIRED = {"deck_a_four_tier_pipeline.html": "case-study.html",                 # retired URL -> where it redirects
+           "deck_b_implementation_walkthrough.html": "case-study.html"}
 def _offsite(v): v=(v or "").strip().lower(); return v.startswith(("http:","https:","//")) or "://" in v
 def _skip(v):
     """True for a reference D3 does not resolve: empty, an #anchor, off-site, or any other URI scheme (mailto:, data:)."""
@@ -923,44 +929,51 @@ _CSS_URL = r"url\(\s*['\"]?([^'\")]+)"
 
 def _read(p):
     with open(p,"rb") as f: return f.read()
-ix, ix_err = None, ""   # parsed docs/index.html, shared by D2 and D3 (None if it is missing or unreadable)
-try:
-    _p = _Refs(); _p.feed(_read(INDEX).decode("utf-8")); _p.close(); ix = _p
-except Exception as e: ix_err = repr(e)
+parsed, parse_err = {}, {}   # every docs page D1 lists -> its _Refs (shared by D1 to D3)
+for _f in DOC_PAGES + sorted(RETIRED):
+    try:
+        _p = _Refs(); _p.feed(_read(os.path.join(DOCS,_f)).decode("utf-8")); _p.close(); parsed[_f] = _p
+    except Exception as e: parse_err[_f] = repr(e)
 
 try:
-    decks = sorted(f for f in os.listdir(PRES) if f.lower().endswith(".html"))
-    drift = [f for f in decks if not os.path.isfile(os.path.join(DOCS,f)) or _read(os.path.join(DOCS,f))!=_read(os.path.join(PRES,f))]
-    stray = sorted(set(f for f in os.listdir(DOCS) if f.lower().endswith(".html") and f!="index.html") - set(decks))
-    check("D1 docs/ holds exactly the presentations/ decks, each a byte-identical copy", len(decks)>=1 and not drift and not stray,
-          dict(decks=decks, missing_or_drifted=drift, stray_in_docs=stray))
-except Exception as e: check("D1 docs deck copies block raised", False, repr(e))
+    have = sorted(f for f in os.listdir(DOCS) if f.lower().endswith(".html"))
+    want = sorted(DOC_PAGES + list(RETIRED))
+    def _refresh(f): return [v for t,k,v in parsed[f].res if t=="meta" and k=="content"] if f in parsed else []
+    bad_stub = {f: _refresh(f) for f,to in RETIRED.items()
+                if _refresh(f) != [to] or not os.path.isfile(os.path.join(DOCS,to))}
+    check("D1 docs/ holds exactly the published pages plus a redirect stub per retired URL, each pointing at an existing page",
+          have == want and not bad_stub and not parse_err,
+          dict(missing=sorted(set(want)-set(have)), stray=sorted(set(have)-set(want)), bad_stubs=bad_stub, unreadable=parse_err))
+except Exception as e: check("D1 docs pages block raised", False, repr(e))
 
 try:
-    if ix is None: raise RuntimeError("docs/index.html not parsed: " + ix_err)
-    # srcset holds "url 2x, url 3x": test the first token of every comma-separated entry
-    ext = [(t,k,v) for t,k,v in ix.res if any(_offsite((e.split() or [""])[0]) for e in v.split(","))]
-    css = " ".join(ix.css)
-    bad_css = re.findall(r"@import[^;]*", css, re.I) + [u for u in re.findall(_CSS_URL, css, re.I) if _offsite(u)]
-    bad_js = [j.strip()[:80] for j in ix.js if "://" in j]
-    check("D2 docs/index.html references no external script, stylesheet, font or image", not ext and not bad_css and not bad_js,
-          dict(external=ext, css=bad_css, inline_script=bad_js))
-except Exception as e: check("D2 docs/index.html block raised", False, repr(e))
+    if parse_err: raise RuntimeError(f"docs pages not parsed: {parse_err}")
+    bad = {}
+    for f,ix in parsed.items():
+        # srcset holds "url 2x, url 3x": test the first token of every comma-separated entry
+        ext = [(t,k,v) for t,k,v in ix.res if any(_offsite((e.split() or [""])[0]) for e in v.split(","))]
+        css = " ".join(ix.css)
+        bad_css = re.findall(r"@import[^;]*", css, re.I) + [u for u in re.findall(_CSS_URL, css, re.I) if _offsite(u)]
+        bad_js = [j.strip()[:80] for j in ix.js if "://" in j]
+        if ext or bad_css or bad_js: bad[f] = dict(external=ext, css=bad_css, inline_script=bad_js)
+    check("D2 every docs page references no external script, stylesheet, font or image", len(parsed)==len(DOC_PAGES)+len(RETIRED) and not bad, bad)
+except Exception as e: check("D2 docs pages block raised", False, repr(e))
 
 try:
-    if ix is None: raise RuntimeError("docs/index.html not parsed: " + ix_err)
+    if parse_err: raise RuntimeError(f"docs pages not parsed: {parse_err}")
     rd = _read(os.path.join(APP_DIR,"README.md")).decode("utf-8")
     rd_refs = (re.findall(r"\]\(\s*<?([^)\s>]+)", rd)                              # [text](..) and ![alt](..)
                + re.findall(r"(?m)^ {0,3}\[[^\]]+\]:\s*<?([^\s>]+)", rd)            # [label]: target
                + re.findall(r"<img\b[^>]*?\bsrc\s*=\s*[\"']([^\"']+)", rd, re.I))
-    ix_refs = ix.refs + re.findall(_CSS_URL, " ".join(ix.css), re.I)
-    miss = [("README.md",m) for m in _local_missing(APP_DIR, rd_refs)] + [("docs/index.html",m) for m in _local_missing(DOCS, ix_refs)]
-    nloc = dict(readme=sum(1 for r in rd_refs if not _skip(r)), index=sum(1 for r in ix_refs if not _skip(r)))
-    used = {_resolve(APP_DIR,r) for r in rd_refs if not _skip(r)} | {_resolve(DOCS,r) for r in ix_refs if not _skip(r)}
+    pg_refs = {f: ix.refs + re.findall(_CSS_URL, " ".join(ix.css), re.I) for f,ix in parsed.items()}
+    miss = [("README.md",m) for m in _local_missing(APP_DIR, rd_refs)]
+    for f,refs in pg_refs.items(): miss += [("docs/"+f,m) for m in _local_missing(DOCS, refs)]
+    nloc = dict(readme=sum(1 for r in rd_refs if not _skip(r)), **{f: sum(1 for r in pg_refs[f] if not _skip(r)) for f in DOC_PAGES})
+    used = {_resolve(APP_DIR,r) for r in rd_refs if not _skip(r)} | {_resolve(DOCS,r) for refs in pg_refs.values() for r in refs if not _skip(r)}
     IMG = os.path.join(DOCS,"img")
     unused = sorted(f for f in (os.listdir(IMG) if os.path.isdir(IMG) else []) if os.path.normpath(os.path.join(IMG,f)) not in used)
-    check("D3 every local link and image in README.md and docs/index.html exists on disk (and every docs/img/ file is used)",
-          not miss and nloc["readme"]>=1 and nloc["index"]>=1 and not unused, dict(local_refs=nloc, missing=miss, unused_images=unused))
+    check("D3 every local link and image in README.md and the docs pages exists on disk (and every docs/img/ file is used)",
+          not miss and all(n>=1 for n in nloc.values()) and not unused, dict(local_refs=nloc, missing=miss, unused_images=unused))
 except Exception as e: check("D3 docs references block raised", False, repr(e))
 
 try:
@@ -1003,7 +1016,7 @@ def _rp_run(app, folder, models, out, execute=True):
     lab = {"meddra_app.py":"Cut folder path (domain CSVs)","phi_app.py":"Cut folder path (domain CSVs)",
            "risk_app.py":"Cut folder path (safety domains)","anomaly_app.py":"Cut folder path (CSV or SAS .sas7bdat)"}[app]
     find(A,"text_input",lab).set_value(folder).run()
-    mlabel = "Models dir (optional real weights)" if app in ("meddra_app.py","phi_app.py") else "Models dir (optional real model)"
+    mlabel = "Models dir (optional real weights)" if app in ("meddra_app.py","phi_app.py") else "Models dir (no trained model in this build)"
     find(A,"text_input",mlabel).set_value(models).run()
     find(A,"text_input","Output folder").set_value(out).run()
     if execute and not A.exception and not [e for e in A.error if "cannot run" in e.value or "failed to load" in e.value

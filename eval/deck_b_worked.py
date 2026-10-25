@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Stage 4: re-run the Deck B worked examples on the REAL path and record the measured values.
+"""Stage 4: re-run the worked examples on the REAL path and record the measured values.
+
+The worked examples were first written for Deck B; the two decks were merged into docs/case-study.html,
+which shows these values. The file names keep the old name so earlier commands and the RM checks still work.
 
 Run (after eval/run_eval.py has written the trained artifacts into the models dir):
     python eval/deck_b_worked.py --models <models_dir>

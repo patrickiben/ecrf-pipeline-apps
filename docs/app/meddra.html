@@ -8,7 +8,7 @@
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>Coding QC Assist (MedDRA-style, demo dictionary): in-browser demo</title>
+<title>Coding QC assist: in-browser demo</title>
 <meta name="description" content="A coding QC assist running in your browser on synthetic adverse-event data: the top three candidate terms per verbatim from a demo dictionary with placeholder codes (not MedDRA), and a gate that sends each verbatim to a coder or auto-commits it.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -25,9 +25,9 @@
 </head>
 <body>
 <header class="bar">
-  <nav class="crumbs" aria-label="Breadcrumb"><a href="../">eCRF pipeline apps</a> <span aria-hidden="true">/</span> <span aria-current="page">Coding QC Assist (MedDRA-style, demo dictionary)</span></nav>
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="../">eCRF pipeline apps</a> <span aria-hidden="true">/</span> <span aria-current="page">Coding QC assist</span></nav>
   <p class="privacy"><strong>Privacy:</strong> Runs in your browser; files are processed on your device and not uploaded by the app; the page is downloaded from GitHub Pages and the CDN, which see your IP address; synthetic data only; not a validated or Part 11 system.</p>
-  <p class="limits"><strong>Limits:</strong> Measured on held-out synthetic verbatims, this lexical stand-in ranked the right preferred term first for 54% (the real model path: 78%) and auto-coded 7 of 96 negated verbatims at the default gate; every code needs a coder&#x27;s review. <a href="https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/docs/EVALUATION.md">How this was measured</a>.</p>
+  <p class="limits"><strong>Limits:</strong> The demo dictionary uses 99-prefixed placeholder codes, not MedDRA. Measured on held-out synthetic verbatims, this lexical stand-in ranked the right preferred term first for 54% (the real model path: 78%) and auto-coded 7 of 96 negated verbatims at the default gate; every code needs a coder&#x27;s review. <a href="../evaluation.html#coding">How this was measured</a>.</p>
   <p id="style-error" class="style-error" role="alert" hidden></p>
 </header>
 <main id="stage">
@@ -39,7 +39,7 @@
       <p id="boot-error" class="error" role="alert" hidden></p>
       <noscript><p class="error">This app needs JavaScript to run in your browser. The screenshot below shows its results on the bundled synthetic data; you can also <a href="https://github.com/patrickiben/ecrf-pipeline-apps#run-locally">run it locally</a>.</p></noscript>
       <figure class="preview">
-        <img src="../img/meddra_results.png" width="1440" height="960" alt="Coding app results table: each adverse-event verbatim with its top three candidate terms, ranks and 99-prefixed placeholder codes, followed by the success message and download buttons.">
+        <img src="../img/meddra_results.png" width="1440" height="960" alt="Coding QC assist results table: each adverse-event verbatim with its top three candidate terms, ranks and 99-prefixed placeholder codes, followed by the success message and download buttons.">
         <figcaption>Screenshot of this app's results on the bundled synthetic data. To use your own files, <a href="https://github.com/patrickiben/ecrf-pipeline-apps#run-locally">run it locally</a>.</figcaption>
       </figure>
     </div>

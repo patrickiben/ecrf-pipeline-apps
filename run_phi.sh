@@ -1,5 +1,5 @@
 #!/bin/sh
-# One-command launcher for the PII/PHI flagging & redaction app.
+# One-command launcher for the De-identification review assist (phi_app.py).
 # Creates .venv on first run, installs requirements, then starts Streamlit.
 set -e
 cd "$(dirname "$0")"
@@ -19,5 +19,5 @@ if [ ! -d .venv ]; then
 fi
 ./.venv/bin/pip install --quiet --disable-pip-version-check -r requirements.txt
 
-echo "Starting PII/PHI Flagging Engine at http://localhost:${PORT:-8502}"
+echo "Starting De-identification review assist [phi_app.py] at http://localhost:${PORT:-8502}"
 exec ./.venv/bin/streamlit run phi_app.py --server.port "${PORT:-8502}" "$@"

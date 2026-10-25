@@ -4,7 +4,7 @@
 Run from anywhere:   python3 generate.py     (writes ae/lb/eg/vs/pe next to this file)
 
 This is ONE cut that all three apps read from. It preserves the small worked rows used by
-Deck B and the coding/PHI traces byte-for-byte, then appends a larger set of participants so the
+the case study (docs/case-study.html) and the coding/PHI traces byte-for-byte, then appends a larger set of participants so the
 risk-scoring app can be assessed on bulk/varied data. Every domain carries the SAME columns it
 would in a real SDTM-ish dump -- including free-text fields (AECOM / EGCOM) alongside numeric
 safety values and source-system flags (ABNORMAL, CLINSIG).
@@ -24,7 +24,7 @@ OUT = os.path.dirname(os.path.abspath(__file__))   # .../biostat_pipeline_apps/s
 STUDY = "PROTO-2026-X89"                            # synthetic study id (not real)
 
 # --------------------------------------------------------------------------- #
-# The worked rows from Deck B -- preserved EXACTLY for AETERM/AESEV/AESER/AECOM so the
+# The worked rows shown in docs/case-study.html (first written for the retired Deck B), preserved EXACTLY for AETERM/AESEV/AESER/AECOM so the
 # coding and PHI traces stay accurate. We add AELIFE (=N; none fatal), a plausible AEOUTCOME,
 # and a plausible AEREL, which neither trace reads. Row 6's blank AECOM is the "missing stays
 # missing" demo. None of these worked rows are fatal -- they all carry a non-fatal outcome.
@@ -42,7 +42,7 @@ WORKED_AE = [
     ("SUBJ-5227", 6, "rash on forearm", "MILD", "N", "UNKNOWN", ""),   # blank AECOM on purpose
 ]
 
-# The PHI clean-negative ECG row (Deck B) -- preserved exactly for EGCOM.
+# The PHI clean-negative ECG row (the case study's worked example), preserved exactly for EGCOM.
 WORKED_EG = ("SUBJ-1044", 1, 432, 72, "Sinus rhythm, no artifact.")
 
 TERMS = {
@@ -108,8 +108,8 @@ NONFATAL_OUTCOMES = ["RECOVERED", "RECOVERED", "RECOVERED", "NOT RECOVERED", "RE
 
 # Source-system flag thresholds (x ULN / absolute) used to derive ABNORMAL and CLINSIG.
 ULN = {"ALT": 40.0, "AST": 35.0, "CREAT": 1.2}
-SAP_MULT = {"ALT": 3.0, "AST": 3.0, "CREAT": 1.5}     # clinically-significant stopping multiples
-QTC_ABNORMAL, QTC_CLINSIG = 460, 500                  # ms
+LAB_MULT = {"ALT": 3.0, "AST": 3.0, "CREAT": 1.5}     # CLINSIG above these x ULN (the risk app's [SI] multiples)
+QTC_ABNORMAL, QTC_CLINSIG = 460, 500                  # ms; ABNORMAL above 460, CLINSIG above 500
 VS_LIMITS = {                                          # param: (abnormal_if_outside, clinsig_limit)
     "SYSBP": ((90, 140), 180), "DIASTP": ((60, 90), 110), "TEMPC": ((35.0, 37.5), 38.5),
 }
@@ -148,7 +148,7 @@ for s in SUBJS:
         labs = {}
         if random.random() < 0.5:
             for a in random.sample(["ALT", "AST", "CREAT"], k=random.randint(1, 2)):
-                labs[a] = round(random.uniform(1.1, 3.4), 1)   # mostly sub-threshold; some breach SAP multiple
+                labs[a] = round(random.uniform(1.1, 3.4), 1)   # mostly sub-threshold; some exceed the built-in multiple
         qtc = random.randint(395, 505) if random.random() < 0.6 else None
         vitals = {}
         if random.random() < 0.4: vitals["SYSBP"] = random.randint(118, 172)
@@ -166,19 +166,19 @@ for s in SUBJS:
             oc = random.choice(NONFATAL_OUTCOMES)
         ae_rows.append([STUDY, s, i, term, sev, ser, life, oc, rel, bulk_note()])
 
-    # labs: value = ratio x ULN; ABNORMAL if above ULN, CLINSIG if past the SAP multiple
+    # labs: value = ratio x ULN; ABNORMAL if above ULN, CLINSIG if above the built-in multiple
     for analyte, ratio in labs.items():
         uln = ULN[analyte]
         abn = "Y" if ratio > 1.0 else "N"
-        clinsig = "Y" if ratio > SAP_MULT.get(analyte, 9e9) else "N"
+        clinsig = "Y" if ratio > LAB_MULT.get(analyte, 9e9) else "N"
         lb_rows.append([s, analyte, round(ratio * uln, 1), uln, abn, clinsig])
 
     # ECG: keep the worked clean row for SUBJ-1044; anchors/seeded carry a QTc value
     if qtc is not None:
         eg_rows.append([STUDY, s, 1, qtc, random.randint(60, 95),
                         "Y" if qtc > QTC_ABNORMAL else "N",
-                        "Y" if qtc >= QTC_CLINSIG else "N",
-                        "Prolonged QTc noted; cardiology consulted." if qtc >= QTC_CLINSIG
+                        "Y" if qtc > QTC_CLINSIG else "N",
+                        "Prolonged QTc noted; cardiology consulted." if qtc > QTC_CLINSIG
                         else ("QTc borderline; repeat ECG ordered." if qtc > QTC_ABNORMAL
                               else "QTc within limits.")])
 
