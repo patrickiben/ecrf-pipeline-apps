@@ -10,13 +10,15 @@ of a production system and not independent double programming by a second person
 | Check | Result | Environment |
 |---|---|---|
 | `python tests/qc_test.py` | **266 passed, 0 failed, 5 skipped** (RM1 to RM5 need a models dir with the real model artifacts) | macOS, Python 3.14.7, Streamlit 1.65.0, pandas 3.0.6, numpy 2.5.4, with the optional extras (pyreadstat 1.3.6, scikit-learn 1.9.1, POT 0.9.7.post1, scipy 1.18.1); no models dir; `ECRF_HOSTED` unset |
+| `python tests/test_sibling.py` | **35 passed, 0 failed** (the within-sibling evaluation: sets, exact tails, plan guard, statistics, known answers at reduced replicates, `make_data.py` byte-identity, real-path wiring with stand-in runtimes, a rerun against the committed results) | the same macOS environment; also 35 / 0 on Python 3.12.13 (Streamlit 1.66.1, pandas 3.1.0, numpy 2.5.4) and on the browser stack (Python 3.14.0, Streamlit 1.65.0, pandas 3.0.2, numpy 2.4.3) |
 | `python3 tools/sync_browser_apps.py --check` | OK: 12 byte-identical copies, 4 rendered pages, 3 pinned wheels, stlite 1.12.0 | standard library only |
-| The four in-browser pages | 4 of 4: Execute on the sample data, the results survive a download, the downloaded file is byte-identical to a native run, zero page errors (details below) | Chrome 155.0.8059.86 (headless), puppeteer-core 25.16.0, `docs/` served locally under `/ecrf-pipeline-apps/` as GitHub Pages serves it |
-| The static pages | `index.html`, `evaluation.html`, `case-study.html` and both redirect stubs: zero page errors and console errors, no off-site request, no horizontal scroll at 1440 px or 390 px; each stub lands on `case-study.html`; at 390 px no participant ID or sequence number in a table wraps (rechecked after the last page edit) | same |
-| CI (`.github/workflows/qc.yml`) | Not run for this branch: its commits are local and have not been pushed. The workflow runs the harness in three legs (stand-in, optional extras, the browser's Python 3.14.0 stack) and the browser-build check on every push and pull request | GitHub Actions |
+| The four in-browser pages | 4 of 4, rechecked after the last app edit: Execute on the sample data, the results survive a download, the downloaded file is byte-identical to a native run, zero page errors (details below) | Chrome 155.0.8059.86 (headless), puppeteer-core 25.16.0, `docs/` served locally under `/ecrf-pipeline-apps/` as GitHub Pages serves it |
+| The static pages | `index.html`, `evaluation.html`, `case-study.html` and both redirect stubs: zero page errors and console errors, no off-site request, no horizontal scroll at 1440 px or 390 px; each stub lands on `case-study.html` (rechecked after the evaluation page gained its within-sibling section); at 390 px no participant ID or sequence number in a case-study table wraps (checked before that edit; the case study did not change) | same |
+| CI (`.github/workflows/qc.yml`) | Not run for this branch: its commits are local and have not been pushed. The workflow runs the harness and `tests/test_sibling.py` in three legs (stand-in, optional extras, the browser's Python 3.14.0 stack) and the browser-build check on every push and pull request | GitHub Actions |
 
 The same 266 / 0 / 5 result was recorded on the same machine before this pass's changes and after its first part
-(the renaming and the help-text edits), and again after the review fixes listed below. The review fixes changed one
+(the renaming and the help-text edits), again after the review fixes listed below, and after each app, test and docs
+commit of the within-sibling pass at the end of this section. The review fixes changed one
 boundary in the risk app (a QTc of exactly 500 ms no longer counts; no sample value is 500 ms, so no score moved) and
 the wording of its lab and QTc reasons in `risk_scores.csv`; checks R13, R14 and R16 cover those reasons and passed.
 
@@ -98,12 +100,43 @@ Review fixes, later on 2026-10-25:
 - **Screenshots.** `risk_results.png` and `anomaly_results.png` were recaptured in the final browser run (they show the
   new sidebar label); the coding and de-identification screens did not change, so their screenshots were kept.
 
+Within-sibling evaluation and naming polish, later on 2026-10-25 (branch `phase3/sibling-eval`):
+
+- **Within-sibling evaluation of the Coding QC assist** (`docs/EVALUATION.md`, "Within-sibling discrimination"). The
+  commits are in the order the method needs: the sibling sets (`eval/sibling_sets.py`, from preferred-term names only;
+  `make_data.py` rerun with no change), then the plan `eval/sibling_plan.md` with its SHA-256 in
+  `eval/sibling_plan.sha256`, then the scripts, then the results. `eval/sibling_eval.py` and
+  `eval/sibling_knownanswer.py` refuse to run when the plan's hash, an input file's hash or the scoring code's
+  fingerprint differs from the registration (checked: an edited plan exits 2 and writes nothing). On the stand-in
+  path both families route to human coding: lab is not assessable at 22 terms (best bound 0.873 against the 0.90
+  floor) and fails both gates; site's bound is 0.805 and it does not beat the keyword rule. The real path was not
+  run (no models dir on this machine). The known-answer demo met every registered criterion, and the negative
+  control rejected 2.8% and 4.0% against a 7.2% ceiling. `tests/test_sibling.py` (35 checks) runs in CI after the
+  harness.
+- **Execute buttons named for their apps** ("Execute Coding QC assist", and so on); the harness finds them by the new
+  labels, and USER_GUIDE follows. **macOS launchers renamed** to `Launch Coding QC assist.command`, `Launch
+  De-identification review assist.command`, `Launch Participant risk screening.command` and `Launch Central
+  statistical monitoring.command` (each still runs its `run_*.sh`; checked from a path with spaces). The
+  `run_*.sh` and `.bat` echo text already used the app names.
+- **Headers.** `meddra_app.py` and `phi_app.py` said "ONE of two separate programs"; there are four.
+- **On-screen ranges** lost their en dashes ("Tiers 2 to 4", "ranks 2 and 3"); the four result screenshots were
+  recaptured to show the new heading.
+- **Not renamed:** `eval/deck_b_worked.py` and `eval/results/deck_b_worked.json` keep the retired deck's name,
+  because the published `docs/EVALUATION.md` links to the script and the evaluation page names both.
+- **Browser recheck.** All four pages became interactive in 5.6 to 6.6 s, showed the new button label and heading,
+  ran Execute, kept their results after a download, and had zero page errors; each downloaded file was
+  byte-identical to a native hosted-mode run with the optional extras hidden. The console showed only the known
+  `stlite.invalid` download-probe messages described above.
+
 ## How to re-run the tests
 
 The harness lives in [`tests/qc_test.py`](tests/qc_test.py) (portable: its paths
 derive from its own location). With the app dependencies installed:
 
     pip install -r requirements.txt && python tests/qc_test.py
+
+The within-sibling evaluation has its own checks, `python tests/test_sibling.py` (about 30 s, `requirements.txt` only;
+CI runs it after the harness).
 
 Exit code 0 = every check passes, and the last line reports how many passed, failed and were skipped. With `requirements.txt` only, SAS2, SAS3 and A16 do not run (they need `pyreadstat` or `scikit-learn`); without a models dir, the 5 real-model checks (RM1 to RM5) are reported as skipped. The latest counts are in the current status at the top of this file. To run them, build a models dir as in [`eval/README.md`](eval/README.md) and run `ECRF_MODELS_DIR=<models dir> python tests/qc_test.py` with the real runtimes installed. It drives each app end-to-end via
 `streamlit.testing.v1.AppTest.from_file(...)`, points the coding/PHI/risk apps at `sample_data/`
