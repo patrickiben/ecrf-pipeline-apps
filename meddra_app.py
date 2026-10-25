@@ -1,15 +1,16 @@
 # meddra_app.py -- INDEPENDENT program: MedDRA auto-coding of verbatim AE terms.
 #
 # READ THIS FIRST (for whoever maintains this file):
-#   * This is ONE of two separate programs. The other is phi_app.py. They do NOT
-#     import each other and share NO module. The small helpers near the bottom of
-#     this header (_have, _col, load_domains) are DELIBERATELY DUPLICATED in
-#     phi_app.py. Do not "refactor" them into a shared pipeline.py: a shared
+#   * This is ONE of four separate programs in this folder (the others are
+#     phi_app.py, risk_app.py and anomaly_app.py). They do NOT import each other
+#     and share NO module. The small helpers near the bottom of this header
+#     (_have, _col, load_domains) are DELIBERATELY DUPLICATED in each of the
+#     other three. Do not "refactor" them into a shared pipeline.py: a shared
 #     module is a coupling point that would let a retrain of one head silently
-#     change the other's behavior, and the two heads are kept separate so each
-#     could be validated on its own scope, with its own audit log (neither is a
-#     validated system; the audit log is a plain CSV). Duplication is the price
-#     of that independence, and it is intentional.
+#     change another's behavior, and the heads are kept separate so each could
+#     be validated on its own scope, with its own audit log (none is a validated
+#     system; the audit log is a plain CSV). Duplication is the price of that
+#     independence, and it is intentional.
 #   * This program codes verbatims ONLY. It never opens a free-text comment
 #     column and never flags PHI -- that is phi_app.py's job, with its own audit.
 #     The pre-flight panel at the bottom enforces this by listing exactly the one

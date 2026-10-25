@@ -2,14 +2,15 @@
 # eCRF fields.
 #
 # READ THIS FIRST (for whoever maintains this file):
-#   * This is ONE of two separate programs. The other is meddra_app.py. They do
-#     NOT import each other and share NO module. The helpers _have/_col/
-#     load_domains are DELIBERATELY DUPLICATED from meddra_app.py. Do not factor
-#     them into a shared module: a shared module is a coupling point that would
-#     let a retrain of one head silently change the other's behavior, and the
-#     two heads are kept separate so each could be validated on its own scope,
-#     with its own audit log (neither is a validated system; the audit log is a
-#     plain CSV). Duplication is intentional.
+#   * This is ONE of four separate programs in this folder (the others are
+#     meddra_app.py, risk_app.py and anomaly_app.py). They do NOT import each
+#     other and share NO module. The helpers _have/_col/load_domains are
+#     DELIBERATELY DUPLICATED in each of the four. Do not factor them into a
+#     shared module: a shared module is a coupling point that would let a
+#     retrain of one head silently change another's behavior, and the heads are
+#     kept separate so each could be validated on its own scope, with its own
+#     audit log (none is a validated system; the audit log is a plain CSV).
+#     Duplication is intentional.
 #   * This program scrubs free text ONLY. It never codes a verbatim and never
 #     reads AETERM -- that is meddra_app.py's job. It needs NO MedDRA dictionary;
 #     a stray meddra*.csv in the cut folder is IGNORED here so the two programs
