@@ -84,9 +84,9 @@ APPS = {
         description="Participant risk screening running in your browser on synthetic safety domains: a safety listing that ranks participants against built-in criteria standing in for a protocol's, with the reasons for each flag.",
         img="risk_results.png",
         limits="Both scores are capped, weighted sums of built-in [SI] rules, not probabilities or a validated model. No "
-               "accuracy was measured: there is no labeled evaluation, and the QC suite checks only that the 5 test-case "
-               "participants planted in the 52-participant synthetic cut get the category or reason they were built for "
-               "(all 5 do). Every flag needs clinical review.", limits_link=EVALUATION + "#notshown",
+               "accuracy was measured: there is no labeled evaluation, and the QC suite checks only that 5 of the 6 "
+               "test-case participants planted in the 52-participant synthetic cut get the category or reason they were "
+               "built for (all 5 do). Every flag needs clinical review.", limits_link=EVALUATION + "#notshown",
         limits_link_text="What was not measured",
         alt="Participant risk screening results: per-participant safety and discontinuation scores and categories with contributing factors, the fatal participant pinned to the top, and a category summary."),
     "anomaly": dict(entry="anomaly_app.py", data="anomaly_data", title="Central statistical monitoring",
