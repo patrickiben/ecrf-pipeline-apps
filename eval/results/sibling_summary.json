@@ -1,0 +1,752 @@
+{
+ "plan": {
+  "file": "eval/sibling_plan.md",
+  "sha256": "8ac2e9cb80fb672c324ee7bd7cacac5c2ad535312accd1b34c0416d4c54543a7",
+  "version": "2026-10-25"
+ },
+ "inputs_sha256": {
+  "eval/data/coding_eval.csv": "ef0fb304e8ec1fd40037fcfd31f70d795400edb89d750d4aeef27bb6cb8f82c8",
+  "eval/data/dictionary.csv": "0213dde1fd0d91e2ebbee09ca8ddf79a48db419f357119dc312171c44beaaec5",
+  "eval/data/sibling_sets.csv": "6da73287863d4199c45d62e83dbd9cd91ba231b4374569e1dc28b95a9bc95e0c"
+ },
+ "scorer_fingerprint": "ce19a95181a279e0020587aa54a434dfbbe3705191fe1cb3d7c56f49ec443343",
+ "deviations": [],
+ "environment": {
+  "python": "3.14.7",
+  "numpy": "2.5.4"
+ },
+ "synthetic": "Synthetic data only: invented terms with 99-prefixed placeholder codes, not MedDRA.",
+ "parameters": {
+  "seed": 20261025,
+  "alpha": 0.05,
+  "a_min": 0.9,
+  "B_mc": 9999,
+  "B_boot": 9999,
+  "split": "test",
+  "variants": [
+   "exact",
+   "colloquial",
+   "misspelled"
+  ]
+ },
+ "results": {
+  "lab": {
+   "standin": {
+    "score_source": "stand-in Tier 4 score S (t4_coding, shipped [SI] weights) on the stand-in Tier 2 cosine (_bow)",
+    "n": 66,
+    "m": 22,
+    "items_per_cluster": 3.0,
+    "set_size_items": {
+     "3": 66
+    },
+    "F": 0.909091,
+    "F_frac_sensitivity": 0.909091,
+    "tie_rate": 0.0,
+    "M": 0.1556,
+    "keyword_F": 0.969697,
+    "gate_a": {
+     "rho_hat": 0.0,
+     "deff": 1.0,
+     "n_eff": 66.0,
+     "x_eff": 60,
+     "bound": 0.828441,
+     "a_min": 0.9,
+     "attainable_bound": 0.872695,
+     "assessable": false,
+     "passed": false,
+     "frac_credit_sensitivity": {
+      "F": 0.909091,
+      "rho_hat": 0.0,
+      "bound": 0.828441
+     }
+    },
+    "gate_b": {
+     "mean_diff": -0.060606,
+     "lower_bound": -0.121212,
+     "B": 9999,
+     "passed": false
+    },
+    "decision": "excluded from auto-coding: routes to human coding",
+    "decision_reasons": [
+     "not assessable at this size: m = 22 clusters, best attainable bound 0.873 < a_min 0.90",
+     "Gate A failed: lower bound 0.828 < a_min 0.90",
+     "Gate B failed: tool minus keyword rule lower bound -0.121 is not above 0"
+    ],
+    "by_variant": {
+     "exact": {
+      "n": 22,
+      "F": 1.0,
+      "F_frac": 1.0,
+      "M": 0.207991,
+      "tie_rate": 0.0,
+      "keyword_F": 1.0
+     },
+     "colloquial": {
+      "n": 22,
+      "F": 0.727273,
+      "F_frac": 0.727273,
+      "M": 0.072659,
+      "tie_rate": 0.0,
+      "keyword_F": 1.0
+     },
+     "misspelled": {
+      "n": 22,
+      "F": 1.0,
+      "F_frac": 1.0,
+      "M": 0.18615,
+      "tie_rate": 0.0,
+      "keyword_F": 0.909091
+     }
+    },
+    "n2_weights": {
+     "increased": 25,
+     "decreased": 28,
+     "abnormal": 26
+    },
+    "null_tests": {
+     "N1": [
+      {
+       "stat": "F",
+       "subset": "all",
+       "n": 66,
+       "clusters": 22,
+       "value": 0.909091,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "all",
+       "n": 66,
+       "clusters": 22,
+       "value": 0.1556,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.000114,
+       "q_by": 0.000311
+      },
+      {
+       "stat": "F",
+       "subset": "exact",
+       "n": 22,
+       "clusters": 22,
+       "value": 1.0,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "exact",
+       "n": 22,
+       "clusters": 22,
+       "value": 0.207991,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.000114,
+       "q_by": 0.000311
+      },
+      {
+       "stat": "F",
+       "subset": "colloquial",
+       "n": 22,
+       "clusters": 22,
+       "value": 0.727273,
+       "p": 0.000183,
+       "q_bh": 0.000183,
+       "q_by": 0.000498
+      },
+      {
+       "stat": "M",
+       "subset": "colloquial",
+       "n": 22,
+       "clusters": 22,
+       "value": 0.072659,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.000114,
+       "q_by": 0.000311
+      },
+      {
+       "stat": "F",
+       "subset": "misspelled",
+       "n": 22,
+       "clusters": 22,
+       "value": 1.0,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "misspelled",
+       "n": 22,
+       "clusters": 22,
+       "value": 0.18615,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.000114,
+       "q_by": 0.000311
+      }
+     ],
+     "N2": [
+      {
+       "stat": "F",
+       "subset": "all",
+       "n": 66,
+       "clusters": 22,
+       "value": 0.909091,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "all",
+       "n": 66,
+       "clusters": 22,
+       "value": 0.1556,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.000114,
+       "q_by": 0.000311
+      },
+      {
+       "stat": "F",
+       "subset": "exact",
+       "n": 22,
+       "clusters": 22,
+       "value": 1.0,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "exact",
+       "n": 22,
+       "clusters": 22,
+       "value": 0.207991,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.000114,
+       "q_by": 0.000311
+      },
+      {
+       "stat": "F",
+       "subset": "colloquial",
+       "n": 22,
+       "clusters": 22,
+       "value": 0.727273,
+       "p": 0.000172,
+       "q_bh": 0.000172,
+       "q_by": 0.000468
+      },
+      {
+       "stat": "M",
+       "subset": "colloquial",
+       "n": 22,
+       "clusters": 22,
+       "value": 0.072659,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.000114,
+       "q_by": 0.000311
+      },
+      {
+       "stat": "F",
+       "subset": "misspelled",
+       "n": 22,
+       "clusters": 22,
+       "value": 1.0,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "misspelled",
+       "n": 22,
+       "clusters": 22,
+       "value": 0.18615,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.000114,
+       "q_by": 0.000311
+      }
+     ],
+     "N3": [
+      {
+       "stat": "F",
+       "subset": "colloquial",
+       "n": 11,
+       "clusters": 11,
+       "value": 0.545455,
+       "p": 0.122085,
+       "q_bh": 0.122085,
+       "q_by": 0.183128
+      },
+      {
+       "stat": "M",
+       "subset": "colloquial",
+       "n": 11,
+       "clusters": 11,
+       "value": 0.006655,
+       "p": 0.0123,
+       "mcse": 0.001102,
+       "B": 9999,
+       "q_bh": 0.0246,
+       "q_by": 0.0369
+      }
+     ],
+     "N2_lambda_0.5": [
+      {
+       "stat": "F",
+       "subset": "all",
+       "n": 66,
+       "clusters": 22,
+       "value": 0.909091,
+       "p": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "all",
+       "n": 66,
+       "clusters": 22,
+       "value": 0.1556,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999
+      }
+     ]
+    },
+    "n3": {
+     "colloquial_items": 22,
+     "used": 11,
+     "dropped_singleton": 11
+    },
+    "negative_control": {
+     "permutations": 400,
+     "B_mc": 999,
+     "max_rejection": 0.072,
+     "reject": {
+      "N1": {
+       "F": {
+        "rate": 0.0275,
+        "mcse": 0.008177
+       },
+       "M": {
+        "rate": 0.035,
+        "mcse": 0.009189
+       }
+      },
+      "N2": {
+       "F": {
+        "rate": 0.0275,
+        "mcse": 0.008177
+       },
+       "M": {
+        "rate": 0.04,
+        "mcse": 0.009798
+       }
+      },
+      "N3": {
+       "F": {
+        "rate": 0.03,
+        "mcse": 0.008529
+       },
+       "M": {
+        "rate": 0.045,
+        "mcse": 0.010365
+       }
+      }
+     },
+     "met": true
+    }
+   },
+   "real": {
+    "status": "not run: no models dir was given (python eval/sibling_eval.py --models <dir>; eval/README.md)"
+   }
+  },
+  "site": {
+   "standin": {
+    "score_source": "stand-in Tier 4 score S (t4_coding, shipped [SI] weights) on the stand-in Tier 2 cosine (_bow)",
+    "n": 144,
+    "m": 48,
+    "items_per_cluster": 3.0,
+    "set_size_items": {
+     "6": 75,
+     "4": 69
+    },
+    "F": 0.861111,
+    "F_frac_sensitivity": 0.861111,
+    "tie_rate": 0.0,
+    "M": 0.166067,
+    "keyword_F": 0.819444,
+    "gate_a": {
+     "rho_hat": 0.0,
+     "deff": 1.0,
+     "n_eff": 144.0,
+     "x_eff": 124,
+     "bound": 0.804611,
+     "a_min": 0.9,
+     "attainable_bound": 0.939497,
+     "assessable": true,
+     "passed": false,
+     "frac_credit_sensitivity": {
+      "F": 0.861111,
+      "rho_hat": 0.0,
+      "bound": 0.804611
+     }
+    },
+    "gate_b": {
+     "mean_diff": 0.041667,
+     "lower_bound": -0.013889,
+     "B": 9999,
+     "passed": false
+    },
+    "decision": "excluded from auto-coding: routes to human coding",
+    "decision_reasons": [
+     "Gate A failed: lower bound 0.805 < a_min 0.90",
+     "Gate B failed: tool minus keyword rule lower bound -0.014 is not above 0"
+    ],
+    "by_variant": {
+     "exact": {
+      "n": 48,
+      "F": 1.0,
+      "F_frac": 1.0,
+      "M": 0.292454,
+      "tie_rate": 0.0,
+      "keyword_F": 0.979167
+     },
+     "colloquial": {
+      "n": 48,
+      "F": 0.604167,
+      "F_frac": 0.604167,
+      "M": 0.017446,
+      "tie_rate": 0.0,
+      "keyword_F": 0.8125
+     },
+     "misspelled": {
+      "n": 48,
+      "F": 0.979167,
+      "F_frac": 0.979167,
+      "M": 0.188302,
+      "tie_rate": 0.0,
+      "keyword_F": 0.666667
+     }
+    },
+    "n2_weights": {
+     "site4": {
+      "pain": 16,
+      "swelling": 17,
+      "numbness": 14,
+      "tenderness": 17
+     },
+     "site6": {
+      "pain": 11,
+      "swelling": 14,
+      "numbness": 14,
+      "tenderness": 12,
+      "weakness": 15,
+      "cramp": 11
+     }
+    },
+    "null_tests": {
+     "N1": [
+      {
+       "stat": "F",
+       "subset": "all",
+       "n": 144,
+       "clusters": 48,
+       "value": 0.861111,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "all",
+       "n": 144,
+       "clusters": 48,
+       "value": 0.166067,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.0001,
+       "q_by": 0.000272
+      },
+      {
+       "stat": "F",
+       "subset": "exact",
+       "n": 48,
+       "clusters": 48,
+       "value": 1.0,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "exact",
+       "n": 48,
+       "clusters": 48,
+       "value": 0.292454,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.0001,
+       "q_by": 0.000272
+      },
+      {
+       "stat": "F",
+       "subset": "colloquial",
+       "n": 48,
+       "clusters": 48,
+       "value": 0.604167,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "colloquial",
+       "n": 48,
+       "clusters": 48,
+       "value": 0.017446,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.0001,
+       "q_by": 0.000272
+      },
+      {
+       "stat": "F",
+       "subset": "misspelled",
+       "n": 48,
+       "clusters": 48,
+       "value": 0.979167,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "misspelled",
+       "n": 48,
+       "clusters": 48,
+       "value": 0.188302,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.0001,
+       "q_by": 0.000272
+      }
+     ],
+     "N2": [
+      {
+       "stat": "F",
+       "subset": "all",
+       "n": 144,
+       "clusters": 48,
+       "value": 0.861111,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "all",
+       "n": 144,
+       "clusters": 48,
+       "value": 0.166067,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.0001,
+       "q_by": 0.000272
+      },
+      {
+       "stat": "F",
+       "subset": "exact",
+       "n": 48,
+       "clusters": 48,
+       "value": 1.0,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "exact",
+       "n": 48,
+       "clusters": 48,
+       "value": 0.292454,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.0001,
+       "q_by": 0.000272
+      },
+      {
+       "stat": "F",
+       "subset": "colloquial",
+       "n": 48,
+       "clusters": 48,
+       "value": 0.604167,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "colloquial",
+       "n": 48,
+       "clusters": 48,
+       "value": 0.017446,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.0001,
+       "q_by": 0.000272
+      },
+      {
+       "stat": "F",
+       "subset": "misspelled",
+       "n": 48,
+       "clusters": 48,
+       "value": 0.979167,
+       "p": 0.0,
+       "q_bh": 0.0,
+       "q_by": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "misspelled",
+       "n": 48,
+       "clusters": 48,
+       "value": 0.188302,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999,
+       "q_bh": 0.0001,
+       "q_by": 0.000272
+      }
+     ],
+     "N3": [
+      {
+       "stat": "F",
+       "subset": "colloquial",
+       "n": 22,
+       "clusters": 22,
+       "value": 0.272727,
+       "p": 0.081721,
+       "q_bh": 0.081721,
+       "q_by": 0.122581
+      },
+      {
+       "stat": "M",
+       "subset": "colloquial",
+       "n": 22,
+       "clusters": 22,
+       "value": -0.045155,
+       "p": 0.0223,
+       "mcse": 0.001477,
+       "B": 9999,
+       "q_bh": 0.0446,
+       "q_by": 0.0669
+      }
+     ],
+     "N2_lambda_0.5": [
+      {
+       "stat": "F",
+       "subset": "all",
+       "n": 144,
+       "clusters": 48,
+       "value": 0.861111,
+       "p": 0.0
+      },
+      {
+       "stat": "M",
+       "subset": "all",
+       "n": 144,
+       "clusters": 48,
+       "value": 0.166067,
+       "p": 0.0001,
+       "mcse": 0.0001,
+       "B": 9999
+      }
+     ]
+    },
+    "n3": {
+     "colloquial_items": 48,
+     "used": 22,
+     "dropped_singleton": 26
+    },
+    "negative_control": {
+     "permutations": 400,
+     "B_mc": 999,
+     "max_rejection": 0.072,
+     "reject": {
+      "N1": {
+       "F": {
+        "rate": 0.04,
+        "mcse": 0.009798
+       },
+       "M": {
+        "rate": 0.04,
+        "mcse": 0.009798
+       }
+      },
+      "N2": {
+       "F": {
+        "rate": 0.0375,
+        "mcse": 0.009499
+       },
+       "M": {
+        "rate": 0.0375,
+        "mcse": 0.009499
+       }
+      },
+      "N3": {
+       "F": {
+        "rate": 0.0275,
+        "mcse": 0.008177
+       },
+       "M": {
+        "rate": 0.05,
+        "mcse": 0.010897
+       }
+      }
+     },
+     "met": true
+    }
+   },
+   "real": {
+    "status": "not run: no models dir was given (python eval/sibling_eval.py --models <dir>; eval/README.md)"
+   }
+  }
+ },
+ "known_answer": {
+  "verbatim": "calcium down on bloods",
+  "gold_pt": "Blood calcium decreased",
+  "found": true,
+  "standin": {
+   "increased": 0.4647,
+   "decreased": 0.505,
+   "abnormal": 0.466
+  },
+  "lab_family_routes_to_human_on_every_path_run": true,
+  "expected": "lab family failing or not assessable on every path (plan section 14)",
+  "met": true
+ }
+}
