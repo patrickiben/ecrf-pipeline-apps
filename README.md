@@ -176,8 +176,11 @@ GitHub Pages publishes `docs/` from `main` (Settings > Pages) at https://patrick
 - [`docs/case-study.html`](docs/case-study.html): the four-tier design and two worked examples, with every number
   tagged by the path that produced it and where it was recorded. It replaces the two earlier decks; their old URLs
   (`docs/deck_a_four_tier_pipeline.html`, `docs/deck_b_implementation_walkthrough.html`) are redirect stubs.
+- [`docs/404.html`](docs/404.html): the page GitHub Pages shows for a missing address on the site, with links
+  home, to the evaluation, the case study and the four apps. Its links are site-absolute (`/ecrf-pipeline-apps/...`)
+  because it is served at whatever depth the missing address had.
 
-All three are single static files with inline CSS and no external scripts, stylesheets, fonts or images (QC check
+All four are single static files with inline CSS and no external scripts, stylesheets, fonts or images (QC check
 D2), and every local link in them must resolve (D3).
 
 ## Using your own cut
@@ -265,8 +268,8 @@ sample_data/             the one SYNTHETIC cut the coding, de-identification and
 anomaly_data/            the monitoring app's own SYNTHETIC longitudinal demo (labs.csv + generate.py)
 eval/                    the real model path: setup, synthetic evaluation data, training and evaluation scripts, results;
                          and the within-sibling check of the coding assist (registered plan, scripts, results)
-docs/                    GitHub Pages: index.html, evaluation.html, case-study.html, two redirect stubs for the
-                         retired decks, EVALUATION.md, FEASIBILITY.md, screenshots (img/), .nojekyll
+docs/                    GitHub Pages: index.html, evaluation.html, case-study.html, 404.html, two redirect stubs
+                         for the retired decks, EVALUATION.md, FEASIBILITY.md, screenshots (img/), .nojekyll
 docs/app/                the in-browser build: four pages, launch.js, app.css, copies of the apps and data, pinned wheels
 tools/                   sync_browser_apps.py (keeps docs/app/ in step; --check for CI) and the page template
 USER_GUIDE.md            step-by-step instruction manual for running all four apps
