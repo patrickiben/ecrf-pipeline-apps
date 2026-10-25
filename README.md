@@ -26,10 +26,9 @@ share no module on purpose; see the header comment in each file before editing.
 
 Quickstart: 60 seconds, sample data included.
 
-**macOS, double-click:** `Launch Coding App.command` (Coding QC assist), `Launch PHI App.command`
-(De-identification review assist), `Launch Risk App.command` (Participant risk screening) or
-`Launch Anomaly App.command` (Central statistical monitoring). Finder runs these in Terminal and opens the app in
-your browser, with no typing needed. The `.bat` files are for Windows; on a Mac use the `.command` files
+**macOS, double-click:** `Launch Coding QC assist.command`, `Launch De-identification review assist.command`,
+`Launch Participant risk screening.command` or `Launch Central statistical monitoring.command`. Finder runs these in
+Terminal and opens the app in your browser, with no typing needed. The `.bat` files are for Windows; on a Mac use the `.command` files
 (double-clicking a plain `.sh` may open it in an editor instead of running it).
 
 From a terminal instead:
