@@ -12,7 +12,7 @@ A step-by-step manual for running the four apps in this folder:
   per-subject anomalies and measures cohort drift over time with Sinkhorn optimal transport, on
   longitudinal (per-visit) data.
 
-They are **four independent programs** that read the same cut folder without interfering (the anomaly app reads its own longitudinal demo), run entirely on your machine (air-gapped), and each write their own audit log. This guide covers installing, running all four apps on real data, reading the outputs, and troubleshooting. For *why* it is built this way, see [Deck A](presentations/deck_a_four_tier_pipeline.md); for a worked trace of exactly what a run produces, see [Deck B](presentations/deck_b_implementation_walkthrough.md).
+They are **four independent programs** that read the same cut folder without interfering (the anomaly app reads its own longitudinal demo), run entirely on your machine (air-gapped), and each write their own audit log. To try them first with nothing installed, open the in-browser versions on the bundled synthetic data (see *Try it in your browser* below). This guide covers installing, running all four apps on real data, reading the outputs, and troubleshooting. For *why* it is built this way, see [Deck A](presentations/deck_a_four_tier_pipeline.md); for a worked trace of exactly what a run produces, see [Deck B](presentations/deck_b_implementation_walkthrough.md).
 
 > **Tip:** each app also carries its own instructions built in — open the **“📖 How to use this
 > app”** panel at the top of any app for the steps relevant to that specific app. This file is the
@@ -59,13 +59,27 @@ Before touching real data, run each app against its demo cut:
 
 [sample_data/README.md](sample_data/README.md) and [anomaly_data/README.md](anomaly_data/README.md) list precisely what each run should show. Both demo cuts are synthetic — see their READMEs.
 
-> **Hosted demo mode.** A public deployment (for example on Streamlit Community Cloud) should run with the Streamlit
-> secret `hosted = true`, or the environment variable `ECRF_HOSTED=1` on other hosts. The app then shows a banner
+### Try it in your browser (no install)
+
+The same four programs also run inside your browser tab, on the bundled synthetic data only:
+[coding app](https://patrickiben.github.io/ecrf-pipeline-apps/app/meddra.html),
+[PHI app](https://patrickiben.github.io/ecrf-pipeline-apps/app/phi.html),
+[risk app](https://patrickiben.github.io/ecrf-pipeline-apps/app/risk.html) and
+[anomaly app](https://patrickiben.github.io/ecrf-pipeline-apps/app/anomaly.html).
+Each page uses stlite (Streamlit on Pyodide, Python compiled to WebAssembly) to run the unchanged program on your
+device, so there is no server. The first visit downloads about 30 MB, then the app opens on the sample cut; click
+**Execute** and save results with the download buttons (the output folder lives in the tab's memory).
+Privacy: runs in your browser; files are processed on your device and not uploaded by the app; the page is
+downloaded from GitHub Pages and the CDN, which see your IP address; synthetic data only; not a validated or Part 11
+system.
+
+> **Hosted demo mode.** The in-browser pages, and any public server deployment, run with hosted mode on (the
+> environment variable `ECRF_HOSTED=1`, or the Streamlit secret `hosted = true` on a server). The app then shows a banner
 > ("Public demo: synthetic data only..."), locks every uploader and path input to the bundled synthetic cut, writes
 > its outputs to a per-session temporary folder and records `hosted_mode=true` in the audit; you only confirm the
 > pre-flight panel and click **Execute**. On your own machine nothing is set, so everything in this guide applies
-> unchanged and the audit records `hosted_mode=false`. Use a local run for real data. Deployment steps are in the
-> [README](README.md#deploy-your-own-demo).
+> unchanged and the audit records `hosted_mode=false`. Use a local run for real data. Server deployment notes are in
+> the [README](README.md#serving-the-apps-from-your-own-server).
 
 ---
 
@@ -350,4 +364,4 @@ A portable end-to-end test harness ships in [`tests/qc_test.py`](tests/qc_test.p
 pip install -r requirements.txt && python tests/qc_test.py
 ```
 
-Exit code **0 = every check passes**: 247 checks with the optional extras (`pyreadstat`, `scikit-learn`, `POT`, `scipy`) installed, 244 with `requirements.txt` only (all four apps driven end-to-end, including a synthetic `.asc` release with HLT/HLGT + currency filter, content-based PHI discovery, SAS `.sas7bdat` input routing, the risk app against `sample_data/` (anchor subjects landing in their expected categories, valid score ranges, full category coverage, `[SI]` criteria sourcing via the audit log) and the anomaly app catching its injected drift column + per-subject outliers. Every run is bit-identical across two runs; hosted demo mode and the `docs/` landing page are checked too). Leave `ECRF_HOSTED` unset and keep any Streamlit secrets file away while you run it: the hosted checks set both themselves. What was checked and what bugs were found and fixed: [QC_REPORT.md](QC_REPORT.md).
+Exit code **0 = every check passes**; the last line reports how many passed, failed and were skipped for the installed dependencies (with `requirements.txt` only, the checks that need `pyreadstat` or `scikit-learn` do not run). The harness drives all four apps end-to-end, including a synthetic `.asc` release with HLT/HLGT + currency filter, content-based PHI discovery, SAS `.sas7bdat` input routing, the risk app against `sample_data/` (anchor participants landing in their expected categories, valid score ranges, full category coverage, `[SI]` criteria sourcing via the audit log) and the anomaly app catching its injected drift column + per-participant outliers. Every run is bit-identical across two runs; hosted demo mode, the `docs/` landing page and the in-browser build in `docs/app/` are checked too. Leave `ECRF_HOSTED` unset and keep any Streamlit secrets file away while you run it: the hosted checks set both themselves. What was checked and what bugs were found and fixed: [QC_REPORT.md](QC_REPORT.md).

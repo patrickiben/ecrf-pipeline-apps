@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>eCRF Pipeline Apps</title>
-<meta name="description" content="Four independent Streamlit apps for synthetic clinical eCRF extracts: auto-coding, PII/PHI redaction, risk scoring, and anomaly and drift detection.">
+<meta name="description" content="Four independent Streamlit apps for synthetic clinical eCRF extracts, runnable in the browser: auto-coding, PII/PHI redaction, risk scoring, and anomaly and drift detection.">
 <meta name="color-scheme" content="light dark">
 <!-- One self-contained page for GitHub Pages (served from the main branch, /docs). Inline CSS only:
      no external scripts, stylesheets, fonts or images (QC check D2 enforces this). -->
@@ -75,7 +75,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <p class="lede">Four independent Streamlit apps that read clinical eCRF extracts and write audit-ready outputs:
     auto-coding of adverse-event verbatims, PII/PHI flagging and redaction, participant safety and discontinuation
     risk scoring, and data anomaly and drift detection. Each app is a separate program with its own audit log, so a
-    run can be reproduced from its audit alone.</p>
+    run can be reproduced from its audit alone. All four also run in your browser on the bundled synthetic data.</p>
   <ul class="links">
     <li><a href="https://github.com/patrickiben/ecrf-pipeline-apps">Source on GitHub</a></li>
     <li><a href="deck_a_four_tier_pipeline.html">Deck A: the four-tier pipeline</a></li>
@@ -90,19 +90,26 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
 <main>
 
 <section aria-labelledby="demos">
-  <h2 id="demos">Try a hosted demo</h2>
-  <p>Each app runs as its own Streamlit Community Cloud deployment in hosted mode: every data input is locked to the
-    bundled synthetic cut, outputs go to a per-session temporary folder, a banner says so on every page, and the audit
-    records <code>hosted_mode=true</code>. For real data, run the apps locally (see the README).</p>
+  <h2 id="demos">Run the apps in your browser</h2>
+  <p>Each page runs the same Python program inside your browser tab with stlite (Streamlit on Pyodide, Python compiled
+    to WebAssembly), so there is no server to sleep, wake or sign in to. The page downloads Python and the app's
+    packages from a CDN, fetches the program and its synthetic data from this site, and runs everything on your device.</p>
   <div class="demolinks">
     <ul>
-      <li><a href="https://ecrf-coding.streamlit.app/?demo=1">Coding app</a> (<code>meddra_app.py</code>): MedDRA-style auto-coding of adverse-event verbatims</li>
-      <li><a href="https://ecrf-phi.streamlit.app/?demo=1">PHI app</a> (<code>phi_app.py</code>): PII/PHI flagging and redaction</li>
-      <li><a href="https://ecrf-risk.streamlit.app/?demo=1">Risk app</a> (<code>risk_app.py</code>): participant safety and discontinuation risk scoring</li>
-      <li><a href="https://ecrf-anomaly.streamlit.app/?demo=1">Anomaly app</a> (<code>anomaly_app.py</code>): numeric outliers, distributional drift and text outliers</li>
+      <li><a href="app/meddra.html">Coding app</a> (<code>meddra_app.py</code>): MedDRA-style auto-coding of adverse-event verbatims</li>
+      <li><a href="app/phi.html">PHI app</a> (<code>phi_app.py</code>): PII/PHI flagging and redaction</li>
+      <li><a href="app/risk.html">Risk app</a> (<code>risk_app.py</code>): participant safety and discontinuation risk scoring</li>
+      <li><a href="app/anomaly.html">Anomaly app</a> (<code>anomaly_app.py</code>): numeric outliers, distributional drift and text outliers</li>
     </ul>
-    <p class="muted" style="margin:10px 0 0">Each opens on the bundled synthetic sample data; click Execute to run it. An app that has been idle may take
-      about 30 seconds to wake up.</p>
+    <p class="muted" style="margin:10px 0 0">Each opens in hosted mode on the bundled synthetic sample data: every data
+      input is locked, a banner says so, and the audit records <code>hosted_mode=true</code>. Click Execute, then save
+      results with the download buttons. The first visit downloads about 30 MB. For real data, run the apps locally (see
+      the README).</p>
+  </div>
+  <div class="note" role="note">
+    <p><strong>Privacy.</strong> Runs in your browser; files are processed on your device and not uploaded by the app;
+      the page is downloaded from GitHub Pages and the CDN, which see your IP address; synthetic data only; not a
+      validated or Part 11 system.</p>
   </div>
 </section>
 
@@ -208,7 +215,9 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
 <section aria-labelledby="about">
   <h2 id="about">About this page</h2>
   <p>This is a single static file, <code>docs/index.html</code>, with no external scripts, stylesheets or fonts. GitHub
-    Pages serves it from the <code>main</code> branch's <code>/docs</code> folder.</p>
+    Pages serves it from the <code>main</code> branch's <code>/docs</code> folder. The four app pages in
+    <code>docs/app/</code> load a pinned stlite release and Python from the jsDelivr CDN; the README explains how they
+    are built and checked.</p>
 </section>
 
 </main>

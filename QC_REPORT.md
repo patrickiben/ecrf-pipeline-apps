@@ -10,6 +10,8 @@
 
 **Update, 2026-10-22:** the coding and PHI apps' real model path is wired and measured, and the harness adds 16 always-run wiring checks and 5 real-model checks that are reported as skipped when no models dir is given; see [New this pass: the real model path](#new-this-pass-the-real-model-path).
 
+**Update, 2026-10-24:** the four apps also run in the browser from GitHub Pages (stlite), every download button keeps the results on screen, and the harness adds D4, which checks the browser build in `docs/app/` against the apps and their data; see [New this pass: the apps in the browser](#new-this-pass-the-apps-in-the-browser).
+
 **Sample-cut enrichment (this pass):** every domain in `sample_data/` now carries an `AVISIT` + `VISITNUM` visit/timepoint dimension, assigned deterministically from row position — deliberately *not* the seeded RNG stream — so no existing value, anchor subject, or PHI-bearing note moved. Labs keep their file-provided reference range (`LBNRHI`), which is exactly what the risk app scores each lab against (option: ranges live in a column of the lab file). All 95 checks still pass on the enriched cut.
 
 ## Bugs found and fixed
@@ -99,7 +101,7 @@ With nothing set (the local default) every app behaves as before; its audit only
 
 **The switch fails closed** (see `_hosted()` in each app). A security review found three ways a public app could end up unlocked with nothing on the page to show it, all fixed this pass: (1) a secrets file that exists but does not parse (`hosted = True` with a capital T, or any stray bad line) made Streamlit's loader report "no secrets", so the app ran in local mode while Streamlit only logged the parse error on the server; (2) `ECRF_HOSTED` values such as `on` or `y` were read as off; (3) a top-level `ECRF_HOSTED` key in the secrets overwrote a host-set `ECRF_HOSTED=1`, because Streamlit copies top-level secrets into the environment. Now any `ECRF_HOSTED` or `hosted` value other than empty, `0`, `false`, `no` or `off` turns hosted mode on, so does a secrets file or folder that exists but does not load, and so does an `ECRF_HOSTED` key in the secrets. With no secrets file at all, a local run is unchanged. The README deploy steps now end with opening the app and confirming the banner, and say how to cap upload sizes on a self-managed host (`--server.maxUploadSize 1`): Streamlit's upload endpoint keeps bytes a crafted client sends to a disabled uploader in server memory until the session expires, although the apps never read them.
 
-**CI.** `.github/workflows/qc.yml` runs `python tests/qc_test.py` on Python 3.12 on every push and pull request, in two matrix variants: `stand-in` (`requirements.txt` only, what a plain install or a Community Cloud deploy gets) and `optional-extras` (plus `pyreadstat`, `scikit-learn`, `POT` and `scipy`). A guard step fails the job if the runner has `ECRF_HOSTED` set, so every run starts from the local default; the hosted checks set and clear it inside the harness process. `requirements.txt` now asks for `streamlit>=1.49`, the oldest release that accepts `st.dataframe(width="stretch")` (1.36 to 1.48 raise `TypeError` on load). The harness itself needs Streamlit 1.56 or newer (`AppTest.file_uploader`), which a fresh install satisfies.
+**CI.** `.github/workflows/qc.yml` runs `python tests/qc_test.py` on Python 3.12 on every push and pull request, in two matrix variants: `stand-in` (`requirements.txt` only, what a plain install gets) and `optional-extras` (plus `pyreadstat`, `scikit-learn`, `POT` and `scipy`). A guard step fails the job if the runner has `ECRF_HOSTED` set, so every run starts from the local default; the hosted checks set and clear it inside the harness process. `requirements.txt` now asks for `streamlit>=1.49`, the oldest release that accepts `st.dataframe(width="stretch")` (1.36 to 1.48 raise `TypeError` on load). The harness itself needs Streamlit 1.56 or newer (`AppTest.file_uploader`), which a fresh install satisfies.
 
 **New check groups (152 checks).**
 
@@ -146,6 +148,33 @@ The "Verified working" list below still describes the 95 app checks; all of them
 | `requirements.txt` only (CI variant `stand-in`) | **260 passed, 0 failed, 5 skipped** (244 + 16 RW; RM skipped) |
 | the real runtimes, no optional extras, `ECRF_MODELS_DIR` set to a models dir built with `eval/fetch_models.py` and trained with `eval/run_eval.py` | **265 passed, 0 failed, 0 skipped** (244 + 16 RW + 5 RM) |
 
+## New this pass: the apps in the browser
+
+**Date:** 2026-10-24 · **Method:** the `AppTest` harness on Python 3.14.7 with Streamlit 1.65.0, pandas 3.0.6 and numpy 2.5.4 (the optional extras and the real runtimes installed, no models dir), plus headless Chrome 155 driven by puppeteer-core 25.16.0 against `docs/` served locally under `/ecrf-pipeline-apps/`, as GitHub Pages serves it.
+
+The Streamlit Community Cloud links had started to answer with a sign-in page, so the four apps now run in the visitor's browser instead. stlite 1.12.0 runs Streamlit 1.65.0 on Pyodide 314.0.3 (Python 3.14) inside the tab, and GitHub Pages serves one page per app from `docs/app/`. What changed:
+
+- **Downloads keep the results (all four apps).** Every `st.download_button` now passes `on_click="ignore"`. Before, a click reran the script and, because the results sit behind the Execute button, wiped the tables and the other download buttons, so a second file needed a second run.
+- **Accurate wording in the browser.** Under Pyodide (`sys.platform == "emscripten"`) the caption says "runs in this browser tab" instead of "air-gapped", the help panel says nothing you load is uploaded instead of "nothing leaves the machine", the Output-folder help explains that the folder is in the tab's memory, and the success message says the files are in the tab's memory and points to the download buttons instead of "Wrote /tmp/...". A local run is unchanged; no widget label, header or button text changed.
+- **The browser build.** `tools/sync_browser_apps.py` copies the four `.py` files and every CSV in `sample_data/` and `anomaly_data/` into `docs/app/`, renders the four pages from `tools/browser_app_template.html` and checks three pinned pure-Python wheels (`itsdangerous`, `python-multipart`, `toml`) that the Streamlit build needs and Pyodide does not ship. Serving those from Pages means a visit contacts only GitHub Pages and cdn.jsdelivr.net, never PyPI. The pages set `ECRF_HOSTED=1`, pin stlite and Pyodide by exact version, check stlite's stylesheet and two core modules with Subresource Integrity, and carry a Content-Security-Policy that allows connections only to the site and the CDN.
+- **New check D4.** `tools/sync_browser_apps.py --check` must pass: byte-identical copies, pages exactly as rendered, wheel hashes, and no stray file. It also runs as its own CI job (`browser-build`). It was seen to fail on scratch copies for an edited app, a new source CSV, a deleted copy, a stray copy, a hand-edited page, a corrupted wheel and a missing screenshot, and to pass again after a sync.
+
+**Browser checks** (each app, run outside the harness; screenshots kept outside the repository):
+
+- Each page shows the loading notice ("Starting Python in your browser; first visit downloads about 30 MB.") and the privacy note word for word, and becomes interactive in 4.1 to 5.3 seconds on this machine (29.3 seconds with the network throttled to 10 Mbps and 100 ms).
+- In hosted mode both banners show, the sample box is ticked and locked, and Execute renders the results with no exception.
+- The first download button saves its file, and the results, the success message and every download button are still on screen afterwards. The four downloaded files (`ae_coded.csv`, `phi_flags.csv`, `risk_scores.csv`, `anomalies.csv`) are byte-identical to a native run of the same apps in hosted mode with the optional extras hidden, so every tier ran its `[SI]` path in both.
+- `?demo=1` works at 390 px phone width, with no horizontal scroll while loading, when ready or with results on screen, and the last download button can be scrolled into view. With hosted mode switched off for a test run only, `?demo=1` ticks the sample box and its absence leaves it unticked, so the query parameter reaches Python in the browser.
+- There were zero page errors. Every request went to the local server or cdn.jsdelivr.net (none to PyPI), and none was a POST or other non-GET request. An off-site fetch from the page, or from a worker it creates, is refused by the policy. Changed copies of `stlite.css`, `stlite.js` or its core chunk are refused by the browser.
+- With the CDN blocked, the page keeps the screenshot and explains that the app could not start. The test sandbox's own network dropped an occasional CDN request: in the final run, 2 of 10 page loads failed to start on the first try, showed that message with the advice to reload, and passed after one reload.
+- Known, harmless console noise: each download button logs a blocked request to stlite's placeholder host `stlite.invalid` when it appears; the download itself works. Only headless Chrome was tested; Safari and Firefox were not.
+
+**Results.**
+
+| Configuration | Result |
+|---|---|
+| `requirements.txt` plus the optional extras and the real runtimes, no models dir (Python 3.14.7, Streamlit 1.65.0) | **264 passed, 0 failed, 5 skipped** (the 263 earlier checks + D4; RM1 to RM5 skipped: no models dir) |
+
 ## Verified working (95 checks)
 
 **meddra_app.py:** domain + dictionary load from folder and via upload · verbatim
@@ -191,11 +220,11 @@ derive from its own location). With the app dependencies installed:
 
     pip install -r requirements.txt && python tests/qc_test.py
 
-Exit code 0 = every check passes: 263 checks with the optional extras (`pyreadstat`, `scikit-learn`, `POT`, `scipy`) installed, or 260 with `requirements.txt` only, where SAS2, SAS3 and A16 do not run; in both, the 5 real-model checks (RM1 to RM5) are reported as skipped. To run them, build a models dir as in [`eval/README.md`](eval/README.md) and run `ECRF_MODELS_DIR=<models dir> python tests/qc_test.py` with the real runtimes installed. It drives each app end-to-end via
+Exit code 0 = every check passes, and the last line reports how many passed, failed and were skipped. With `requirements.txt` only, SAS2, SAS3 and A16 do not run (they need `pyreadstat` or `scikit-learn`); without a models dir, the 5 real-model checks (RM1 to RM5) are reported as skipped. The latest counts are in the newest "New this pass" section above. To run them, build a models dir as in [`eval/README.md`](eval/README.md) and run `ECRF_MODELS_DIR=<models dir> python tests/qc_test.py` with the real runtimes installed. It drives each app end-to-end via
 `streamlit.testing.v1.AppTest.from_file(...)`, points the coding/PHI/risk apps at `sample_data/`
 and the anomaly app at `anomaly_data/`, clicks Execute, and asserts on the rendered dataframes and
 written CSVs — including a synthetic `.asc` release (HLT/HLGT + currency filter), content-based
-PHI discovery, SAS `.sas7bdat` input routing, the risk-app anchor subjects, and the anomaly app's injected drift column + per-subject outliers. It also runs each app in hosted mode (the H checks, which set and clear `ECRF_HOSTED` and their own scratch secrets themselves, so leave `ECRF_HOSTED` unset and keep any secrets file out of `~/.streamlit/` and `.streamlit/` while it runs) and checks `docs/` (the D checks). The assertions above are the acceptance criteria; keep them green before sharing a change.
+PHI discovery, SAS `.sas7bdat` input routing, the risk-app anchor participants, and the anomaly app's injected drift column + per-participant outliers. It also runs each app in hosted mode (the H checks, which set and clear `ECRF_HOSTED` and their own scratch secrets themselves, so leave `ECRF_HOSTED` unset and keep any secrets file out of `~/.streamlit/` and `.streamlit/` while it runs) and checks `docs/`, including the in-browser build in `docs/app/` (the D checks). The assertions above are the acceptance criteria; keep them green before sharing a change.
 
 ## Known limits (unchanged by QC)
 

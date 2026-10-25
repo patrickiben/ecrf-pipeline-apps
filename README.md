@@ -5,7 +5,8 @@
 📖 **New here?** Start with the [User Guide](USER_GUIDE.md) for step-by-step usage of all four apps.
 
 Four independent Streamlit apps that run on local, air-gapped hardware and read the
-**same cut folder** without interfering (the anomaly app reads its own longitudinal demo):
+**same cut folder** without interfering (the anomaly app reads its own longitudinal demo). They also
+[run in your browser](#run-in-your-browser-no-install) on the bundled synthetic data, with nothing to install:
 
 | App | Reads | Needs | Writes |
 |---|---|---|---|
@@ -19,7 +20,9 @@ labelled stand-in `[SI]`), and every effective threshold — so a run is reprodu
 alone. The four programs share no module on purpose; see the header comment in each file before
 editing.
 
-## Quickstart (60 seconds, sample data included)
+## Run locally
+
+Quickstart: 60 seconds, sample data included.
 
 **macOS — just double-click:** `Launch Coding App.command`, `Launch PHI App.command`,
 `Launch Risk App.command`, or `Launch Anomaly App.command`. Finder runs these in Terminal and opens the app in your browser — no typing needed. The `.bat` files are for Windows; on Mac use the `.command` files (double-clicking a plain `.sh` may open it in an editor instead of running it).
@@ -51,30 +54,35 @@ identical output columns.
 
 Manual equivalent: `pip install -r requirements.txt && streamlit run <app>.py`.
 
-## Hosted demo (no install)
+## Run in your browser (no install)
 
-**Live demos** (synthetic data only; each opens on the bundled sample cut, then click **Execute**):
+- [Coding app](https://patrickiben.github.io/ecrf-pipeline-apps/app/meddra.html) (`meddra_app.py`)
+- [PHI app](https://patrickiben.github.io/ecrf-pipeline-apps/app/phi.html) (`phi_app.py`)
+- [Risk app](https://patrickiben.github.io/ecrf-pipeline-apps/app/risk.html) (`risk_app.py`)
+- [Anomaly app](https://patrickiben.github.io/ecrf-pipeline-apps/app/anomaly.html) (`anomaly_app.py`)
 
-- [Coding app](https://ecrf-coding.streamlit.app/?demo=1) (`meddra_app.py`)
-- [PHI app](https://ecrf-phi.streamlit.app/?demo=1) (`phi_app.py`)
-- [Risk app](https://ecrf-risk.streamlit.app/?demo=1) (`risk_app.py`)
-- [Anomaly app](https://ecrf-anomaly.streamlit.app/?demo=1) (`anomaly_app.py`)
+Each page runs the same Python program inside your browser tab with [stlite](https://github.com/whitphx/stlite), which is Streamlit on Pyodide (CPython compiled to WebAssembly), so there is no server to sleep, wake or sign in to. The page downloads Python and the app's packages from a CDN, fetches the program and its synthetic data from GitHub Pages, and runs everything on your device.
 
-An app that has been idle may take about 30 seconds to wake up. Landing page: https://patrickiben.github.io/ecrf-pipeline-apps/
+Each opens on the bundled synthetic cut; click **Execute**. The first visit downloads about 30 MB and was measured at about 5 seconds to a usable app on a fast connection and about 30 seconds at 10 Mbps; later visits load from the browser cache. The pages need WebAssembly and module workers (current Chrome, Edge, Firefox or Safari); they were tested in Chrome. Landing page: https://patrickiben.github.io/ecrf-pipeline-apps/
 
-A public demo runs each app in **hosted mode**: every data input (the uploaders, folder paths and models dir) is locked to the bundled synthetic cut, outputs go to a per-session server temp folder (deleted when the session ends), a banner on every page says the demo takes synthetic data only, and the audit records `hosted_mode=true`. Everything bundled is synthetic: no real patients, no real study and no licensed dictionary. The demo dictionary's codes are 99-prefixed placeholders, not MedDRA codes. Hosted mode is off unless a deployment switches it on, so a local run behaves exactly as described in the rest of this README; there, opening the app with `?demo=1` appended simply starts with **Use the bundled synthetic sample data** ticked. Use a local run for real data.
+**Privacy:** Runs in your browser; files are processed on your device and not uploaded by the app; the page is downloaded from GitHub Pages and the CDN, which see your IP address; synthetic data only; not a validated or Part 11 system.
 
-### Deploy your own demo
+The pages run each app in **hosted mode** (`ECRF_HOSTED=1`): every data input (the uploaders, folder paths and models dir) is locked to the bundled synthetic cut, outputs go to a folder in the tab's memory (save them with the download buttons), a banner says the demo takes synthetic data only, and the audit records `hosted_mode=true`. Only the labeled `[SI]` stand-in path runs in the browser: the pages load numpy and pandas only, and the real model runtimes have no WebAssembly builds. Everything bundled is synthetic: no real patients, no real study and no licensed dictionary. The demo dictionary's codes are 99-prefixed placeholders, not MedDRA codes. Hosted mode is off unless a deployment switches it on, so a local run behaves exactly as described in the rest of this README; there, opening the app with `?demo=1` appended simply starts with **Use the bundled synthetic sample data** ticked. Use a local run for real data.
 
-On [Streamlit Community Cloud](https://streamlit.io/cloud), straight from this repository:
+### How the browser build is put together
 
-1. **One app per deployment.** Deploy each program as its own app from the same repository and branch, with the main file path set to `meddra_app.py`, `phi_app.py`, `risk_app.py` or `anomaly_app.py`.
-2. **Python 3.12.** Choose it under **Advanced settings** when you create the app (it is the version CI tests; changing it later means deleting and redeploying). Leave `requirements.txt` as is: it installs the labeled `[SI]` stand-in path.
-3. **Turn on hosted mode.** Add the secret `hosted = true` (the Secrets box takes TOML: paste it under Advanced settings, or later under the app's **Settings > Secrets**). Do not skip this step: without it, a public deployment accepts uploads and folder paths like a local install. On any other host, set the environment variable `ECRF_HOSTED=1` instead. Do not put an `ECRF_HOSTED` key in the secrets: Streamlit copies top-level secrets into the environment over the host's own value, so the apps treat that key as on whatever it says. The switch fails closed: any value other than empty, `0`, `false`, `no` or `off` turns hosted mode on, and so does a secrets file that exists but does not parse (for example `hosted = True` with a capital T), because Streamlit only logs that error on the server.
-4. **Check the banner.** Open the deployed app and confirm that the "Public demo: synthetic data only" banner shows on the main page and at the top of the sidebar, and that the uploaders and folder fields are grayed out. If the banner is missing, hosted mode is off: fix the secret before you share the link.
-5. **Share the link** with `?demo=1` appended, for example `https://<your-app>.streamlit.app/?demo=1`.
+`docs/app/` holds what GitHub Pages serves for the four apps:
 
-**Hosting it yourself** (a container or server where you control the start command): set `ECRF_HOSTED=1` and also start Streamlit with `--server.maxUploadSize 1` (or `STREAMLIT_SERVER_MAX_UPLOAD_SIZE=1`). In hosted mode the apps never read or process an uploaded file, but Streamlit's upload endpoint still keeps the bytes a crafted client sends, even to a disabled uploader, in server memory until the session expires; the 1 MB cap bounds that. Keep the cap out of `.streamlit/config.toml`, which local runs share.
+- `meddra.html`, `phi.html`, `risk.html`, `anomaly.html`: one page per app, rendered from `tools/browser_app_template.html`. Each shows a loading notice and a screenshot of the app's results until Python is ready, and keeps the screenshot with a short explanation if the app cannot start.
+- `launch.js` and `app.css`: the shared loader and page style.
+- Byte-identical copies of the four `.py` files and of every CSV in `sample_data/` and `anomaly_data/`, which the pages load from Pages.
+- `wheels/`: three small pure-Python wheels the Streamlit build needs that Pyodide does not ship (`itsdangerous` 2.2.0, BSD-3-Clause; `python-multipart` 0.0.32, Apache-2.0; `toml` 0.10.2, MIT), pinned by sha256 and served from Pages so a visit never contacts PyPI. Each wheel carries its license text in its `.dist-info` folder.
+
+After editing an app or its sample data, run `python tools/sync_browser_apps.py` and commit what it changes. CI fails while `docs/app/` is out of step (the `browser-build` job, and QC check D4). The pages pin stlite 1.12.0 (Streamlit 1.65.0 on Pyodide 314.0.3, Python 3.14) by exact version, check its stylesheet and core modules with Subresource Integrity, and carry a Content-Security-Policy that lets them connect only to GitHub Pages and cdn.jsdelivr.net. To move to a newer stlite, change the pins at the top of `tools/sync_browser_apps.py`, run it with `--verify-cdn`, re-render, and test the four pages in a browser before merging. One harmless quirk: each download button logs a console error when it appears (stlite probes a placeholder URL that the page's policy blocks); the file still downloads.
+
+### Serving the apps from your own server
+
+The apps also support a public server deployment. Set the environment variable `ECRF_HOSTED=1` (or the Streamlit secret `hosted = true`) and start Streamlit with `--server.maxUploadSize 1` (or `STREAMLIT_SERVER_MAX_UPLOAD_SIZE=1`), keeping the cap out of `.streamlit/config.toml`, which local runs share. In hosted mode the apps never read or process an uploaded file, but Streamlit's upload endpoint still keeps the bytes a crafted client sends, even to a disabled uploader, in server memory until the session expires; the 1 MB cap bounds that. Do not put an `ECRF_HOSTED` key in the secrets: Streamlit copies top-level secrets into the environment over the host's own value, so the apps treat that key as on whatever it says. The switch fails closed: any value other than empty, `0`, `false`, `no` or `off` turns hosted mode on, and so does a secrets file that exists but does not parse (for example `hosted = True` with a capital T), because Streamlit only logs that error on the server. Before you share the link, open the app and confirm that the "Public demo: synthetic data only" banner shows on the main page and at the top of the sidebar and that the uploaders and folder fields are grayed out; if the banner is missing, hosted mode is off.
 
 ## Screenshots
 
@@ -98,7 +106,7 @@ Local runs on the bundled synthetic data, opened with `?demo=1` and captured aft
 
 ## Landing page
 
-[`docs/index.html`](docs/index.html) is a one-page overview for GitHub Pages: the four apps, links to the live demos, the screenshots and both decks. It is published by GitHub Pages from `main`, folder `/docs` (Settings > Pages), at https://patrickiben.github.io/ecrf-pipeline-apps/. `docs/` also holds byte-identical copies of the two HTML decks so they render there; after editing a deck's HTML in `presentations/`, copy it into `docs/` too (QC check D1 fails otherwise).
+[`docs/index.html`](docs/index.html) is a one-page overview for GitHub Pages: the four apps, links to the in-browser apps in [`docs/app/`](docs/app/), the screenshots and both decks. It is published by GitHub Pages from `main`, folder `/docs` (Settings > Pages), at https://patrickiben.github.io/ecrf-pipeline-apps/. `docs/` also holds byte-identical copies of the two HTML decks so they render there; after editing a deck's HTML in `presentations/`, copy it into `docs/` too (QC check D1 fails otherwise).
 
 ## Using your own cut
 
@@ -137,7 +145,8 @@ stand-in is honest about being lexical — semantically-gapped verbatims flag to
 ## What this build does NOT do
 
 No scanned-document / bounding-box path (input is tabular eCRF), no negation feature, no clinical
-variable derivation, and nothing leaves the machine. The PHI output is compliance-*enabling*, not a
+variable derivation, and nothing leaves the machine (in the browser build, nothing you load is uploaded
+by the app). The PHI output is compliance-*enabling*, not a
 certification; that remains an organizational determination. **The risk app is decision support — it
 ranks and flags subjects for human review but does NOT make a clinical determination**, and it scores
 raw data against built-in `[SI]` criteria rather than parsing free-text PDF/Word protocols or SAPs. See
@@ -157,11 +166,14 @@ run_risk.sh   / .bat     one-command launchers (same as above, risk app on port 
 run_anomaly.sh/ .bat     one-command launchers (same as above, anomaly app on port 8504)
 Launch *.command         macOS double-click launchers — Finder runs them in Terminal
 .streamlit/config.toml   disables Streamlit usage stats — nothing leaves the machine
-.github/workflows/qc.yml CI: runs tests/qc_test.py on every push and pull request, stand-in and optional-extras variants
+.github/workflows/qc.yml CI: runs tests/qc_test.py on every push and pull request, stand-in and optional-extras variants,
+                         and checks docs/app/ against the apps (tools/sync_browser_apps.py --check)
 sample_data/             the one SYNTHETIC cut the coding/PHI/risk apps read (+ generate.py to regenerate ae/lb/eg/vs/pe)
 anomaly_data/            the anomaly app's own SYNTHETIC longitudinal demo (labs.csv + generate.py)
 presentations/           Deck A (conceptual) and Deck B (implementation walkthrough), MD + HTML
 docs/                    GitHub Pages landing page (index.html), byte-identical copies of the two HTML decks, screenshots (img/), .nojekyll
+docs/app/                the in-browser build: four pages, launch.js, app.css, copies of the apps and data, pinned wheels
+tools/                   sync_browser_apps.py (keeps docs/app/ in step; --check for CI) and the page template
 USER_GUIDE.md            step-by-step instruction manual for running all four apps
 tests/qc_test.py         portable end-to-end test harness (`python tests/qc_test.py` reports passed, failed, and skipped checks for the installed dependencies)
 QC_REPORT.md             what was tested, what bugs were found and fixed, how to re-run the tests
