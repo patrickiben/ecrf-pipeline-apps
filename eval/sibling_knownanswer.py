@@ -10,7 +10,8 @@ Five planted scorers on simulated lab clusters, each with an answer the statisti
   (c) pure noise               iid N(0, 1) scores: every null holds its size; M's p-values are uniform
   (d) good enough              q_c ~ Beta(97, 3): passes the floor at 120 clusters and beats the keyword rule
   (e) bound coverage           true accuracy 0.85 with intraclass correlation 0.2: the Gate A bound sits below
-                               0.85 in at least 93% of datasets
+                               0.85 in at least 93% of datasets (also reported, outside the plan: the coverage
+                               with the design effect left out, which shows what this criterion alone can detect)
 Like eval/sibling_eval.py it refuses to run unless the plan's SHA-256 matches eval/sibling_plan.sha256 and every
 input file's SHA-256 matches the plan (it reads the lab sets from eval/data/sibling_sets.csv), and it reads every
 parameter from the plan. It never calls the coding app's scorer, so unlike sibling_eval.py it does not check the
@@ -75,7 +76,9 @@ def one(kind, s_idx, ds, P, B_mc, B_boot, n_stems):
         gold = [[c for _, c, _ in it["members"]].index(it["gold_code"]) for it in items]
         correct = np.array([p[0] == g for p, g in zip(picks, gold)], float)
         A = S.gate_a(correct, clusters, float(P["alpha"]), float(P["a_min"]))
-        return dict(F=A["F"], bound=A["bound"], gate_a=A["passed"], rho=A["rho_hat"])
+        n = len(correct)          # the same bound with the design effect left out (deff = 1): reported, not registered
+        no_deff = S.cp_lower(math.floor(A["F"] * n + 1e-9), n, float(P["alpha"]))
+        return dict(F=A["F"], bound=A["bound"], gate_a=A["passed"], rho=A["rho_hat"], bound_no_deff=no_deff)
     a = S.analyze(items, T, P, 0, 0, picks, B_mc=B_mc, rng_tag=("knownanswer", s_idx, ds),
                   only={"N1": ["all"], "N2": ["all"], "N3": ["colloquial"]})
     out = dict(F=a["F"], M=a["M"])
@@ -128,6 +131,8 @@ def criteria(res, P, R, Rcov, crit=None):
         d = res["e"]; t = float(P["knownanswer"]["e_true_accuracy"]); v, se = _rate([x["bound"] < t for x in d])
         add("e", f"Gate A bound below the true accuracy {t}", v, se, f">= {C['e_coverage_min']}", v >= C["e_coverage_min"])
         v = float(np.mean([x["rho"] for x in d])); add("e", "mean estimated intraclass correlation (reported; true 0.2)", v, float(np.std([x["rho"] for x in d]) / math.sqrt(len(d))), "reported", None)
+        v, se = _rate([x["bound_no_deff"] < t for x in d])
+        add("e", f"Gate A bound below {t} with the design effect left out (reported, added after review, not registered: what (e) alone can detect)", v, se, "reported", None)
     return rows
 
 def run_knownanswer(P, datasets=None, coverage_datasets=None, B_mc=None, B_boot=None, scorers=SCORERS, crit=None):

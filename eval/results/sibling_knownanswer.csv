@@ -23,3 +23,4 @@ d,mean F (reported),0.970556,0.000432,reported,,400,9999,9999,20261025,8ac2e9cb8
 d,mean Gate A bound (reported),0.950236,0.000554,reported,,400,9999,9999,20261025,8ac2e9cb80fb672c324ee7bd7cacac5c2ad535312accd1b34c0416d4c54543a7
 e,Gate A bound below the true accuracy 0.85,0.965,0.004109,>= 0.93,True,2000,9999,9999,20261025,8ac2e9cb80fb672c324ee7bd7cacac5c2ad535312accd1b34c0416d4c54543a7
 e,mean estimated intraclass correlation (reported; true 0.2),0.195471,0.001699,reported,,2000,9999,9999,20261025,8ac2e9cb80fb672c324ee7bd7cacac5c2ad535312accd1b34c0416d4c54543a7
+e,"Gate A bound below 0.85 with the design effect left out (reported, added after review, not registered: what (e) alone can detect)",0.9325,0.00561,reported,,2000,9999,9999,20261025,8ac2e9cb80fb672c324ee7bd7cacac5c2ad535312accd1b34c0416d4c54543a7

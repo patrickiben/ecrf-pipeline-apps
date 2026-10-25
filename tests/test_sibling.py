@@ -14,9 +14,15 @@ What is checked (S-checks):
        nothing written); the scorer fingerprint matches the registration, ignores a comment edit and catches a
        code edit
   S5   the statistics: Clopper-Pearson attainability 0.05^(1/m), Gate A with every item correct, BH/BY on a
-       hand-checked case, KS on uniform draws, the keyword rule's matching
+       hand-checked case, KS on uniform draws, the keyword rule's matching; and, added after review so that a
+       broken gate cannot pass (none of these is in the registered plan): the Clopper-Pearson bound against its
+       binomial tail, the intraclass correlation on a hand-worked unbalanced example, Gate A's design effect,
+       Gate B against hand-checked bootstrap quantiles and at the boundary where the tool and the rule are
+       equally accurate (pass rate about 0.05), and the accuracy and margin tails inside analyze() against
+       enumeration
   S6   the known-answer demo (a) to (e) at reduced replicates (60 datasets, 300 for coverage, B = 999), with
-       the reduced tolerances below
+       the reduced tolerances below; and (added after review) that (e) depends on the design effect: leaving
+       it out lowers the coverage, and the mean estimated intraclass correlation is near the true 0.2
   S7   eval/make_data.py still writes byte-identical coding_eval.csv and dictionary.csv
   S8   the real-path scoring wiring, with stand-in runtimes: the cosine is used when the re-ranker's contract
        has ret_rank (and why is recorded), the re-ranker score when its contract fits any candidate
@@ -171,6 +177,67 @@ def s5():
     check("S5f a tie at the maximum is broken by the draw, among the tied members only", pk == [0, 0, 1, 1], pk)
 block("S5", s5)
 
+def s5_gates():
+    # S5g Clopper-Pearson: at the bound, the binomial tail P(X >= x | n, p = bound) is exactly alpha
+    worst = max(abs(sum(math.comb(n, k) * b ** k * (1 - b) ** (n - k) for k in range(x, n + 1)) - 0.05)
+                for x, n in ((60, 66), (124, 144), (5, 10), (1, 3), (29, 29), (118, 120)) for b in [S.cp_lower(x, n)])
+    check("S5g Clopper-Pearson lower bound: P(X >= x) at the bound equals 0.05 for six (x, n), including lab's 60 of 66 and site's 124 of 144",
+          worst < 1e-9 and abs(S.cp_lower(60, 66) - 0.828441) < 1e-6, worst)
+    # S5h one-way ANOVA ICC, hand-worked on an unbalanced example (clusters of 3, 3, 2 and 4 items):
+    # grand mean 1/2; SSB = 19/12 on 3 df, so MSB = 19/36; SSW = 17/12 on 8 df, so MSW = 17/96;
+    # n0 = (12 - 38/12)/3 = 53/18; ICC = (MSB - MSW)/(MSB + (n0 - 1) MSW) = 606/1507 = 0.402123
+    y = [1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0]; cl = [0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 3, 3]
+    r = S.anova_icc(y, cl); r_neg = S.anova_icc([1, 0, 1, 0, 1, 0], [0, 0, 1, 1, 2, 2])
+    check("S5h intraclass correlation on a hand-worked unbalanced example equals 606/1507 = 0.402123; a negative estimate is truncated to 0",
+          abs(r - 606 / 1507) < 1e-12 and r_neg == 0.0, (r, r_neg))
+    # S5i Gate A applies the Kish design effect with m-bar = n/m
+    A = S.gate_a(y, cl, 0.05, 0.90); deff = 1 + (12 / 4 - 1) * 606 / 1507
+    check("S5i Gate A uses the design effect: deff = 1 + (n/m - 1) rho, n_eff = n/deff, x_eff = floor(F n_eff), and the bound is below the one that ignores clustering",
+          abs(A["deff"] - deff) < 1e-12 and abs(A["n_eff"] - 12 / deff) < 1e-12 and A["x_eff"] == math.floor(0.5 * 12 / deff)
+          and abs(A["bound"] - S.cp_lower(A["x_eff"], 12 / deff)) < 1e-12 and A["bound"] < S.cp_lower(6, 12), A)
+    # S5j Gate B's bound is the LOWER 5% bootstrap quantile. Two clusters with means +1 and -1: the resampled mean is
+    # -1, 0 or +1 with probabilities 1/4, 1/2, 1/4, so the 5% quantile is -1 (the 95% quantile is +1). Three
+    # one-item clusters -1, 0, +1: the resampled mean is at most -2/3 with probability 4/27 = 0.148 and at most -1
+    # with 1/27 = 0.037, so the 5% quantile is -2/3 (the 95% quantile is +2/3).
+    g1 = S.gate_b([1, 1, -1, -1], [0, 0, 1, 1], 9999, np.random.default_rng(1))
+    g2 = S.gate_b([-1, 0, 1], [0, 1, 2], 9999, np.random.default_rng(2))
+    g3 = S.gate_b([1, 1, 1, 1], [0, 0, 1, 1], 999, np.random.default_rng(3))
+    check("S5j Gate B lower bound equals the hand-checked 5% bootstrap quantile (-1 and -2/3; the upper quantile would give +1 and +2/3); all +1 passes",
+          g1["lower_bound"] == -1.0 and not g1["passed"] and abs(g2["lower_bound"] + 2 / 3) < 1e-12 and not g2["passed"]
+          and g3["lower_bound"] == 1.0 and g3["passed"], (g1, g2, g3))
+    # S5k Gate B at the boundary: tool and rule equally accurate (both correct with probability q_c ~ Beta(8, 2)),
+    # 48 clusters of 3 items, 1,000 families, B = 999. A one-sided 5% bound should pass about 5% of the time.
+    rng = np.random.default_rng(20261026); R5 = 1000; passes = 0
+    for _ in range(R5):
+        q = rng.beta(8, 2, 48); tool = rng.random((48, 3)) < q[:, None]; rule = rng.random((48, 3)) < q[:, None]
+        passes += S.gate_b((tool.astype(float) - rule).reshape(-1), np.repeat(np.arange(48), 3), 999, rng)["passed"]
+    sd = math.sqrt(0.05 * 0.95 / R5); rate = passes / R5
+    check(f"S5k Gate B passes in 0.05 +/- 3 SD ({0.05 - 3 * sd:.3f} to {0.05 + 3 * sd:.3f}) of 1,000 families where the tool and the rule are equally accurate",
+          abs(rate - 0.05) <= 3 * sd, rate)
+    # S5l the tails inside analyze(): 5 clusters of 3 members with 2 items each, random scores; under N1 every one of
+    # the 3^5 pseudo-gold assignments has probability 1/243. The F tail must be P(sum >= observed) exactly, and the
+    # Monte Carlo M tail must agree with the enumerated P(M* >= M) within 4 MCSE plus the (b + 1)/(B + 1) offset.
+    rng = np.random.default_rng(5); roles = ("increased", "decreased", "abnormal"); items, T = [], []
+    for c in range(5):
+        mem = [(ro, f"W{c}:{ro}", f"stem{c} {ro}") for ro in roles]; g = int(rng.integers(0, 3))
+        for j in range(2):
+            items.append(dict(id=f"W{c}{j}", variant=("exact", "misspelled")[j], family="lab", gold_code=mem[g][1], gold_role=roles[g],
+                              members=mem, w=dict(zip(roles, (1, 1, 1))), lex_set=set()))
+            T.append(list(rng.random(3)))
+    picks = [S.pick_with_ties(t, 0.5) for t in T]
+    a = S.analyze(items, T, P, 0, 0, picks, B_mc=9999, rng_tag=("knownanswer", 99, 0), only={"N1": ["all"]})
+    rF = next(x for x in a["null_tests"]["N1"] if x["stat"] == "F"); rM = next(x for x in a["null_tests"]["N1"] if x["stat"] == "M")
+    gold = [[cd for _, cd, _ in it["members"]].index(it["gold_code"]) for it in items]
+    mif = lambda i, k: T[i][k] - max(T[i][j] for j in range(3) if j != k)
+    obs = sum(picks[i][0] == gold[i] for i in range(10)); Mobs = sum(mif(i, gold[i]) for i in range(10)) / 10
+    tF = tM = 0.0
+    for combo in itertools.product(range(3), repeat=5):
+        tF += (sum(picks[i][0] == combo[i // 2] for i in range(10)) >= obs) / 243
+        tM += (sum(mif(i, combo[i // 2]) for i in range(10)) / 10 >= Mobs - 1e-12) / 243
+    check("S5l analyze(): the N1 accuracy p is P(sum >= observed) by enumeration of all 243 pseudo-gold draws, and the margin p agrees with enumeration",
+          abs(rF["p"] - tF) < 1e-12 and abs(rM["p"] - tM) <= 4 * rM["mcse"] + 1 / 10000, dict(pF=rF["p"], enumF=tF, pM=rM["p"], enumM=tM, obs=obs))
+block("S5 gates", s5_gates)
+
 # ---------------------------------------------------------------- S6 known-answer demo, reduced
 R, RCOV, BR = 60, 300, 999
 SD = 3 * math.sqrt(0.05 * 0.95 / R)                     # 3 binomial SDs at 0.05 with R datasets
@@ -179,12 +246,18 @@ REDUCED = dict(a_joint_q_rate_min=0.90, a_gate_a_fail_min=0.90, b_mean_f=[0.57, 
                c_reject_max=round(0.05 + SD, 4), c_ks_p_min=0.001, d_gate_a_pass_min=0.50, d_gate_b_pass_min=0.90,
                e_coverage_min=0.90)
 def s6():
-    rows, _ = KA.run_knownanswer(P, datasets=R, coverage_datasets=RCOV, B_mc=BR, B_boot=BR, crit=REDUCED)
+    rows, res = KA.run_knownanswer(P, datasets=R, coverage_datasets=RCOV, B_mc=BR, B_boot=BR, crit=REDUCED)
     for s in "abcde":
         got = [r for r in rows if r["scorer"] == s and r["met"] is not None]
         bad = [(r["check"], round(r["value"], 4), r["criterion"]) for r in got if not r["met"]]
         check(f"S6{s} known-answer scorer ({s}) recovered at {RCOV if s == 'e' else R} datasets, B = {BR}: "
               + "; ".join(f"{r['check']} {r['criterion']}" for r in got), got and not bad, bad)
+    # (e) alone cannot tell whether the design effect is applied (its 0.93 floor still holds without it), so check
+    # that leaving it out lowers the coverage and that the intraclass correlation is estimated near its true 0.2.
+    e = res["e"]; cov = float(np.mean([x["bound"] < 0.85 for x in e])); cov0 = float(np.mean([x["bound_no_deff"] < 0.85 for x in e]))
+    rho = float(np.mean([x["rho"] for x in e]))
+    check(f"S6f (e) depends on the design effect: coverage drops when it is left out, and the mean estimated intraclass correlation is within 0.05 of 0.2",
+          cov0 < cov and abs(rho - 0.2) < 0.05, dict(coverage=cov, coverage_no_deff=cov0, mean_rho=rho))
 block("S6", s6)
 
 # ---------------------------------------------------------------- S7 make_data byte-identical
