@@ -1,7 +1,9 @@
 # Stand-in path: runs anywhere, no trained weights needed.
 numpy>=1.24        # meddra_app.py + anomaly_app.py (stand-in encoder/index math; [SI] Wasserstein)
 pandas>=2.0        # all four apps (risk_app.py uses pandas only)
-streamlit>=1.49    # all four apps (floor: oldest release accepting st.dataframe(width="stretch"); 1.36-1.48 raise TypeError)
+streamlit>=1.51    # all four apps (floor: oldest release that reads the [theme.light] and [theme.dark] sections of
+                   # .streamlit/config.toml; 1.49 and 1.50 ignore them with a warning, and 1.36-1.48 also raise
+                   # TypeError on st.dataframe(width="stretch"))
 
 # Real path (coding + PHI apps). Pinned: both model packages release several times a week. CPU torch FIRST,
 # or pip pulls about 1.8 GB of CUDA wheels:

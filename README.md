@@ -259,7 +259,8 @@ run_risk.sh   / .bat     the same, Participant risk screening on port 8503
 run_anomaly.sh/ .bat     the same, Central statistical monitoring on port 8504
 Launch *.command         macOS double-click launchers; Finder runs them in Terminal
 .streamlit/config.toml   disables Streamlit usage stats, so nothing leaves the machine, and sets a light and dark
-                         color theme whose text and buttons meet WCAG AA contrast
+                         color theme whose text and buttons meet WCAG AA contrast, except a slider's value in dark
+                         mode (3.2:1; the in-browser pages fix it in docs/app/app.css)
 .github/workflows/qc.yml CI: runs tests/qc_test.py and tests/test_sibling.py on every push and pull request in
                          three variants (stand-in and optional-extras on Python 3.12; browser-stack on Python 3.14.0
                          with the Streamlit, pandas, numpy and pyarrow versions the in-browser pages run), and checks

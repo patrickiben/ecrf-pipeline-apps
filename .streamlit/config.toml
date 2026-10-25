@@ -7,7 +7,8 @@ gatherUsageStats = false
 # text. Dark: the primary color, for white text on the Execute button and the tags. One gap remains in dark mode on
 # a local run: Streamlit writes a slider's value in the primary color on the sidebar (3.2:1 here), and no single
 # primary passes both that and white text. The in-browser pages close it in docs/app/app.css. They set the same
-# theme in docs/app/launch.js (streamlitConfig); keep the two in step.
+# theme in docs/app/launch.js (streamlitConfig); keep the two in step. Streamlit reads [theme.light] and
+# [theme.dark] from 1.51 on (1.49 and 1.50 ignore them with a warning), hence the floor in requirements.txt.
 [theme.light]
 primaryColor = "#0757BF"
 textColor = "#101218"
