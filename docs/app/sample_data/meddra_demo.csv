@@ -1,0 +1,13 @@
+llt_code,llt_name,pt_code,pt_name,hlt_code,hlt_name,hlgt_code,hlgt_name,soc_code,soc_name
+99000001,Headache,99019211,Headache,99030001,Cranial pain,99040001,Cranial and cerebral disorders,99026879,Nervous system disorders
+99000002,Pain in back of head,99019211,Headache,99030001,Cranial pain,99040001,Cranial and cerebral disorders,99026879,Nervous system disorders
+99000003,Throbbing pain in head,99019211,Headache,99030001,Cranial pain,99040001,Cranial and cerebral disorders,99026879,Nervous system disorders
+99000004,Migraine,99027599,Migraine,99030001,Cranial pain,99040001,Cranial and cerebral disorders,99026879,Nervous system disorders
+99000005,Postural dizziness,99013575,Dizziness postural,99030002,Dizziness,99040001,Cranial and cerebral disorders,99026879,Nervous system disorders
+99000006,Lightheadedness,99013575,Dizziness postural,99030002,Dizziness,99040001,Cranial and cerebral disorders,99026879,Nervous system disorders
+99000007,Diarrhoea,99012735,Diarrhoea,99030003,Diarrhoeal symptoms,99040002,Gastrointestinal motility disorders,99035445,Gastrointestinal disorders
+99000008,Watery diarrhoea,99012735,Diarrhoea,99030003,Diarrhoeal symptoms,99040002,Gastrointestinal motility disorders,99035445,Gastrointestinal disorders
+99000009,Loose stools,99012735,Diarrhoea,99030003,Diarrhoeal symptoms,99040002,Gastrointestinal motility disorders,99035445,Gastrointestinal disorders
+99000010,Nausea,99028280,Nausea,99030004,Nausea and vomiting,99040002,Gastrointestinal motility disorders,99035445,Gastrointestinal disorders
+99000011,Electrocardiogram QT prolonged,99014387,Electrocardiogram QT prolonged,99030005,QT interval prolongation,99040003,Cardiac investigations,99027689,Investigations
+99000012,Fatigue,99016250,Fatigue,99030006,Fatigue and malaise,99040004,General to body symptoms,99019578,General disorders and administration site conditions
