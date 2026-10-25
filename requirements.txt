@@ -1,4 +1,4 @@
-# Stand-in path — runs anywhere, no trained weights needed.
+# Stand-in path: runs anywhere, no trained weights needed.
 numpy>=1.24        # meddra_app.py + anomaly_app.py (stand-in encoder/index math; [SI] Wasserstein)
 pandas>=2.0        # all four apps (risk_app.py uses pandas only)
 streamlit>=1.49    # all four apps (floor: oldest release accepting st.dataframe(width="stretch"); 1.36-1.48 raise TypeError)
@@ -14,15 +14,15 @@ streamlit>=1.49    # all four apps (floor: oldest release accepting st.dataframe
 # the app instead of letting it substitute a stand-in. Never "pip install needle": an unrelated CSS-testing package.
 # hnswlib ships no wheels (needs a C++ compiler); xgboost 3.4.1 needs Python 3.12+.
 
-# Optional — SAS .sas7bdat input (SDTM/ADaM dumps). CSV-only users can skip this;
+# Optional: SAS .sas7bdat input (SDTM/ADaM dumps). CSV-only users can skip this;
 # every app probes for it and reads .csv without it. Install to also load .sas7bdat:
 #   pip install pyreadstat
 
-# Optional — real Sinkhorn optimal-transport drift for anomaly_app.py (Tier 3). Without these it runs a
+# Optional: real Sinkhorn optimal-transport drift for anomaly_app.py (Tier 3). Without these it runs a
 # labeled [SI] 1-D-Wasserstein stand-in with identical output columns. Install to flip that tier REAL:
 #   pip install POT scipy
 
-# Optional — real Isolation-Forest numeric-outlier corroborator for anomaly_app.py (Tier 2). Without it the
+# Optional: real Isolation-Forest numeric-outlier corroborator for anomaly_app.py (Tier 2). Without it the
 # tier runs its labeled [SI] robust-z gate alone; install to add the REAL detector and flip the banner:
 #   pip install scikit-learn
 
