@@ -1,6 +1,6 @@
 # Evaluation: the real model path, measured
 
-This file reports what the coding and PHI apps do on their **real** model path (open-source Cactus Needle3, hnswlib, Laya and XGBoost), measured on this repository's synthetic data. It follows [`FEASIBILITY.md`](FEASIBILITY.md) (Stage 0: can the models be obtained, loaded offline and called) and covers Stages 1 to 4. The headline metrics below are read from files in [`../eval/results/`](../eval/results/) written by scripts in [`../eval/`](../eval/); the per-format breakdowns of leaks and false positives, the mean P(direct) and the case-sensitivity example are recorded only in this report (no script writes them to a results file); [`../eval/README.md`](../eval/README.md) says how to rebuild the models dir and rerun each one. The same results, failures first, are on the published [evaluation case study](https://patrickiben.github.io/ecrf-pipeline-apps/evaluation.html) (`docs/evaluation.html`); the worked examples are in the [case study](https://patrickiben.github.io/ecrf-pipeline-apps/case-study.html) (`docs/case-study.html`), which replaced the two retired decks.
+This file reports what the coding and PHI apps do on their **real** model path (open-source Cactus Needle3, hnswlib, Laya and XGBoost), measured on this repository's synthetic data. It follows [`FEASIBILITY.md`](FEASIBILITY.md) (Stage 0: can the models be obtained, loaded offline and called) and covers Stages 1 to 4, plus a [within-sibling check](#within-sibling-discrimination) of the coding assist. The headline metrics below are read from files in [`../eval/results/`](../eval/results/) written by scripts in [`../eval/`](../eval/); the per-format breakdowns of leaks and false positives, the mean P(direct) and the case-sensitivity example are recorded only in this report (no script writes them to a results file); [`../eval/README.md`](../eval/README.md) says how to rebuild the models dir and rerun each one. The same results, failures first, are on the published [evaluation case study](https://patrickiben.github.io/ecrf-pipeline-apps/evaluation.html) (`docs/evaluation.html`); the worked examples are in the [case study](https://patrickiben.github.io/ecrf-pipeline-apps/case-study.html) (`docs/case-study.html`), which replaced the two retired decks.
 
 **Everything here is synthetic.** The dictionary is invented terms with 99-prefixed placeholder codes, not MedDRA, and its groupings are not MedDRA's hierarchy. The notes, names, phone numbers and identifiers are invented. Nothing here says how the stack would do on a real MedDRA release or real site notes; it says how the shipped code behaves on a controlled, labeled test set built to probe the failure modes the design is meant to handle (colloquial, misspelled and negated verbatims; identifier look-alikes).
 
@@ -159,12 +159,103 @@ Script: [`eval/deck_b_worked.py`](../eval/deck_b_worked.py), output [`deck_b_wor
 
 **PHI.** The real path redacts every target in the three worked fields, at P(redact) 0.92 to 0.96, and keeps both look-alikes: Needle3 proposed "50" (from "Alanine 50 mg") as a date of birth and "120" (from "120 mg/dL") as a ZIP, and the gate rejected both, so the sanitized text matches the stand-in's. In the clean EG field Needle3 proposed "Sinus rhythm" as a person name, and the gate rejected that too. Laya's field probabilities are where an earlier version of Deck B's illustrative numbers failed most: P(direct) is 0.67 on AE row 1 and 0.01 on AE row 2 and the PR row, though all three hold direct identifiers (that earlier version had 0.998; the deck was corrected on 2026-10-22, before it was retired). The redactions are right anyway because the gate leans on the span evidence.
 
+## Within-sibling discrimination
+
+**Evidence label: Tools built.** An adaptation of the within-site permutation design from my AlphaGenome audit to coding-assist evaluation, on synthetic, non-MedDRA data. Closely related to contrast-set evaluation in NLP. Not validated on a real MedDRA release or on real coding data. Built and run on 2026-10-25 in an AI-assisted coding session (Claude Code); those commits carry a Claude co-author line in the git history.
+
+Scripts: [`eval/sibling_sets.py`](../eval/sibling_sets.py), [`eval/sibling_eval.py`](../eval/sibling_eval.py) and [`eval/sibling_knownanswer.py`](../eval/sibling_knownanswer.py), run to the plan registered before any scoring, [`eval/sibling_plan.md`](../eval/sibling_plan.md), which is locked by its SHA-256 in [`eval/sibling_plan.sha256`](../eval/sibling_plan.sha256). Outputs: [`sibling_summary.json`](../eval/results/sibling_summary.json), [`sibling_items.csv`](../eval/results/sibling_items.csv) and [`sibling_knownanswer.csv`](../eval/results/sibling_knownanswer.csv). Checks: [`tests/test_sibling.py`](../tests/test_sibling.py), run in CI.
+
+**Why.** Stage 3 found that many colloquial misses land in the right neighborhood and pick the wrong member: "calcium down on bloods" retrieves "Blood calcium increased" above "decreased". Top-1 accuracy mixes two failures, finding the neighborhood and choosing within it. This check isolates the second: the neighborhood is given, and the only question is which member the tool prefers.
+
+**The method in plain words.**
+
+- **Sibling sets**, fixed from preferred-term names before any scoring: lab direction (44 analytes, each "<analyte> increased", "decreased" and "abnormal") and body site (51 sites, 28 with four and 23 with six of "Pain in", "Swelling of", "Numbness of", "Tenderness of", "Weakness of" and "Cramp in").
+- **Items**: the test-split verbatims whose correct term is in a set, 66 lab items (22 terms) and 144 site items (48 terms), three variants each (exact, colloquial, misspelled). Negated verbatims are left out, because they have no correct code.
+- **The tool's choice**: for each item the tool scores every member of the set with its own shipped scorer (on the stand-in path, the Tier 4 score, taking the best lowest-level term under each member), and its pick is the member with the highest score. **Within-set accuracy** is the share of items where the pick is right; the **margin** is the right member's score minus the best wrong member's.
+- **Chance, three ways.** Each null relabels the right answer within the set, once per term and shared by its three variants: uniform over the members (N1); in proportion to how often each member is the answer in the training split (N2); and, for colloquial items only, uniform over the members whose words overlap the verbatim as much as the right one does (N3). The accuracy tail is exact (by convolution); the margin's is Monte Carlo with 9,999 draws. False discovery control: Benjamini-Hochberg within each family, path and null, with Benjamini-Yekutieli as a check.
+- **A comparator**: a keyword rule (for example "low", "down" and "below" for decreased), written into the plan before scoring.
+- **The gates decide auto-coding, not the p-values.** Gate A: the one-sided 95% lower bound on within-set accuracy (Clopper-Pearson at the effective size after clustering by term) must reach 0.90. Gate B: the tool must beat the keyword rule, with a one-sided 95% cluster-bootstrap lower bound above 0. A family that fails either gate, or could not reach 0.90 even with every item right, is excluded from auto-coding and routes to human coding.
+
+**Attainability, computed before scoring.** With every item right, the best possible bound is 0.05^(1/m) for m terms, so a 0.90 floor needs at least 29 terms and 0.95 needs 59.
+
+| family | items | terms (clusters) | best attainable bound | assessable at 0.90 |
+|---|---|---|---|---|
+| lab | 66 | 22 | 0.873 | no: not assessable at this size |
+| site | 144 | 48 | 0.940 | yes |
+
+**Results, stand-in path** (test split):
+
+| family | within-set accuracy | keyword rule | margin | Gate A bound (best possible) | Gate B: tool minus rule, and its lower bound | routing |
+|---|---|---|---|---|---|---|
+| lab | 0.909 | 0.970 | 0.156 | 0.828 (0.873) | -0.061, lower bound -0.121 | human coding: not assessable; fails Gates A and B |
+| site | 0.861 | 0.819 | 0.166 | 0.805 (0.940) | +0.042, lower bound -0.014 | human coding: fails Gates A and B |
+
+| family, variant | items | tool | keyword rule | margin | whole-dictionary top-1 (Stage 3 rows) |
+|---|---|---|---|---|---|
+| lab, exact | 22 | 1.000 | 1.000 | 0.208 | 1.000 |
+| lab, colloquial | 22 | 0.727 | 1.000 | 0.073 | 0.455 |
+| lab, misspelled | 22 | 1.000 | 0.909 | 0.186 | 0.455 |
+| site, exact | 48 | 1.000 | 0.979 | 0.292 | 1.000 |
+| site, colloquial | 48 | 0.604 | 0.813 | 0.017 | 0.542 |
+| site, misspelled | 48 | 0.979 | 0.667 | 0.188 | 0.104 |
+
+The last column is the stand-in's rank-1 accuracy over the whole dictionary on the same items, read from `eval/results/coding_test_standin.csv`, for comparison.
+
+- **Against chance.** On all items, both families beat uniform chance (N1) and base-rate chance (N2) on accuracy and on margin: exact p below 0.0001 for accuracy, and Monte Carlo p = 0.0001 for the margin, the smallest value 9,999 draws can give. So does each variant. N1 and N2 agree because the base rates are near uniform on this synthetic set by construction, as the plan expected.
+- **Against lexical overlap.** On the colloquial items whose words overlap two or more members equally (N3: 11 lab and 22 site items; the rest drop out because one member overlaps most), accuracy is not distinguishable from chance: 0.545 lab (p = 0.12) and 0.273 site (p = 0.08). The margin still beats that null (p = 0.012 and 0.022; BH q = 0.025 and 0.045).
+- **Ties and clustering.** No item had tied scores, so the fractional-credit sensitivity analysis equals the main result. The intraclass correlations were estimated below 0 and truncated to 0, so the design effect is 1.
+
+What this shows:
+
+- **With the neighborhood given, the stand-in picks the right member most of the time**: 0.909 lab and 0.861 site, against a whole-dictionary top-1 of 0.636 and 0.549 on the same items. Most of its misses are in finding the neighborhood, not in choosing within it; misspellings show it most (site: 0.104 top-1, 0.979 within the set). Colloquial verbatims carry the within-set misses (0.727 lab, 0.604 site).
+- **It is not accurate enough to auto-code either family.** The lab family is too small to clear a 0.90 floor even with every item right (22 terms, 29 needed), and its bound of 0.828 fails anyway. The site family is large enough, but its bound is 0.805.
+- **A keyword rule does as well or better.** On lab the rule is right on 0.970 of items against the tool's 0.909; on site the tool is ahead (0.861 against 0.819), but not by enough to clear Gate B. The rule's lexicon was written with the generator's templates visible, so it is optimistic here; it still sets the bar an assist has to clear on these families.
+- **"calcium down on bloods"** is picked correctly on the stand-in path (decreased 0.505, abnormal 0.466, increased 0.465). The Stage 3 failure on this item is on the real path, which this pass did not run.
+
+**Real path: not run in this pass.** No models dir was available on the machine that produced these results; `python eval/sibling_eval.py --models <dir>` adds it where one exists. The shipped re-ranker's feature contract includes `ret_rank`, a candidate's rank within the retrieved top 10, which a sibling outside that pool does not have, so the plan registers the Needle3 cosine as the real-path score. The registered expectation that the lab family fails or is not assessable holds on any path by attainability alone. For context only (descriptive, not the registered statistic): in the committed Stage 3 rows of the real path, 17 of the 22 lab colloquial items have a member of the right set at rank 1, and 10 of those 17 are the right member.
+
+**Checks of the method.** Known-answer demo (`sibling_knownanswer.csv`; seed 20261025; 400 simulated datasets of 120 lab terms with three items each, 2,000 for coverage; 9,999 draws and resamples). Every registered criterion was met:
+
+| planted scorer | must show | result |
+|---|---|---|
+| (a) accurate but not enough (mean accuracy 0.80) | beats chance under N1 and N2 (q < 0.05) in at least 95% of datasets; fails Gate A in at least 95% | 100%; 100% |
+| (b) always increased, then decreased, then abnormal | accuracy about 0.60; N1 rejects in at least 99%; N2 rejects in 0.028 to 0.072; fails both gates in at least 95% | 0.599; 100%; 0.065 (MCSE 0.012); 100% and 100% |
+| (c) pure noise | each null rejects in at most 0.072; margin p-values uniform (Kolmogorov-Smirnov p at least 0.01) | N1 0.043, N2 0.040, N3 0.028; KS p 0.24, 0.18, 0.69 |
+| (d) good enough (mean accuracy 0.97) | Gate A passes in most datasets; Gate B in at least 95% | 100% (mean bound 0.950); 100% |
+| (e) true accuracy 0.85, intraclass correlation 0.2 | Gate A bound below 0.85 in at least 93% | 96.5% (MCSE 0.4%) |
+
+Negative control: with the stand-in's scores shuffled among the members of each set (one permutation per term, applied to its three variants, 400 times), the accuracy test under N1 rejected 2.8% (lab) and 4.0% (site) of the time, against a registered ceiling of 7.2%. `tests/test_sibling.py` also checks the exact tail against brute-force enumeration and the Poisson-binomial tail, the plan guard against an edited plan, the demo at reduced replicates, that `make_data.py` still writes byte-identical data, and that a rerun reproduces the committed results.
+
+**Caveats.**
+
+- The dictionary is synthetic, invented terms with placeholder codes, not MedDRA. Its sibling families are regular by construction; real MedDRA families are not.
+- The gold codes were generated together with the verbatims, so they are independent of the tool by construction. Real use needs gold codes adjudicated without the tool's suggestions, a licensed MedDRA release and a sibling rule registered before scoring, as this one was.
+- The generator's "abnormal" colloquial templates carry no direction ("albumin off on labs"), and their correct code is the "abnormal" term: code what is reported, and query the site when the direction is unclear. The tool must not infer a direction from linked lab values, and nothing here does.
+- The keyword lexicon was written with the generator's templates visible, so the baseline is optimistic.
+- The families are small (22 and 48 terms). The q-values are diagnostics; only the gates route.
+
+**Prior art, and what is new.** Contrast sets (Gardner et al., Findings of EMNLP 2020, pp. 1307-1323) and behavioral testing with CheckList (Ribeiro et al., ACL 2020) evaluate a model on minimally different inputs. Hierarchical precision and recall (Kiritchenko et al. 2006) credit near misses in a class hierarchy. Shortcut learning (Geirhos et al. 2020) describes models that succeed on surface cues and fail on the distinction that matters. The conditional logit (McFadden 1974) is the parametric twin of a choice within a fixed set. The design effect (Kish 1965), the exact binomial bound (Clopper and Pearson 1934) and false discovery control (Benjamini and Hochberg 1995; Benjamini and Yekutieli 2001) are standard. The design is adapted from the within-site permutation design of the AlphaGenome audit cited below. What is new here is modest: a base-rate-weighted within-set null, the keyword rule as a required comparator, and routing gates registered in advance, with an attainability check, tied to the auto-coding decision.
+
+Regulatory context, for status only: FDA's guidance on considerations for the use of artificial intelligence to support regulatory decision-making for drug and biological products is a draft (January 2025, not for implementation), and the FDA-EMA guiding principles of good AI practice in drug development (January 2026) are non-binding. This check is not a validation under either.
+
+**Citation.** Iben P. What do within-site comparisons of AlphaGenome Atlas predictions measure? An audit at ClinVar sites in 11 genes. Human Genomics, submitted. Preprint: doi:10.5281/zenodo.23543154. Code and data: doi:10.5281/zenodo.23537469.
+
+To rerun (stand-in path; no models needed):
+
+```bash
+python eval/sibling_sets.py --check    # the sibling sets are current
+python eval/sibling_eval.py            # refuses unless eval/sibling_plan.md matches its committed SHA-256
+python eval/sibling_knownanswer.py     # the known-answer demo, about 3 minutes
+python tests/test_sibling.py           # the CI checks, about 30 seconds
+```
+
 ## What ran for real, and what did not
 
-Ran for real, measured here: Needle3 embeddings and the hnswlib index (Stage 1); Laya on both apps' questions, with temperatures fitted (Stage 2); the XGBoost re-ranker and span gate, trained on synthetic train splits (Stage 3); both apps end to end on the real path, air-gapped from the models dir (Stage 4).
+Ran for real, measured here: Needle3 embeddings and the hnswlib index (Stage 1); Laya on both apps' questions, with temperatures fitted (Stage 2); the XGBoost re-ranker and span gate, trained on synthetic train splits (Stage 3); both apps end to end on the real path, air-gapped from the models dir (Stage 4). The within-sibling check ran on the stand-in path only.
 
 Not measured, or still illustrative:
 
+- **The within-sibling check on the real path.** It needs a models dir; this pass had none.
 - **Real MedDRA and real site notes.** Everything is synthetic. Accuracy on a licensed release or on real notes is unknown and should be expected to be lower; the dictionary here is 3,371 terms, a release about 86,800.
 - **Retrieval quality at release scale.** The 86,800-term figures are index cost on random vectors only.
 - **The risk and anomaly apps** have no trained model path. They run their labeled stand-ins (and, in the anomaly app, the optional scikit-learn and POT detectors); a trained-model file in their models dir stops the run instead of being half-loaded.

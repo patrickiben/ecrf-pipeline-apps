@@ -102,6 +102,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
       <li><a href="#splits">Grouped splits</a></li>
       <li><a href="#calibration">Calibration</a></li>
       <li><a href="#coding">Coding: stand-in vs real</a></li>
+      <li><a href="#within-sibling-discrimination">Within-sibling discrimination</a></li>
       <li><a href="#deid">De-identification: stand-in vs real</a></li>
       <li><a href="#cost">Speed and index cost</a></li>
       <li><a href="#feasibility">Before the build: feasibility checks</a></li>
@@ -141,6 +142,11 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
         to 0.12, so all four went to a human coder. See the <a href="case-study.html">case study</a>.</li>
       <li><strong>Slow on a CPU.</strong> About 0.4 s per verbatim and 0.9 to 1.6 s per note, one record at a time, on a
         4-vCPU cloud CPU. The real path is a batch job, not the sub-50 ms interactive tool an earlier version of Deck A targeted.</li>
+      <li><strong>No sibling family may auto-code.</strong> Given the right neighborhood, the stand-in picked the right
+        lab direction or body-site term for 0.909 and 0.861 of items, below the registered 0.90 floor once uncertainty is
+        counted (lower bounds 0.828 and 0.805), and a keyword rule did as well or better. The lab family is too small to
+        clear the floor even with every item right. See <a href="#within-sibling-discrimination">Within-sibling
+        discrimination</a>.</li>
       <li><strong>The re-ranker lowered top-3.</strong> It raised top-1 over plain retrieval order (0.747 to 0.778) but
         lowered top-3 (0.885 to 0.854), because several lowest-level terms under one preferred term crowd the right
         one out of the three exported candidates.</li>
@@ -277,6 +283,120 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   </ul>
 </section>
 
+<section aria-labelledby="within-sibling-discrimination">
+  <h2 id="within-sibling-discrimination">Within-sibling discrimination</h2>
+  <div class="label" role="note">
+    <p><strong>Evidence label: Tools built.</strong> An adaptation of the within-site permutation design from my
+      AlphaGenome audit to coding-assist evaluation, on synthetic, non-MedDRA data. Closely related to contrast-set
+      evaluation in NLP. Not validated on a real MedDRA release or on real coding data.</p>
+    <p>Built and run on 2026-10-25 in an AI-assisted coding session (Claude Code); those commits carry a Claude
+      co-author line in the git history.</p>
+  </div>
+  <p>Many colloquial misses land in the right neighborhood and pick the wrong member: "calcium down on bloods"
+    retrieves "Blood calcium increased" above "decreased". Top-1 accuracy mixes two failures, finding the
+    neighborhood and choosing within it. This check isolates the second: the neighborhood is given, and the only
+    question is which member the tool prefers. Everything below was registered before any scoring in
+    <code>eval/sibling_plan.md</code>, which is locked by its SHA-256; the scripts refuse to run when the plan, an input
+    file or the scoring code differs from what was registered.</p>
+  <ul>
+    <li><strong>Sibling sets</strong>, fixed from preferred-term names: lab direction (44 analytes, each
+      "increased", "decreased" and "abnormal") and body site (51 sites with four or six of "Pain in", "Swelling of",
+      "Numbness of", "Tenderness of", "Weakness of" and "Cramp in").</li>
+    <li><strong>Items</strong>: the test-split verbatims whose correct term is in a set, 66 lab items (22 terms) and
+      144 site items (48 terms), three variants each. Negated verbatims have no correct code and are left out.</li>
+    <li><strong>The tool's choice</strong>: it scores every member of the set with its own shipped scorer and picks the
+      highest. <strong>Within-set accuracy</strong> is the share picked right; the <strong>margin</strong> is the right
+      member's score minus the best wrong member's.</li>
+    <li><strong>Chance, three ways</strong>, each relabeling the right answer within the set once per term: uniform
+      (N1); by how often each member is the answer in training (N2); and, for colloquial items, uniform over the
+      members whose words overlap the verbatim as much as the right one does (N3). The accuracy tail is exact; the
+      margin's is Monte Carlo with 9,999 draws.</li>
+    <li><strong>A keyword rule</strong> ("low", "down", "below" for decreased, and so on), written into the plan before
+      scoring, as a comparator.</li>
+    <li><strong>The gates decide auto-coding, not the p-values.</strong> Gate A: the one-sided 95% lower bound on
+      within-set accuracy, at the effective size after clustering by term, must reach 0.90. Gate B: the tool must beat
+      the keyword rule (one-sided 95% cluster-bootstrap lower bound above 0). A family that fails either gate, or could
+      not reach 0.90 even with every item right, routes to human coding.</li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th>Family (registered before scoring)</th><th class="n">Items</th><th class="n">Terms</th><th class="n">Best attainable bound</th><th>Assessable at 0.90</th></tr></thead>
+    <tbody>
+      <tr><td>lab direction</td><td class="n">66</td><td class="n">22</td><td class="n">0.873</td><td>no: not assessable at this size</td></tr>
+      <tr><td>body site</td><td class="n">144</td><td class="n">48</td><td class="n">0.940</td><td>yes</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">With every item right the bound is 0.05<sup>1/m</sup> for m terms, so a 0.90 floor needs at least 29
+    terms and 0.95 needs 59.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Stand-in path, test split</th><th class="n">Within-set accuracy</th><th class="n">Keyword rule</th><th class="n">Margin</th><th class="n">Gate A bound (best)</th><th class="n">Gate B lower bound</th><th>Routing</th></tr></thead>
+    <tbody>
+      <tr><td>lab direction</td><td class="n">0.909</td><td class="n">0.970</td><td class="n">0.156</td><td class="n">0.828 (0.873)</td><td class="n">-0.121</td><td>human coding: not assessable; fails Gates A and B</td></tr>
+      <tr><td>body site</td><td class="n">0.861</td><td class="n">0.819</td><td class="n">0.166</td><td class="n">0.805 (0.940)</td><td class="n">-0.014</td><td>human coding: fails Gates A and B</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Family, variant</th><th class="n">Items</th><th class="n">Tool</th><th class="n">Keyword rule</th><th class="n">Whole-dictionary top-1</th></tr></thead>
+    <tbody>
+      <tr><td>lab, exact</td><td class="n">22</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td></tr>
+      <tr><td>lab, colloquial</td><td class="n">22</td><td class="n">0.727</td><td class="n">1.000</td><td class="n">0.455</td></tr>
+      <tr><td>lab, misspelled</td><td class="n">22</td><td class="n">1.000</td><td class="n">0.909</td><td class="n">0.455</td></tr>
+      <tr><td>site, exact</td><td class="n">48</td><td class="n">1.000</td><td class="n">0.979</td><td class="n">1.000</td></tr>
+      <tr><td>site, colloquial</td><td class="n">48</td><td class="n">0.604</td><td class="n">0.813</td><td class="n">0.542</td></tr>
+      <tr><td>site, misspelled</td><td class="n">48</td><td class="n">0.979</td><td class="n">0.667</td><td class="n">0.104</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">The last column is the stand-in's rank-1 accuracy over the whole dictionary on the same items, from
+    the Stage 3 rows, for comparison.</p>
+  <ul>
+    <li><strong>With the neighborhood given, the stand-in picks the right member most of the time</strong> (0.909 lab,
+      0.861 site, against a whole-dictionary top-1 of 0.636 and 0.549 on the same items). Most of its misses are in
+      finding the neighborhood; colloquial verbatims carry the within-set misses.</li>
+    <li><strong>It beats chance but not lexical overlap.</strong> Both families beat N1 and N2 on accuracy and margin
+      (p below 0.001). On colloquial items whose words overlap two or more members equally (11 lab, 22 site), accuracy
+      is not distinguishable from chance under N3 (0.545, p = 0.12; 0.273, p = 0.08); the margin still is (p = 0.012
+      and 0.022).</li>
+    <li><strong>It is not accurate enough to auto-code either family.</strong> Lab is too small to reach 0.90 with
+      every item right, and its bound of 0.828 fails anyway; site's bound is 0.805.</li>
+    <li><strong>A keyword rule does as well or better</strong>: 0.970 against 0.909 on lab; on site the tool is ahead
+      (0.861 against 0.819) but not by enough to clear Gate B. The rule's lexicon was written with the generator's
+      templates visible, so this baseline is optimistic.</li>
+    <li><strong>Real path: not run in this pass</strong> (no models dir was available). The shipped re-ranker scores
+      only candidates from the retrieved top 10, so the plan registers the Needle3 cosine as the real-path score.
+      "calcium down on bloods" is picked correctly on the stand-in path; its Stage 3 failure is on the real path.</li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th>Known-answer check (400 simulated datasets; 2,000 for coverage)</th><th>Must show</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>(a) accurate but not enough, mean accuracy 0.80</td><td>beats chance (q &lt; 0.05) and fails Gate A, each in at least 95%</td><td>100%; 100%</td></tr>
+      <tr><td>(b) always "increased" first</td><td>accuracy about 0.60; N1 rejects in at least 99%; N2 in 0.028 to 0.072; fails both gates</td><td>0.599; 100%; 0.065; 100%</td></tr>
+      <tr><td>(c) pure noise</td><td>each null rejects in at most 0.072; margin p-values uniform</td><td>0.043, 0.040, 0.028; KS p 0.24, 0.18, 0.69</td></tr>
+      <tr><td>(d) good enough, mean accuracy 0.97</td><td>Gate A passes in most; Gate B in at least 95%</td><td>100%; 100%</td></tr>
+      <tr><td>(e) true accuracy 0.85, intraclass correlation 0.2</td><td>Gate A bound below 0.85 in at least 93%</td><td>96.5%</td></tr>
+    </tbody>
+  </table></div>
+  <p>Every registered criterion was met. In the negative control, with the stand-in's scores shuffled among the members
+    of each set 400 times, the accuracy test under N1 rejected 2.8% (lab) and 4.0% (site) of the time, against a
+    registered ceiling of 7.2%.</p>
+  <p><strong>Caveats.</strong> The dictionary is synthetic and not MedDRA, and its sibling families are regular by
+    construction. The gold codes were generated, so they are independent of the tool by construction; real use needs
+    gold codes adjudicated without the tool's suggestions, a licensed MedDRA release and a sibling rule registered
+    before scoring. An "abnormal" colloquial verbatim such as "albumin off on labs" carries no direction, and its
+    correct code is the "abnormal" term: code what is reported and query the site; nothing here infers a direction from
+    linked lab values.</p>
+  <p><strong>Prior art.</strong> Contrast sets (Gardner et al., Findings of EMNLP 2020) and CheckList (Ribeiro et al.,
+    ACL 2020) test models on minimally different inputs; hierarchical precision and recall (Kiritchenko et al. 2006),
+    shortcut learning (Geirhos et al. 2020) and the conditional logit (McFadden 1974) are close relatives; the design
+    effect (Kish 1965), the Clopper-Pearson bound (1934) and false discovery control (Benjamini and Hochberg 1995;
+    Benjamini and Yekutieli 2001) are standard. What is new is modest: a base-rate-weighted within-set null, the
+    keyword rule as a required comparator, and routing gates registered in advance with an attainability check.
+    FDA's January 2025 guidance on AI to support regulatory decision-making is a draft, not for implementation, and the
+    FDA-EMA good AI practice principles (January 2026) are non-binding; this check is not a validation under either.</p>
+  <p><strong>Citation.</strong> Iben P. What do within-site comparisons of AlphaGenome Atlas predictions measure? An
+    audit at ClinVar sites in 11 genes. Human Genomics, submitted. Preprint: doi:10.5281/zenodo.23543154. Code and data:
+    doi:10.5281/zenodo.23537469. The full write-up is in
+    <a href="https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/docs/EVALUATION.md#within-sibling-discrimination">EVALUATION.md</a>.</p>
+</section>
+
 <section aria-labelledby="deid">
   <h2 id="deid">De-identification: stand-in vs real</h2>
   <p>Test split: 220 notes from 10 templates never seen in training, holding 308 redaction targets. The real path
@@ -365,6 +485,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
       <tr><td>Index size, latency, recall@10</td><td><code>eval/results/stage1_index.json</code></td><td><code>eval/bench_index.py</code></td></tr>
       <tr><td>Calibration, coding and de-identification results, ablations</td><td><code>eval/results/stage2_3.json</code> (per-verbatim rows in <code>coding_test_real.csv</code>, <code>coding_test_standin.csv</code>)</td><td><code>eval/run_eval.py</code></td></tr>
       <tr><td>Worked examples on the real path, per-record latency</td><td><code>eval/results/deck_b_worked.json</code> (named for the retired Deck B)</td><td><code>eval/deck_b_worked.py</code></td></tr>
+      <tr><td>Within-sibling discrimination, its known-answer checks and negative control</td><td><code>eval/results/sibling_summary.json</code>, <code>sibling_items.csv</code>, <code>sibling_knownanswer.csv</code>, under the plan <code>eval/sibling_plan.md</code></td><td><code>eval/sibling_eval.py</code>, <code>eval/sibling_knownanswer.py</code></td></tr>
       <tr><td>Leaks by format (22 MRN, 22 phone, 19 date of birth, 17 names), the breakdown of the 11 false positives, the mean <code>P(direct)</code> of 0.24, "insomnia" scoring 0.948, a full release's size of about 86,800 lowest-level terms</td><td><code>docs/EVALUATION.md</code>, the written record of the Stage 1 to 4 runs. Of these, only the leak totals (91 left readable, 80 of them direct) are in <code>stage2_3.json</code>, and only the benchmark size (86,800 random vectors) is in <code>stage1_index.json</code></td><td>none: written up from the runs, not regenerated by a script</td></tr>
       <tr><td>Stage 0 examples: the assumed 384-dim encoder, unrelated terms at 0.93 against 0.96, Laya's 0.655 on "Patient denies headache."</td><td><code>docs/FEASIBILITY.md</code>, the Stage 0 session record (2026-10-21 and 2026-10-22)</td><td>none: recorded during the Stage 0 checks</td></tr>
     </tbody>
@@ -381,7 +502,8 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
 python eval/bench_index.py --models models      # index cost
 python eval/run_eval.py   --models models       # calibrate, train, evaluate
 python eval/deck_b_worked.py --models models    # worked examples, per-record latency
-ECRF_MODELS_DIR=models python tests/qc_test.py  # adds the RM real-path checks</code></pre>
+ECRF_MODELS_DIR=models python tests/qc_test.py  # adds the RM real-path checks
+python eval/sibling_eval.py --models models     # within-sibling check (without --models: stand-in only)</code></pre>
   <p>The long-form report, with measurement notes, is
     <a href="https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/docs/EVALUATION.md">EVALUATION.md</a>.</p>
 </section>
@@ -392,6 +514,7 @@ ECRF_MODELS_DIR=models python tests/qc_test.py  # adds the RM real-path checks</
     <li><strong>Real data.</strong> Accuracy on a licensed MedDRA release or on real site notes is unknown and should be
       expected to be lower.</li>
     <li><strong>Retrieval quality at release scale.</strong> The 86,800-term figures are index cost on random vectors.</li>
+    <li><strong>The within-sibling check on the real path.</strong> It ran on the stand-in path only; it needs a models dir.</li>
     <li><strong>Participant risk screening and Central statistical monitoring.</strong> Neither has a trained-model path
       or a labeled evaluation; they run labeled rule-based stand-ins (plus optional scikit-learn and POT detectors in the
       monitoring app), checked against injected synthetic signals in the QC suite.</li>

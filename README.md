@@ -251,13 +251,14 @@ run_risk.sh   / .bat     the same, Participant risk screening on port 8503
 run_anomaly.sh/ .bat     the same, Central statistical monitoring on port 8504
 Launch *.command         macOS double-click launchers; Finder runs them in Terminal
 .streamlit/config.toml   disables Streamlit usage stats, so nothing leaves the machine
-.github/workflows/qc.yml CI: runs tests/qc_test.py on every push and pull request in three variants (stand-in and
-                         optional-extras on Python 3.12; browser-stack on Python 3.14.0 with the Streamlit, pandas,
-                         numpy and pyarrow versions the in-browser pages run), and checks docs/app/ against the apps
-                         (tools/sync_browser_apps.py --check)
+.github/workflows/qc.yml CI: runs tests/qc_test.py and tests/test_sibling.py on every push and pull request in
+                         three variants (stand-in and optional-extras on Python 3.12; browser-stack on Python 3.14.0
+                         with the Streamlit, pandas, numpy and pyarrow versions the in-browser pages run), and checks
+                         docs/app/ against the apps (tools/sync_browser_apps.py --check)
 sample_data/             the one SYNTHETIC cut the coding, de-identification and risk apps read (+ generate.py)
 anomaly_data/            the monitoring app's own SYNTHETIC longitudinal demo (labs.csv + generate.py)
-eval/                    the real model path: setup, synthetic evaluation data, training and evaluation scripts, results
+eval/                    the real model path: setup, synthetic evaluation data, training and evaluation scripts, results;
+                         and the within-sibling check of the coding assist (registered plan, scripts, results)
 docs/                    GitHub Pages: index.html, evaluation.html, case-study.html, two redirect stubs for the
                          retired decks, EVALUATION.md, FEASIBILITY.md, screenshots (img/), .nojekyll
 docs/app/                the in-browser build: four pages, launch.js, app.css, copies of the apps and data, pinned wheels
@@ -265,5 +266,6 @@ tools/                   sync_browser_apps.py (keeps docs/app/ in step; --check 
 USER_GUIDE.md            step-by-step instruction manual for running all four apps
 tests/qc_test.py         portable end-to-end test harness (`python tests/qc_test.py` reports passed, failed and
                          skipped checks for the installed dependencies)
+tests/test_sibling.py    checks for the within-sibling evaluation (plan guard, exact tails, known answers, a rerun)
 QC_REPORT.md             current QC status first, then what was tested, the bugs found and fixed, and how to re-run
 ```
