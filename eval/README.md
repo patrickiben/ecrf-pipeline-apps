@@ -1,6 +1,6 @@
 # eval/: the real model path, setup, training and evaluation
 
-This folder holds everything needed to run the coding and PHI apps on their **real** model path (Cactus Needle3, hnswlib, Laya, XGBoost) and to reproduce the measured numbers in [`docs/EVALUATION.md`](../docs/EVALUATION.md) and Deck B. All data here is **synthetic**: invented terms with 99-prefixed placeholder codes (not MedDRA) and invented notes.
+This folder holds everything needed to run the Coding QC assist and the De-identification review assist on their **real** model path (Cactus Needle3, hnswlib, Laya, XGBoost) and to reproduce the measured numbers in [`docs/EVALUATION.md`](../docs/EVALUATION.md) and in the [evaluation case study](https://patrickiben.github.io/ecrf-pipeline-apps/evaluation.html) and the [case study](https://patrickiben.github.io/ecrf-pipeline-apps/case-study.html). All data here is **synthetic**: invented terms with 99-prefixed placeholder codes (not MedDRA) and invented notes.
 
 The stand-in path needs none of this. Without a models dir the apps run their labeled `[SI]` stand-ins, and `python tests/qc_test.py` passes with no model installed.
 
@@ -44,7 +44,7 @@ python eval/make_data.py                       # regenerate eval/data/ (seed 42;
 python eval/bench_index.py --models models     # Stage 1: index latency and size -> results/stage1_index.json
 python eval/run_eval.py   --models models --smoke   # optional: the whole pipeline on a small slice (about 5 min)
 python eval/run_eval.py   --models models      # Stages 2-3: calibrate, train, evaluate -> results/stage2_3.json
-python eval/deck_b_worked.py --models models   # Stage 4: Deck B worked rows -> results/deck_b_worked.json
+python eval/deck_b_worked.py --models models   # Stage 4: the case study's worked rows -> results/deck_b_worked.json
 ECRF_MODELS_DIR=models python tests/qc_test.py # adds the RM real-path checks (skipped without it)
 ```
 
@@ -60,7 +60,7 @@ Two Laya details matter when you refit. Laya fits a temperature per answer type 
 | `_app.py` | loads an app's own tier functions from its file (everything above its UI marker), so the evaluation measures the shipped code, not a copy |
 | `bench_index.py` | Stage 1 |
 | `run_eval.py` | Stages 2 and 3 |
-| `deck_b_worked.py` | Stage 4: runs both apps end to end on `sample_data/` and records the worked values |
+| `deck_b_worked.py` | Stage 4: runs both apps end to end on `sample_data/` and records the worked values shown in the case study (named for the retired Deck B, which the case study replaced) |
 | `fetch_models.py` | builds a models dir |
 | `data/` | the generated data (committed; regenerate with `make_data.py`) |
 | `artifacts/` | the trained, synthetic-data artifacts (committed, small) |

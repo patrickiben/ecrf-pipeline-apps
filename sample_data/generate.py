@@ -4,7 +4,7 @@
 Run from anywhere:   python3 generate.py     (writes ae/lb/eg/vs/pe next to this file)
 
 This is ONE cut that all three apps read from. It preserves the small worked rows used by
-Deck B and the coding/PHI traces byte-for-byte, then appends a larger set of participants so the
+the case study (docs/case-study.html) and the coding/PHI traces byte-for-byte, then appends a larger set of participants so the
 risk-scoring app can be assessed on bulk/varied data. Every domain carries the SAME columns it
 would in a real SDTM-ish dump -- including free-text fields (AECOM / EGCOM) alongside numeric
 safety values and source-system flags (ABNORMAL, CLINSIG).
@@ -24,7 +24,7 @@ OUT = os.path.dirname(os.path.abspath(__file__))   # .../biostat_pipeline_apps/s
 STUDY = "PROTO-2026-X89"                            # synthetic study id (not real)
 
 # --------------------------------------------------------------------------- #
-# The worked rows from Deck B -- preserved EXACTLY for AETERM/AESEV/AESER/AECOM so the
+# The worked rows shown in docs/case-study.html (first written for the retired Deck B), preserved EXACTLY for AETERM/AESEV/AESER/AECOM so the
 # coding and PHI traces stay accurate. We add AELIFE (=N; none fatal), a plausible AEOUTCOME,
 # and a plausible AEREL, which neither trace reads. Row 6's blank AECOM is the "missing stays
 # missing" demo. None of these worked rows are fatal -- they all carry a non-fatal outcome.
@@ -42,7 +42,7 @@ WORKED_AE = [
     ("SUBJ-5227", 6, "rash on forearm", "MILD", "N", "UNKNOWN", ""),   # blank AECOM on purpose
 ]
 
-# The PHI clean-negative ECG row (Deck B) -- preserved exactly for EGCOM.
+# The PHI clean-negative ECG row (the case study's worked example), preserved exactly for EGCOM.
 WORKED_EG = ("SUBJ-1044", 1, 432, 72, "Sinus rhythm, no artifact.")
 
 TERMS = {

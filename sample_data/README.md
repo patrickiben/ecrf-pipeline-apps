@@ -1,7 +1,7 @@
 # Sample cut — try the apps on this before touching real data
 
 This folder is **one synthetic cut** that all four apps read without interfering. It starts from the
-worked scenario in [Deck B](../presentations/deck_b_implementation_walkthrough.md) (protocol
+worked examples in the [case study](https://patrickiben.github.io/ecrf-pipeline-apps/case-study.html) (protocol
 PROTO-2026-X89) and then appends a larger bulk set of participants so you can see how the apps behave on
 more/varied data — not just six hand-picked rows. Point any app's **Cut folder path** at this directory
 and Execute: `meddra_demo.csv` is auto-found as the coding dictionary, and every other app ignores it

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>eCRF Pipeline Apps</title>
-<meta name="description" content="Four independent Streamlit apps for synthetic clinical eCRF extracts, runnable in the browser: auto-coding, PII/PHI redaction, risk scoring, and anomaly and drift detection.">
+<title>eCRF pipeline apps</title>
+<meta name="description" content="Four independent Python apps for synthetic clinical eCRF extracts that run in the browser: Coding QC assist, De-identification review assist, Participant risk screening and Central statistical monitoring, with an evaluation and a case study.">
 <meta name="color-scheme" content="light dark">
 <!-- One self-contained page for GitHub Pages (served from the main branch, /docs). Inline CSS only:
      no external scripts, stylesheets, fonts or images (QC check D2 enforces this). -->
@@ -56,8 +56,8 @@ figure { margin:0 0 28px; }
 figure a { display:block; }
 figure img { display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:6px; background:#FFFFFF; }
 figcaption { margin-top:8px; color:var(--muted); font-size:.92rem; }
-ul.decks { margin:0; padding-left:1.2em; }
-ul.decks li { margin:0 0 8px; }
+ul.reading { margin:0; padding-left:1.2em; }
+ul.reading li { margin:0 0 8px; }
 .muted { color:var(--muted); }
 footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--line); color:var(--muted); font-size:.9rem; }
 @media (max-width:480px) {
@@ -70,20 +70,24 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
 <div class="wrap">
 
 <header class="site">
-  <p class="kicker">Portfolio project &middot; Patrick Iben, biostatistician</p>
-  <h1>eCRF Pipeline Apps</h1>
-  <p class="lede">Four independent Streamlit apps that read clinical eCRF extracts and write audit-ready outputs:
-    auto-coding of adverse-event verbatims, PII/PHI flagging and redaction, participant safety and discontinuation
-    risk scoring, and data anomaly and drift detection. Each app is a separate program with its own audit log, so a
-    run can be reproduced from its audit alone. All four also run in your browser on the bundled synthetic data.</p>
+  <p class="kicker">Portfolio project &middot; Patrick Iben, independent biostatistician</p>
+  <h1>eCRF pipeline apps</h1>
+  <p class="lede">Four independent Streamlit programs that read clinical eCRF extracts and write outputs a person
+    reviews: the <strong>Coding QC assist</strong> proposes dictionary codes for adverse-event verbatims, the
+    <strong>De-identification review assist</strong> flags and redacts identifiers in free text,
+    <strong>Participant risk screening</strong> ranks participants against built-in safety criteria, and
+    <strong>Central statistical monitoring</strong> looks for outliers, drift and unusual notes. Each app is a separate
+    program with its own audit log, so a run can be reproduced from its audit alone. All four also run in your browser
+    on the bundled synthetic data.</p>
   <ul class="links">
+    <li><a href="evaluation.html">Evaluation case study</a></li>
+    <li><a href="case-study.html">Case study: the four-tier design, traced</a></li>
     <li><a href="https://github.com/patrickiben/ecrf-pipeline-apps">Source on GitHub</a></li>
-    <li><a href="deck_a_four_tier_pipeline.html">Deck A: the four-tier pipeline</a></li>
-    <li><a href="deck_b_implementation_walkthrough.html">Deck B: implementation walkthrough</a></li>
   </ul>
   <div class="note" role="note">
     <p><strong>Synthetic data only.</strong> Everything bundled with these apps is synthetic: no real patients, no real
-      study and no licensed dictionary. The demo dictionary uses 99-prefixed placeholder codes; it is not MedDRA.</p>
+      study and no licensed dictionary. The demo dictionary uses 99-prefixed placeholder codes; it is not MedDRA.
+      Evidence label: <strong>Tools built</strong>. These are evaluated prototypes, not validated systems.</p>
   </div>
 </header>
 
@@ -96,12 +100,12 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     packages from a CDN, fetches the program and its synthetic data from this site, and runs everything on your device.</p>
   <div class="demolinks">
     <ul>
-      <li><a href="app/meddra.html">Coding app</a> (<code>meddra_app.py</code>): a coding QC assist that proposes MedDRA-style terms for adverse-event verbatims from a demo dictionary.
+      <li><a href="app/meddra.html">Coding QC assist</a> (<code>meddra_app.py</code>): proposes MedDRA-style terms for adverse-event verbatims from a demo dictionary.
         On held-out synthetic verbatims its stand-in ranked the right preferred term first for 54% (the real model path: 78%).</li>
-      <li><a href="app/phi.html">PHI app</a> (<code>phi_app.py</code>): a de-identification review assist that flags and redacts identifiers in free text.
+      <li><a href="app/phi.html">De-identification review assist</a> (<code>phi_app.py</code>): flags and redacts identifiers in free text.
         On held-out synthetic text its stand-in left 108 of 308 identifiers readable (the real model path: 91 of 308); every output needs human review.</li>
-      <li><a href="app/risk.html">Risk app</a> (<code>risk_app.py</code>): participant risk screening, a safety listing ranked by rule-based safety and discontinuation scores</li>
-      <li><a href="app/anomaly.html">Anomaly app</a> (<code>anomaly_app.py</code>): central statistical monitoring checks for numeric outliers, distributional drift and text outliers</li>
+      <li><a href="app/risk.html">Participant risk screening</a> (<code>risk_app.py</code>): a safety listing ranked by rule-based safety and discontinuation scores, which are capped rule sums, not probabilities.</li>
+      <li><a href="app/anomaly.html">Central statistical monitoring</a> (<code>anomaly_app.py</code>): checks for numeric outliers, distributional drift and unusual free-text notes.</li>
     </ul>
     <p class="muted" style="margin:10px 0 0">Each opens in hosted mode on the bundled synthetic sample data: every data
       input is locked, a banner says so, and the audit records <code>hosted_mode=true</code>. Click Execute, then save
@@ -117,12 +121,12 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
 
 <section aria-labelledby="apps">
   <h2 id="apps">The four apps</h2>
-  <p>The coding, PHI and risk apps read the same synthetic cut folder without interfering; the anomaly app reads its
-    own longitudinal demo, because drift needs a time axis. All four accept CSV, and SAS <code>.sas7bdat</code> when
+  <p>The coding, de-identification and risk apps read the same synthetic cut folder without interfering; the
+    monitoring app reads its own longitudinal demo, because drift needs a time axis. All four accept CSV, and SAS <code>.sas7bdat</code> when
     <code>pyreadstat</code> is installed.</p>
   <div class="grid">
     <article class="card">
-      <h3>Auto-coding</h3>
+      <h3>Coding QC assist</h3>
       <p class="file"><code>meddra_app.py</code></p>
       <dl>
         <dt>Reads</dt><dd>The one verbatim column you select (<code>AETERM</code> or a synonym), plus a dictionary as a flattened CSV or an <code>.asc</code> release.</dd>
@@ -130,15 +134,15 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
       </dl>
     </article>
     <article class="card">
-      <h3>PII/PHI redaction</h3>
+      <h3>De-identification review assist</h3>
       <p class="file"><code>phi_app.py</code></p>
       <dl>
         <dt>Reads</dt><dd>Every non-numeric column, found by content rather than by name. No dictionary.</dd>
-        <dt>Writes</dt><dd><code>phi_flags.csv</code> (one row per scrubbed span), <code>sanitized/&lt;domain&gt;.csv</code> and <code>audit_log.csv</code>.</dd>
+        <dt>Writes</dt><dd><code>phi_flags.csv</code> (one row per scrubbed span), <code>sanitized/&lt;domain&gt;.csv</code> and <code>audit_log.csv</code>. Both data outputs still contain the identifiers (the span text, and the original column beside the scrubbed copy).</dd>
       </dl>
     </article>
     <article class="card">
-      <h3>Risk scoring</h3>
+      <h3>Participant risk screening</h3>
       <p class="file"><code>risk_app.py</code></p>
       <dl>
         <dt>Reads</dt><dd>Safety domains (<code>ae</code>, <code>lb</code>, <code>eg</code>, <code>vs</code>, <code>pe</code>), classified by content and scored against built-in <code>[SI]</code> criteria. No SAP file.</dd>
@@ -146,7 +150,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
       </dl>
     </article>
     <article class="card">
-      <h3>Anomaly and drift</h3>
+      <h3>Central statistical monitoring</h3>
       <p class="file"><code>anomaly_app.py</code></p>
       <dl>
         <dt>Reads</dt><dd>Longitudinal files aligned by <code>USUBJID</code>: numeric columns, plus optional visit, lab/site and free-text columns.</dd>
@@ -170,12 +174,13 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <p>No trained weights ship with this repository, so the model tiers run as labeled deterministic stand-ins, tagged
     <code>[SI]</code> in the banner and in every audit row, with the same output columns the real components would
     produce. Run locally with the open-source runtimes (Cactus Needle3, hnswlib, Laya, XGBoost) and a models dir, and the
-    coding and PHI apps switch to their real path tier by tier, air-gapped; a tier shows REAL only when its artifact loads,
-    and an artifact that cannot be used stops the run rather than being replaced by a stand-in. What the real path does on
-    synthetic data is measured in <a href="EVALUATION.md">the evaluation</a>: better than the stand-in on misspellings and
-    untitled names, no better on colloquial verbatims, and about 0.4 s per verbatim on a CPU. Optional packages also turn on
-    real paths in the anomaly app: <code>scikit-learn</code> adds an Isolation Forest, and
-    <code>POT</code> with <code>scipy</code> runs Sinkhorn optimal-transport drift.</p>
+    coding and de-identification apps switch to their real path tier by tier, with no network access; a tier shows REAL
+    only when its artifact loads, and an artifact that cannot be used stops the run rather than being replaced by a
+    stand-in. The real path cannot run in the browser. What it does on synthetic data is measured in the
+    <a href="evaluation.html">evaluation case study</a>: better than the stand-in on misspellings and untitled names, no
+    better on colloquial verbatims, and about 0.4 s per verbatim on a CPU. Optional packages also turn on real detectors in
+    the monitoring app when it runs locally: <code>scikit-learn</code> adds an Isolation Forest, and <code>POT</code> with
+    <code>scipy</code> runs Sinkhorn optimal-transport drift.</p>
 </section>
 
 <section aria-labelledby="shots">
@@ -183,41 +188,43 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <p class="muted">Captured from the in-browser pages (hosted mode, bundled synthetic data) after Execute; a local run on the stand-in path shows the same tables. Select an image to open it at full size.</p>
   <figure>
     <a href="img/meddra_results.png"><img src="img/meddra_results.png" width="1440" height="960" loading="lazy"
-         alt="Coding app results table: each adverse-event verbatim with its top three candidate terms, ranks and 99-prefixed placeholder codes, followed by the success message and download buttons."></a>
-    <figcaption>Coding app: top three candidates per verbatim, with placeholder codes; the ranking comes from the <code>[SI]</code> lexical stand-in.</figcaption>
+         alt="Coding QC assist results table: each adverse-event verbatim with its top three candidate terms, ranks and 99-prefixed placeholder codes, followed by the success message and download buttons."></a>
+    <figcaption>Coding QC assist: top three candidates per verbatim, with placeholder codes; the ranking comes from the <code>[SI]</code> lexical stand-in.</figcaption>
   </figure>
   <figure>
     <a href="img/phi_results.png"><img src="img/phi_results.png" width="1440" height="960" loading="lazy"
-         alt="PHI app results: a table of flagged spans such as invented phone numbers, names, a ZIP code and initials, each with its entity type, offsets, redaction probability and action, above the sanitized domain rows."></a>
-    <figcaption>PHI app: one row per scrubbed span; every name and number shown is invented.</figcaption>
+         alt="De-identification review assist results: a table of flagged spans such as invented phone numbers, names, a ZIP code and initials, each with its entity type, offsets, redaction probability and action, above the sanitized domain rows."></a>
+    <figcaption>De-identification review assist: one row per scrubbed span; every name and number shown is invented.</figcaption>
   </figure>
   <figure>
     <a href="img/risk_results.png"><img src="img/risk_results.png" width="1440" height="960" loading="lazy"
-         alt="Risk app results: per-participant safety and discontinuation scores and categories with contributing factors, the fatal participant pinned to the top, and a category summary."></a>
-    <figcaption>Risk app: per-participant safety and discontinuation scores, sorted highest risk first, with the reasons for each.</figcaption>
+         alt="Participant risk screening results: per-participant safety and discontinuation scores and categories with contributing factors, the fatal participant pinned to the top, and a category summary."></a>
+    <figcaption>Participant risk screening: per-participant safety and discontinuation scores, sorted highest risk first, with the reasons for each.</figcaption>
   </figure>
   <figure>
     <a href="img/anomaly_results.png"><img src="img/anomaly_results.png" width="1440" height="960" loading="lazy"
-         alt="Anomaly app results: flagged per-participant numeric outliers with their extreme columns, a cohort-wide drift table per column, and the start of the per-lab drift table."></a>
-    <figcaption>Anomaly app: flagged numeric outliers, cohort-wide drift per column and per-lab drift on the longitudinal demo.</figcaption>
+         alt="Central statistical monitoring results: flagged per-participant numeric outliers with their extreme columns, a cohort-wide drift table per column, and the start of the per-lab drift table."></a>
+    <figcaption>Central statistical monitoring: flagged numeric outliers, cohort-wide drift per column and per-lab drift on the longitudinal demo.</figcaption>
   </figure>
 </section>
 
-<section aria-labelledby="decks">
-  <h2 id="decks">Presentations</h2>
-  <ul class="decks">
-    <li><a href="deck_a_four_tier_pipeline.html">Deck A: The Four-Tier Pipeline</a>. The conceptual deck: why the work is split into four tiers, and the governance and limits.</li>
-    <li><a href="deck_b_implementation_walkthrough.html">Deck B: Implementation Walkthrough</a>. Two worked traces, coding and PHI, on the synthetic cut.</li>
+<section aria-labelledby="reading">
+  <h2 id="reading">Evaluation and case study</h2>
+  <ul class="reading">
+    <li><a href="evaluation.html">Evaluation case study</a>. What was measured on the coding and de-identification real
+      model path and its stand-in, on what synthetic data, with grouped splits and calibration, and the failures:
+      identifiers left readable, colloquial verbatims unsolved, a weak probability that calibration made worse.</li>
+    <li><a href="case-study.html">Case study: the four-tier design, traced</a>. Why the work is split into four tiers, two
+      worked examples on the synthetic cut with every number tagged by the path that produced it, and what the build
+      does not do (it is not a validated or Part 11 system). It replaces the two earlier decks, whose old links redirect
+      to it.</li>
   </ul>
-  <p class="muted" style="margin-top:12px">Use the arrow keys or the buttons at the bottom of each deck to move between
-    slides. Links inside the decks to their Markdown versions and to other repository files work only from the
-    decks in <code>presentations/</code> in the GitHub repository, not from this site.</p>
 </section>
 
 <section aria-labelledby="about">
-  <h2 id="about">About this page</h2>
-  <p>This is a single static file, <code>docs/index.html</code>, with no external scripts, stylesheets or fonts. GitHub
-    Pages serves it from the <code>main</code> branch's <code>/docs</code> folder. The four app pages in
+  <h2 id="about">About these pages</h2>
+  <p>This page, the evaluation and the case study are static files in <code>docs/</code> with no external scripts,
+    stylesheets or fonts. GitHub Pages serves them from the <code>main</code> branch's <code>/docs</code> folder. The four app pages in
     <code>docs/app/</code> load a pinned stlite release and Python from the jsDelivr CDN; the README explains how they
     are built and checked.</p>
 </section>

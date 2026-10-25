@@ -44,7 +44,7 @@ run_anomaly.bat
 ```
 
 The scripts create a `.venv` on first run and install dependencies themselves. Then, in each app's
-sidebar: set **Cut folder path** to [`sample_data/`](sample_data/) — the one synthetic cut the coding, PHI and risk apps read (the worked scenario from [Deck B](presentations/deck_b_implementation_walkthrough.md), plus a larger bulk set of participants) — or to [`anomaly_data/`](anomaly_data/) for the anomaly app. Confirm the pre-flight panel, then click **Execute**. See each folder's README for exactly what a run should show.
+sidebar: set **Cut folder path** to [`sample_data/`](sample_data/) — the one synthetic cut the coding, PHI and risk apps read (the worked examples in the [case study](https://patrickiben.github.io/ecrf-pipeline-apps/case-study.html), plus a larger bulk set of participants) — or to [`anomaly_data/`](anomaly_data/) for the anomaly app. Confirm the pre-flight panel, then click **Execute**. See each folder's README for exactly what a run should show.
 
 All apps accept **CSV or SAS `.sas7bdat`** (SDTM/ADaM dumps). CSV works out of the box; to load
 `.sas7bdat`, install `pyreadstat` (`pip install pyreadstat`). The anomaly app's real detectors are opt-in:
@@ -106,7 +106,7 @@ Captured from the in-browser pages (hosted mode, bundled synthetic data) after *
 
 ## Landing page
 
-[`docs/index.html`](docs/index.html) is a one-page overview for GitHub Pages: the four apps, links to the in-browser apps in [`docs/app/`](docs/app/), the screenshots and both decks. It is published by GitHub Pages from `main`, folder `/docs` (Settings > Pages), at https://patrickiben.github.io/ecrf-pipeline-apps/. `docs/` also holds byte-identical copies of the two HTML decks so they render there; after editing a deck's HTML in `presentations/`, copy it into `docs/` too (QC check D1 fails otherwise).
+[`docs/index.html`](docs/index.html) is a one-page overview for GitHub Pages: the four apps, links to the in-browser apps in [`docs/app/`](docs/app/), the screenshots, and links to the [evaluation case study](docs/evaluation.html) and the [case study](docs/case-study.html). It is published by GitHub Pages from `main`, folder `/docs` (Settings > Pages), at https://patrickiben.github.io/ecrf-pipeline-apps/. The two earlier decks were merged into `docs/case-study.html`; their old URLs in `docs/` are redirect stubs (QC check D1).
 
 ## Using your own cut
 
@@ -150,7 +150,7 @@ by the app). The PHI output is compliance-*enabling*, not a
 certification; that remains an organizational determination. **The risk app is decision support — it
 ranks and flags participants for human review but does NOT make a clinical determination**, and it scores
 raw data against built-in `[SI]` criteria rather than parsing free-text PDF/Word protocols or SAPs. See
-[Deck A](presentations/deck_a_four_tier_pipeline.md) for the full governance and limits section.
+[case study](https://patrickiben.github.io/ecrf-pipeline-apps/case-study.html) for the full governance and limits section.
 
 ## Files
 
@@ -172,8 +172,7 @@ Launch *.command         macOS double-click launchers — Finder runs them in Te
                          (tools/sync_browser_apps.py --check)
 sample_data/             the one SYNTHETIC cut the coding/PHI/risk apps read (+ generate.py to regenerate ae/lb/eg/vs/pe)
 anomaly_data/            the anomaly app's own SYNTHETIC longitudinal demo (labs.csv + generate.py)
-presentations/           Deck A (conceptual) and Deck B (implementation walkthrough), MD + HTML
-docs/                    GitHub Pages landing page (index.html), byte-identical copies of the two HTML decks, screenshots (img/), .nojekyll
+docs/                    GitHub Pages: index.html, evaluation.html, case-study.html, redirect stubs for the two retired decks, screenshots (img/), .nojekyll
 docs/app/                the in-browser build: four pages, launch.js, app.css, copies of the apps and data, pinned wheels
 tools/                   sync_browser_apps.py (keeps docs/app/ in step; --check for CI) and the page template
 USER_GUIDE.md            step-by-step instruction manual for running all four apps

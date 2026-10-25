@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Four-tier coding case study</title>
+<meta name="description" content="Case study of the Coding QC assist and the De-identification review assist: the four-tier design, two worked examples on synthetic eCRF data, what ran on the stand-in path and on the real model path, and the limits.">
+<meta name="color-scheme" content="light dark">
+<!-- Self-contained page for GitHub Pages (main branch, /docs). Inline CSS only: no external scripts,
+     stylesheets, fonts or images (QC check D2). It replaces the two retired decks (Deck A, the four-tier
+     pipeline; Deck B, the implementation walkthrough); their old URLs redirect here. -->
+<style>
+:root {
+  --bg:#F6F7F8; --surface:#FFFFFF; --text:#18212B; --muted:#4F5B67; --line:#D5DBE1;
+  --accent:#0757BF; --note-bg:#FBF3E9; --note-line:#C66A36; --code-bg:#EAEFF4;
+  --fail-bg:#FBECEA; --fail-line:#B3261E;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#12171D; --surface:#1A2129; --text:#E6EAEE; --muted:#A9B3BD; --line:#323C47;
+    --accent:#7DB5FF; --note-bg:#2A2119; --note-line:#E0935F; --code-bg:#24303C;
+    --fail-bg:#3A1F1D; --fail-line:#F2B8B5;
+  }
+}
+* { box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:1rem; line-height:1.6; }
+.wrap { max-width:920px; margin:0 auto; padding:0 16px; }
+header.site { padding:40px 0 24px; border-bottom:1px solid var(--line); }
+.crumbs { margin:0 0 16px; font-size:.9rem; }
+.kicker { margin:0 0 8px; color:var(--muted); font-size:.85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+h1 { margin:0 0 12px; font-size:clamp(1.7rem, 5vw, 2.3rem); line-height:1.2; }
+h2 { margin:44px 0 12px; font-size:1.35rem; line-height:1.3; }
+h3 { margin:24px 0 8px; font-size:1.08rem; }
+p { margin:0 0 12px; }
+ul, ol { margin:0 0 12px; padding-left:1.3em; }
+li { margin:0 0 6px; }
+.lede { font-size:1.08rem; max-width:46em; }
+a { color:var(--accent); text-underline-offset:2px; }
+a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:2px; }
+code { font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.88em; background:var(--code-bg);
+  padding:.1em .35em; border-radius:4px; overflow-wrap:anywhere; }
+.note, .fail, .label { margin:20px 0; padding:12px 16px; border-radius:4px; }
+.note { background:var(--note-bg); border-left:4px solid var(--note-line); }
+.fail { background:var(--fail-bg); border-left:4px solid var(--fail-line); }
+.label { background:var(--surface); border:1px solid var(--line); }
+.note p:last-child, .fail p:last-child, .label p:last-child, .note ul:last-child, .fail ul:last-child { margin-bottom:0; }
+.tbl { overflow-x:auto; margin:0 0 16px; border:1px solid var(--line); border-radius:6px; background:var(--surface); }
+table { border-collapse:collapse; width:100%; font-size:.9rem; }
+th, td { padding:7px 10px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); }
+th { font-weight:600; color:var(--muted); background:var(--bg); }
+tr:last-child td { border-bottom:none; }
+td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.caption { margin:-8px 0 16px; color:var(--muted); font-size:.88rem; }
+.tag { display:inline-block; padding:0 .4em; border:1px solid var(--line); border-radius:4px; font-size:.8em; font-weight:600; color:var(--muted); white-space:nowrap; }
+nav.toc { margin:20px 0 0; padding:12px 16px; background:var(--surface); border:1px solid var(--line); border-radius:6px; }
+nav.toc ol { margin:0; columns:2 16em; column-gap:28px; }
+nav.toc li { break-inside:avoid; }
+.muted { color:var(--muted); }
+footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--line); color:var(--muted); font-size:.9rem; }
+@media print {
+  body { background:#FFFFFF; color:#000000; }
+  .tbl { overflow:visible; }
+  a { color:#000000; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <p class="crumbs"><a href="./">eCRF pipeline apps</a> / Case study</p>
+  <p class="kicker">Case study &middot; synthetic data only</p>
+  <h1>A four-tier coding and de-identification assist, traced end to end</h1>
+  <p class="lede">The Coding QC assist (<code>meddra_app.py</code>) and the De-identification review assist
+    (<code>phi_app.py</code>) share one design: four tiers, each handing named, readable columns to the next, so the
+    final decision is a rule over numbers a reviewer can inspect and a threshold a reviewer can move. This page explains
+    the design, walks two worked examples through it on the bundled synthetic cut, and says for every number whether it
+    came from the rule-based stand-in or from the real model path, and where it was recorded.</p>
+  <div class="label" role="note">
+    <p><strong>Evidence label: Tools built (synthetic data only).</strong> The two apps, their stand-ins, the real-path
+      wiring and the measurements are working artifacts in this repository. It merges and corrects the two earlier decks
+      (Deck A, the four-tier pipeline; Deck B, the implementation walkthrough), which are retired. The real-path build and
+      measurement (2026-10-21 and 2026-10-22) were done in AI-assisted coding sessions (Claude Code), whose commits are
+      authored "Claude" in the git history.</p>
+  </div>
+  <nav class="toc" aria-label="On this page">
+    <ol>
+      <li><a href="#first">Read this first</a></li>
+      <li><a href="#paths">Two paths, and where each number comes from</a></li>
+      <li><a href="#design">The design: four tiers, numbers between them</a></li>
+      <li><a href="#coding">Worked example 1: coding</a></li>
+      <li><a href="#deid">Worked example 2: de-identification</a></li>
+      <li><a href="#heldout">What the held-out evaluation adds</a></li>
+      <li><a href="#governance">What the build does, and does not do</a></li>
+      <li><a href="#corrections">Corrections to the retired decks</a></li>
+      <li><a href="#verify">Check it yourself</a></li>
+    </ol>
+  </nav>
+</header>
+
+<main>
+
+<section aria-labelledby="first">
+  <h2 id="first">Read this first</h2>
+  <div class="fail" role="note">
+    <ul>
+      <li><strong>Synthetic data only.</strong> No real patients, no real study and no licensed dictionary. The demo
+        dictionary's codes are 99-prefixed placeholders, not MedDRA codes; every name, phone number and identifier is
+        invented.</li>
+      <li><strong>Not a validated system, and not built to 21 CFR Part 11.</strong> There are no user accounts, no access
+        control, no electronic signatures and no protected audit trail; the audit log is a plain CSV written next to the
+        outputs. A system that held real trial records would have to be built and validated against FDA's
+        <em>Electronic Systems, Electronic Records, and Electronic Signatures in Clinical Investigations: Questions and
+        Answers</em> (final guidance, October 2024). Deck A's line that sign-off is "captured under 21 CFR Part 11" was
+        not true of this build and is withdrawn.</li>
+      <li><strong>No review screen.</strong> The apps propose codes and redactions; they have no override, approval or
+        sign-off step and record no reviewer identity. Review happens on the exported files, outside the app.</li>
+      <li><strong>The de-identification outputs contain identifiers.</strong> <code>phi_flags.csv</code> lists the text of
+        every redacted span, and <code>sanitized/&lt;domain&gt;.csv</code> keeps the original column beside its scrubbed
+        copy. Treat both as PHI.</li>
+      <li><strong>Neither path is good enough to run unreviewed.</strong> On held-out synthetic notes the real path left 91
+        of 308 identifiers readable and the stand-in 108 (<a href="evaluation.html#failures">evaluation</a>).</li>
+    </ul>
+  </div>
+</section>
+
+<section aria-labelledby="paths">
+  <h2 id="paths">Two paths, and where each number comes from</h2>
+  <p>Every tier has a labeled deterministic stand-in, tagged <span class="tag">[SI]</span> in the app's banner and in
+    every audit row. The coding and de-identification apps also have a real model path, which turns on tier by tier
+    only when a trained artifact in the models dir actually loads; an artifact that is present but cannot be used stops
+    the run instead of falling back to a stand-in. Numbers measured on the real path are tagged
+    <span class="tag">[RM]</span> below.</p>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>Stand-in <span class="tag">[SI]</span></th><th>Real model path <span class="tag">[RM]</span></th></tr></thead>
+    <tbody>
+      <tr><td>Where it runs</td><td>Anywhere: a local run, and the in-browser pages on GitHub Pages (numpy and pandas only)</td><td>Locally only, with the pinned runtimes and a models dir (<a href="https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/eval/README.md">eval/README.md</a>). Not in the browser as built: Needle3 loads a native engine library, Laya needs torch, hnswlib has no Pyodide build, and Pyodide's xgboost (2.1.4) is older than the 3.4.1 the gates were trained with.</td></tr>
+      <tr><td>Coding, Tier 2</td><td>Hashed bag-of-words, cosine over the dictionary</td><td>Cactus Needle3 embeddings (3072-dim) and an hnswlib inner-product index</td></tr>
+      <tr><td>Tier 3</td><td>Coding: none. De-identification: a direct-span rule and a mosaic rule</td><td>Laya, with temperatures fitted on a synthetic calibration split</td></tr>
+      <tr><td>Tier 4</td><td>Coding: a fixed weighted sum and the gate. De-identification: P(redact) 0.99 inside a span, else 0.01</td><td>XGBoost re-ranker (coding) and span gate (de-identification), trained on synthetic data</td></tr>
+      <tr><td>Numbers on this page</td><td>Re-run on 2026-10-25 against <code>sample_data/</code> with the shipped apps (local run, stand-in path); the same values the in-browser pages and <code>tests/qc_test.py</code> produce</td><td>Recorded on 2026-10-22 in <code>eval/results/deck_b_worked.json</code> on a 4-vCPU cloud CPU (Intel Xeon @ 2.80GHz, no GPU). Not re-run for this page; the RM checks in <code>tests/qc_test.py</code> reproduce them when a models dir is given</td></tr>
+    </tbody>
+  </table></div>
+  <p>Untagged numbers are configuration (the coding gate, default 0.88 and set to 0.90 in the worked run; the redaction
+    gate 0.85; index settings M 32, efConstruction 200, efSearch 64) or dictionary content.</p>
+</section>
+
+<section aria-labelledby="design">
+  <h2 id="design">The design: four tiers, numbers between them</h2>
+  <p>A single text-to-code model folds "the dictionary match was close" and "this token is a drug name, not a patient
+    name" into one set of weights, leaving nothing in between to read or to set a limit on. Here the work is split so
+    each tier writes named columns the next tier reads, and the decision tier receives only numbers derived from the
+    text, never the text itself. A decision then becomes a row of readable columns, and its threshold a parameter a
+    reviewer can move without retraining.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Tier</th><th>Job</th><th>Coding QC assist</th><th>De-identification review assist</th></tr></thead>
+    <tbody>
+      <tr><td>1. Intake</td><td>Align rows to participants; copy every value through unchanged (missing stays missing); find the columns to read by content</td><td>The one verbatim column the operator confirms (<code>AETERM</code> or a synonym)</td><td>Every column that is not strictly numeric, confirmed or deselected by the operator</td></tr>
+      <tr><td>2. Retrieval and extraction</td><td>Propose and measure; decide nothing</td><td>Top candidates, each with its LLT, PT, HLT, HLGT and SOC and a similarity</td><td>Typed identifier spans with in-field start and end offsets</td></tr>
+      <tr><td>3. Context</td><td>A probability about the whole string</td><td><code>P(unambiguous)</code>: the verbatim reports one problem the participant had (a re-ranker feature)</td><td><code>P(direct)</code> and <code>P(quasi)</code>: a direct identifier is present; two or more indirect attributes co-occur</td></tr>
+      <tr><td>4. Decision</td><td>An explicit rule on the earlier tiers' columns only</td><td>Re-rank the candidates, then auto-commit at or above the gate (default 0.88) or send to a coder with the top three pre-filled</td><td>Per-span redaction above the gate (default 0.85): a scrubbed copy of the field (<code>SAN_&lt;field&gt;</code>) and a per-row flag</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Why separate tiers, and what measurement said about it.</strong> Two problems motivate the split. A
+    look-alike (a drug name or a lab value next to a real patient name) defeats a pattern matcher, and two candidates
+    can be equally close in retrieval, so similarity alone cannot pick the code. The argument held up only in part. On
+    coding, Laya's answer plus the re-ranker kept every negated verbatim below the gate on the held-out set. On
+    de-identification, the look-alikes in the worked fields were kept, but because of the span evidence and the trained
+    gate, not because of Tier 3: Laya's direct-identifier probability was weak (AUROC 0.69) and mostly ignored by the
+    gate.</p>
+</section>
+
+<section aria-labelledby="coding">
+  <h2 id="coding">Worked example 1: coding</h2>
+  <p>The synthetic cut (protocol <code>PROTO-2026-X89</code>) opens with four paraphrased verbatims in
+    <code>sample_data/ae.csv</code>. The coding app reads only <code>AETERM</code>; the comment column next to it belongs
+    to the de-identification trace. Every exported row carries the full LLT, PT, HLT, HLGT and SOC path as evidence columns (<code>HLT</code> and <code>HLGT</code> are not SDTM
+    write-back variables; the write-back fields are <code>AEDECOD</code>, <code>AEPTCD</code> and
+    <code>AESOC</code>).</p>
+  <div class="tbl"><table>
+    <thead><tr><th>AESEQ</th><th>USUBJID</th><th>Verbatim (<code>AETERM</code>)</th><th>Stand-in top PT, score <span class="tag">[SI]</span></th><th>Real top PT, re-rank score <span class="tag">[RM]</span></th><th>Routed (both paths, gate 0.88 or 0.90)</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td>SUBJ-3092</td><td>severe throbbing pain in back of head</td><td>Headache, 0.7726</td><td>Headache, 0.1235</td><td>human coder</td></tr>
+      <tr><td class="n">2</td><td>SUBJ-3092</td><td>feeling lightheaded when standing up</td><td>Headache (wrong), 0.2972</td><td>Dizziness postural, 0.0913</td><td>human coder</td></tr>
+      <tr><td class="n">3</td><td>SUBJ-1044</td><td>frequent watery bowel movements</td><td>Diarrhoea, 0.4672</td><td>Diarrhoea, 0.0418</td><td>human coder</td></tr>
+      <tr><td class="n">4</td><td>SUBJ-4110</td><td>marked prolonged heart rhythm interval</td><td>Electrocardiogram QT prolonged, 0.4285</td><td>Electrocardiogram QT prolonged, 0.0901</td><td>human coder</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">Preferred-term names are the demo dictionary's (MedDRA-style spelling, placeholder codes). The two
+    score columns are on different scales and are not comparable number for number.</p>
+  <ul>
+    <li><strong>Retrieval is where the real path helps.</strong> It ranks the right preferred term first for all four,
+      including "Dizziness postural" for "feeling lightheaded when standing up", which the lexical stand-in codes as
+      Headache.</li>
+    <li><strong>It does not yet score those right answers high enough to auto-code them.</strong> The trained re-ranker
+      scored all four between 0.04 and 0.12, far below either gate, so all four go to a coder at 0.88 and at 0.90 alike.
+      That matches the held-out result for colloquial verbatims (top-1 52%, none auto-coded): the re-ranker was trained
+      on a dictionary where most right matches are lexically close.</li>
+    <li><strong>Similarity alone separates little.</strong> For AESEQ 1 the real path's top three were Throbbing pain in
+      head (0.9629), Pain in back of head (0.9605) and Electrocardiogram QT prolonged (0.9326): every candidate, the
+      unrelated one included, scored between 0.93 and 0.97 <span class="tag">[RM]</span>. Ordering and gating have to be
+      the re-ranker's job.</li>
+    <li><strong>Laya read all four as plain reports:</strong> <code>P(unambiguous)</code> 0.861 to 0.919
+      <span class="tag">[RM]</span>. The stand-in has no Tier 3 and scores without it.</li>
+    <li><strong>The gate does fire on easy cases.</strong> On the stand-in path the exact verbatim "headache" auto-commits
+      with a score of 1.0, and across the whole sample cut 50 of 151 verbatims auto-commit at the default gate
+      <span class="tag">[SI]</span>.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="deid">
+  <h2 id="deid">Worked example 2: de-identification</h2>
+  <p>The same cut carries four free-text fields built to test four cases. The app scans every non-numeric column in
+    each domain; identifiers turn up only in <code>AECOM</code> and <code>PRDSC</code>.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Domain, row, field</th><th>Text as typed (synthetic)</th><th>Case</th></tr></thead>
+    <tbody>
+      <tr><td>AE 1 <code>AECOM</code></td><td><code>CRC Note: Patient Jane Miller called site cell phone (617) 555-0192 at 10:15 AM.</code></td><td>direct identifiers</td></tr>
+      <tr><td>AE 2 <code>AECOM</code></td><td><code>Patient Jane Miller tolerating well; continued Alanine 50 mg; repeat glucose 120 mg/dL.</code></td><td>look-alikes beside a name</td></tr>
+      <tr><td>PR 1 <code>PRDSC</code></td><td>Initials, an MRN, a date of birth and a ZIP code in one note (<code>J.M.</code>, <code>884-019-22</code>, <code>04/12/1972</code>, <code>02114</code>)</td><td>direct identifiers plus a mosaic of indirect ones</td></tr>
+      <tr><td>EG 1 <code>EGCOM</code></td><td><code>Sinus rhythm, no artifact.</code></td><td>clean</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Spans and redaction probabilities</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Field</th><th>Span</th><th>Entity</th><th class="n">Start</th><th class="n">End</th><th class="n">P(redact) <span class="tag">[SI]</span></th><th class="n">P(redact) <span class="tag">[RM]</span></th></tr></thead>
+    <tbody>
+      <tr><td>AE 1</td><td>Jane Miller</td><td>PERSON_NAME (direct)</td><td class="n">18</td><td class="n">29</td><td class="n">0.99</td><td class="n">0.962</td></tr>
+      <tr><td>AE 1</td><td>(617) 555-0192</td><td>PHONE (direct)</td><td class="n">53</td><td class="n">67</td><td class="n">0.99</td><td class="n">0.962</td></tr>
+      <tr><td>AE 2</td><td>Jane Miller</td><td>PERSON_NAME (direct)</td><td class="n">8</td><td class="n">19</td><td class="n">0.99</td><td class="n">0.949</td></tr>
+      <tr><td>PR 1</td><td>J.M.</td><td>INITIALS (indirect)</td><td class="n">8</td><td class="n">12</td><td class="n">0.99</td><td class="n">0.918</td></tr>
+      <tr><td>PR 1</td><td>884-019-22</td><td>MRN (direct)</td><td class="n">18</td><td class="n">28</td><td class="n">0.99</td><td class="n">0.949</td></tr>
+      <tr><td>PR 1</td><td>04/12/1972</td><td>DOB (direct)</td><td class="n">35</td><td class="n">45</td><td class="n">0.99</td><td class="n">0.949</td></tr>
+      <tr><td>PR 1</td><td>02114</td><td>ZIP (indirect)</td><td class="n">56</td><td class="n">61</td><td class="n">0.99</td><td class="n">0.929</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">Offsets are in-field character positions from the stand-in run; the real path flagged the same seven
+    spans. All seven are above the 0.85 gate on both paths.</p>
+  <ul>
+    <li><strong>The look-alikes survive on both paths.</strong> "Alanine 50 mg" and "120 mg/dL" are kept while the name
+      beside them is scrubbed. The stand-in never proposes them (a name needs a title in front; the number patterns do
+      not match). On the real path Needle3 did propose four look-alikes, <code>10:15 AM</code> and <code>50</code> as
+      dates of birth, <code>120</code> as a ZIP code and <code>Sinus rhythm</code> as a person name, and the trained gate
+      rejected all four <span class="tag">[RM]</span>.</li>
+    <li><strong>The mosaic case.</strong> The PR note's initials and ZIP code are each harmless alone; the stand-in
+      redacts indirect attributes only when two or more co-occur in a field, which they do here.</li>
+    <li><strong>Laya's field probabilities are where the old deck's numbers failed most.</strong>
+      <span class="tag">[RM]</span> <code>P(quasi)</code> behaved as designed: 0.713 on the PR note, 0.404 or lower
+      elsewhere. <code>P(direct)</code> did not: 0.673 on AE 1, but 0.013 on AE 2 and 0.036 on PR 1, though both hold
+      direct identifiers, and 0.012 on the clean EG note. (The retired deck showed 0.998.) The redactions are right
+      anyway because the gate leans on the span evidence. The stand-in reports <code>P(direct)</code> 0.99 when a direct
+      span exists and 0.05 otherwise, and <code>P(quasi)</code> 0.96 when two or more indirect spans co-occur.</li>
+  </ul>
+  <p><strong>Output.</strong> AE row 1 becomes <code>CRC Note: Patient [REDACTED_PATIENT_NAME] called site cell phone
+    [REDACTED_PHONE] at 10:15 AM.</code> with its flag set to <code>Y</code>; the EG note is unchanged with flag
+    <code>N</code>. The tag vocabulary is configuration, recorded in the audit. Because the input is a database field,
+    there is no page, bounding box or text layer to remove; the scanned-document path is not part of this build.</p>
+</section>
+
+<section aria-labelledby="heldout">
+  <h2 id="heldout">What the held-out evaluation adds</h2>
+  <p>Four worked rows show the mechanism, not the error rate. The <a href="evaluation.html">evaluation case study</a>
+    measured both paths on a labeled synthetic test set with grouped splits (coding by preferred term, notes by
+    template) and fitted calibration:</p>
+  <ul>
+    <li>Coding: right preferred term first for 78% of held-out verbatims on the real path against 54% for the stand-in;
+      38% auto-coded with no error at the default gate, against 25.5% with 7.1% of auto-codes wrong. Colloquial phrasing
+      stayed unsolved.</li>
+    <li>De-identification: 91 of 308 identifiers left readable on the real path and 108 on the stand-in, mostly 8-digit
+      MRNs, 7-digit phone numbers, M/D/YYYY dates of birth and untitled names.</li>
+    <li>Speed: about 0.4 s per verbatim and 0.9 to 1.6 s per note on a 4-vCPU CPU, one record at a time.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="governance">
+  <h2 id="governance">What the build does, and does not do</h2>
+  <h3>Does</h3>
+  <ul>
+    <li><strong>Records each run.</strong> One audit row per run with the files read, the column or columns used, the
+      dictionary's source, row count and content hash, which path ran per tier (REAL or stand-in), every threshold in
+      force, and on the real path a SHA-256 fingerprint of each loaded artifact. The QC suite checks that two runs on the
+      same input give bit-identical output for the coding app (the real path too, when a models dir is given), the risk app and the
+      monitoring app.</li>
+    <li><strong>Refuses to substitute silently.</strong> A tier shows REAL only when its artifact loads; an artifact
+      whose runtime is missing, that fails to load, or whose feature contract the loaded tiers do not meet stops the
+      run.</li>
+    <li><strong>Stays off the network on the real path.</strong> The apps set <code>HF_HUB_OFFLINE=1</code>,
+      <code>NEEDLE_TELEMETRY=0</code> and <code>DO_NOT_TRACK=1</code> before any model loads and read only the models
+      dir.</li>
+    <li><strong>Locks the public demo.</strong> The in-browser pages run in hosted mode: synthetic data only, every
+      upload and path input disabled, and <code>hosted_mode=true</code> in the audit.</li>
+  </ul>
+  <h3>Does not</h3>
+  <ul>
+    <li>Implement Part 11 controls, a review or sign-off step, or reviewer identity (see <a href="#first">Read this
+      first</a>).</li>
+    <li>Verify a MedDRA subscription. It records the dictionary it was given; MedDRA is a licensed product of the ICH
+      MedDRA MSSO and none is included.</li>
+    <li>Cover every identifier type. The stand-in's patterns find titled or surname-comma names, phone numbers,
+      emails, one MRN format, two date-of-birth formats, ZIP codes, initials and "NN-year-old" ages; it has no pattern
+      for addresses, SSNs or rare conditions. The output supports a de-identification review; it is not a HIPAA Safe
+      Harbor or Expert Determination method and certifies nothing.</li>
+    <li>Detect negation as a feature, derive clinical variables, process scanned documents, or make dosing or safety
+      decisions. Reported study numbers belong to the sponsor's validated, double-programmed SAS or R programs and a
+      medical coder's review, not to these apps.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="corrections">
+  <h2 id="corrections">Corrections to the retired decks</h2>
+  <p>The two decks this page replaces said several things the build does not support. They are corrected here rather
+    than kept:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>The decks said</th><th>What is true</th></tr></thead>
+    <tbody>
+      <tr><td>Sign-off "is captured under 21 CFR Part 11"; overrides are logged</td><td>No sign-off, override or Part 11 control exists in the apps</td></tr>
+      <tr><td>An editable write-back table, and an Approve-Redaction action that logs reviewer and time</td><td>Neither screen exists; the apps show read-only tables and download buttons</td></tr>
+      <tr><td>The PHI log keeps redacted spans "without retaining raw PHI in secondary storage"</td><td><code>phi_flags.csv</code> holds each span's text and the sanitized files keep the original column</td></tr>
+      <tr><td>The entity schema is the HIPAA Safe Harbor set</td><td>A subset of identifier types, listed above</td></tr>
+      <tr><td>A 384-dim SapBERT encoder; about 178 MB resident for a full release</td><td>Needle3, 3072-dim and not biomedical; about 1 GB at release size (measured on random vectors)</td></tr>
+      <tr><td>A sub-50 ms per-record target</td><td>About 0.4 s (coding) and 0.9 to 1.6 s (de-identification) per record on a 4-vCPU CPU</td></tr>
+      <tr><td>Illustrative re-rank scores 0.958, 0.971, 0.934, 0.882 with three of four auto-coded</td><td>0.04 to 0.12, all four routed to a coder</td></tr>
+      <tr><td>Laya <code>P(direct)</code> 0.998 on the worked fields</td><td>0.01 to 0.67</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section aria-labelledby="verify">
+  <h2 id="verify">Check it yourself</h2>
+  <ul>
+    <li><strong>Stand-in values:</strong> open the <a href="app/meddra.html">Coding QC assist</a> or the
+      <a href="app/phi.html">De-identification review assist</a> in the browser and click Execute, or run either app
+      locally against <code>sample_data/</code>. The span offsets, scores and sanitized text above are what they
+      produce.</li>
+    <li><strong>Real-path values:</strong> build a models dir as in
+      <a href="https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/eval/README.md">eval/README.md</a>, set it as
+      the Models dir and run again; <code>ECRF_MODELS_DIR=&lt;models dir&gt; python tests/qc_test.py</code> checks the run
+      against <code>eval/results/deck_b_worked.json</code>.</li>
+    <li><strong>What was tested and fixed:</strong>
+      <a href="https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/QC_REPORT.md">QC_REPORT.md</a>.</li>
+  </ul>
+</section>
+
+</main>
+
+<footer class="site">
+  <p>Patrick Iben &middot; Apache-2.0 &middot; <a href="./">eCRF pipeline apps</a> &middot;
+    <a href="evaluation.html">Evaluation</a> &middot;
+    <a href="https://github.com/patrickiben/ecrf-pipeline-apps">Source on GitHub</a></p>
+</footer>
+
+</div>
+</body>
+</html>

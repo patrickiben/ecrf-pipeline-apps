@@ -12,7 +12,7 @@ A step-by-step manual for running the four apps in this folder:
   per-participant anomalies and measures cohort drift over time with Sinkhorn optimal transport, on
   longitudinal (per-visit) data.
 
-They are **four independent programs** that read the same cut folder without interfering (the anomaly app reads its own longitudinal demo), run entirely on your machine (air-gapped), and each write their own audit log. To try them first with nothing installed, open the in-browser versions on the bundled synthetic data (see *Try it in your browser* below). This guide covers installing, running all four apps on real data, reading the outputs, and troubleshooting. For *why* it is built this way, see [Deck A](presentations/deck_a_four_tier_pipeline.md); for a worked trace of exactly what a run produces, see [Deck B](presentations/deck_b_implementation_walkthrough.md).
+They are **four independent programs** that read the same cut folder without interfering (the anomaly app reads its own longitudinal demo), run entirely on your machine (air-gapped), and each write their own audit log. To try them first with nothing installed, open the in-browser versions on the bundled synthetic data (see *Try it in your browser* below). This guide covers installing, running all four apps on real data, reading the outputs, and troubleshooting. For *why* it is built this way, and a worked trace of exactly what a run produces, see the [case study](https://patrickiben.github.io/ecrf-pipeline-apps/case-study.html).
 
 > **Tip:** each app also carries its own instructions built in — open the **“📖 How to use this
 > app”** panel at the top of any app for the steps relevant to that specific app. This file is the
@@ -352,7 +352,7 @@ in their own output folders; they share no module.
 No scanned-document / bounding-box path (input is tabular eCRF), no negation feature and no clinical variable derivation, and nothing
 leaves the machine (in the browser build, nothing you load is uploaded by the app). The PHI output is compliance-*enabling*, not a certification; that remains an organizational determination. **The
 risk app is decision support only** — it does not make a clinical determination and scores raw data against built-in `[SI]` criteria
-rather than parsing free-text PDF/Word protocols or SAPs. **The anomaly app is decision support too** — it ranks and flags participants/columns for human review but does not certify data quality, make a clinical determination, or replace a validated anomaly model (install `POT` + `scipy` to run real Sinkhorn drift; the default `[SI]` path is a labeled 1-D-Wasserstein stand-in). See [Deck A](presentations/deck_a_four_tier_pipeline.md) for the full governance and limits section.
+rather than parsing free-text PDF/Word protocols or SAPs. **The anomaly app is decision support too** — it ranks and flags participants/columns for human review but does not certify data quality, make a clinical determination, or replace a validated anomaly model (install `POT` + `scipy` to run real Sinkhorn drift; the default `[SI]` path is a labeled 1-D-Wasserstein stand-in). See the [case study](https://patrickiben.github.io/ecrf-pipeline-apps/case-study.html) for the full governance and limits section.
 
 ---
 

@@ -61,21 +61,22 @@ WHEELS = [
 REQUIREMENTS = ["numpy", "pandas", "toml"]
 
 # What each page must say about its own limits, next to the privacy note, so a visitor reads the measured
-# shortfall before the results (docs/EVALUATION.md has the numbers; they are synthetic-data results).
-EVALUATION = "https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/docs/EVALUATION.md"
+# shortfall before the results (docs/evaluation.html has the numbers; they are synthetic-data results). The link
+# is relative, so it stays on the site and the --check pass verifies the page exists.
+EVALUATION = "../evaluation.html"
 APPS = {
     "meddra": dict(entry="meddra_app.py", data="sample_data", title="Coding QC assist",
         description="A coding QC assist running in your browser on synthetic adverse-event data: the top three candidate terms per verbatim from a demo dictionary with placeholder codes (not MedDRA), and a gate that sends each verbatim to a coder or auto-commits it.",
         img="meddra_results.png",
         limits="The demo dictionary uses 99-prefixed placeholder codes, not MedDRA. Measured on held-out synthetic verbatims, this lexical stand-in ranked the right preferred term first "
                "for 54% (the real model path: 78%) and auto-coded 7 of 96 negated verbatims at the default gate; every "
-               "code needs a coder's review.", limits_link=EVALUATION,
+               "code needs a coder's review.", limits_link=EVALUATION + "#coding",
         alt="Coding app results table: each adverse-event verbatim with its top three candidate terms, ranks and 99-prefixed placeholder codes, followed by the success message and download buttons."),
     "phi": dict(entry="phi_app.py", data="sample_data", title="De-identification review assist",
         description="A de-identification review assist running in your browser on synthetic eCRF text: flagged identifier spans and sanitized copies of each table, for a person to review.",
         img="phi_results.png",
         limits="On held-out synthetic text this stand-in left 108 of 308 identifiers readable (the real model path: "
-               "91 of 308); every output needs human review.", limits_link=EVALUATION,
+               "91 of 308); every output needs human review.", limits_link=EVALUATION + "#deid",
         alt="PHI app results: a table of flagged spans such as invented phone numbers, names, a ZIP code and initials, each with its entity type, offsets, redaction probability and action, above the sanitized domain rows."),
     "risk": dict(entry="risk_app.py", data="sample_data", title="Participant risk screening",
         description="Participant risk screening running in your browser on synthetic safety domains: a safety listing that ranks participants against built-in criteria standing in for a protocol's, with the reasons for each flag.",

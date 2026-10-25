@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluation case study</title>
+<meta name="description" content="How the coding QC assist and the de-identification review assist were evaluated on synthetic eCRF data: grouped splits, calibration, held-out results and the failures, stated plainly.">
+<meta name="color-scheme" content="light dark">
+<!-- Self-contained page for GitHub Pages (main branch, /docs). Inline CSS only: no external scripts,
+     stylesheets, fonts or images (QC check D2). Every number below is read from a file in eval/results/
+     (see "Where the numbers come from"); docs/EVALUATION.md is the long-form source of this page. -->
+<style>
+:root {
+  --bg:#F6F7F8; --surface:#FFFFFF; --text:#18212B; --muted:#4F5B67; --line:#D5DBE1;
+  --accent:#0757BF; --note-bg:#FBF3E9; --note-line:#C66A36; --code-bg:#EAEFF4;
+  --fail-bg:#FBECEA; --fail-line:#B3261E; --ok-bg:#E9F4EC; --ok-line:#2E7D4F;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#12171D; --surface:#1A2129; --text:#E6EAEE; --muted:#A9B3BD; --line:#323C47;
+    --accent:#7DB5FF; --note-bg:#2A2119; --note-line:#E0935F; --code-bg:#24303C;
+    --fail-bg:#3A1F1D; --fail-line:#F2B8B5; --ok-bg:#1B2C22; --ok-line:#8FD3A8;
+  }
+}
+* { box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:1rem; line-height:1.6; }
+.wrap { max-width:920px; margin:0 auto; padding:0 16px; }
+header.site { padding:40px 0 24px; border-bottom:1px solid var(--line); }
+.crumbs { margin:0 0 16px; font-size:.9rem; }
+.kicker { margin:0 0 8px; color:var(--muted); font-size:.85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+h1 { margin:0 0 12px; font-size:clamp(1.7rem, 5vw, 2.3rem); line-height:1.2; }
+h2 { margin:44px 0 12px; font-size:1.35rem; line-height:1.3; }
+h3 { margin:24px 0 8px; font-size:1.08rem; }
+p { margin:0 0 12px; }
+ul, ol { margin:0 0 12px; padding-left:1.3em; }
+li { margin:0 0 6px; }
+.lede { font-size:1.08rem; max-width:46em; }
+a { color:var(--accent); text-underline-offset:2px; }
+a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:2px; }
+code { font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.88em; background:var(--code-bg);
+  padding:.1em .35em; border-radius:4px; overflow-wrap:anywhere; }
+pre { margin:0 0 14px; padding:12px 14px; background:var(--code-bg); border-radius:6px; overflow-x:auto; font-size:.85rem; line-height:1.5; }
+pre code { background:none; padding:0; }
+.note, .fail, .label { margin:20px 0; padding:12px 16px; border-radius:4px; }
+.note { background:var(--note-bg); border-left:4px solid var(--note-line); }
+.fail { background:var(--fail-bg); border-left:4px solid var(--fail-line); }
+.label { background:var(--surface); border:1px solid var(--line); }
+.note p:last-child, .fail p:last-child, .label p:last-child, .fail ul:last-child { margin-bottom:0; }
+.tbl { overflow-x:auto; margin:0 0 16px; border:1px solid var(--line); border-radius:6px; background:var(--surface); }
+table { border-collapse:collapse; width:100%; font-size:.9rem; }
+th, td { padding:7px 10px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); }
+th { font-weight:600; color:var(--muted); background:var(--bg); }
+tr:last-child td { border-bottom:none; }
+td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.caption { margin:-8px 0 16px; color:var(--muted); font-size:.88rem; }
+nav.toc { margin:20px 0 0; padding:12px 16px; background:var(--surface); border:1px solid var(--line); border-radius:6px; }
+nav.toc ol { margin:0; columns:2 16em; column-gap:28px; }
+nav.toc li { break-inside:avoid; }
+.muted { color:var(--muted); }
+footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--line); color:var(--muted); font-size:.9rem; }
+@media print {
+  body { background:#FFFFFF; color:#000000; }
+  .tbl { overflow:visible; }
+  a { color:#000000; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <p class="crumbs"><a href="./">eCRF pipeline apps</a> / Evaluation case study</p>
+  <p class="kicker">Evaluation case study &middot; synthetic data only</p>
+  <h1>How the coding and de-identification assists were evaluated</h1>
+  <p class="lede">Two of the four apps, the Coding QC assist and the De-identification review assist, have a second,
+    optional "real model path" built from open-source models (Cactus Needle3, hnswlib, Laya and XGBoost). This page
+    reports what that path and the default rule-based stand-in did on a labeled synthetic test set: how the data were
+    built and split, how the probabilities were calibrated, what was measured, and where it failed.</p>
+  <div class="label" role="note">
+    <p><strong>Evidence label: Tools built (synthetic data only).</strong> The apps, the synthetic data generator and
+      the evaluation scripts are working artifacts in this repository. Nothing here was run on real patient data, a
+      licensed MedDRA release or real site notes, and nothing here is a validated system. The real-path build and
+      measurement (2026-10-21 and 2026-10-22) were done in AI-assisted coding sessions (Claude Code), whose commits are
+      authored "Claude" in the git history; every number on this page is read from a committed result file written by
+      a script in <code>eval/</code>, not from a session's text.</p>
+  </div>
+  <nav class="toc" aria-label="On this page">
+    <ol>
+      <li><a href="#failures">The failures, stated plainly</a></li>
+      <li><a href="#glance">Results at a glance</a></li>
+      <li><a href="#data">What was measured, on what data</a></li>
+      <li><a href="#splits">Grouped splits</a></li>
+      <li><a href="#calibration">Calibration</a></li>
+      <li><a href="#coding">Coding: stand-in vs real</a></li>
+      <li><a href="#deid">De-identification: stand-in vs real</a></li>
+      <li><a href="#cost">Speed and index cost</a></li>
+      <li><a href="#feasibility">Before the build: feasibility checks</a></li>
+      <li><a href="#provenance">Where the numbers come from</a></li>
+      <li><a href="#notshown">What this does not show</a></li>
+    </ol>
+  </nav>
+</header>
+
+<main>
+
+<section aria-labelledby="failures">
+  <h2 id="failures">The failures, stated plainly</h2>
+  <div class="fail" role="note">
+    <ul>
+      <li><strong>Identifiers left readable.</strong> On 220 held-out synthetic notes holding 308 identifiers that should
+        have been redacted, the real model path left <strong>91 of 308</strong> readable (80 direct identifiers, 11
+        indirect) and the stand-in left <strong>108 of 308</strong> (all direct). The leaks are formats neither proposer
+        covers: 8-digit MRNs ("MRN: 21428912", 22 leaked), 7-digit phone numbers ("555-0185", 22), dates of birth written
+        M/D/YYYY ("9/13/1940", 19) and names with no title in front of them (17). None of Needle3's 5 MRN proposals was
+        right. This alone rules out using either path as a de-identification method without a person reviewing every
+        record.</li>
+      <li><strong>False redactions.</strong> The real path made 11 false positives the stand-in did not: drug names
+        taken as patient names ("Alanine" twice, "Levothyroxine"), doses taken as phone numbers ("20 mg prescribed",
+        "100 mg"), bare years taken as dates of birth, an MRN typed as initials, and 3 boundary slips on initials.</li>
+      <li><strong>Colloquial verbatims are not solved.</strong> For phrasing such as "calcium down on bloods", the right
+        preferred term ranked first for 52% on the real path against 46% for the stand-in, and none cleared the
+        auto-code gate. The misses are mostly direction words: "calcium down" retrieves "Blood calcium increased" above
+        "decreased", because Needle3's embedding does not separate them.</li>
+      <li><strong>A weak probability that calibration made worse.</strong> Laya's "does this field hold a direct
+        identifier?" answer had an AUROC of 0.69 and was biased low (fields that do hold one got a mean probability of
+        0.24). Fitting a temperature raised its expected calibration error from 0.445 to 0.485, because a temperature
+        cannot fix a bias and the fitted value is shared with the other PHI question.</li>
+      <li><strong>The worked examples did not reproduce the original deck.</strong> The illustrative scores the first
+        version of the walkthrough showed (0.958, 0.971, 0.934, 0.882, and "three auto-code, one flags") were not
+        reproduced: on the real path all four worked verbatims got the right preferred term at rank 1 but scored 0.04
+        to 0.12, so all four went to a human coder. See the <a href="case-study.html">case study</a>.</li>
+      <li><strong>Slow on a CPU.</strong> About 0.4 s per verbatim and 0.9 to 1.6 s per note, one record at a time, on a
+        4-vCPU cloud CPU. The real path is a batch job, not the sub-50 ms interactive tool the first deck targeted.</li>
+      <li><strong>The re-ranker lowered top-3.</strong> It raised top-1 over plain retrieval order (0.747 to 0.778) but
+        lowered top-3 (0.885 to 0.854), because several lowest-level terms under one preferred term crowd the right
+        one out of the three exported candidates.</li>
+    </ul>
+  </div>
+</section>
+
+<section aria-labelledby="glance">
+  <h2 id="glance">Results at a glance</h2>
+  <p>Held-out test splits only; nothing was fitted on them. "Stand-in" is the default <code>[SI]</code> path that runs
+    anywhere, including in the browser; "real" is the optional local model path.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Measure (test split)</th><th class="n">Stand-in <code>[SI]</code></th><th class="n">Real path</th></tr></thead>
+    <tbody>
+      <tr><td>Coding: right preferred term at rank 1 (288 verbatims with a correct code)</td><td class="n">54.2%</td><td class="n">77.8%</td></tr>
+      <tr><td>Coding: right preferred term in the exported top 3</td><td class="n">61.5%</td><td class="n">85.4%</td></tr>
+      <tr><td>Coding: auto-coded at the default gate 0.88 (all 384 verbatims)</td><td class="n">25.5%</td><td class="n">38.0%</td></tr>
+      <tr><td>Coding: share of auto-codes that were wrong, at 0.88</td><td class="n">7.1%</td><td class="n">0.0%</td></tr>
+      <tr><td>Coding: negated verbatims ("denies nausea") auto-coded, at 0.88</td><td class="n">7 of 96</td><td class="n">0 of 96</td></tr>
+      <tr><td>De-identification: identifiers left readable (308 targets)</td><td class="n">108</td><td class="n">91</td></tr>
+      <tr><td>De-identification: strict precision / recall / F1 (all entities)</td><td class="n">1.00 / 0.65 / 0.79</td><td class="n">0.95 / 0.70 / 0.81</td></tr>
+      <tr><td>Time for the whole test split (coding 384 verbatims; PHI 220 notes)</td><td class="n">2.5 s; under 0.1 s</td><td class="n">86 s; 279 s</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section aria-labelledby="data">
+  <h2 id="data">What was measured, on what data</h2>
+  <p>All evaluation data come from <code>eval/make_data.py</code> (seed 42; rerunning it reproduces
+    <code>eval/data/</code> byte for byte). Everything is invented: terms carry 99-prefixed placeholder codes, not
+    MedDRA codes, and the groupings are not MedDRA's hierarchy.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>File</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td><code>dictionary.csv</code></td><td>3,371 lowest-level terms under 519 preferred terms, in the shape of the demo dictionary: body-site pain, stiffness and swelling; fractures, wounds and burns; lab values increased, decreased and abnormal; infections by organ; common symptoms.</td></tr>
+      <tr><td><code>coding_eval.csv</code></td><td>1,920 adverse-event verbatims, four per term: <strong>exact</strong> (a term typed lower-case), <strong>colloquial</strong> ("forearm feels weak"), <strong>misspelled</strong> ("palpitaitns") and <strong>negated</strong> ("denies nausea"). A negated verbatim has no correct code, so any auto-code of one counts as an error.</td></tr>
+      <tr><td><code>phi_fields.csv</code>, <code>phi_spans.csv</code></td><td>880 free-text eCRF notes from 40 templates with 1,166 gold spans: 1,078 redaction targets (patient names, phone numbers, emails, MRNs, dates of birth, ZIP codes, initials, ages) and 88 identifier-shaped spans that are not targets on their own (a lone initial or ZIP code). The notes also carry look-alikes that are not identifiers: drug names, lab values, doses, times, kit and lot numbers.</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>How the shipped code was measured.</strong> <code>eval/run_eval.py</code> loads each app's own tier
+    functions from its file (everything above its UI marker, through <code>eval/_app.py</code>), so the evaluation runs
+    the code the apps ship rather than a copy. It runs the stand-in on the test split; builds the real Tier 2 and Tier 3
+    features on every split; fits the Laya temperatures on the calibration split; trains the XGBoost gate on the
+    training split; writes those artifacts into a models dir; then <strong>reloads the app from that models dir</strong>
+    and runs its real path on the test split. Those reloaded runs are the "real" numbers, and the script asserts that
+    the reloaded app's calibrated probabilities match the ones the gate was trained on (to 0.002).</p>
+  <p><strong>Scoring rules.</strong> Coding: top-1 and top-3 are measured on the 288 verbatims that have a correct
+    code; the auto-code rate is over all 384; an auto-code is an error if its preferred term is wrong or the verbatim is
+    negated. De-identification: a redaction counts as correct only on a strict match (same note, same start and end
+    offset, same entity type); "left readable" counts gold targets with no overlapping redaction of any type, which
+    forgives boundary and type slips and is the number that matters for privacy.</p>
+</section>
+
+<section aria-labelledby="splits">
+  <h2 id="splits">Grouped splits</h2>
+  <p>A random row split would let the test set share terms and note templates with training, so a model could score
+    well by memorizing them. The splits are grouped instead: coding rows by <strong>preferred term</strong> (a test term
+    never appears in training or calibration) and notes by <strong>template</strong> (a test template is never seen in
+    training).</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Split</th><th>Used for</th><th class="n">Coding verbatims</th><th class="n">PHI notes (templates)</th></tr></thead>
+    <tbody>
+      <tr><td>train</td><td>fitting the XGBoost re-ranker and span gate</td><td class="n">1,152</td><td class="n">484 (22)</td></tr>
+      <tr><td>calib</td><td>fitting the Laya temperatures; XGBoost early stopping</td><td class="n">384</td><td class="n">176 (8)</td></tr>
+      <tr><td>test</td><td>reported; nothing is fitted on it</td><td class="n">384</td><td class="n">220 (10)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section aria-labelledby="calibration">
+  <h2 id="calibration">Calibration</h2>
+  <p>Laya answers each yes/no question with a probability: the softmax of its logits divided by a temperature. The
+    checkpoint ships a temperature of 1.98; the script fits a new one on the calibration split with Laya's own fitting
+    function and reports the test split before (shipped) and after (fitted). Expected calibration error (ECE) uses 10
+    equal-width bins; lower is better. A temperature changes how confident the probabilities are, not their order, so
+    AUROC does not change.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Question</th><th>Labeled true when</th><th class="n">Temperature</th><th class="n">Test n</th><th class="n">ECE before &rarr; after</th><th class="n">Brier before &rarr; after</th><th class="n">AUROC</th></tr></thead>
+    <tbody>
+      <tr><td>coding: <code>unambiguous</code></td><td>the verbatim is not negated</td><td class="n">1.98 &rarr; 1.45</td><td class="n">384</td><td class="n">0.119 &rarr; 0.084</td><td class="n">0.173 &rarr; 0.172</td><td class="n">0.736</td></tr>
+      <tr><td>PHI: <code>direct_pii</code></td><td>the note holds a direct identifier</td><td class="n">1.98 &rarr; 1.36 (shared)</td><td class="n">220</td><td class="n">0.445 &rarr; 0.485 (worse)</td><td class="n">0.411 &rarr; 0.467</td><td class="n">0.686</td></tr>
+      <tr><td>PHI: <code>reident_risk</code></td><td>the note holds two or more indirect attributes</td><td class="n">1.98 &rarr; 1.36 (shared)</td><td class="n">220</td><td class="n">0.154 &rarr; 0.093</td><td class="n">0.045 &rarr; 0.031</td><td class="n">0.998</td></tr>
+    </tbody>
+  </table></div>
+  <p>Laya fits a temperature per answer type and option count only from 2,000 labeled records or more. The calibration
+    splits here are smaller, so it fits one type-level temperature, and the two PHI questions share it. The indirect
+    question's near-perfect AUROC reflects templated synthetic notes, an easy case, not a general result. The coding
+    question's AUROC of 0.74 means Laya separates negated from plain verbatims only moderately; it is the re-ranker,
+    combining that answer with the retrieval features, that kept every negated verbatim below the gate.</p>
+</section>
+
+<section aria-labelledby="coding">
+  <h2 id="coding">Coding: stand-in vs real</h2>
+  <p>Test split: 384 verbatims (96 of each variant) coded against the 3,371-term dictionary. The real path retrieves the
+    top 10 candidates with Needle3 and hnswlib, adds Laya's <code>unambiguous</code> probability, and re-ranks with a
+    trained XGBoost classifier; the stand-in uses a hashed bag-of-words and a fixed weighted sum.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Path</th><th class="n">Gate</th><th class="n">Top-1</th><th class="n">Top-3</th><th class="n">Auto-coded</th><th class="n">Wrong share of auto-codes</th><th class="n">Errors per 100</th><th class="n">Negated auto-coded</th></tr></thead>
+    <tbody>
+      <tr><td>stand-in <code>[SI]</code></td><td class="n">0.88</td><td class="n">0.542</td><td class="n">0.615</td><td class="n">25.5%</td><td class="n">7.1%</td><td class="n">1.8</td><td class="n">7 of 96</td></tr>
+      <tr><td>stand-in <code>[SI]</code></td><td class="n">0.90</td><td class="n">0.542</td><td class="n">0.615</td><td class="n">24.0%</td><td class="n">1.1%</td><td class="n">0.3</td><td class="n">1 of 96</td></tr>
+      <tr><td>real</td><td class="n">0.88</td><td class="n">0.778</td><td class="n">0.854</td><td class="n">38.0%</td><td class="n">0.0%</td><td class="n">0.0</td><td class="n">0 of 96</td></tr>
+      <tr><td>real</td><td class="n">0.90</td><td class="n">0.778</td><td class="n">0.854</td><td class="n">38.0%</td><td class="n">0.0%</td><td class="n">0.0</td><td class="n">0 of 96</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Variant (96 each)</th><th class="n">Stand-in top-1</th><th class="n">Real top-1</th><th class="n">Stand-in auto-coded (0.90)</th><th class="n">Real auto-coded (0.90)</th></tr></thead>
+    <tbody>
+      <tr><td>exact</td><td class="n">0.979</td><td class="n">1.000</td><td class="n">90.6%</td><td class="n">100%</td></tr>
+      <tr><td>misspelled</td><td class="n">0.188</td><td class="n">0.813</td><td class="n">4.2%</td><td class="n">52.1%</td></tr>
+      <tr><td>colloquial</td><td class="n">0.458</td><td class="n">0.521</td><td class="n">0%</td><td class="n">0%</td></tr>
+      <tr><td>negated</td><td class="n">no correct code</td><td class="n">no correct code</td><td class="n">1.0%</td><td class="n">0%</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Ablation, real path (same 288 verbatims)</th><th class="n">Top-1</th><th class="n">Top-3</th></tr></thead>
+    <tbody>
+      <tr><td>Needle3 retrieval order only, no re-ranker</td><td class="n">0.747</td><td class="n">0.885</td></tr>
+      <tr><td>the same, with terms and verbatims embedded as typed (no lower-casing)</td><td class="n">0.622</td><td class="n">0.729</td></tr>
+      <tr><td>full real path (top 10 retrieved, re-ranked by XGBoost)</td><td class="n">0.778</td><td class="n">0.854</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>The gain is mostly on misspellings</strong> (top-1 0.81 against 0.19), and the re-ranker auto-coded about
+      half of them with no error. Exact matches were all auto-coded.</li>
+    <li><strong>The gate value did not matter on the real path here.</strong> The re-ranker's scores were bimodal (134
+      above 0.95, most of the rest below 0.5, none between 0.88 and 0.90). On the stand-in, the same 0.02 moved 6 negated
+      verbatims across the gate.</li>
+    <li><strong>Case mattered.</strong> Needle3's embedding is case-sensitive ("insomnia" scored 0.948 against
+      "Insomnia", below several unrelated terms). The first real run had this defect; the app now embeds lower-cased
+      text on both sides, which is worth 0.125 top-1 on retrieval alone.</li>
+    <li><strong>Small dictionary.</strong> 3,371 terms is far sparser than a full release (about 86,800 lowest-level
+      terms). Accuracy at release scale was not measured and should be expected to be lower.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="deid">
+  <h2 id="deid">De-identification: stand-in vs real</h2>
+  <p>Test split: 220 notes from 10 templates never seen in training, holding 308 redaction targets. The real path
+    proposes spans with Needle3's typed extraction plus the stand-in's patterns, and a trained XGBoost gate decides each
+    one; the stand-in uses the patterns and a fixed rule. "Needle3 alone" uses Needle3's values directly as redactions,
+    with no patterns and no gate, to show what the extractor contributes on its own.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Entity</th><th class="n">Gold</th><th class="n">Stand-in P / R / F1</th><th class="n">Real P / R / F1</th><th class="n">Needle3 alone P / R</th></tr></thead>
+    <tbody>
+      <tr><td>PERSON_NAME</td><td class="n">66</td><td class="n">1.00 / 0.33 / 0.50</td><td class="n">0.94 / 0.74 / 0.83</td><td class="n">0.45 / 0.70</td></tr>
+      <tr><td>PHONE</td><td class="n">44</td><td class="n">1.00 / 0.50 / 0.67</td><td class="n">0.92 / 0.50 / 0.65</td><td class="n">0.30 / 0.55</td></tr>
+      <tr><td>EMAIL</td><td class="n">22</td><td class="n">1.00 / 1.00 / 1.00</td><td class="n">1.00 / 1.00 / 1.00</td><td class="n">0.95 / 0.86</td></tr>
+      <tr><td>MRN</td><td class="n">44</td><td class="n">1.00 / 0.50 / 0.67</td><td class="n">1.00 / 0.50 / 0.67</td><td class="n">0.00 / 0.00</td></tr>
+      <tr><td>DOB</td><td class="n">44</td><td class="n">1.00 / 0.55 / 0.71</td><td class="n">0.92 / 0.55 / 0.69</td><td class="n">0.31 / 0.34</td></tr>
+      <tr><td>ZIP</td><td class="n">22</td><td class="n">1.00 / 1.00 / 1.00</td><td class="n">1.00 / 1.00 / 1.00</td><td class="n">0.21 / 0.55</td></tr>
+      <tr><td>INITIALS</td><td class="n">44</td><td class="n">1.00 / 1.00 / 1.00</td><td class="n">0.91 / 0.89 / 0.90</td><td class="n">0.60 / 0.64</td></tr>
+      <tr><td>AGE</td><td class="n">22</td><td class="n">1.00 / 1.00 / 1.00</td><td class="n">1.00 / 0.73 / 0.84</td><td class="n">0.69 / 1.00</td></tr>
+      <tr><td><strong>all</strong></td><td class="n"><strong>308</strong></td><td class="n"><strong>1.00 / 0.65 / 0.79</strong></td><td class="n"><strong>0.95 / 0.70 / 0.81</strong></td><td class="n">0.42 / 0.54</td></tr>
+      <tr><td><strong>left readable</strong> (of 308)</td><td class="n"></td><td class="n">108 (all direct)</td><td class="n">91 (80 direct, 11 indirect)</td><td class="n"></td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">P = precision, R = recall, strict match on offsets and entity type.</p>
+  <ul>
+    <li><strong>The real path finds more names.</strong> Needle3 proposes names with no title in front ("Spoke with Linda
+      Miller"), which the stand-in's patterns require, and the gate keeps most of them: name recall 0.33 to 0.74 at 0.94
+      precision.</li>
+    <li><strong>It lost some indirect attributes</strong> the stand-in kept (age recall 1.00 to 0.73, initials 1.00 to
+      0.89): the stand-in redacts any indirect attribute when two co-occur, and the trained gate learned a softer
+      rule.</li>
+    <li><strong>The gate leans on span evidence, not on Laya.</strong> With <code>direct_pii</code> weak and biased low,
+      the redactions that are right are right because of the span features.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="cost">
+  <h2 id="cost">Speed and index cost</h2>
+  <p>One record at a time through each real tier, on the worked examples (25 timed calls after a warm-up; medians,
+    ranges across four records):</p>
+  <div class="tbl"><table>
+    <thead><tr><th>App</th><th>Tier 2</th><th>Tier 3 (Laya, one call)</th><th>Tier 4 (XGBoost, with features)</th><th class="n">Per record</th></tr></thead>
+    <tbody>
+      <tr><td>coding</td><td>Needle3 embed and search: 40 to 48 ms</td><td>328 to 346 ms (1 question)</td><td>7 to 9 ms</td><td class="n">about 390 ms</td></tr>
+      <tr><td>de-identification</td><td>Needle3 extraction and patterns: 434 to 1,077 ms</td><td>449 to 523 ms (2 questions)</td><td>under 1 ms</td><td class="n">0.9 to 1.6 s</td></tr>
+    </tbody>
+  </table></div>
+  <p>Retrieval index (coding Tier 2): Needle3 vectors are 3072-dimensional. Over the 3,371-term dictionary the index
+    held 40.4 MB, search took 0.54 ms (median) against 0.60 ms for exact brute force, and recall@10 against exact
+    search was 0.994. At a full release's size, measured on 86,800 random unit vectors of the same width (index cost
+    only, not retrieval quality), the index held about 1,040 MB and search took 5.8 ms. Embedding the verbatim (about
+    30 ms) costs more than the search.</p>
+</section>
+
+<section aria-labelledby="feasibility">
+  <h2 id="feasibility">Before the build: feasibility checks</h2>
+  <p>Before any build work (Stage 0, 2026-10-21 and 2026-10-22), both models were downloaded, loaded offline on a CPU
+    and checked against what the apps assumed. The full record is in
+    <a href="https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/docs/FEASIBILITY.md">FEASIBILITY.md</a>. What
+    it changed:</p>
+  <ul>
+    <li><strong>The assumed embedding was wrong.</strong> The original design said "384-dim (SapBERT)"; Needle3's vectors
+      are 3072-dimensional and it is not a biomedical encoder. Its similarity scores are compressed (unrelated terms
+      scored 0.93 against 0.96 for the right one), so no fixed cosine cutoff carries over.</li>
+    <li><strong>Laya is over-confident as shipped</strong> (its authors say so) and near chance zero-shot on its authors'
+      decision benchmark. One measured example went the wrong way: "Does the patient report a headache?" on "Patient
+      denies headache." gave 0.655. That is why calibration and a labeled negation set were required before any Laya
+      output drove a decision.</li>
+    <li><strong>Five wiring defects in the apps</strong> would have stopped or mislabeled the real path: the model
+      modules were never bound to names; the Laya call used <code>route()</code>, which returns a routing decision, not
+      answers; the banners claimed REAL when only a library was importable; the guarded artifact names
+      (<code>needle3.onnx</code>, <code>laya.onnx</code>) do not exist in either model repository; and the Laya probe
+      reported REAL with torch absent. All five were fixed, and each fix is pinned by an always-run check in
+      <code>tests/qc_test.py</code> (RW1 to RW16, stub packages, no models needed).</li>
+    <li><strong>Network and telemetry.</strong> Needle3's Python package sends usage telemetry unless it is switched
+      off, and its loader asks the Hugging Face Hub for a config file on every load, even with the weights cached. The
+      apps set <code>NEEDLE_TELEMETRY=0</code>,
+      <code>DO_NOT_TRACK=1</code> and <code>HF_HUB_OFFLINE=1</code> before any model loads and read only the models dir.
+      An unrelated PyPI package also installs the import name <code>needle</code>; the apps reject it.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="provenance">
+  <h2 id="provenance">Where the numbers come from</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Numbers</th><th>Result file</th><th>Script</th></tr></thead>
+    <tbody>
+      <tr><td>Index size, latency, recall@10</td><td><code>eval/results/stage1_index.json</code></td><td><code>eval/bench_index.py</code></td></tr>
+      <tr><td>Calibration, coding and de-identification results, ablations</td><td><code>eval/results/stage2_3.json</code> (per-verbatim rows in <code>coding_test_real.csv</code>, <code>coding_test_standin.csv</code>)</td><td><code>eval/run_eval.py</code></td></tr>
+      <tr><td>Worked examples on the real path, per-record latency</td><td><code>eval/results/deck_b_worked.json</code> (named for the retired Deck B)</td><td><code>eval/deck_b_worked.py</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>Measured on 2026-10-22 on one cloud container: Intel Xeon @ 2.80GHz, 4 vCPU, no GPU, 15 GB RAM, Linux 6.18,
+    Python 3.12.3, with <code>cactus-needle</code> 3.2.8 (engine 3.3.3), Laya 0.4.13 (English checkpoint
+    <code>convaiinnovations/laya</code> at commit <code>55cf4c4e</code>), hnswlib 0.8.0 (M 32, efConstruction 200, efSearch
+    64), <code>xgboost-cpu</code> 3.4.1, torch 2.14.1+cpu and transformers 5.20.2. The stand-in numbers come from the same
+    runs. Everything is seeded and CPU inference is deterministic, so a rerun on the same versions reproduces the
+    committed files. To rerun, follow
+    <a href="https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/eval/README.md">eval/README.md</a>: install the
+    pinned runtimes, build a models dir with <code>python eval/fetch_models.py --out models</code>, then:</p>
+<pre><code>python eval/make_data.py                        # regenerate eval/data/ (byte-identical)
+python eval/bench_index.py --models models      # index cost
+python eval/run_eval.py   --models models       # calibrate, train, evaluate
+python eval/deck_b_worked.py --models models    # worked examples, per-record latency
+ECRF_MODELS_DIR=models python tests/qc_test.py  # adds the RM real-path checks</code></pre>
+  <p>The long-form report, with measurement notes, is
+    <a href="https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/docs/EVALUATION.md">EVALUATION.md</a>.</p>
+</section>
+
+<section aria-labelledby="notshown">
+  <h2 id="notshown">What this does not show</h2>
+  <ul>
+    <li><strong>Real data.</strong> Accuracy on a licensed MedDRA release or on real site notes is unknown and should be
+      expected to be lower.</li>
+    <li><strong>Retrieval quality at release scale.</strong> The 86,800-term figures are index cost on random vectors.</li>
+    <li><strong>Participant risk screening and Central statistical monitoring.</strong> Neither has a trained-model path
+      or a labeled evaluation; they run labeled rule-based stand-ins (plus optional scikit-learn and POT detectors in the
+      monitoring app), checked against injected synthetic signals in the QC suite.</li>
+    <li><strong>Validation.</strong> These are evaluated prototypes, not validated systems. Reported study numbers belong
+      to the sponsor's validated, double-programmed SAS or R programs; nothing here replaces that or the medical coder's
+      and privacy reviewer's judgment.</li>
+  </ul>
+</section>
+
+</main>
+
+<footer class="site">
+  <p>Patrick Iben &middot; Apache-2.0 &middot; <a href="./">eCRF pipeline apps</a> &middot;
+    <a href="case-study.html">Case study</a> &middot;
+    <a href="https://github.com/patrickiben/ecrf-pipeline-apps">Source on GitHub</a></p>
+</footer>
+
+</div>
+</body>
+</html>
