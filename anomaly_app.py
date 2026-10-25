@@ -1,4 +1,4 @@
-# anomaly_app.py -- INDEPENDENT program: per-subject ANOMALY detection + distributional DRIFT
+# anomaly_app.py -- INDEPENDENT program: per-participant ANOMALY detection + distributional DRIFT
 # over longitudinal safety/lab/vital data, across NUMERIC and FREE-TEXT fields.
 #
 # READ THIS FIRST (for whoever maintains this file):
@@ -6,16 +6,16 @@
 #     phi_app.py and risk_app.py). They do NOT import each other and share NO module. The small
 #     helpers near the top (_have, _col, load_domains) are DELIBERATELY DUPLICATED from the
 #     siblings. Do not "refactor" them into a shared file: a shared module is a coupling point
-#     that would let a change to one head silently move another's behaviour, and each head is
+#     that would let a change to one head silently move another's behavior, and each head is
 #     validated as its own computer-system scope with its own audit trail. Duplication is the
 #     price of that independence, and it is intentional.
 #   * This program DETECTS ANOMALIES AND DRIFT ONLY -- it reads a cut folder, aligns rows to
-#     subjects by USUBJID, and emits flagged observations plus per-column / per-lab drift tables.
+#     participants by USUBJID, and emits flagged observations plus per-column / per-lab drift tables.
 #     A stray meddra*.csv is IGNORED so all four programs can share one folder without interfering.
-#   * It ships as a TRANSPARENT, LABELLED build ([SI]/real discipline): every detector runs its REAL
-#     algorithm when the runtime is installed and otherwise a labelled stand-in with the SAME output
+#   * It ships as a TRANSPARENT, LABELED build ([SI]/real discipline): every detector runs its REAL
+#     algorithm when the runtime is installed and otherwise a labeled stand-in with the SAME output
 #     columns; which path ran is recorded in the banner and every audit row -- a stand-in is never
-#     presented as the component. This is DECISION SUPPORT: it ranks and flags subjects/columns for
+#     presented as the component. This is DECISION SUPPORT: it ranks and flags participants/columns for
 #     human review; it does NOT certify data quality or make a clinical determination.
 #   * It reads CSV OR SAS .sas7bdat (SDTM/ADaM dumps) via an optional pyreadstat reader, exactly
 #     like the siblings -- install `pyreadstat` to load .sas7bdat; CSV works without it.
@@ -28,23 +28,23 @@
 # WHAT IT DOES, TIER BY TIER (the chain is the product; every decision is a row of readable
 # numbers, never a hidden weight). Three separate signals are detected with fast, scalable
 # algorithms -- there are many ways data can be anomalous:
-#   Tier 1 intake    -> load domains (CSV/SAS), align rows to subjects by USUBJID, and locate the
+#   Tier 1 intake    -> load domains (CSV/SAS), align rows to participants by USUBJID, and locate the
 #                       measurable NUMERIC columns, an OPTIONAL time/visit column, an OPTIONAL
 #                       categorical LAB/site column, and any FREE-TEXT columns. Copy values through
 #                       UNCHANGED. Missing optional columns disable that signal and are surfaced in
 #                       pre-flight, not hidden.
-#   Tier 2 numeric   -> per-subject NUMERIC outlier detection: a robust z-score (median/MAD) of each
-#                       subject's change-from-baseline against the cohort's distribution of changes is
+#   Tier 2 numeric   -> per-participant NUMERIC outlier detection: a robust z-score (median/MAD) of each
+#                       participant's change-from-baseline against the cohort's distribution of changes is
 #                       the interpretable gate; Isolation Forest (scikit-learn, REAL when installed)
-#                       corroborates it. Only FLAGGED subjects are emitted, with a discriminative score
+#                       corroborates it. Only FLAGGED participants are emitted, with a discriminative score
 #                       in [0,1] and the exact columns/z that fired.
 #   Tier 3 drift     -> per measurable column AND per LAB x column: transport distance between the
 #                       REFERENCE window (earliest timepoint) and CURRENT window (latest), Sinkhorn
-#                       optimal transport (`ot.sinkhorn2`, REAL) or a labelled 1D-Wasserstein stand-in
+#                       optimal transport (`ot.sinkhorn2`, REAL) or a labeled 1D-Wasserstein stand-in
 #                       ([SI]). Reported as a unitless drift ratio. Lab-level drift catches a site/lab
 #                       assay change that cohort-wide drift dilutes away.
 #   Tier 3b text     -> per FREE-TEXT column: retrieval-isolation of each note against the corpus of
-#                       notes in that field -- Needle3/Laya (REAL when installed) or a labelled
+#                       notes in that field -- Needle3/Laya (REAL when installed) or a labeled
 #                       bag-of-words isolation stand-in ([SI]). Only FLAGGED notes are emitted.
 #   Tier 4 categorize-> map scores/ratios to categories, write contributing factors citing WHICH
 #                       detector fired, and emit anomalies.csv + drift.csv + lab_drift.csv +
@@ -63,7 +63,7 @@ import numpy as np, pandas as pd, streamlit as st
 # --------------------------------------------------------------------------- #
 # Runtime probe. Same pattern as the siblings: test each OPTIONAL library by attempting an import
 # inside try/except WITHOUT importing at module scope, so a missing dependency never crashes the app
-# -- it only affects whether a REAL detector can run (vs its labelled [SI] stand-in).
+# -- it only affects whether a REAL detector can run (vs its labeled [SI] stand-in).
 # --------------------------------------------------------------------------- #
 def _have(m):
     try: __import__(m); return True
@@ -81,10 +81,10 @@ REAL_TEXT = False
 # BUILT-IN [SI] CRITERIA this transparent engine always uses -- declared constants, not hidden magic.
 DEFAULT_THR = {
     # --- Tier 2 numeric outlier ---
-    "ANOM_Z": 3.0,                 # robust-z magnitude that FLAGS a subject (extreme deviation)
+    "ANOM_Z": 3.0,                 # robust-z magnitude that FLAGS a participant (extreme deviation)
     "ANOM_Z_TOP": 8.0,             # z mapped to score 1.0; keeps scores discriminative in [0,1]
                                    #   (z=3 -> ~0.375 MODERATE, z=6 -> 0.75 CRITICAL) instead of every
-                                   #    flagged subject saturating at exactly 1.0
+                                   #    flagged participant saturating at exactly 1.0
     "ANOM_CAT_MODERATE": 0.25,     # anomaly-score category cuts (score in [0,1])
     "ANOM_CAT_HIGH": 0.5,
     "ANOM_CAT_CRITICAL": 0.75,
@@ -109,7 +109,7 @@ SYN = {
     "TIME": ["avisitd","avaldt","visit_date","studyday","visnum","visit_num","visitnumber",
              "avisitn","vnum","cycle","week"],
     # categorical lab/site/assay column -- enables per-lab drift (a site assay change that cohort-wide
-    # drift dilutes). Constant per subject in the demo; any grouping column works.
+    # drift dilutes). Constant per participant in the demo; any grouping column works.
     "LAB": ["lab","site","laboratory","assay_site","lab_name","center"],
     # study-id-like columns are EXCLUDED from free-text scanning (they are codes, not notes).
     "STUDY": ["studyid","study_id","studynm","studyname"],
@@ -217,7 +217,7 @@ def load_domains(folder=None, uploads=None):
 # CONSUMES: the loaded domain frames. EMITS: a single aligned long view keyed by USUBJID carrying the
 # measurable numeric columns + an optional time column + an optional LAB column + any free-text cols,
 # plus meta recording which of each were found. INVARIANT: Tier 1 NEVER rewrites a value -- it only
-# locates columns and aligns rows to subjects, so Tiers 2/3 measure against exactly what was recorded.
+# locates columns and aligns rows to participants, so Tiers 2/3 measure against exactly what was recorded.
 def _num(series):
     """Coerce a column to float, leaving unparseable cells as NaN (never a crash)."""
     return pd.to_numeric(series, errors="coerce")
@@ -236,7 +236,7 @@ def _is_text_col(df, c, exclude):
 
 def tier1_align(domains):
     """Concatenate every loaded domain into one frame indexed by USUBJID. For each domain we keep the
-    subject id, any detected time column, any LAB column, every STRICTLY-NUMERIC measurable column, and
+    participant id, any detected time column, any LAB column, every STRICTLY-NUMERIC measurable column, and
     any free-text columns (skipping the time/lab/study/id columns themselves). Duplicate domains are
     concatenated so two files both count. Returns (view, meta) where meta records which numeric + time
     + lab + text columns were found."""
@@ -244,7 +244,7 @@ def tier1_align(domains):
     timecol=None; labcol=None
     for name,df in domains.items():
         subj=_col(df,*SYN["USUBJID"])
-        if not subj: continue   # cannot align to subjects without an id column
+        if not subj: continue   # cannot align to participants without an id column
         t=_col(df,*SYN["TIME"]); l=_col(df,*SYN["LAB"])
         study=_col(df,*SYN["STUDY"])
         if t is not None and timecol is None: timecol=t
@@ -266,10 +266,10 @@ def tier1_align(domains):
     return out, meta
 
 # ============================ TIER 2 (numeric outlier) ============================
-# CONSUMES: the aligned Tier-1 view + thresholds. EMITS: per-subject READABLE numeric-outlier signals --
-# a robust z-score of each subject's change-from-baseline against the cohort's distribution of changes,
+# CONSUMES: the aligned Tier-1 view + thresholds. EMITS: per-participant READABLE numeric-outlier signals --
+# a robust z-score of each participant's change-from-baseline against the cohort's distribution of changes,
 # an aggregate anomaly score in [0,1], and (when Isolation Forest is installed) its corroborating verdict.
-# CONTRACT: Tier 2 PROPOSES and MEASURES; it decides nothing (Tier 4 categorizes). Only FLAGGED subjects
+# CONTRACT: Tier 2 PROPOSES and MEASURES; it decides nothing (Tier 4 categorizes). Only FLAGGED participants
 # are returned -- the operator does not need rows for everyone who was normal.
 def _robust_z(vals):
     """Robust z-score vs median/MAD. MAD is scaled by 1.4826 to be consistent with std for normal data;
@@ -281,23 +281,23 @@ def _robust_z(vals):
     return (vals-med)/scale
 
 def _change_matrix(view, meta):
-    """Per subject x numeric column: baseline (earliest) and current (latest) values, picked positionally
-    per subject so duplicated ids never misalign. A subject with at least one valid time value gets a real
-    baseline/current window; a subject whose rows carry NO time value -- e.g. present only in a
+    """Per participant x numeric column: baseline (earliest) and current (latest) values, picked positionally
+    per participant so duplicated ids never misalign. A participant with at least one valid time value gets a real
+    baseline/current window; a participant whose rows carry NO time value -- e.g. present only in a
     cross-sectional domain when the cut also has longitudinal files -- falls back to its first row and is
     marked tflag=False so Tier 2 scores it as a static outlier instead of dividing by an undefined change.
-    Returns (subjects, base, cur, tflag) where base/cur are {column: {subject: value}} and tflag[s] says
-    whether subject s has a usable time axis."""
+    Returns (participants, base, cur, tflag) where base/cur are {column: {participant: value}} and tflag[s] says
+    whether participant s has a usable time axis."""
     numcols=meta["numcols"]; tcol=meta["timecol"]
     has_time = tcol is not None and tcol in view.columns
-    subjects=list(dict.fromkeys(view.index))   # unique subjects, stable order
+    subjects=list(dict.fromkeys(view.index))   # unique participants, stable order
     base={c:{} for c in numcols}; cur={c:{} for c in numcols}; tflag={}
     for s in subjects:
         sub=view.loc[s]; sub=pd.DataFrame([sub]) if isinstance(sub,pd.Series) else sub
         tf=False; b=cu=sub.iloc[0:1]
         if has_time and tcol in sub.columns:
             tv=_num(sub[tcol]).to_numpy()
-            if np.isfinite(tv).any():          # at least one valid time value for this subject
+            if np.isfinite(tv).any():          # at least one valid time value for this participant
                 tf=True
                 b=sub.iloc[[int(np.nanargmin(tv))]]; cu=sub.iloc[[int(np.nanargmax(tv))]]
         tflag[s]=tf
@@ -306,8 +306,8 @@ def _change_matrix(view, meta):
     return subjects, base, cur, tflag
 
 def _if_verdict(subjects, base, cur, numcols):
-    """REAL Isolation Forest corroborator (scikit-learn). Fits IF on the subject x column change matrix
-    and returns {subject: 'confirms'|'does not confirm'} using an ADAPTIVE rule -- a subject is confirmed
+    """REAL Isolation Forest corroborator (scikit-learn). Fits IF on the participant x column change matrix
+    and returns {participant: 'confirms'|'does not confirm'} using an ADAPTIVE rule -- a participant is confirmed
     when its anomaly score beats the cohort median, so there is no magic cutoff to tune per dataset.
     Returns {} when sklearn is absent (the [SI] path simply has no IF verdict)."""
     if not REAL_IF: return {}
@@ -320,24 +320,24 @@ def _if_verdict(subjects, base, cur, numcols):
     return {s:("confirms" if v>med else "does not confirm") for s,v in zip(subjects,sc)}
 
 def tier2_signals(view, meta, thr):
-    """Per subject x numeric column: the robust z of each subject's deviation against the cohort's own
-    distribution for that column -- CHANGE-FROM-BASELINE when the subjects carrying that column have a time
+    """Per participant x numeric column: the robust z of each participant's deviation against the cohort's own
+    distribution for that column -- CHANGE-FROM-BASELINE when the participants carrying that column have a time
     axis (a uniform population shift moves everyone together -> no one is an outlier in the change
     distribution; that signal belongs to Tier-3 drift), else DEVIATION-FROM-COHORT-MEDIAN for columns whose
-    subjects are cross-sectional. An individual who deviates far beyond the typical within-column spread IS
+    participants are cross-sectional. An individual who deviates far beyond the typical within-column spread IS
     flagged here -- so anomaly and drift stay separate, honest signals. The score is min(1, max|z| / ANOM_Z_TOP)
-    so it stays discriminative in [0,1] instead of every flagged subject saturating at exactly 1.0. Only
-    subjects with max|z| >= ANOM_Z are returned."""
+    so it stays discriminative in [0,1] instead of every flagged participant saturating at exactly 1.0. Only
+    participants with max|z| >= ANOM_Z are returned."""
     numcols=meta["numcols"]
     if not numcols or len(view)==0: return pd.DataFrame()
     subjects, base, cur, tflag = _change_matrix(view, meta)
     verdict=_if_verdict(subjects, base, cur, numcols)   # {} on the [SI] path
 
     # Per column, pick the signal definition from the data itself: change-from-baseline when enough of the
-    # subjects carrying this column have a time axis; otherwise static deviation-from-cohort-median. This is
+    # participants carrying this column have a time axis; otherwise static deviation-from-cohort-median. This is
     # what lets a mixed cut (longitudinal labs + cross-sectional safety files) score each column honestly
-    # instead of crashing on an undefined baseline for a subject with no visits.
-    col_signal={}   # {column: {subject: signal_value}}
+    # instead of crashing on an undefined baseline for a participant with no visits.
+    col_signal={}   # {column: {participant: signal_value}}
     for c in numcols:
         timed={s:(cur[c][s]-base[c][s]) for s in subjects
                if tflag[s] and not pd.isna(cur[c].get(s)) and not pd.isna(base[c].get(s))}
@@ -362,7 +362,7 @@ def tier2_signals(view, meta, thr):
             mag=min(1.0, abs(z)/thr["ANOM_Z_TOP"])
             zext.append(abs(z))
             if abs(z)>=thr["ANOM_Z"]: factors.append(f"{c} Δ={sig[s]:+.2f} (z={z:+.1f})")
-        if not zext or max(zext)<thr["ANOM_Z"]: continue   # flagged-only: skip normal subjects
+        if not zext or max(zext)<thr["ANOM_Z"]: continue   # flagged-only: skip normal participants
         score=round(float(min(1.0, max(zext)/thr["ANOM_Z_TOP"])),3)
         det=["robust-z"]
         v=verdict.get(s)
@@ -374,7 +374,7 @@ def tier2_signals(view, meta, thr):
 # ============================ TIER 3 (drift) ============================
 # CONSUMES: ONLY the aligned view + thresholds. EMITS: per-column AND per-LAB x column drift -- a transport
 # distance between the reference and current windows, plus a unitless ratio. [SI]/real discipline: Sinkhorn
-# when `ot`+scipy are present, else a labelled 1D-Wasserstein stand-in with the SAME output columns. The
+# when `ot`+scipy are present, else a labeled 1D-Wasserstein stand-in with the SAME output columns. The
 # decision is a function of numbers already on screen -- no hidden feature.
 def _sinkhorn_dist(x_ref,x_cur,scale,reg_frac):
     """Real path: regularized Sinkhorn transport cost between two empirical 1-D distributions with uniform
@@ -442,8 +442,8 @@ def tier3_lab_drift(view, meta, thr):
     return pd.DataFrame(rows)
 
 def _subject_current_values(view, meta, c):
-    """Per-subject current-window value for column c (latest timepoint if a time axis exists, else the first
-    non-missing value), grouped by LAB. Returns {lab: np.array(values)}. Comparing labs at each subject's own
+    """Per-participant current-window value for column c (latest timepoint if a time axis exists, else the first
+    non-missing value), grouped by LAB. Returns {lab: np.array(values)}. Comparing labs at each participant's own
     latest visit keeps the between-lab comparison on the same footing as per-lab temporal drift."""
     tcol=meta["timecol"]; lc=meta["labcol"]
     out={}
@@ -465,7 +465,7 @@ def tier3_lab_compare(view, meta, thr):
     distribution, normalized by the reference spread. A site/lab that systematically measures differently from
     every other site shows a high ratio; sites that agree with the rest show ~0. This answers 'how different is
     this lab/site from all the others?' -- distinct from per-lab drift, which asks how much one lab moved over
-    time. [SI]/real discipline: Sinkhorn when `ot`+scipy are present, else the labelled 1D-Wasserstein stand-in."""
+    time. [SI]/real discipline: Sinkhorn when `ot`+scipy are present, else the labeled 1D-Wasserstein stand-in."""
     if not meta.get("labcol"): return pd.DataFrame()
     lc=meta["labcol"]; numcols=meta["numcols"]
     labs=sorted(view[lc].dropna().astype(str).unique())
@@ -489,13 +489,13 @@ def tier3_lab_compare(view, meta, thr):
 # ============================ TIER 3b (text outlier) ============================
 # CONSUMES: the aligned view + thresholds. EMITS: flagged FREE-TEXT observations -- notes whose content is
 # isolated from the corpus of notes in that field. [SI]/real discipline: Needle3/Laya when installed, else a
-# labelled bag-of-words retrieval-isolation stand-in with the SAME output columns. Only FLAGGED notes are
+# labeled bag-of-words retrieval-isolation stand-in with the SAME output columns. Only FLAGGED notes are
 # returned (the operator does not need every routine note).
 def _bow_isolation(texts):
     """[SI] stand-in: retrieval isolation of each document against the corpus in its field. Each note is a
     bag-of-words vector; its isolation score is 1 - (max cosine similarity to any OTHER note). Routine notes
     are near-duplicates of one another -> high max-similarity -> iso ~0; an unusual/erroneous note has no
-    close neighbour -> iso near 1. Same monotonicity in 'how unlike the rest' as a Needle3 retrieval-isolation
+    close neighbor -> iso near 1. Same monotonicity in 'how unlike the rest' as a Needle3 retrieval-isolation
     score, without needing those packages."""
     toks=[re.findall(r"[a-z0-9]+", t.lower()) for t in texts]
     docs=[{w:toks[i].count(w) for w in set(toks[i])} for i in range(len(texts))]
@@ -591,9 +591,9 @@ st.caption("Tier 1 intake → Tier 2 numeric outliers (robust-z + Isolation Fore
 if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
 _HELP_MD = """
-**What this app does.** Flags anomalous observations and distributional drift over longitudinal safety/lab/vital data, across **numeric AND free-text** fields. It emits only the FLAGGED observations (subjects whose measurements deviate far from the cohort, notes isolated from their field's corpus) plus per-column and per-lab drift tables. It ranks and flags for human review; it is **decision support, not a data-quality certification or clinical determination**.
+**What this app does.** Flags anomalous observations and distributional drift over longitudinal safety/lab/vital data, across **numeric AND free-text** fields. It emits only the FLAGGED observations (participants whose measurements deviate far from the cohort, notes isolated from their field's corpus) plus per-column and per-lab drift tables. It ranks and flags for human review; it is **decision support, not a data-quality certification or clinical determination**.
 
-**What it needs.** A cut folder (or uploads) of CSV / SAS `.sas7bdat` with a subject-id column (`USUBJID`) and one or more numeric columns to measure. Optional: a **time/visit column** (e.g. `VISITNUM`, `AVISITD`, `STUDYDAY`) enables drift; a categorical **lab/site column** (e.g. `LAB`) enables per-lab drift; any long free-text column (e.g. `LABCOM`, `AECOM`) is scanned for text outliers. Missing optional columns disable that signal and are shown in pre-flight.
+**What it needs.** A cut folder (or uploads) of CSV / SAS `.sas7bdat` with a participant ID column (`USUBJID`) and one or more numeric columns to measure. Optional: a **time/visit column** (e.g. `VISITNUM`, `AVISITD`, `STUDYDAY`) enables drift; a categorical **lab/site column** (e.g. `LAB`) enables per-lab drift; any long free-text column (e.g. `LABCOM`, `AECOM`) is scanned for text outliers. Missing optional columns disable that signal and are shown in pre-flight.
 
 ### Step by step
 1. **Point at your data** (sidebar 📂 1) — type a cut-folder path and/or upload files. Every `*.csv`/`.sas7bdat` except one named `*meddra*` loads; columns are located by content/synonym, not file name.
@@ -602,24 +602,24 @@ _HELP_MD = """
 4. **Execute** — click 🚀 Execute Anomaly & Drift Detection. Results render on screen and write to the output folder.
 
 ### How it works (`[SI]` / real) -- three separate signals, fast algorithms only
-- **Numeric outliers (Tier 2)** — per subject × column, a robust z-score of each subject's change-from-baseline against the cohort's distribution of changes is the interpretable gate; **Isolation Forest** (scikit-learn, REAL when installed) corroborates it. A subject is flagged when its worst |z| ≥ `ANOM_Z` (3). The score is `min(1, max|z| / ANOM_Z_TOP)` so it stays discriminative in [0,1] instead of every flagged subject saturating at exactly 1.0. Only flagged subjects are emitted; `extreme_columns` names the exact column(s) and z that fired, and `detectors` says which detector(s) agreed.
-- **Drift (Tier 3)** — transport distance between the reference (earliest) and current (latest) windows per measurable column: **Sinkhorn optimal transport** (`ot.sinkhorn2`, linear L1 cost regularized to the reference robust spread) when Python Optimal Transport + scipy are installed, else a labelled **1D-Wasserstein stand-in `[SI]`**. Reported as a unitless **drift ratio** (distance / reference spread). Runs cohort-wide AND per `LAB × column` (temporal drift within each lab/site), and separately **between labs/sites** — each lab's current-window distribution vs the pooled others (leave-one-out) in `lab_compare.csv`, so a site/lab assay shift that no single lab's own history reveals still stands out.
-- **Text outliers (Tier 3b)** — retrieval isolation of each note against the corpus in its field: **Needle3/Laya** when installed, else a labelled **bag-of-words isolation stand-in `[SI]`**. A routine note is a near-duplicate of others (iso ≈ 0); an unusual/erroneous note has no close neighbour (iso → 1). Only flagged notes are emitted.
+- **Numeric outliers (Tier 2)** — per participant × column, a robust z-score of each participant's change-from-baseline against the cohort's distribution of changes is the interpretable gate; **Isolation Forest** (scikit-learn, REAL when installed) corroborates it. A participant is flagged when its worst |z| ≥ `ANOM_Z` (3). The score is `min(1, max|z| / ANOM_Z_TOP)` so it stays discriminative in [0,1] instead of every flagged participant saturating at exactly 1.0. Only flagged participants are emitted; `extreme_columns` names the exact column(s) and z that fired, and `detectors` says which detector(s) agreed.
+- **Drift (Tier 3)** — transport distance between the reference (earliest) and current (latest) windows per measurable column: **Sinkhorn optimal transport** (`ot.sinkhorn2`, linear L1 cost regularized to the reference robust spread) when Python Optimal Transport + scipy are installed, else a labeled **1D-Wasserstein stand-in `[SI]`**. Reported as a unitless **drift ratio** (distance / reference spread). Runs cohort-wide AND per `LAB × column` (temporal drift within each lab/site), and separately **between labs/sites** — each lab's current-window distribution vs the pooled others (leave-one-out) in `lab_compare.csv`, so a site/lab assay shift that no single lab's own history reveals still stands out.
+- **Text outliers (Tier 3b)** — retrieval isolation of each note against the corpus in its field: **Needle3/Laya** when installed, else a labeled **bag-of-words isolation stand-in `[SI]`**. A routine note is a near-duplicate of others (iso ≈ 0); an unusual/erroneous note has no close neighbor (iso → 1). Only flagged notes are emitted.
 - Categories come from built-in `[SI]` cuts; every row carries the readable numbers that produced it.
 
 ### Reading the outputs
-- **`anomalies.csv`** — one row per FLAGGED subject: anomaly score, category, which detector(s) fired, and the extreme columns.
+- **`anomalies.csv`** — one row per FLAGGED participant: anomaly score, category, which detector(s) fired, and the extreme columns.
 - **`drift.csv`** — one row per measurable column (cohort-wide): window sizes, transport distance, drift ratio, category.
 - **`lab_drift.csv`** — one row per `LAB × column`: temporal drift within each lab/site (same shape as drift).
 - **`lab_compare.csv`** — one row per `LAB × column`: between-lab/site comparison, each lab's current-window distribution vs the pooled others (leave-one-out transport distance → ratio → category).
-- **`text_anomalies.csv`** — one row per FLAGGED note: subject, field, isolation score, category, and the note text.
+- **`text_anomalies.csv`** — one row per FLAGGED note: participant, field, isolation score, category, and the note text.
 - The on-screen tables are pre-sorted highest-risk first with a category summary.
 
 > This build is transparent by construction: which detector path ran (real vs `[SI]`) is in the banner and every audit row; weights/thresholds are declared constants written to the audit — not hidden. A real deployment can replace any tier with a trained, externally-validated model and flip that tier's banner to `[RM]`.
 
 ### Troubleshooting
 - **"No measurable columns":** your numeric columns may be stored as text — coerce them to numbers, or add their spelling to `SYN` at the top of this file.
-- **Drift shows "(off)":** no time/visit column was detected — add one (e.g. `VISITNUM`) and re-run; per-subject anomalies still work without it.
+- **Drift shows "(off)":** no time/visit column was detected — add one (e.g. `VISITNUM`) and re-run; per-participant anomalies still work without it.
 - **Per-lab drift shows "(off)":** no lab/site column was detected by synonym — rename it to `LAB` or add its spelling to `SYN["LAB"]`.
 
 ### What this build does NOT do
@@ -642,7 +642,7 @@ _use_sample = st.sidebar.checkbox("Use the bundled synthetic sample data",
     help="Fills the folder path with the synthetic demo cut shipped in ./anomaly_data/ (no real patients or licensed dictionary).")
 if HOSTED: _use_sample = True
 folder = st.sidebar.text_input("Cut folder path (CSV or SAS .sas7bdat)", value=(_SAMPLE_DIR if _use_sample else ""), disabled=HOSTED,
-    help="Path to a folder of CSV / SAS .sas7bdat files with a subject-id column and numeric columns "
+    help="Path to a folder of CSV / SAS .sas7bdat files with a participant ID column and numeric columns "
          "to measure, plus an optional time/visit column for drift, an optional lab/site column for "
          "per-lab drift, and any free-text columns to scan. Every *.csv/*.sas7bdat EXCEPT one named "
          "*meddra* loads; columns are located by content/synonym, not file name.")
@@ -706,18 +706,18 @@ else:
         st.write(f"Time/visit column → **{meta['timecol']}** · Drift → " + ("ON" if drift_on else "OFF (no time column)"))
         st.write(f"Lab/site column → **{meta['labcol']}** · Per-lab drift → " + ("ON" if lab_on else "OFF (no lab column)"))
         st.write("Free-text columns → " + (", ".join(meta["textcols"]) or "(none)") + " · Text outliers → " + ("ON" if text_on else "OFF"))
-        st.write(f"Subjects aligned → **{meta['n_subjects']}**")
+        st.write(f"Participants aligned → **{meta['n_subjects']}**")
     st.caption("This program reads ONLY the measurable numeric, lab and free-text columns above and scores them -- "
                "it flags anomalous observations for human review; it does not make a clinical determination.")
 
-# ---- Run button: disabled until at least one subject + one measurable column is aligned. ----
+# ---- Run button: disabled until at least one participant + one measurable column is aligned. ----
 n_ready = meta["n_subjects"] if (meta["numcols"]) else 0
 if not st.button("🚀 Execute Anomaly & Drift Detection", type="primary", disabled=not n_ready):
     st.stop()
 
 # ---- execute the tiers on the already-loaded frames; time the whole run for the latency figure. ----
 t0=time.perf_counter()
-sig = tier2_signals(view, meta, thr)              # Tier 2: per-subject numeric outliers (flagged-only)
+sig = tier2_signals(view, meta, thr)              # Tier 2: per-participant numeric outliers (flagged-only)
 drift = tier3_drift(view, meta, thr)              # Tier 3: cohort-wide Sinkhorn / [SI] drift per column
 lab_drift = tier3_lab_drift(view, meta, thr)      # Tier 3: per-LAB x column temporal drift
 lab_cmp = tier3_lab_compare(view, meta, thr)      # Tier 3: BETWEEN-lab/site comparison (leave-one-out)
@@ -729,11 +729,11 @@ elapsed=(time.perf_counter()-t0)*1000
 st.subheader(f"Tier 2–4 · anomalies & drift (computed from your files; {elapsed:.2f} ms)")
 if len(anom):
     shown=anom.sort_values("anomaly_score", ascending=False)
-    st.markdown("**Per-subject numeric outliers** — flagged only"); st.dataframe(shown, width="stretch")
+    st.markdown("**Per-participant numeric outliers** — flagged only"); st.dataframe(shown, width="stretch")
     dist=anom["anomaly_category"].value_counts().to_dict()
     st.caption("Anomaly categories → " + ", ".join(f"{k}: {v}" for k,v in sorted(dist.items())))
 else:
-    st.caption("No subject exceeded the anomaly threshold (max |z| ≥ ANOM_Z) — nothing flagged.")
+    st.caption("No participant exceeded the anomaly threshold (max |z| ≥ ANOM_Z) — nothing flagged.")
 if len(dcat):
     dshown=dcat.sort_values("drift_ratio", ascending=False)
     st.markdown("**Distributional drift per column** (cohort-wide)"); st.dataframe(dshown, width="stretch")

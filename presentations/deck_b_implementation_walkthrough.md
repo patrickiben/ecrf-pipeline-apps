@@ -31,7 +31,7 @@ Tier 2 indexes the MedDRA release assembled from the licensed ASCII conversions,
 | `hlgt.asc` | `hlgt_code` · `hlgt_name` · `soc_code` | 136 |
 | `soc.asc` | `soc_code` · `soc_name` | 27 |
 
-merged on `currency = 'Y'`, joined LLT→PT on `pt_code`, PT→HLT on `hlt_code`, HLT→HLGT on `hlgt_code`, HLGT→SOC on `soc_code`; each term is indexed under `llt_name + "[PT: " + pt_name + "]"`. The full chain is LLT → PT → **HLT** → **HLGT** → SOC: related preferred terms are grouped into High Level Terms by anatomy, pathology, physiology, aetiology or function; related HLTs in turn link to High Level Group Terms; and HLGTs group into System Organ Classes (by aetiology, manifestation site or purpose).
+merged on `currency = 'Y'`, joined LLT→PT on `pt_code`, PT→HLT on `hlt_code`, HLT→HLGT on `hlgt_code`, HLGT→SOC on `soc_code`; each term is indexed under `llt_name + "[PT: " + pt_name + "]"`. The full chain is LLT → PT → **HLT** → **HLGT** → SOC: related preferred terms are grouped into High Level Terms by anatomy, pathology, physiology, etiology or function; related HLTs in turn link to High Level Group Terms; and HLGTs group into System Organ Classes (by etiology, manifestation site or purpose).
 
 ### 1.1 · Tier 1 — eCRF intake
 
@@ -166,7 +166,7 @@ One non-generative pass per field returns the probability that direct identifier
 | PR | PRDSC | 1 | direct (MRN, DOB) + mosaic (initials, postcode) | 0.036 | 0.713 | 0.99 / 0.96 |
 | EG | EGCOM | 1 | nothing | 0.012 | 0.086 | 0.05 / none |
 
-The single-name rows keep `P(Quasi)` low because no indirect set co-occurs; the PR row raises it because initials and postcode appear together. That joint risk is a field-level judgement Tier 2 cannot produce — Tier 2 flagged the MRN and DOB as direct spans but said nothing about the *combination* of the indirect attributes, which is precisely Tier 3's output.
+The single-name rows keep `P(Quasi)` low because no indirect set co-occurs; the PR row raises it because initials and postcode appear together. That joint risk is a field-level judgment Tier 2 cannot produce — Tier 2 flagged the MRN and DOB as direct spans but said nothing about the *combination* of the indirect attributes, which is precisely Tier 3's output.
 
 Measured, `P(Quasi)` behaves as designed. `P(direct)` does not: it is 0.67 on AE row 1 and close to zero on AE row 2 and the PR row, though all three hold direct identifiers. That matches the held-out evaluation, where Laya's direct-identifier answer was weak and biased low (AUROC 0.69). The redactions in §2.4 are right anyway, because the trained span gate leans on Tier 2's span evidence more than on `P(direct)`.
 

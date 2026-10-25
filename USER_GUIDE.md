@@ -7,9 +7,9 @@ A step-by-step manual for running the four apps in this folder:
 - **[phi_app.py](phi_app.py)** — *PII/PHI Flagging & Redaction Engine*: finds and scrubs
   patient identifiers in free-text fields.
 - **[risk_app.py](risk_app.py)** — *Participant Safety & Discontinuation Risk Scoring*: scores each
-  subject on risk to their safety (0–100) and risk of discontinuing (0–1) from AE + lab/ECG/vitals/PE.
+  participant on risk to their safety (0–100) and risk of discontinuing (0–1) from AE + lab/ECG/vitals/PE.
 - **[anomaly_app.py](anomaly_app.py)** — *Data Anomaly & Distributional-Drift Detection*: flags
-  per-subject anomalies and measures cohort drift over time with Sinkhorn optimal transport, on
+  per-participant anomalies and measures cohort drift over time with Sinkhorn optimal transport, on
   longitudinal (per-visit) data.
 
 They are **four independent programs** that read the same cut folder without interfering (the anomaly app reads its own longitudinal demo), run entirely on your machine (air-gapped), and each write their own audit log. To try them first with nothing installed, open the in-browser versions on the bundled synthetic data (see *Try it in your browser* below). This guide covers installing, running all four apps on real data, reading the outputs, and troubleshooting. For *why* it is built this way, see [Deck A](presentations/deck_a_four_tier_pipeline.md); for a worked trace of exactly what a run produces, see [Deck B](presentations/deck_b_implementation_walkthrough.md).
@@ -44,7 +44,7 @@ installs dependencies itself, then opens the app in your browser:
 > The launchers opt out of Streamlit's first-run telemetry prompt and pin ports 8501–8504, so a
 > fresh machine goes from double-click to running app with no interactive prompts.
 
-**Optional extras (all apps still run without them):** `pip install pyreadstat` lets every app load SAS `.sas7bdat` files (SDTM/ADaM dumps) in addition to CSV; `pip install POT scipy` flips the anomaly app's drift tier from its labelled `[SI]` 1-D-Wasserstein stand-in to **real Sinkhorn optimal transport**. See [requirements.txt](requirements.txt).
+**Optional extras (all apps still run without them):** `pip install pyreadstat` lets every app load SAS `.sas7bdat` files (SDTM/ADaM dumps) in addition to CSV; `pip install POT scipy` flips the anomaly app's drift tier from its labeled `[SI]` 1-D-Wasserstein stand-in to **real Sinkhorn optimal transport**. See [requirements.txt](requirements.txt).
 
 ---
 
@@ -107,7 +107,7 @@ system.
      on the candidates.
 
    > **The hierarchy.** MedDRA groups related preferred terms into **High Level Terms (HLT)** by
-   > anatomy/pathology/physiology/aetiology/function; HLTs link to **High Level Group Terms (HLGT)**;
+   > anatomy/pathology/physiology/etiology/function; HLTs link to **High Level Group Terms (HLGT)**;
    > HLGTs group into **System Organ Classes (SOC)**. The app carries the full `LLT → PT → HLT → HLGT →
    > SOC` path on every candidate as *evidence columns*.
 
@@ -187,15 +187,15 @@ or more co-occur in the same field** — the "mosaic" rule that catches re-ident
 
 ## 5. App 3 — Participant Safety & Discontinuation Risk Scoring (`risk_app.py`)
 
-> ⚠ This app is **decision support, not a clinical determination.** It ranks and flags subjects for human
-> review; it does not diagnose, predict an outcome with validated accuracy, or replace medical judgement.
+> ⚠ This app is **decision support, not a clinical determination.** It ranks and flags participants for human
+> review; it does not diagnose, predict an outcome with validated accuracy, or replace medical judgment.
 
 ### What it needs
 - **Safety-domain CSVs** — `ae` (adverse events), `lb` (labs), `eg` (ECG/QTc), `vs` (vital signs), and/or
-  `pe` (physical exam) — each with a subject-id column (`USUBJID`). At least one is required; the rest are
+  `pe` (physical exam) — each with a participant ID column (`USUBJID`). At least one is required; the rest are
   optional but recommended. Labs/vitals carry source-system flags (`ABNORMAL`, `CLINSIG`) when present, and AEs
   carry an outcome field (`AEOUTCOME`) that backs up any fatal flag with explicit evidence. There is **no SAP or
-  protocol file** — the app scores raw data against clearly-labelled built-in criteria tagged `[SI]`.
+  protocol file** — the app scores raw data against clearly-labeled built-in criteria tagged `[SI]`.
 
 ### How files are classified (content-based)
 Each CSV is classified by its **signature columns**, not its file name — so `ae.csv`, `adverse_events.csv`, or an
@@ -210,7 +210,7 @@ app).
 2. **Set outputs** — sidebar section *⚖ 2*: output folder (default `risk_output`) and a models dir field. This build
    has no trained risk model, so leave it empty: a `risk_model.json` there stops the run rather than being ignored. There is no gate slider here — the operating point is the built-in `[SI]` criteria, recorded in
    the audit.
-3. **Confirm the input (pre-flight)** — check which domains loaded and how each classified, plus the subject count.
+3. **Confirm the input (pre-flight)** — check which domains loaded and how each classified, plus the participant count.
 4. **Execute** — click **🚀 Execute Risk Scoring**.
 
 ### How scoring works (`[SI]` transparent engine)
@@ -219,28 +219,28 @@ app).
   **fatal outcome forces CRITICAL** regardless of score — death is by definition the highest safety risk.
 - **Discontinuation score (0–1)** = serious-AE burden + relatedness fraction + max severity + fatal flag + grade≥3 labs
   + QTc/vital breaches, squashed to [0,1].
-- A fatal outcome's contributing factors cite its `AEOUTCOME=DIED` evidence, so "fatal" is backed by data rather than inferred from severity alone. Categories come from built-in `[SI]` cuts; a human-readable **contributing factors** column explains *why* each subject landed where it did.
+- A fatal outcome's contributing factors cite its `AEOUTCOME=DIED` evidence, so "fatal" is backed by data rather than inferred from severity alone. Categories come from built-in `[SI]` cuts; a human-readable **contributing factors** column explains *why* each participant landed where it did.
 
 ### Reading the results (`risk_scores.csv`)
-One row per subject: `USUBJID`, both scores + categories, and a human-readable **`contributing_factors`** string that explains *why* each subject landed where it did (including any fatal outcome with its `AEOUTCOME=DIED` evidence). The raw counts / max-severity / fatal signals are internal — they drive scoring but are not exported; read the reasoning from `contributing_factors`. Sort by `safety_risk_score` to triage. The on-screen table is pre-sorted highest-risk first (fatal subjects pinned to the top) with a category summary.
+One row per participant: `USUBJID`, both scores + categories, and a human-readable **`contributing_factors`** string that explains *why* each participant landed where it did (including any fatal outcome with its `AEOUTCOME=DIED` evidence). The raw counts / max-severity / fatal signals are internal — they drive scoring but are not exported; read the reasoning from `contributing_factors`. Sort by `safety_risk_score` to triage. The on-screen table is pre-sorted highest-risk first (fatal participants pinned to the top) with a category summary.
 
 ---
 
 ## 6. App 4 — Data Anomaly & Distributional-Drift Detection (`anomaly_app.py`)
 
-> ⚠ This app is **decision support, not a data-quality certification or clinical determination.** It ranks and flags subjects/columns for human review; it does not certify your data or make a medical judgement.
+> ⚠ This app is **decision support, not a data-quality certification or clinical determination.** It ranks and flags participants/columns for human review; it does not certify your data or make a medical judgment.
 
 ### What it needs
-- A folder (or upload) of **longitudinal** files — one row per subject per visit — with a subject-id column (`USUBJID`) and one or more numeric columns to measure. CSV or SAS `.sas7bdat`.
+- A folder (or upload) of **longitudinal** files — one row per participant per visit — with a participant ID column (`USUBJID`) and one or more numeric columns to measure. CSV or SAS `.sas7bdat`.
 - Optional signals, each surfaced in pre-flight when present: a **time/visit column** (e.g. `VISITNUM`, `AVISITD`) enables drift; a categorical **lab/site column** (e.g. `LAB`) enables per-lab drift; any long **free-text column** (e.g. `LABCOM`, `AECOM`) is scanned for text outliers. A missing optional column disables that signal and shows "OFF" in pre-flight — surfaced, not hidden.
 
 ### What it detects (three separate signals)
 There are many ways data can be anomalous, so the app runs three independent detectors with fast, scalable algorithms:
-- **Numeric outliers** — a subject whose change-from-baseline deviates far from the cohort's own distribution of changes (robust z-score, median/MAD), corroborated by **Isolation Forest**. A uniform population shift does NOT flag everyone; only individuals who jump beyond the typical within-subject change do.
+- **Numeric outliers** — a participant whose change-from-baseline deviates far from the cohort's own distribution of changes (robust z-score, median/MAD), corroborated by **Isolation Forest**. A uniform population shift does NOT flag everyone; only individuals who jump beyond the typical within-participant change do.
 - **Distributional drift** — per measurable column, how far the whole cohort's distribution moved between an early ("reference") and a late ("current") window, measured with **Sinkhorn optimal transport**. Runs cohort-wide AND per `LAB × column`, so a site/lab assay change that cohort-wide drift dilutes away still stands out.
 - **Text outliers** — free-text notes whose content is isolated from the corpus of notes in that field (retrieval isolation), catching unusual or erroneous entries no numeric check sees.
 
-Only **flagged** observations are emitted — normal subjects and routine notes do not appear in the output.
+Only **flagged** observations are emitted — normal participants and routine notes do not appear in the output.
 
 ### Step-by-step
 
@@ -250,18 +250,18 @@ Only **flagged** observations are emitted — normal subjects and routine notes 
 4. **Execute** — click **🚀 Execute Anomaly & Drift Detection**.
 
 ### How it works (`[SI]` / real)
-- **Numeric outlier score (0–1)** = `min(1, max|robust z| / ANOM_Z_TOP)` where the robust z is each subject's change-from-baseline against the cohort's distribution of changes and `ANOM_Z_TOP` defaults to 8. A subject is flagged when its worst |z| ≥ `ANOM_Z` (3). The mapping keeps scores **discriminative** in [0,1] instead of every flagged subject saturating at exactly 1.0. **Isolation Forest** (scikit-learn) corroborates each flag; the `detectors` column says which detector(s) agreed.
-- **Drift** = transport distance between the reference and current windows per measurable column: **Sinkhorn optimal transport** (`ot.sinkhorn2`, linear L1 cost regularized to the reference robust spread) when Python Optimal Transport + scipy are installed, else a labelled **1-D-Wasserstein stand-in `[SI]`**. Reported as a unitless **drift ratio** (distance / reference spread). Runs cohort-wide AND per `LAB × column` (temporal drift within each lab/site).
+- **Numeric outlier score (0–1)** = `min(1, max|robust z| / ANOM_Z_TOP)` where the robust z is each participant's change-from-baseline against the cohort's distribution of changes and `ANOM_Z_TOP` defaults to 8. A participant is flagged when its worst |z| ≥ `ANOM_Z` (3). The mapping keeps scores **discriminative** in [0,1] instead of every flagged participant saturating at exactly 1.0. **Isolation Forest** (scikit-learn) corroborates each flag; the `detectors` column says which detector(s) agreed.
+- **Drift** = transport distance between the reference and current windows per measurable column: **Sinkhorn optimal transport** (`ot.sinkhorn2`, linear L1 cost regularized to the reference robust spread) when Python Optimal Transport + scipy are installed, else a labeled **1-D-Wasserstein stand-in `[SI]`**. Reported as a unitless **drift ratio** (distance / reference spread). Runs cohort-wide AND per `LAB × column` (temporal drift within each lab/site).
 - **Between-lab/site comparison** = for each numeric column and each lab, the transport distance from that lab's current-window distribution to the POOLED-OTHERS (leave-one-out) distribution, normalized by the robust spread → a unitless `between_lab_ratio`. A site/lab that systematically measures differently from every other site shows a high ratio; sites that agree with the rest show ~0. This answers *"how different is this lab/site from all the others?"* — distinct from per-lab drift, which asks how much one lab moved over time.
-- **Text outlier score (0–1)** = retrieval isolation of each note against the corpus in its field: **Needle3/Laya** when installed, else a labelled **bag-of-words isolation stand-in `[SI]`**. A routine note is a near-duplicate of others (iso ≈ 0); an unusual/erroneous note has no close neighbour (iso → 1). Only notes at/above the flag threshold are emitted.
+- **Text outlier score (0–1)** = retrieval isolation of each note against the corpus in its field: **Needle3/Laya** when installed, else a labeled **bag-of-words isolation stand-in `[SI]`**. A routine note is a near-duplicate of others (iso ≈ 0); an unusual/erroneous note has no close neighbor (iso → 1). Only notes at/above the flag threshold are emitted.
 - Categories come from built-in `[SI]` cuts; `extreme_columns`, the drift rows, and the flagged notes explain *why* each observation landed where it did.
 
 ### Reading the results (`anomalies.csv`, `drift.csv`, `lab_drift.csv`, `lab_compare.csv`, `text_anomalies.csv`)
-- **`anomalies.csv`** — one row per FLAGGED subject: anomaly score, category, which detector(s) fired, and the extreme columns.
+- **`anomalies.csv`** — one row per FLAGGED participant: anomaly score, category, which detector(s) fired, and the extreme columns.
 - **`drift.csv`** — one row per measurable column (cohort-wide): window sizes, transport distance, drift ratio, category.
 - **`lab_drift.csv`** — one row per `LAB × column`: temporal drift within each lab/site (same shape as drift).
 - **`lab_compare.csv`** — one row per `LAB × column`: between-lab/site comparison, each lab's current-window distribution vs the pooled others (leave-one-out transport distance → ratio → category).
-- **`text_anomalies.csv`** — one row per FLAGGED note: subject, field, isolation score, category, and the note text.
+- **`text_anomalies.csv`** — one row per FLAGGED note: participant, field, isolation score, category, and the note text.
 
 The on-screen tables are pre-sorted highest first with a category summary. See [anomaly_data/README.md](anomaly_data/README.md) for the demo's injected signals and what a correct run shows.
 
@@ -269,7 +269,7 @@ The on-screen tables are pre-sorted highest first with a category summary. See [
 
 ## 7. Stand-in vs real components (`[SI]` / `[RM]`)
 
-Without trained weights installed, Tiers 2–4 run as **labelled deterministic stand-ins** — shown as `[SI]` in the mode
+Without trained weights installed, Tiers 2–4 run as **labeled deterministic stand-ins** — shown as `[SI]` in the mode
 banner and recorded per tier in every audit row:
 
 - **Coding:** lexical retrieval (a hashing bag-of-words + cosine). It is honest about being lexical — semantically-gapped
@@ -280,9 +280,9 @@ banner and recorded per tier in every audit row:
   audit — not hidden. A real deployment replaces Tier 3 with a trained, externally-validated survival/risk model and flips
   the banner to `[RM]`.
 - **Anomaly & drift:** numeric outliers use a robust z-score (median/MAD) as the interpretable gate, corroborated by
-  **Isolation Forest** — install `scikit-learn` and that detector runs for real. Drift uses a labelled **1-D-Wasserstein stand-in**
+  **Isolation Forest** — install `scikit-learn` and that detector runs for real. Drift uses a labeled **1-D-Wasserstein stand-in**
   by default; install `POT` + `scipy` and it becomes **real Sinkhorn optimal transport** (`ot.sinkhorn2`). Text outliers use a
-  labelled **bag-of-words isolation stand-in**; this build has no real text-isolation model, so that tier stays `[SI]`
+  labeled **bag-of-words isolation stand-in**; this build has no real text-isolation model, so that tier stays `[SI]`
   whatever is installed. The other two flip their tier to REAL with identical output columns.
 
 **Coding and PHI: the real path.** Install the pinned real runtimes (Cactus Needle3, `hnswlib`, Laya, XGBoost), build a
@@ -309,13 +309,13 @@ and anomaly apps have no trained-model path; a model file in their models dir st
 | PHI | `phi_flags.csv` | One row per scrubbed span (field, entity, offsets, confidence, action). |
 | PHI | `sanitized/<domain>.csv` | Original columns + `SAN_<field>` + `<field>_PHI_FLAG`. |
 | PHI | `audit_log.csv` | Files read, selected columns, discovery mode, per-tier path, gate, tag scheme, latency. |
-| Risk | `risk_scores.csv` | One row per subject: both scores + categories and a human-readable contributing-factors string (counts/severity/fatal are internal signals, not exported). |
+| Risk | `risk_scores.csv` | One row per participant: both scores + categories and a human-readable contributing-factors string (counts/severity/fatal are internal signals, not exported). |
 | Risk | `audit_log.csv` | Files/classifications read, criteria source (`[SI]`) + every threshold in force, path (`[SI]`/`[RM]`), category distribution, latency. |
-| Anomaly | `anomalies.csv` | One row per FLAGGED subject: anomaly score, category, which detector(s) fired, extreme columns. |
+| Anomaly | `anomalies.csv` | One row per FLAGGED participant: anomaly score, category, which detector(s) fired, extreme columns. |
 | Anomaly | `drift.csv` | One row per measurable column (cohort-wide): window sizes, transport distance, drift ratio, category. |
 | Anomaly | `lab_drift.csv` | One row per `LAB × column`: temporal drift within each lab/site (same shape as drift). |
 | Anomaly | `lab_compare.csv` | One row per `LAB × column`: between-lab/site comparison, each lab vs the pooled others (leave-one-out transport distance → ratio → category). |
-| Anomaly | `text_anomalies.csv` | One row per FLAGGED note: subject, field, isolation score, category, note text. |
+| Anomaly | `text_anomalies.csv` | One row per FLAGGED note: participant, field, isolation score, category, note text. |
 | Anomaly | `audit_log.csv` | Files read, measurable + time + lab + free-text columns, numeric/drift/text paths (`[SI]`/real), every threshold in force, distributions, latency. |
 
 Each audit log records the **contract** (which files/columns), the **per-tier path** that ran (REAL or `[SI]`), and every
@@ -336,11 +336,11 @@ in their own output folders; they share no module.
   field. If you know that column is safe, deselect it in the pre-flight multiselect and re-run; review any flags before trusting
   a scrub.
 - **"No safety domains loaded" (risk app):** point at a folder with at least one of `ae`/`lb`/`eg`/`vs`/`pe`, or upload files. A
-  file is only scored if it has a subject-id column (`USUBJID`).
+  file is only scored if it has a participant ID column (`USUBJID`).
 - **A domain shows as unrecognized (risk app):** its columns don't match the synonyms — rename them (e.g. severity → `AESEV`) or
   add the spelling to `SYN` at the top of `risk_app.py`.
 - **"No measurable columns" / drift shows OFF (anomaly app):** your numeric columns may be stored as text (coerce them), and/or no
-  time/visit column was detected — add one (e.g. `VISITNUM`) to enable drift; per-subject anomalies still run without it. Add an
+  time/visit column was detected — add one (e.g. `VISITNUM`) to enable drift; per-participant anomalies still run without it. Add an
   unusual header spelling to `SYN` at the top of `anomaly_app.py`.
 - **Blank cells:** missing values stay missing through all four apps (never `"nan"`), so an empty field correctly reports flag `N` /
   no code rather than scanning silently clean.
@@ -352,7 +352,7 @@ in their own output folders; they share no module.
 No scanned-document / bounding-box path (input is tabular eCRF), no negation feature, no clinical variable derivation — and nothing
 leaves the machine. The PHI output is compliance-*enabling*, not a certification; that remains an organizational determination. **The
 risk app is decision support only** — it does not make a clinical determination and scores raw data against built-in `[SI]` criteria
-rather than parsing free-text PDF/Word protocols or SAPs. **The anomaly app is decision support too** — it ranks and flags subjects/columns for human review but does not certify data quality, make a clinical determination, or replace a validated anomaly model (install `POT` + `scipy` to run real Sinkhorn drift; the default `[SI]` path is a labelled 1-D-Wasserstein stand-in). See [Deck A](presentations/deck_a_four_tier_pipeline.md) for the full governance and limits section.
+rather than parsing free-text PDF/Word protocols or SAPs. **The anomaly app is decision support too** — it ranks and flags participants/columns for human review but does not certify data quality, make a clinical determination, or replace a validated anomaly model (install `POT` + `scipy` to run real Sinkhorn drift; the default `[SI]` path is a labeled 1-D-Wasserstein stand-in). See [Deck A](presentations/deck_a_four_tier_pipeline.md) for the full governance and limits section.
 
 ---
 

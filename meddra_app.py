@@ -6,7 +6,7 @@
 #     this header (_have, _col, load_domains) are DELIBERATELY DUPLICATED in
 #     phi_app.py. Do not "refactor" them into a shared pipeline.py: a shared
 #     module is a coupling point that would let a retrain of one head silently
-#     change the other's behaviour, and the two heads are validated as separate
+#     change the other's behavior, and the two heads are validated as separate
 #     computer-system scopes with separate audit trails. Duplication is the
 #     price of that independence, and it is intentional.
 #   * This program codes verbatims ONLY. It never opens a free-text comment
@@ -25,7 +25,7 @@
 #
 # WHAT IT DOES, TIER BY TIER (the chain is the product; the weights are
 # swappable underneath it -- see the [SI]/[RM] discipline in the banner/audit):
-#   Tier 1 intake   -> align rows to subjects; copy the verbatim through
+#   Tier 1 intake   -> align rows to participants; copy the verbatim through
 #                      UNCHANGED (Tier 2 must measure closeness to what the site
 #                      actually typed, so rewriting here would corrupt it).
 #   Tier 2 Needle3  -> embed the verbatim to a UNIT vector (Cactus Needle3:
@@ -248,8 +248,8 @@ def ingest_meddra(source_kind, source_ref, _key=None):
                    HLGT->SOC on soc_code.
     The full MedDRA chain is LLT -> PT -> HLT -> HLGT -> SOC: related preferred
     terms are grouped into High Level Terms by anatomy, pathology, physiology,
-    aetiology or function; related HLTs in turn link to High Level Group Terms;
-    and HLGTs group into System Organ Classes (by aetiology, manifestation site
+    etiology or function; related HLTs in turn link to High Level Group Terms;
+    and HLGTs group into System Organ Classes (by etiology, manifestation site
     or purpose). HLT/HLGT ride along on every candidate as EVIDENCE columns --
     they are never scored by Tier 4 and are not SDTM write-back fields (the
     write-back stays AEDECOD/AEPTCD/AESOC).
@@ -449,7 +449,7 @@ def collect_verbatims(domains, domain, col):
     through (USUBJID + AESEQ if present and non-missing, else ID, else the 1-based
     row number) so ae_coded.csv is joinable back to the source. Blank/NaN
     verbatims are dropped -- there is nothing to code, and an empty string would
-    retrieve a meaningless nearest neighbour. NOTE: `domain`/`col` arrive from
+    retrieve a meaningless nearest neighbor. NOTE: `domain`/`col` arrive from
     splitting the selectbox option string; the option format here ('{d} :: {c}')
     and the split separator in the UI MUST match, or this unpacks wrong -- see
     the UI section comment."""
@@ -859,7 +859,7 @@ _HELP_MD = """
 5. **Execute** — click 🚀 Execute MedDRA Auto-Coding. Results render on screen and write to the output folder (default `meddra_output`).
 
 ### The hierarchy
-MedDRA groups related preferred terms into **High Level Terms (HLT)** by anatomy/pathology/physiology/aetiology/function; HLTs link to **High Level Group Terms (HLGT)**; HLGTs group into **System Organ Classes (SOC)**. Every candidate carries the full `LLT → PT → HLT → HLGT → SOC` path as evidence columns.
+MedDRA groups related preferred terms into **High Level Terms (HLT)** by anatomy/pathology/physiology/etiology/function; HLTs link to **High Level Group Terms (HLGT)**; HLGTs group into **System Organ Classes (SOC)**. Every candidate carries the full `LLT → PT → HLT → HLGT → SOC` path as evidence columns.
 
 ### Reading ae_coded.csv
 One row per candidate (top-3), so a coder sees the whole pre-populated list, not just the winner.
@@ -877,7 +877,7 @@ One row per candidate (top-3), so a coder sees the whole pre-populated list, not
 > A **name-only dictionary** (no PT codes) forces every verbatim to route to a human — an `AEPTCD` without a number is not submission-grade. The pre-flight panel warns you up front.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
-Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
+Without trained weights, Tiers 2–4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
 ### Troubleshooting
 - **"No MedDRA source found":** provide exactly one dictionary shape (upload CSV / set the .asc folder / name it `meddra*.csv` in the cut folder).

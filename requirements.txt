@@ -19,11 +19,11 @@ streamlit>=1.49    # all four apps (floor: oldest release accepting st.dataframe
 #   pip install pyreadstat
 
 # Optional — real Sinkhorn optimal-transport drift for anomaly_app.py (Tier 3). Without these it runs a
-# labelled [SI] 1-D-Wasserstein stand-in with identical output columns. Install to flip that tier REAL:
+# labeled [SI] 1-D-Wasserstein stand-in with identical output columns. Install to flip that tier REAL:
 #   pip install POT scipy
 
 # Optional — real Isolation-Forest numeric-outlier corroborator for anomaly_app.py (Tier 2). Without it the
-# tier runs its labelled [SI] robust-z gate alone; install to add the REAL detector and flip the banner:
+# tier runs its labeled [SI] robust-z gate alone; install to add the REAL detector and flip the banner:
 #   pip install scikit-learn
 
 # Note: anomaly_app.py's text-outlier tier (Tier 3b) has no real Needle3/Laya path wired yet; it always runs its labeled

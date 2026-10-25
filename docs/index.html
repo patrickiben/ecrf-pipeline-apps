@@ -159,8 +159,8 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <p>Every app runs the same discipline: four tiers in sequence, each handing named, readable columns to the next, so
     a decision is a row of numbers a reviewer can inspect and its threshold is a parameter a reviewer can move.</p>
   <ol class="tiers">
-    <li><strong>Tier 1, intake.</strong> Aligns each row to its subject, copies every value through unchanged (missing stays missing) and locates the columns to read by content.</li>
-    <li><strong>Tier 2, retrieval and extraction.</strong> Proposes and measures: candidate dictionary terms, typed identifier spans, or per-subject signals. It decides nothing.</li>
+    <li><strong>Tier 1, intake.</strong> Aligns each row to its participant, copies every value through unchanged (missing stays missing) and locates the columns to read by content.</li>
+    <li><strong>Tier 2, retrieval and extraction.</strong> Proposes and measures: candidate dictionary terms, typed identifier spans, or per-participant signals. It decides nothing.</li>
     <li><strong>Tier 3, context and calibration.</strong> Adds calibrated probabilities, an ambiguity score, aggregate risk scores or drift distances.</li>
     <li><strong>Tier 4, decision.</strong> Applies an explicit rule to the earlier tiers' columns only: the auto-commit gate (default 0.88), the redaction gate (default 0.85), or the risk and anomaly categories.</li>
   </ol>
@@ -191,12 +191,12 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   </figure>
   <figure>
     <a href="img/risk_results.png"><img src="img/risk_results.png" width="1440" height="960" loading="lazy"
-         alt="Risk app results: per-subject safety and discontinuation scores and categories with contributing factors, the fatal subject pinned to the top, and a category summary."></a>
-    <figcaption>Risk app: per-subject safety and discontinuation scores, sorted highest risk first, with the reasons for each.</figcaption>
+         alt="Risk app results: per-participant safety and discontinuation scores and categories with contributing factors, the fatal participant pinned to the top, and a category summary."></a>
+    <figcaption>Risk app: per-participant safety and discontinuation scores, sorted highest risk first, with the reasons for each.</figcaption>
   </figure>
   <figure>
     <a href="img/anomaly_results.png"><img src="img/anomaly_results.png" width="1440" height="960" loading="lazy"
-         alt="Anomaly app results: flagged per-subject numeric outliers with their extreme columns, a cohort-wide drift table per column, and the start of the per-lab drift table."></a>
+         alt="Anomaly app results: flagged per-participant numeric outliers with their extreme columns, a cohort-wide drift table per column, and the start of the per-lab drift table."></a>
     <figcaption>Anomaly app: flagged numeric outliers, cohort-wide drift per column and per-lab drift on the longitudinal demo.</figcaption>
   </figure>
 </section>

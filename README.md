@@ -16,7 +16,7 @@ Four independent Streamlit apps that run on local, air-gapped hardware and read 
 | [anomaly_app.py](anomaly_app.py) — *Anomaly & Drift Detection* | measurable numeric columns + optional time/visit, lab/site and free-text columns, aligned by `USUBJID` | longitudinal CSVs/SAS only — **no dictionary**; scores against built-in `[SI]` criteria | `anomalies.csv`, `drift.csv`, `lab_drift.csv`, `lab_compare.csv`, `text_anomalies.csv`, `audit_log.csv` |
 
 Each app writes its own audit log with the files it read, the per-tier path that ran (REAL or
-labelled stand-in `[SI]`), and every effective threshold — so a run is reproducible from its audit
+labeled stand-in `[SI]`), and every effective threshold — so a run is reproducible from its audit
 alone. The four programs share no module on purpose; see the header comment in each file before
 editing.
 
@@ -44,12 +44,12 @@ run_anomaly.bat
 ```
 
 The scripts create a `.venv` on first run and install dependencies themselves. Then, in each app's
-sidebar: set **Cut folder path** to [`sample_data/`](sample_data/) — the one synthetic cut the coding, PHI and risk apps read (the worked scenario from [Deck B](presentations/deck_b_implementation_walkthrough.md), plus a larger bulk set of subjects) — or to [`anomaly_data/`](anomaly_data/) for the anomaly app. Confirm the pre-flight panel, then click **Execute**. See each folder's README for exactly what a run should show.
+sidebar: set **Cut folder path** to [`sample_data/`](sample_data/) — the one synthetic cut the coding, PHI and risk apps read (the worked scenario from [Deck B](presentations/deck_b_implementation_walkthrough.md), plus a larger bulk set of participants) — or to [`anomaly_data/`](anomaly_data/) for the anomaly app. Confirm the pre-flight panel, then click **Execute**. See each folder's README for exactly what a run should show.
 
 All apps accept **CSV or SAS `.sas7bdat`** (SDTM/ADaM dumps). CSV works out of the box; to load
 `.sas7bdat`, install `pyreadstat` (`pip install pyreadstat`). The anomaly app's real detectors are opt-in:
 `POT` + `scipy` flip drift to **real Sinkhorn optimal transport**, and `scikit-learn` adds a real
-**Isolation Forest** numeric-outlier corroborator; without them it runs labelled `[SI]` stand-ins with
+**Isolation Forest** numeric-outlier corroborator; without them it runs labeled `[SI]` stand-ins with
 identical output columns.
 
 Manual equivalent: `pip install -r requirements.txt && streamlit run <app>.py`.
@@ -96,11 +96,11 @@ Local runs on the bundled synthetic data, opened with `?demo=1` and captured aft
 
 *PHI app: one row per scrubbed span; every name and number shown is invented.*
 
-![Risk app results: per-subject safety and discontinuation scores and categories with contributing factors, the fatal subject pinned to the top](docs/img/risk_results.png)
+![Risk app results: per-participant safety and discontinuation scores and categories with contributing factors, the fatal participant pinned to the top](docs/img/risk_results.png)
 
-*Risk app: per-subject safety and discontinuation scores, sorted highest risk first, with the reasons for each.*
+*Risk app: per-participant safety and discontinuation scores, sorted highest risk first, with the reasons for each.*
 
-![Anomaly app results: flagged per-subject numeric outliers, cohort-wide drift per column, and per-lab drift](docs/img/anomaly_results.png)
+![Anomaly app results: flagged per-participant numeric outliers, cohort-wide drift per column, and per-lab drift](docs/img/anomaly_results.png)
 
 *Anomaly app: flagged numeric outliers, cohort-wide drift per column and per-lab drift on the longitudinal demo.*
 
@@ -121,10 +121,10 @@ Local runs on the bundled synthetic data, opened with `?demo=1` and captured aft
    touched). No rule editing needed.
 4. **Risk app:** point at a folder with your safety domains (`ae`/`lb`/`eg`/`vs`/`pe`). Each file is
    classified by its *content* (signature columns), not its name, so oddly-named dumps work. No SAP or
-   protocol file is needed — the app scores raw data against clearly-labelled built-in criteria tagged
+   protocol file is needed — the app scores raw data against clearly-labeled built-in criteria tagged
    `[SI]`, and records that source in the audit.
-5. **Anomaly app:** point at a folder of longitudinal files (one row per subject per visit) with a
-   subject-id column (`USUBJID`) and one or more numeric columns to measure. Optional signals are detected
+5. **Anomaly app:** point at a folder of longitudinal files (one row per participant per visit) with a
+   participant ID column (`USUBJID`) and one or more numeric columns to measure. Optional signals are detected
    by content/synonym and surfaced in pre-flight: a time/visit column (e.g. `VISITNUM`, `AVISITD`) enables
    drift, a categorical lab/site column (e.g. `LAB`) enables per-lab drift AND between-lab/site comparison,
    and any long free-text column
@@ -134,11 +134,11 @@ Local runs on the bundled synthetic data, opened with `?demo=1` and captured aft
 
 ## Stand-in vs real components
 
-Without the trained weights installed, Tiers 2–4 run as **labelled deterministic stand-ins** (`[SI]`
+Without the trained weights installed, Tiers 2–4 run as **labeled deterministic stand-ins** (`[SI]`
 in the banner and audit): lexical retrieval for coding, guarded regexes for PHI spans, rule-based
-probabilities, a transparent weighted rule engine for risk scoring, and — for the anomaly app — a robust-z numeric gate, a labelled 1-D-Wasserstein drift stand-in, and a
+probabilities, a transparent weighted rule engine for risk scoring, and — for the anomaly app — a robust-z numeric gate, a labeled 1-D-Wasserstein drift stand-in, and a
 bag-of-words text-isolation stand-in. The PHI stand-in reproduces its worked trace exactly; the coding
-stand-in is honest about being lexical — semantically-gapped verbatims flag to a human coder rather than auto-code. The anomaly app's drift path becomes **real Sinkhorn optimal transport** (`ot.sinkhorn2`) with `POT` + `scipy`, and its numeric-outlier corroborator becomes real **Isolation Forest** with `scikit-learn`; its text detector has no real model path and stays a labelled stand-in.
+stand-in is honest about being lexical — semantically-gapped verbatims flag to a human coder rather than auto-code. The anomaly app's drift path becomes **real Sinkhorn optimal transport** (`ot.sinkhorn2`) with `POT` + `scipy`, and its numeric-outlier corroborator becomes real **Isolation Forest** with `scikit-learn`; its text detector has no real model path and stays a labeled stand-in.
 
 **The real model path (coding and PHI apps).** With the open-source runtimes installed (Cactus Needle3, hnswlib, Laya, XGBoost) and a **models dir** holding their weights and the trained gates, the coding and PHI apps run their real Tiers 2 to 4, air-gapped. [`eval/README.md`](eval/README.md) says how to install the pinned runtimes and build the models dir (`python eval/fetch_models.py --out models`), and [`docs/EVALUATION.md`](docs/EVALUATION.md) has what was measured, on synthetic data only: the real coding path reached the right preferred term at rank 1 for 78% of held-out verbatims against 54% for the stand-in and auto-coded 38% with no error, and the real PHI path left 91 of 308 held-out identifiers readable against 108 for the stand-in. A tier shows REAL only when its artifact loads; an artifact that is present but cannot be loaded, or a trained gate whose inputs are missing, **stops** the run rather than silently substituting a stand-in. The risk app has no trained-model path: a model file in its models dir stops the run.
 
@@ -148,7 +148,7 @@ No scanned-document / bounding-box path (input is tabular eCRF), no negation fea
 variable derivation, and nothing leaves the machine (in the browser build, nothing you load is uploaded
 by the app). The PHI output is compliance-*enabling*, not a
 certification; that remains an organizational determination. **The risk app is decision support — it
-ranks and flags subjects for human review but does NOT make a clinical determination**, and it scores
+ranks and flags participants for human review but does NOT make a clinical determination**, and it scores
 raw data against built-in `[SI]` criteria rather than parsing free-text PDF/Word protocols or SAPs. See
 [Deck A](presentations/deck_a_four_tier_pipeline.md) for the full governance and limits section.
 

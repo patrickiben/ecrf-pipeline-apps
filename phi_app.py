@@ -6,7 +6,7 @@
 #     NOT import each other and share NO module. The helpers _have/_col/
 #     load_domains are DELIBERATELY DUPLICATED from meddra_app.py. Do not factor
 #     them into a shared module: a shared module is a coupling point that would
-#     let a retrain of one head silently change the other's behaviour, and the
+#     let a retrain of one head silently change the other's behavior, and the
 #     two heads are validated as separate computer-system scopes with separate
 #     audit trails. Duplication is intentional.
 #   * This program scrubs free text ONLY. It never codes a verbatim and never
@@ -235,7 +235,7 @@ def discover_scan_cols(df):
 #           between DIRECT and INDIRECT classes is the load-bearing design:
 #           a DIRECT span scrubs on its own merit; an INDIRECT span scrubs ONLY
 #           when Tier 3 says the field's JOINT re-identification risk is high.
-#           That judgement is Tier 3's, never Tier 2's -- which is exactly why
+#           That judgment is Tier 3's, never Tier 2's -- which is exactly why
 #           the two are separate tiers.
 DIRECT={"PERSON_NAME","PHONE","EMAIL","MRN","DOB","ADDRESS","SSN"}
 INDIRECT={"AGE","RARE_CONDITION","ZIP","INITIALS"}
@@ -351,7 +351,7 @@ def t2_phi(text):
 # CONTRACT: Tier 3 is its own hop because span localization (Tier 2) cannot see
 #           JOINT risk: initials + a postcode + a rare condition are each harmless
 #           alone and none is a DIRECT span, yet together they re-identify. That
-#           is a field-level judgement and must come back as its own number so
+#           is a field-level judgment and must come back as its own number so
 #           Tier 4 can weigh it explicitly rather than as a hidden weight.
 # ONE local English checkpoint, loaded once per process by load_real (not Laya's
 # Router, which sends short English text to the uncalibrated multilingual model).
@@ -595,7 +595,7 @@ A *direct* identifier (name, phone, MRN, DOB, address, SSN) scrubs on its own me
 - **`sanitized/<domain>.csv`** — a copy of each scanned domain carrying the original columns plus `SAN_<field>` (scrubbed text) and `<field>_PHI_FLAG` (`Y` if that cell changed, else `N`). Missing values stay missing — never `"nan"`.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
-Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[SI]` in the banner and audit): guarded regexes for spans + rule-based probabilities. It reproduces its worked trace exactly because identifier detection is pattern-shaped and the scrub is a string replace. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
+Without trained weights, Tiers 2–4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): guarded regexes for spans + rule-based probabilities. It reproduces its worked trace exactly because identifier detection is pattern-shaped and the scrub is a string replace. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
 ### Troubleshooting
 - **A date / ID column got flagged:** that is content-based discovery working as designed — it scans every non-numeric field. If you know that column is safe, deselect it in step 4 and re-run; review any flags before trusting a scrub.

@@ -239,7 +239,7 @@ san = next((df for df in pdfs if "SAN_AECOM" in getattr(df,"columns",[])), None)
 check("P9 sanitized ae frame present", san is not None)
 if san is not None:
     # Key the worked rows by USUBJID+AESEQ (not iloc) so they stay correct now that ae.csv
-    # has 155 rows with the bulk subjects appended after the six worked rows.
+    # has 155 rows with the bulk participants appended after the six worked rows.
     def arow(subj,seq): return san[(san["USUBJID"].astype(str)==subj)&(san["AESEQ"]==seq)].iloc[0]
     row1 = arow("SUBJ-3092",1)["SAN_AECOM"]
     check("P10 AE row1 scrubbed exactly", row1=="CRC Note: Patient [REDACTED_PATIENT_NAME] called site cell phone [REDACTED_PHONE] at 10:15 AM.", row1)
@@ -289,7 +289,7 @@ if res is not None:
     # the audit must record that source (verified via the audit log).
     aud = pd.read_csv(os.path.join(outr1,"audit_log.csv"))
     check("R6b criteria source recorded as [SI] built-in defaults", "[SI] built-in defaults" in str(aud.iloc[0]["criteria_source"]), str(aud.iloc[0]["criteria_source"]))
-    # valid ranges for every subject
+    # valid ranges for every participant
     check("R7 safety scores in [0,100]", res["safety_risk_score"].between(0,100).all(), "")
     check("R8 disc scores in [0,1]", res["discontinuation_risk_score"].between(0,1).all(), "")
     # all four safety categories present across the bulk cut
@@ -304,10 +304,10 @@ if res is not None:
     # A life-threatening SEVERITY that did NOT result in death must NOT be called fatal. The `fatal`
     # column is no longer exported; the evidence lives in contributing_factors, which must lack it.
     check("R10d life-threatening-but-survived SUBJ-9001 is not fatal", "Fatal outcome" not in str(subj("SUBJ-9001").iloc[0]["contributing_factors"]), str(subj("SUBJ-9001").iloc[0]["contributing_factors"]))
-    # A fatal outcome must rank at/above EVERY non-fatal subject (death outranks any comorbidity load).
+    # A fatal outcome must rank at/above EVERY non-fatal participant (death outranks any comorbidity load).
     _f = subj("SUBJ-9015").iloc[0]
     _nf_max = res[res["USUBJID"].astype(str)!="SUBJ-9015"]["safety_risk_score"].max()
-    check("R10c fatal ranks at/above every non-fatal subject", _f["safety_category"]=="CRITICAL" and _f["safety_risk_score"]>=_nf_max, f"fatal={_f['safety_risk_score']} vs max_nonfatal={_nf_max}")
+    check("R10c fatal ranks at/above every non-fatal participant", _f["safety_category"]=="CRITICAL" and _f["safety_risk_score"]>=_nf_max, f"fatal={_f['safety_risk_score']} vs max_nonfatal={_nf_max}")
     check("R11 multi-system SUBJ-9001 -> CRITICAL", subj("SUBJ-9001").iloc[0]["safety_category"]=="CRITICAL", "")
     check("R12 severe-AE SUBJ-9002 -> HIGH", subj("SUBJ-9002").iloc[0]["safety_category"]=="HIGH", "")
     # lab-driven: SUBJ-9013's dominant signal is an ALT breach
@@ -346,9 +346,9 @@ check("R18b pre-flight explains WHY the file is unrecognized",
 # ---------------------------------------------------------------- anomaly app (A-checks)
 # The anomaly/drift app reads its OWN longitudinal demo cut (anomaly_data/labs.csv), because drift needs a
 # time axis the cross-sectional shared cut lacks. We verify end-to-end: load, execute, and assert the
-# injected signals are caught -- ALT is THE drift column (cohort trend) and the three injected per-subject
+# injected signals are caught -- ALT is THE drift column (cohort trend) and the three injected per-participant
 # outliers rank at/near the top of anomalies. Conditional on `ot`+scipy like the SAS checks: with Python
-# Optimal Transport installed we exercise the REAL Sinkhorn path; otherwise the labelled [SI] Wasserstein
+# Optimal Transport installed we exercise the REAL Sinkhorn path; otherwise the labeled [SI] Wasserstein
 # stand-in runs (same output columns, same ordering) and A6 confirms the audit records which path ran.
 try:
     import ot as _ot; HAVE_OT=True
@@ -394,8 +394,8 @@ if anomf is not None:
     inj = {"SUBJ-A003","SUBJ-A017","SUBJ-A029"}
     top6 = set(anomf.sort_values("anomaly_score",ascending=False).head(6)["USUBJID"])
     check("A8 all 3 injected outliers in top-6 anomalies", inj <= top6, sorted(inj & top6))
-    # flagged-only: every emitted subject is at least MODERATE (no LOW rows leak into the output)
-    check("A8b flagged-only output (no LOW-category subjects emitted)", int((anomf["anomaly_category"]=="LOW").sum())==0, sorted(set(anomf["anomaly_category"])))
+    # flagged-only: every emitted participant is at least MODERATE (no LOW rows leak into the output)
+    check("A8b flagged-only output (no LOW-category participants emitted)", int((anomf["anomaly_category"]=="LOW").sum())==0, sorted(set(anomf["anomaly_category"])))
     if HAVE_SKLEARN:
         check("A16 numeric outliers cite the IsolationForest detector", anomf["detectors"].astype(str).str.contains("IsolationForest").all(), list(anomf["detectors"]))
 if driftf is not None:
@@ -432,7 +432,7 @@ check("A11 deterministic across runs", len(_cmp)>=2 and all(sha(os.path.join(out
 
 # ---------------------------------------------------------------- anomaly app (mixed-upload regression, A19-A20)
 # Regression: uploading the LONGITUDINAL labs.csv together with CROSS-SECTIONAL safety files used to crash
-# (_change_matrix -> nanargmin on an all-NaN time slice for subjects present only in a domain without VISITNUM).
+# (_change_matrix -> nanargmin on an all-NaN time slice for participants present only in a domain without VISITNUM).
 # Build a temp cut mixing both shapes, run end-to-end, and assert NO exception AND that the 3 injected numeric
 # outliers are still flagged (the longitudinal signal must survive alongside cross-sectional files).
 mixed = os.path.join(SCRATCH, "anom_mixed"); shutil.rmtree(mixed, ignore_errors=True); os.makedirs(mixed)
