@@ -137,7 +137,8 @@ _HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a s
 # In-browser build (stlite on Pyodide, served from docs/app/ on GitHub Pages): sys.platform is
 # "emscripten" there and nowhere else. The flag only rewords text that would be wrong in a browser
 # tab ("runs locally, no network calls", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
-# help); a local run is unchanged.
+# help) and keeps the page's "<app name>: in-browser demo" tab title once the app starts; a local run is
+# unchanged.
 IN_BROWSER = sys.platform == "emscripten"
 RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "runs locally, no network calls"
 OUT_HELP_BROWSER = ("In this in-browser build the folder lives in the tab's memory, not on your disk, and is "
@@ -560,7 +561,7 @@ def _contract_error(R):
 # panel, then Run. The operator confirms which columns will be scanned/scrubbed
 # BEFORE compute, so a column that should not be touched (or one the operator wants
 # excluded) is caught on screen and deselected there.
-st.set_page_config(page_title="De-identification review assist", layout="wide")
+st.set_page_config(page_title="De-identification review assist" + (": in-browser demo" if IN_BROWSER else ""), layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
@@ -726,7 +727,7 @@ st.info("**Mode banner:** "+banner+" · a [SI] stand-in is never the component; 
 # ---- pre-flight CONTRACT panel: show what loaded + what the rule caught, before
 #      any compute. Fixes belong in the sidebar (rule inputs / multiselect), not
 #      in the code. ----
-st.subheader("📋 Input contract (pre-flight)")
+st.header("📋 Input contract (pre-flight)")
 if load_err: st.error(f"Import failed: {load_err}")
 elif not domains: st.warning("No domain CSVs loaded yet. Set the folder path or upload files.")
 else:
@@ -800,7 +801,7 @@ elapsed=(time.perf_counter()-t0)*1000
 
 # ---- results: the flag table + the sanitized domain rows (original columns +
 #      SAN_<field> + <field>_PHI_FLAG), computed from the operator's files. ----
-st.subheader(f"Tiers 2 to 4 · results (computed from your files; {elapsed:.2f} ms)")
+st.header(f"Tiers 2 to 4 · results (computed from your files; {elapsed:.2f} ms)")
 if phi_rows:
     st.markdown("**PHI flags**: one row per scrubbed span")
     st.dataframe(pd.DataFrame(phi_rows), width="stretch")

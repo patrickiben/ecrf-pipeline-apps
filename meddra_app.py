@@ -188,7 +188,8 @@ _HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a s
 # In-browser build (stlite on Pyodide, served from docs/app/ on GitHub Pages): sys.platform is
 # "emscripten" there and nowhere else. The flag only rewords text that would be wrong in a browser
 # tab ("runs locally, no network calls", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
-# help); a local run is unchanged.
+# help) and keeps the page's "<app name>: in-browser demo" tab title once the app starts; a local run is
+# unchanged.
 IN_BROWSER = sys.platform == "emscripten"
 RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "runs locally, no network calls"
 OUT_HELP_BROWSER = ("In this in-browser build the folder lives in the tab's memory, not on your disk, and is "
@@ -833,7 +834,7 @@ def _contract_error(R):
 # then the pre-flight CONTRACT panel, then Run. The operator confirms the input
 # contract BEFORE any compute, so a mis-pointed folder or a wrong verbatim column
 # is caught on screen, not after a silent wrong answer.
-st.set_page_config(page_title="Coding QC assist", layout="wide")
+st.set_page_config(page_title="Coding QC assist" + (": in-browser demo" if IN_BROWSER else ""), layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
@@ -1007,7 +1008,7 @@ st.info("**Mode banner:** "+banner+" · a [SI] stand-in is never the component; 
 # ---- pre-flight CONTRACT panel: show, before any compute, exactly what the app
 #      read, so the operator confirms it matches their cut. If a column is wrong
 #      here, fix it in the sidebar (selector / rule inputs), NOT in the code. ----
-st.subheader("📋 Input contract (pre-flight)")
+st.header("📋 Input contract (pre-flight)")
 if load_err: st.error(f"Import failed: {load_err}")
 elif not domains: st.warning("No domain CSVs loaded yet. Set the folder path or upload files.")
 else:
@@ -1075,7 +1076,7 @@ elapsed=(time.perf_counter()-t0)*1000
 
 # ---- results: these tables ARE the tier outputs, computed from the operator's
 #      files; no reference/expected table is embedded anywhere in this file. ----
-st.subheader(f"Tiers 2 to 4 · results (computed from your files; {elapsed:.2f} ms)")
+st.header(f"Tiers 2 to 4 · results (computed from your files; {elapsed:.2f} ms)")
 if coded_rows:
     st.dataframe(pd.DataFrame(coded_rows), width="stretch")
     st.caption("cosine/S are computed from your dictionary by the active Tier-2 path "

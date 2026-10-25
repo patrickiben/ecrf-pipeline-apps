@@ -147,7 +147,8 @@ _HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a s
 # In-browser build (stlite on Pyodide, served from docs/app/ on GitHub Pages): sys.platform is
 # "emscripten" there and nowhere else. The flag only rewords text that would be wrong in a browser
 # tab ("runs locally, no network calls", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
-# help); a local run is unchanged.
+# help) and keeps the page's "<app name>: in-browser demo" tab title once the app starts; a local run is
+# unchanged.
 IN_BROWSER = sys.platform == "emscripten"
 RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "runs locally, no network calls"
 OUT_HELP_BROWSER = ("In this in-browser build the folder lives in the tab's memory, not on your disk, and is "
@@ -576,7 +577,7 @@ def _guard_artifacts(models_dir):
 # read and how each file classified, then the banner, then the pre-flight CONTRACT panel, then
 # Run. The operator confirms the input contract BEFORE any compute, so a mis-pointed folder or
 # an unrecognized domain is caught on screen, not after a silent wrong answer.
-st.set_page_config(page_title="Participant risk screening", layout="wide")
+st.set_page_config(page_title="Participant risk screening" + (": in-browser demo" if IN_BROWSER else ""), layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
@@ -687,7 +688,7 @@ st.info("**Mode banner:** "+banner+" · decision support only, not a clinical de
 
 # ---- pre-flight CONTRACT panel: show what loaded + how each file classified + the SAP source,
 #      before any compute. Fixes belong in the sidebar (folder/uploads), NOT in the code. ----
-st.subheader("📋 Input contract (pre-flight)")
+st.header("📋 Input contract (pre-flight)")
 if load_err: st.error(f"Import failed: {load_err}")
 elif not domains: st.warning("No safety-domain CSVs loaded yet. Set the folder path or upload files.")
 else:
@@ -721,7 +722,7 @@ results = tier4_categorize(scores, thr)             # Tier 4: categories + contr
 elapsed=(time.perf_counter()-t0)*1000
 
 # ---- results: these tables ARE the tier outputs, computed from the operator's files. ----
-st.subheader(f"Tiers 2 to 4 · per-participant risk (computed from your files; {elapsed:.2f} ms)")
+st.header(f"Tiers 2 to 4 · per-participant risk (computed from your files; {elapsed:.2f} ms)")
 if len(results):
     # fatal participants pinned to the top (internal _fatal key), then by safety score -- so a fatal
     # outcome always ranks at/above every non-fatal participant regardless of comorbidity load. The
