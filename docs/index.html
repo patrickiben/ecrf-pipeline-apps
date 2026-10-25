@@ -96,12 +96,12 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     packages from a CDN, fetches the program and its synthetic data from this site, and runs everything on your device.</p>
   <div class="demolinks">
     <ul>
-      <li><a href="app/meddra.html">Coding app</a> (<code>meddra_app.py</code>): MedDRA-style auto-coding of adverse-event verbatims.
+      <li><a href="app/meddra.html">Coding app</a> (<code>meddra_app.py</code>): a coding QC assist that proposes MedDRA-style terms for adverse-event verbatims from a demo dictionary.
         On held-out synthetic verbatims its stand-in ranked the right preferred term first for 54% (the real model path: 78%).</li>
-      <li><a href="app/phi.html">PHI app</a> (<code>phi_app.py</code>): PII/PHI flagging and redaction.
+      <li><a href="app/phi.html">PHI app</a> (<code>phi_app.py</code>): a de-identification review assist that flags and redacts identifiers in free text.
         On held-out synthetic text its stand-in left 108 of 308 identifiers readable (the real model path: 91 of 308); every output needs human review.</li>
-      <li><a href="app/risk.html">Risk app</a> (<code>risk_app.py</code>): participant safety and discontinuation risk scoring</li>
-      <li><a href="app/anomaly.html">Anomaly app</a> (<code>anomaly_app.py</code>): numeric outliers, distributional drift and text outliers</li>
+      <li><a href="app/risk.html">Risk app</a> (<code>risk_app.py</code>): participant risk screening, a safety listing ranked by rule-based safety and discontinuation scores</li>
+      <li><a href="app/anomaly.html">Anomaly app</a> (<code>anomaly_app.py</code>): central statistical monitoring checks for numeric outliers, distributional drift and text outliers</li>
     </ul>
     <p class="muted" style="margin:10px 0 0">Each opens in hosted mode on the bundled synthetic sample data: every data
       input is locked, a banner says so, and the audit records <code>hosted_mode=true</code>. Click Execute, then save

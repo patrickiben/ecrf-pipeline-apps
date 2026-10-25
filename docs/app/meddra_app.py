@@ -837,8 +837,10 @@ HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
 if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("🏷 MedDRA Auto-Coding Engine")
-st.caption("Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · "
-           "codes verbatim AETERM only · " + RUNS_WHERE + " · no sample data in this file")
+# In the browser only the [SI] stand-ins can run (see README), so the caption names those instead.
+st.caption(("Tier 1 intake → Tier 2 lexical retrieval [SI] → Tier 3 off [SI] → Tier 4 weighted re-rank and gate [SI] · "
+            if IN_BROWSER else "Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · ")
+           + "codes verbatim AETERM only · " + RUNS_WHERE + " · no sample data in this file")
 # Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
 if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 

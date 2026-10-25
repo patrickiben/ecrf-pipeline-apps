@@ -564,8 +564,10 @@ HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
 if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("🛡 PII/PHI Flagging & Redaction Engine")
-st.caption("Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · "
-           "scrubs free-text eCRF fields only · " + RUNS_WHERE + " · no sample data in this file")
+# In the browser only the [SI] stand-ins can run (see README), so the caption names those instead.
+st.caption(("Tier 1 intake → Tier 2 guarded patterns [SI] → Tier 3 direct and mosaic rules [SI] → Tier 4 redaction gate [SI] · "
+            if IN_BROWSER else "Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · ")
+           + "scrubs free-text eCRF fields only · " + RUNS_WHERE + " · no sample data in this file")
 if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
 # Built-in, app-specific instruction manual (from USER_GUIDE.md §4), rendered as a

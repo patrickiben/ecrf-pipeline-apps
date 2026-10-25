@@ -586,9 +586,13 @@ HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
 if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("🔎 Data Anomaly & Distributional-Drift Detection")
-st.caption("Tier 1 intake → Tier 2 numeric outliers (robust-z + Isolation Forest) → "
-           "Tier 3 Sinkhorn OT drift (cohort + per-lab + between-lab) → Tier 3b text outliers → Tier 4 categorize · "
-           "decision support, not a data-quality certification · " + RUNS_WHERE + " · no sample data in this file")
+# In the browser only the [SI] stand-ins can run (numpy and pandas only), so the caption names those instead.
+st.caption(("Tier 1 intake → Tier 2 numeric outliers (robust-z [SI]) → "
+            "Tier 3 drift (1-D Wasserstein [SI]; cohort + per-lab + between-lab) → Tier 3b text outliers (bag-of-words [SI]) → Tier 4 categorize · "
+            if IN_BROWSER else
+            "Tier 1 intake → Tier 2 numeric outliers (robust-z + Isolation Forest) → "
+            "Tier 3 Sinkhorn OT drift (cohort + per-lab + between-lab) → Tier 3b text outliers → Tier 4 categorize · ")
+           + "decision support, not a data-quality certification · " + RUNS_WHERE + " · no sample data in this file")
 # Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
 if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
