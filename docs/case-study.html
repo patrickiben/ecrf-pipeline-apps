@@ -56,6 +56,9 @@ tr:last-child td { border-bottom:none; }
 td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
 /* inside a table, wrap code only at spaces, so identifiers such as direct_pii stay whole (the table scrolls) */
 .tbl code { overflow-wrap:normal; }
+/* identifier cells (AESEQ, USUBJID) stay on one line; the table scrolls inside its box instead */
+td.id, th.id { white-space:nowrap; }
+td.verb { min-width:12em; }
 .caption { margin:-8px 0 16px; color:var(--muted); font-size:.88rem; }
 .tag { display:inline-block; padding:0 .4em; border:1px solid var(--line); border-radius:4px; font-size:.8em; font-weight:600; color:var(--muted); white-space:nowrap; }
 nav.toc { margin:20px 0 0; padding:12px 16px; background:var(--surface); border:1px solid var(--line); border-radius:6px; }
@@ -184,16 +187,17 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     write-back variables; the write-back fields are <code>AEDECOD</code>, <code>AEPTCD</code> and
     <code>AESOC</code>).</p>
   <div class="tbl"><table>
-    <thead><tr><th>AESEQ</th><th>USUBJID</th><th>Verbatim (<code>AETERM</code>)</th><th>Stand-in top PT, score <span class="tag">[SI]</span></th><th>Real top PT, re-rank score <span class="tag">[RM]</span></th><th>Routed (both paths, gate 0.88 or 0.90)</th></tr></thead>
+    <thead><tr><th class="id">AESEQ</th><th class="id">USUBJID</th><th>Verbatim (<code>AETERM</code>)</th><th>Stand-in top PT, score <span class="tag">[SI]</span></th><th>Real top PT, re-rank score <span class="tag">[RM]</span></th><th class="id">Routed</th></tr></thead>
     <tbody>
-      <tr><td class="n">1</td><td>SUBJ-3092</td><td>severe throbbing pain in back of head</td><td>Headache, 0.7726</td><td>Headache, 0.1235</td><td>human coder</td></tr>
-      <tr><td class="n">2</td><td>SUBJ-3092</td><td>feeling lightheaded when standing up</td><td>Headache (wrong), 0.2972</td><td>Dizziness postural, 0.0913</td><td>human coder</td></tr>
-      <tr><td class="n">3</td><td>SUBJ-1044</td><td>frequent watery bowel movements</td><td>Diarrhoea, 0.4672</td><td>Diarrhoea, 0.0418</td><td>human coder</td></tr>
-      <tr><td class="n">4</td><td>SUBJ-4110</td><td>marked prolonged heart rhythm interval</td><td>Electrocardiogram QT prolonged, 0.4285</td><td>Electrocardiogram QT prolonged, 0.0901</td><td>human coder</td></tr>
+      <tr><td class="n id">1</td><td class="id">SUBJ-3092</td><td class="verb">severe throbbing pain in back of head</td><td>Headache, 0.7726</td><td>Headache, 0.1235</td><td class="id">human coder</td></tr>
+      <tr><td class="n id">2</td><td class="id">SUBJ-3092</td><td class="verb">feeling lightheaded when standing up</td><td>Headache (wrong), 0.2972</td><td>Dizziness postural, 0.0913</td><td class="id">human coder</td></tr>
+      <tr><td class="n id">3</td><td class="id">SUBJ-1044</td><td class="verb">frequent watery bowel movements</td><td>Diarrhoea, 0.4672</td><td>Diarrhoea, 0.0418</td><td class="id">human coder</td></tr>
+      <tr><td class="n id">4</td><td class="id">SUBJ-4110</td><td class="verb">marked prolonged heart rhythm interval</td><td>Electrocardiogram QT prolonged, 0.4285</td><td>Electrocardiogram QT prolonged, 0.0901</td><td class="id">human coder</td></tr>
     </tbody>
   </table></div>
   <p class="caption">Preferred-term names are the demo dictionary's (MedDRA-style spelling, placeholder codes). The two
-    score columns are on different scales and are not comparable number for number.</p>
+    score columns are on different scales and are not comparable number for number. Routing is the same on both paths
+    and at either gate (0.88 or 0.90).</p>
   <ul>
     <li><strong>Retrieval is where the real path helps.</strong> It ranks the right preferred term first for all four,
       including "Dizziness postural" for "feeling lightheaded when standing up", which the lexical stand-in codes as
