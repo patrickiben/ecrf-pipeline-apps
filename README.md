@@ -86,7 +86,7 @@ The apps also support a public server deployment. Set the environment variable `
 
 ## Screenshots
 
-Local runs on the bundled synthetic data, opened with `?demo=1` and captured after **Execute**.
+Captured from the in-browser pages (hosted mode, bundled synthetic data) after **Execute**; a local run on the stand-in path shows the same tables.
 
 ![Coding app results table: each adverse-event verbatim with its top three candidate terms, ranks and 99-prefixed placeholder codes](docs/img/meddra_results.png)
 
