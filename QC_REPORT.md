@@ -12,6 +12,8 @@
 
 **Update, 2026-10-24:** the four apps also run in the browser from GitHub Pages (stlite), every download button keeps the results on screen, and the harness adds D4, which checks the browser build in `docs/app/` against the apps and their data; see [New this pass: the apps in the browser](#new-this-pass-the-apps-in-the-browser).
 
+**Update, 2026-10-24 (review fixes):** each in-browser page states its measured limits, the docs and app text say participant, the anomaly app counts participants rather than rows, and CI adds a leg on the browser's Python 3.14 stack; see [New this pass: review fixes to the browser build](#new-this-pass-review-fixes-to-the-browser-build).
+
 **Sample-cut enrichment (this pass):** every domain in `sample_data/` now carries an `AVISIT` + `VISITNUM` visit/timepoint dimension, assigned deterministically from row position — deliberately *not* the seeded RNG stream — so no existing value, anchor participant, or PHI-bearing note moved. Labs keep their file-provided reference range (`LBNRHI`), which is exactly what the risk app scores each lab against (option: ranges live in a column of the lab file). All 95 checks still pass on the enriched cut.
 
 ## Bugs found and fixed
@@ -174,6 +176,38 @@ The Streamlit Community Cloud links had started to answer with a sign-in page, s
 | Configuration | Result |
 |---|---|
 | `requirements.txt` plus the optional extras and the real runtimes, no models dir (Python 3.14.7, Streamlit 1.65.0) | **264 passed, 0 failed, 5 skipped** (the 263 earlier checks + D4; RM1 to RM5 skipped: no models dir) |
+
+## New this pass: review fixes to the browser build
+
+**Date:** 2026-10-24 · **Method:** the `AppTest` harness in three configurations (table below), plus headless Chrome 155 driven by puppeteer-core 25.16.0 against `docs/` served locally under `/ecrf-pipeline-apps/`, as GitHub Pages serves it.
+
+What changed after review:
+
+- **Measured limits on each page.** Every in-browser page carries a "Limits" line under the privacy note. The PHI page says that on held-out synthetic text the stand-in left 108 of 308 identifiers readable (the real model path: 91 of 308); the coding page gives the stand-in's 54% top-1 (real path: 78%) and its 7 of 96 auto-coded negated verbatims; the risk page says both scores are capped, weighted rule sums, not probabilities; the anomaly page says every detector runs its `[SI]` stand-in. The landing page repeats the coding and PHI figures.
+- **"Participant", not "subject".** The docs and the text the apps show say participant(s) and per-participant ("Participants aligned", "per-participant risk"). Identifiers (`n_subjects`), CDISC names (`USUBJID`, `SUBJ-` IDs), the PHI title regexes and the synthetic note text are unchanged. British spellings in the same places became American (labeled, behavior, neighbor, judgment, etiology).
+- **Anomaly app counted rows as participants (bug fixed).** The pre-flight panel and the audit's `n_subjects` reported 600 for the 150-participant, 4-visit demo. It now counts unique `USUBJID`. New checks A2c (pre-flight shows 150) and A6d (audit records 150).
+- **Page names and captions.** The pages are titled Coding QC Assist (MedDRA-style, demo dictionary), De-identification Review Assist, Participant Risk Screening and Anomaly and Drift Checks, and the apps' tab titles match. In the browser the coding, PHI and anomaly captions name the `[SI]` stand-ins that run there instead of Needle3, Laya, XGBoost, Isolation Forest and Sinkhorn.
+- **Stylesheet retry.** If stlite's stylesheet fails to load, the page fetches it again (after 1 s, then 4 s) and otherwise shows a notice with a Reload button above the app, instead of looking ready while unstyled.
+- **CI.** Actions pinned to release commits (checkout v7.0.1, setup-python v7.1.0, both Node 24), and a third harness leg, `browser-stack`: Python 3.14.0 with Streamlit 1.65.0, pandas 3.0.2, numpy 2.4.3 and pyarrow 22.0.0, the versions stlite 1.12.0 runs on Pyodide 314.0.3.
+- **Screenshots** in `docs/img/` were recaptured from the in-browser pages, so they say "per-participant" and show the hosted-mode banner and the in-tab "Done" message.
+- `CHANGES_FOR_PUBLIC.md` was removed from the tree (a copy is kept privately; it remains in git history).
+
+**Browser checks** (each app, run outside the harness):
+
+- Every page shows the loading notice and the privacy note word for word, its Limits line, and the new tab title; each became interactive in 5.1 to 5.6 s on this machine, at desktop width and with `?demo=1` at 390 px, with no reload needed. Execute rendered results with no exception; the pre-flight panels read "Participants aligned → 52" (risk) and "→ 150" (anomaly); no visible app text outside the tables says "subject".
+- The first download saved its file and the results stayed on screen. The four files are byte-identical to a native run of the same apps in hosted mode on the browser stack (Python 3.14.0, Streamlit 1.65.0, pandas 3.0.2), with the optional extras hidden.
+- No horizontal scroll at 390 px while loading, when ready or with results; the last download button can be scrolled into view. `?demo=1` reaches Python when hosted mode is switched off for a test run. With the CDN blocked, the page keeps the screenshot and says the app could not start. Zero page errors; every request went to the local server or cdn.jsdelivr.net, none to PyPI, all GET. Off-site fetches from the page and from a worker are refused by the policy, and changed copies of `stlite.js`, its core chunk or `stlite.css` are refused by Subresource Integrity.
+- Stylesheet failure: with the first `stlite.css` request aborted, the retry styled the app and no notice showed; with every request aborted, or the file changed so SRI refused it, the notice and Reload button showed (desktop and 390 px) and the app stayed usable. In the final verifier run the test sandbox's network dropped the first `stlite.css` request in 5 of 8 page loads; the retry recovered all 5, so none needed a reload.
+
+**Results.**
+
+| Configuration | Result |
+|---|---|
+| `requirements.txt` only (Python 3.14.7, Streamlit 1.65.0, pandas 3.1.0) | **263 passed, 0 failed, 5 skipped** |
+| `requirements.txt` plus `pyreadstat`, `scikit-learn`, `POT`, `scipy` (Python 3.12.13, Streamlit 1.66.1), the CI `optional-extras` leg | **266 passed, 0 failed, 5 skipped** |
+| browser stack: Python 3.14.0, Streamlit 1.65.0, pandas 3.0.2, numpy 2.4.3, pyarrow 22.0.0, the CI `browser-stack` leg | **263 passed, 0 failed, 5 skipped** |
+
+The two new checks are A2c and A6d; RM1 to RM5 are skipped because no models dir was given.
 
 ## Verified working (95 checks)
 
