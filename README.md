@@ -166,8 +166,10 @@ run_risk.sh   / .bat     one-command launchers (same as above, risk app on port 
 run_anomaly.sh/ .bat     one-command launchers (same as above, anomaly app on port 8504)
 Launch *.command         macOS double-click launchers — Finder runs them in Terminal
 .streamlit/config.toml   disables Streamlit usage stats — nothing leaves the machine
-.github/workflows/qc.yml CI: runs tests/qc_test.py on every push and pull request, stand-in and optional-extras variants,
-                         and checks docs/app/ against the apps (tools/sync_browser_apps.py --check)
+.github/workflows/qc.yml CI: runs tests/qc_test.py on every push and pull request in three variants (stand-in and
+                         optional-extras on Python 3.12; browser-stack on Python 3.14.0 with the Streamlit, pandas,
+                         numpy and pyarrow versions the in-browser pages run), and checks docs/app/ against the apps
+                         (tools/sync_browser_apps.py --check)
 sample_data/             the one SYNTHETIC cut the coding/PHI/risk apps read (+ generate.py to regenerate ae/lb/eg/vs/pe)
 anomaly_data/            the anomaly app's own SYNTHETIC longitudinal demo (labs.csv + generate.py)
 presentations/           Deck A (conceptual) and Deck B (implementation walkthrough), MD + HTML

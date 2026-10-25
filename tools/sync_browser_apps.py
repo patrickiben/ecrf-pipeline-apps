@@ -29,7 +29,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP_DIR = os.path.join(ROOT, "docs", "app")
 TEMPLATE = os.path.join(ROOT, "tools", "browser_app_template.html")
 
-# ---- pins. Change them together, then run --verify-cdn and the browser check in the README. ----
+# ---- pins. Change them together, then run --verify-cdn and the browser check in the README, and update the
+#      browser-stack leg of .github/workflows/qc.yml, which runs the harness on the same Python and packages. ----
 # @stlite/browser 1.12.0 (npm, 2026-10-18) bundles Streamlit 1.65.0 for Pyodide 314.0.3 (CPython 3.14,
 # pandas 3.0.2, numpy 2.4.3, pyarrow 22.0.0). The Pyodide URL is the one this stlite release uses by
 # default; it is passed explicitly so the pin is visible here.

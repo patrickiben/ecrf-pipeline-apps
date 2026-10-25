@@ -7,12 +7,19 @@
 #                    tools/browser_app_template.html and the pinned wheels (sha256). Fix a failure with
 #                    `python tools/sync_browser_apps.py` and commit the result.
 #
-# Two matrix variants of the harness so BOTH dependency paths stay tested on every push / PR:
-#   stand-in         requirements.txt only (what a plain install gets); the SAS check asserts the
-#                    clear "install pyreadstat" message and the anomaly checks assert the labeled
-#                    [SI] stand-in paths are recorded.
-#   optional-extras  requirements.txt plus pyreadstat, scikit-learn, POT and scipy, which flips the
-#                    SAS .sas7bdat, Isolation-Forest and Sinkhorn checks on.
+# Three matrix variants of the harness so every dependency path stays tested on every push / PR:
+#   stand-in         Python 3.12, requirements.txt only (what a plain install gets); the SAS check
+#                    asserts the clear "install pyreadstat" message and the anomaly checks assert the
+#                    labeled [SI] stand-in paths are recorded.
+#   optional-extras  Python 3.12, requirements.txt plus pyreadstat, scikit-learn, POT and scipy, which
+#                    flips the SAS .sas7bdat, Isolation-Forest and Sinkhorn checks on.
+#   browser-stack    the stack the in-browser pages run: Python 3.14.0 with Streamlit 1.65.0, pandas
+#                    3.0.2, numpy 2.4.3 and pyarrow 22.0.0, which is what stlite 1.12.0 bundles on
+#                    Pyodide 314.0.3 (see the pins in tools/sync_browser_apps.py). Stand-in path only,
+#                    as in the browser. Change these pins together with STLITE_VERSION.
+#
+# Actions are pinned to the commit of a release tag (checkout v7.0.1, setup-python v7.1.0; both run on
+# Node 24). Bump the SHA and the comment together.
 #
 # ECRF_HOSTED is deliberately NOT set anywhere in this workflow. The harness checks the local
 # default first, then sets and removes ECRF_HOSTED inside its own process for the hosted-mode
@@ -37,9 +44,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
 
@@ -47,7 +56,7 @@ jobs:
         run: python tools/sync_browser_apps.py --check
 
   qc:
-    name: qc (${{ matrix.variant }})
+    name: qc (${{ matrix.variant }}, Python ${{ matrix.python }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -55,24 +64,28 @@ jobs:
       matrix:
         include:
           - variant: stand-in
+            python: "3.12"
             extras: ""
           - variant: optional-extras
+            python: "3.12"
             extras: "pyreadstat scikit-learn POT scipy"
+          - variant: browser-stack
+            python: "3.14.0"
+            extras: "streamlit==1.65.0 pandas==3.0.2 numpy==2.4.3 pyarrow==22.0.0"
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          python-version: "3.12"
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
           cache: pip
           cache-dependency-path: requirements.txt
 
-      - name: Install requirements.txt
-        run: python -m pip install -r requirements.txt
-
-      - name: Install optional extras
-        if: matrix.extras != ''
-        run: python -m pip install ${{ matrix.extras }}
+      # One resolve, so the browser-stack pins are installed together with requirements.txt.
+      - name: Install requirements.txt (plus the variant's extras or pins)
+        run: python -m pip install -r requirements.txt ${{ matrix.extras }}
 
       - name: Show resolved versions
         run: python -m pip freeze
