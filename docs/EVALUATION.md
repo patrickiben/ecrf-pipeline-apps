@@ -181,14 +181,16 @@ Scripts: [`eval/sibling_sets.py`](../eval/sibling_sets.py), [`eval/sibling_eval.
 | family | items | terms (clusters) | best attainable bound | assessable at 0.90 |
 |---|---|---|---|---|
 | lab | 66 | 22 | 0.873 | no: not assessable at this size |
-| site | 144 | 48 | 0.940 | yes |
+| site | 144 | 48 | 0.939 | yes |
+
+The plan's copy of this table ([`eval/sibling_plan.md`](../eval/sibling_plan.md), section 11) prints 0.940 for 48 terms and 0.951 for 59. The exact values, 0.05^(1/48) = 0.93950 and 0.05^(1/59) = 0.95049, round to 0.939 and 0.950, so those are two display-rounding errors in the locked plan. The scripts compute the bound themselves, no gate or decision used the printed values, and the plan is left as registered.
 
 **Results, stand-in path** (test split):
 
 | family | within-set accuracy | keyword rule | margin | Gate A bound (best possible) | Gate B: tool minus rule, and its lower bound | routing |
 |---|---|---|---|---|---|---|
 | lab | 0.909 | 0.970 | 0.156 | 0.828 (0.873) | -0.061, lower bound -0.121 | human coding: not assessable; fails Gates A and B |
-| site | 0.861 | 0.819 | 0.166 | 0.805 (0.940) | +0.042, lower bound -0.014 | human coding: fails Gates A and B |
+| site | 0.861 | 0.819 | 0.166 | 0.805 (0.939) | +0.042, lower bound -0.014 | human coding: fails Gates A and B |
 
 | family, variant | items | tool | keyword rule | margin | whole-dictionary top-1 (Stage 3 rows) |
 |---|---|---|---|---|---|
@@ -201,15 +203,15 @@ Scripts: [`eval/sibling_sets.py`](../eval/sibling_sets.py), [`eval/sibling_eval.
 
 The last column is the stand-in's rank-1 accuracy over the whole dictionary on the same items, read from `eval/results/coding_test_standin.csv`, for comparison.
 
-- **Against chance.** On all items, both families beat uniform chance (N1) and base-rate chance (N2) on accuracy and on margin: exact p below 0.0001 for accuracy, and Monte Carlo p = 0.0001 for the margin, the smallest value 9,999 draws can give. So does each variant. N1 and N2 agree because the base rates are near uniform on this synthetic set by construction, as the plan expected.
-- **Against lexical overlap.** On the colloquial items whose words overlap two or more members equally (N3: 11 lab and 22 site items; the rest drop out because one member overlaps most), accuracy is not distinguishable from chance: 0.545 lab (p = 0.12) and 0.273 site (p = 0.08). The margin still beats that null (p = 0.012 and 0.022; BH q = 0.025 and 0.045).
+- **Against chance.** On all items, both families beat uniform chance (N1) and base-rate chance (N2) on accuracy and on margin: exact p below 1e-10 for accuracy (under N1, 3.2e-11 lab and 5.0e-34 site), and Monte Carlo p = 0.0001 for the margin, the smallest value 9,999 draws can give. So does each variant. N1 and N2 agree because the base rates are near uniform on this synthetic set by construction, as the plan expected.
+- **Against lexical overlap.** On the colloquial items whose words overlap two or more members equally (N3: 11 lab and 22 site items; the rest drop out because one member overlaps most), accuracy is not distinguishable from chance: 0.545 lab (p = 0.12) and 0.273 site (p = 0.08). The margin beats that null (p = 0.012 and 0.022; BH q = 0.025 and 0.045) without separating the right member: on those items the mean margin is near zero on lab (0.007) and negative on site (-0.045), where the right member scores below the best wrong member on average and is picked for only 6 of 22 items.
 - **Ties and clustering.** No item had tied scores, so the fractional-credit sensitivity analysis equals the main result. The intraclass correlations were estimated below 0 and truncated to 0, so the design effect is 1.
 
 What this shows:
 
 - **With the neighborhood given, the stand-in picks the right member most of the time**: 0.909 lab and 0.861 site, against a whole-dictionary top-1 of 0.636 and 0.549 on the same items. Most of its misses are in finding the neighborhood, not in choosing within it; misspellings show it most (site: 0.104 top-1, 0.979 within the set). Colloquial verbatims carry the within-set misses (0.727 lab, 0.604 site).
 - **It is not accurate enough to auto-code either family.** The lab family is too small to clear a 0.90 floor even with every item right (22 terms, 29 needed), and its bound of 0.828 fails anyway. The site family is large enough, but its bound is 0.805.
-- **A keyword rule does as well or better.** On lab the rule is right on 0.970 of items against the tool's 0.909; on site the tool is ahead (0.861 against 0.819), but not by enough to clear Gate B. The rule's lexicon was written with the generator's templates visible, so it is optimistic here; it still sets the bar an assist has to clear on these families.
+- **The tool was not shown to beat a keyword rule.** On lab the rule was ahead, right on 0.970 of items against the tool's 0.909. On site the tool was ahead (0.861 against 0.819), but its 0.042 lead was within bootstrap uncertainty (lower bound -0.014), so it failed Gate B. The rule's lexicon was written with the generator's templates visible, so it is optimistic here; it still sets the bar an assist has to clear on these families.
 - **"calcium down on bloods"** is picked correctly on the stand-in path (decreased 0.505, abnormal 0.466, increased 0.465). The Stage 3 failure on this item is on the real path, which this pass did not run.
 
 **Real path: not run in this pass.** No models dir was available on the machine that produced these results; `python eval/sibling_eval.py --models <dir>` adds it where one exists. The shipped re-ranker's feature contract includes `ret_rank`, a candidate's rank within the retrieved top 10, which a sibling outside that pool does not have, so the plan registers the Needle3 cosine as the real-path score. The registered expectation that the lab family fails or is not assessable holds on any path by attainability alone. For context only (descriptive, not the registered statistic): in the committed Stage 3 rows of the real path, 17 of the 22 lab colloquial items have a member of the right set at rank 1, and 10 of those 17 are the right member.
@@ -222,9 +224,11 @@ What this shows:
 | (b) always increased, then decreased, then abnormal | accuracy about 0.60; N1 rejects in at least 99%; N2 rejects in 0.028 to 0.072; fails both gates in at least 95% | 0.599; 100%; 0.065 (MCSE 0.012); 100% and 100% |
 | (c) pure noise | each null rejects in at most 0.072; margin p-values uniform (Kolmogorov-Smirnov p at least 0.01) | N1 0.043, N2 0.040, N3 0.028; KS p 0.24, 0.18, 0.69 |
 | (d) good enough (mean accuracy 0.97) | Gate A passes in most datasets; Gate B in at least 95% | 100% (mean bound 0.950); 100% |
-| (e) true accuracy 0.85, intraclass correlation 0.2 | Gate A bound below 0.85 in at least 93% | 96.5% (MCSE 0.4%) |
+| (e) true accuracy 0.85, intraclass correlation 0.2 | Gate A bound below 0.85 in at least 93% | 96.5% (MCSE 0.4%); with the design effect left out, 93.3% (reported, not registered) |
 
-Negative control: with the stand-in's scores shuffled among the members of each set (one permutation per term, applied to its three variants, 400 times), the accuracy test under N1 rejected 2.8% (lab) and 4.0% (site) of the time, against a registered ceiling of 7.2%. `tests/test_sibling.py` also checks the exact tail against brute-force enumeration and the Poisson-binomial tail, the plan guard against an edited plan, the demo at reduced replicates, that `make_data.py` still writes byte-identical data, and that a rerun reproduces the committed results.
+Negative control: with the stand-in's scores shuffled among the members of each set (one permutation per term, applied to its three variants, 400 times), the accuracy test under N1 rejected 2.8% (lab) and 4.0% (site) of the time, against a registered ceiling of 7.2%. `tests/test_sibling.py` also checks the exact tail against brute-force enumeration and the Poisson-binomial tail, both scripts' guards against an edited plan and a changed input file, the demo at reduced replicates, that `make_data.py` still writes byte-identical data, and that a rerun reproduces the committed results.
+
+The registered criteria above do not show on their own that the gates work. With the design effect left out, (e) still clears its 93% floor (93.3%), and in a review run with Gate B reading the upper instead of the lower bootstrap quantile, (b) and (d) were still met. So `tests/test_sibling.py` also checks the gates directly, outside the plan: the Clopper-Pearson bound against its binomial tail, the intraclass correlation on a hand-worked unbalanced example, the design effect inside Gate A, Gate B against hand-checked bootstrap quantiles and at the boundary where the tool and the rule are equally accurate (it passed in 4.5% of 1,000 such families, against a nominal 5%), the accuracy and margin tails against enumeration, and that the mean estimated intraclass correlation in (e) is near its true 0.2. Each of these checks was seen to fail on a scratch copy with the defect it guards injected.
 
 **Caveats.**
 

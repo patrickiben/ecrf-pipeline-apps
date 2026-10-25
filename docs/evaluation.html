@@ -144,7 +144,8 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
         4-vCPU cloud CPU. The real path is a batch job, not the sub-50 ms interactive tool an earlier version of Deck A targeted.</li>
       <li><strong>No sibling family may auto-code.</strong> Given the right neighborhood, the stand-in picked the right
         lab direction or body-site term for 0.909 and 0.861 of items, below the registered 0.90 floor once uncertainty is
-        counted (lower bounds 0.828 and 0.805), and a keyword rule did as well or better. The lab family is too small to
+        counted (lower bounds 0.828 and 0.805), and the tool was not shown to beat a keyword rule (the rule was ahead
+        on lab; on site the tool's 0.042 lead was within bootstrap uncertainty). The lab family is too small to
         clear the floor even with every item right. See <a href="#within-sibling-discrimination">Within-sibling
         discrimination</a>.</li>
       <li><strong>The re-ranker lowered top-3.</strong> It raised top-1 over plain retrieval order (0.747 to 0.778) but
@@ -296,8 +297,9 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     retrieves "Blood calcium increased" above "decreased". Top-1 accuracy mixes two failures, finding the
     neighborhood and choosing within it. This check isolates the second: the neighborhood is given, and the only
     question is which member the tool prefers. Everything below was registered before any scoring in
-    <code>eval/sibling_plan.md</code>, which is locked by its SHA-256; the scripts refuse to run when the plan, an input
-    file or the scoring code differs from what was registered.</p>
+    <code>eval/sibling_plan.md</code>, which is locked by its SHA-256. Both scripts refuse to run when the plan or an
+    input file differs from what was registered, and the evaluation script also refuses when the coding app's
+    scoring code does.</p>
   <ul>
     <li><strong>Sibling sets</strong>, fixed from preferred-term names: lab direction (44 analytes, each
       "increased", "decreased" and "abnormal") and body site (51 sites with four or six of "Pain in", "Swelling of",
@@ -322,16 +324,17 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     <thead><tr><th>Family (registered before scoring)</th><th class="n">Items</th><th class="n">Terms</th><th class="n">Best attainable bound</th><th>Assessable at 0.90</th></tr></thead>
     <tbody>
       <tr><td>lab direction</td><td class="n">66</td><td class="n">22</td><td class="n">0.873</td><td>no: not assessable at this size</td></tr>
-      <tr><td>body site</td><td class="n">144</td><td class="n">48</td><td class="n">0.940</td><td>yes</td></tr>
+      <tr><td>body site</td><td class="n">144</td><td class="n">48</td><td class="n">0.939</td><td>yes</td></tr>
     </tbody>
   </table></div>
   <p class="caption">With every item right the bound is 0.05<sup>1/m</sup> for m terms, so a 0.90 floor needs at least 29
-    terms and 0.95 needs 59.</p>
+    terms and 0.95 needs 59. The locked plan's own table prints 0.940 for 48 terms and 0.951 for 59; the exact values
+    round to 0.939 and 0.950. The scripts compute the bound themselves, so no decision used the printed values.</p>
   <div class="tbl"><table>
     <thead><tr><th>Stand-in path, test split</th><th class="n">Within-set accuracy</th><th class="n">Keyword rule</th><th class="n">Margin</th><th class="n">Gate A bound (best)</th><th class="n">Gate B lower bound</th><th>Routing</th></tr></thead>
     <tbody>
       <tr><td>lab direction</td><td class="n">0.909</td><td class="n">0.970</td><td class="n">0.156</td><td class="n">0.828 (0.873)</td><td class="n">-0.121</td><td>human coding: not assessable; fails Gates A and B</td></tr>
-      <tr><td>body site</td><td class="n">0.861</td><td class="n">0.819</td><td class="n">0.166</td><td class="n">0.805 (0.940)</td><td class="n">-0.014</td><td>human coding: fails Gates A and B</td></tr>
+      <tr><td>body site</td><td class="n">0.861</td><td class="n">0.819</td><td class="n">0.166</td><td class="n">0.805 (0.939)</td><td class="n">-0.014</td><td>human coding: fails Gates A and B</td></tr>
     </tbody>
   </table></div>
   <div class="tbl"><table>
@@ -353,12 +356,14 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
       finding the neighborhood; colloquial verbatims carry the within-set misses.</li>
     <li><strong>It beats chance but not lexical overlap.</strong> Both families beat N1 and N2 on accuracy and margin
       (p below 0.001). On colloquial items whose words overlap two or more members equally (11 lab, 22 site), accuracy
-      is not distinguishable from chance under N3 (0.545, p = 0.12; 0.273, p = 0.08); the margin still is (p = 0.012
-      and 0.022).</li>
+      is not distinguishable from chance under N3 (0.545, p = 0.12; 0.273, p = 0.08). The margin beats that null
+      (p = 0.012 and 0.022) without separating the right member: on those items the mean margin is 0.007 on lab and
+      -0.045 on site, where the right member is picked for only 6 of 22.</li>
     <li><strong>It is not accurate enough to auto-code either family.</strong> Lab is too small to reach 0.90 with
       every item right, and its bound of 0.828 fails anyway; site's bound is 0.805.</li>
-    <li><strong>A keyword rule does as well or better</strong>: 0.970 against 0.909 on lab; on site the tool is ahead
-      (0.861 against 0.819) but not by enough to clear Gate B. The rule's lexicon was written with the generator's
+    <li><strong>The tool was not shown to beat a keyword rule</strong>: the rule was ahead on lab (0.970 against
+      0.909); on site the tool was ahead (0.861 against 0.819), but its 0.042 lead was within bootstrap uncertainty
+      (lower bound -0.014), so it failed Gate B. The rule's lexicon was written with the generator's
       templates visible, so this baseline is optimistic.</li>
     <li><strong>Real path: not run in this pass</strong> (no models dir was available). The shipped re-ranker scores
       only candidates from the retrieved top 10, so the plan registers the Needle3 cosine as the real-path score.
@@ -371,12 +376,15 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
       <tr><td>(b) always "increased" first</td><td>accuracy about 0.60; N1 rejects in at least 99%; N2 in 0.028 to 0.072; fails both gates</td><td>0.599; 100%; 0.065; 100%</td></tr>
       <tr><td>(c) pure noise</td><td>each null rejects in at most 0.072; margin p-values uniform</td><td>0.043, 0.040, 0.028; KS p 0.24, 0.18, 0.69</td></tr>
       <tr><td>(d) good enough, mean accuracy 0.97</td><td>Gate A passes in most; Gate B in at least 95%</td><td>100%; 100%</td></tr>
-      <tr><td>(e) true accuracy 0.85, intraclass correlation 0.2</td><td>Gate A bound below 0.85 in at least 93%</td><td>96.5%</td></tr>
+      <tr><td>(e) true accuracy 0.85, intraclass correlation 0.2</td><td>Gate A bound below 0.85 in at least 93%</td><td>96.5% (93.3% with the design effect left out; reported, not registered)</td></tr>
     </tbody>
   </table></div>
   <p>Every registered criterion was met. In the negative control, with the stand-in's scores shuffled among the members
     of each set 400 times, the accuracy test under N1 rejected 2.8% (lab) and 4.0% (site) of the time, against a
-    registered ceiling of 7.2%.</p>
+    registered ceiling of 7.2%. These criteria alone do not show that the gates work (row (e) still clears 93% with the
+    design effect left out), so the test suite also checks the gates directly, outside the plan: the bound, the
+    intraclass correlation and Gate B against hand-worked values, Gate B at the point where the tool and the rule are
+    equally accurate (it passed in 4.5% of 1,000 such families), and the tails against enumeration.</p>
   <p><strong>Caveats.</strong> The dictionary is synthetic and not MedDRA, and its sibling families are regular by
     construction. The gold codes were generated, so they are independent of the tool by construction; real use needs
     gold codes adjudicated without the tool's suggestions, a licensed MedDRA release and a sibling rule registered
