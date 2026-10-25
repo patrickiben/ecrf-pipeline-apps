@@ -185,10 +185,10 @@ HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real 
 _HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
 # In-browser build (stlite on Pyodide, served from docs/app/ on GitHub Pages): sys.platform is
 # "emscripten" there and nowhere else. The flag only rewords text that would be wrong in a browser
-# tab ("air-gapped", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
+# tab ("runs locally, no network calls", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
 # help); a local run is unchanged.
 IN_BROWSER = sys.platform == "emscripten"
-RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "air-gapped"
+RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "runs locally, no network calls"
 OUT_HELP_BROWSER = ("In this in-browser build the folder lives in the tab's memory, not on your disk, and is "
                     "gone when the tab closes. Save results with the download buttons.")
 def _hosted():

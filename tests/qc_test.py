@@ -575,11 +575,11 @@ HAPPS = [
          btn="🚀 Execute PII/PHI Flagging", out="phi_output", sample=SAMPLE, local_run=outp,
          decoy="cut", src=SRC_AE, pre="PHI scan set = expected_scan(sample)"),
     dict(c="R", app="risk", file="risk_app.py", folder="Cut folder path (safety domains)",
-         up="...or upload safety files (CSV or SAS .sas7bdat)", models="Models dir (optional real model)",
+         up="...or upload safety files (CSV or SAS .sas7bdat)", models="Models dir (no trained model in this build)",
          btn="🚀 Execute Risk Scoring", out="risk_output", sample=SAMPLE, local_run=outr1,
          decoy="cut", src=SRC_AE, pre="pre-flight classifies ae/lb/eg/vs/pe"),
     dict(c="A", app="anomaly", file="anomaly_app.py", folder="Cut folder path (CSV or SAS .sas7bdat)",
-         up="...or upload files (CSV or SAS .sas7bdat)", models="Models dir (optional real model)",
+         up="...or upload files (CSV or SAS .sas7bdat)", models="Models dir (no trained model in this build)",
          btn="🚀 Execute Anomaly & Drift Detection", out="anomaly_output", sample=ANOM, local_run=outa1,
          decoy="labs", src=SRC_LABS, pre="pre-flight detects VISITNUM + ALT"),
 ]
@@ -1016,7 +1016,7 @@ def _rp_run(app, folder, models, out, execute=True):
     lab = {"meddra_app.py":"Cut folder path (domain CSVs)","phi_app.py":"Cut folder path (domain CSVs)",
            "risk_app.py":"Cut folder path (safety domains)","anomaly_app.py":"Cut folder path (CSV or SAS .sas7bdat)"}[app]
     find(A,"text_input",lab).set_value(folder).run()
-    mlabel = "Models dir (optional real weights)" if app in ("meddra_app.py","phi_app.py") else "Models dir (optional real model)"
+    mlabel = "Models dir (optional real weights)" if app in ("meddra_app.py","phi_app.py") else "Models dir (no trained model in this build)"
     find(A,"text_input",mlabel).set_value(models).run()
     find(A,"text_input","Output folder").set_value(out).run()
     if execute and not A.exception and not [e for e in A.error if "cannot run" in e.value or "failed to load" in e.value
