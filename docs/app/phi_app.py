@@ -7,8 +7,9 @@
 #     load_domains are DELIBERATELY DUPLICATED from meddra_app.py. Do not factor
 #     them into a shared module: a shared module is a coupling point that would
 #     let a retrain of one head silently change the other's behavior, and the
-#     two heads are validated as separate computer-system scopes with separate
-#     audit trails. Duplication is intentional.
+#     two heads are kept separate so each could be validated on its own scope,
+#     with its own audit log (neither is a validated system; the audit log is a
+#     plain CSV). Duplication is intentional.
 #   * This program scrubs free text ONLY. It never codes a verbatim and never
 #     reads AETERM -- that is meddra_app.py's job. It needs NO MedDRA dictionary;
 #     a stray meddra*.csv in the cut folder is IGNORED here so the two programs
@@ -812,8 +813,8 @@ st.expander("Processing log").write("\n".join(log))
 #      TAG SCHEME chosen, and the eCRF-vs-document SCOPE. The scope line is the
 #      explicit statement that the mosaic signal fires only on co-occurring
 #      indirect spans and that page geometry is absent -- so neither capability
-#      is over-claimed. This is what keeps this head's validation scope separate
-#      from meddra_app.py's (separate program, separate audit_log.csv). ----
+#      is over-claimed. This is what keeps this head's scope separate from
+#      meddra_app.py's (separate program, separate audit_log.csv). ----
 audit=pd.DataFrame([dict(program="phi_scanner", timestamp=pd.Timestamp.now().isoformat(timespec="seconds"),
     hosted_mode=("true" if HOSTED else "false"),
     domains=list(domains.keys()),

@@ -6,9 +6,10 @@
 #     this header (_have, _col, load_domains) are DELIBERATELY DUPLICATED in
 #     phi_app.py. Do not "refactor" them into a shared pipeline.py: a shared
 #     module is a coupling point that would let a retrain of one head silently
-#     change the other's behavior, and the two heads are validated as separate
-#     computer-system scopes with separate audit trails. Duplication is the
-#     price of that independence, and it is intentional.
+#     change the other's behavior, and the two heads are kept separate so each
+#     could be validated on its own scope, with its own audit log (neither is a
+#     validated system; the audit log is a plain CSV). Duplication is the price
+#     of that independence, and it is intentional.
 #   * This program codes verbatims ONLY. It never opens a free-text comment
 #     column and never flags PHI -- that is phi_app.py's job, with its own audit.
 #     The pre-flight panel at the bottom enforces this by listing exactly the one
@@ -1083,7 +1084,7 @@ st.expander("Processing log").write("\n".join(log))
 # ---- audit: one row per run, recording the CONTRACT (which files, which column,
 #      which dictionary + its hash), the per-tier PATH (REAL/[SI]), and the
 #      EFFECTIVE operating point. This is what makes a run reproducible and what
-#      keeps this head's validation scope separate from phi_app.py's. ----
+#      keeps this head's scope and audit log separate from phi_app.py's. ----
 sha=lambda df: hashlib.sha256(df.to_csv(index=False).encode()).hexdigest()[:16]
 audit=pd.DataFrame([dict(program="meddra_coder", timestamp=pd.Timestamp.now().isoformat(timespec="seconds"),
     hosted_mode=("true" if HOSTED else "false"),

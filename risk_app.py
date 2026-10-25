@@ -6,9 +6,10 @@
 #     module. The small helpers near the top (_have, _col) are DELIBERATELY
 #     DUPLICATED from the siblings. Do not "refactor" them into a shared file:
 #     a shared module is a coupling point that would let a change to one head
-#     silently move another's behavior, and each head is validated as its own
-#     computer-system scope with its own audit trail. Duplication is the price
-#     of that independence, and it is intentional.
+#     silently move another's behavior, and each head is kept separate so it could
+#     be validated on its own scope, with its own audit log (none is a validated
+#     system; the audit log is a plain CSV). Duplication is the price of that
+#     independence, and it is intentional.
 #   * This program SCORES RISK ONLY. It never codes a verbatim (that is
 #     meddra_app.py), never scrubs PHI (phi_app.py), and never detects anomalies/drift
 #     (anomaly_app.py). It reads safety domains -- AE / LB / EG / VS / PE -- from raw data
