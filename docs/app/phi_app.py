@@ -109,8 +109,8 @@ DEF_REDACT_GATE=0.85
 
 # --------------------------------------------------------------------------- #
 # Hosted-demo safety mode. ON when the environment variable ECRF_HOSTED=1 is set
-# or the Streamlit secret "hosted = true" exists (Streamlit Community Cloud: app
-# Settings > Secrets). A public demo must never take in real data, so in this
+# or the Streamlit secret "hosted = true" exists (.streamlit/secrets.toml on a
+# server you run; the in-browser pages set ECRF_HOSTED=1). A public demo must never take in real data, so in this
 # mode every input that could bring data in (the uploaders, the folder path, the
 # models dir and, in the coding app, the .asc folder) is DISABLED in the UI and
 # its value is also OVERWRITTEN in code: a disabled widget only stops the
@@ -349,7 +349,7 @@ def t2_phi(text):
 # CONSUMES: a free-text string + the Tier-2 spans (to count indirect attrs).
 # EMITS:    P(Direct_PHI), P(Quasi_Identifier) (or None), as named scalars.
 # CONTRACT: Tier 3 is its own hop because span localization (Tier 2) cannot see
-#           JOINT risk: initials + a postcode + a rare condition are each harmless
+#           JOINT risk: initials + a ZIP code + a rare condition are each harmless
 #           alone and none is a DIRECT span, yet together they re-identify. That
 #           is a field-level judgment and must come back as its own number so
 #           Tier 4 can weigh it explicitly rather than as a hidden weight.
@@ -462,7 +462,7 @@ def _guard_artifacts(models_dir):
         miss=[l for l in libs if not HAVE.get(l,False)]
         if os.path.exists(os.path.join(models_dir,art)) and miss:
             st.error(f"{art} present but {', '.join(repr(m) for m in miss)} not installed (laya also needs "
-                     f"torch and transformers). Install it or remove the artifact -- the engine will NOT "
+                     f"torch and transformers). Install it or remove the artifact; the engine will NOT "
                      f"silently substitute a stand-in."); st.stop()
 
 def _load_laya(d,cal):
@@ -573,38 +573,38 @@ if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 # Built-in, app-specific instruction manual (from USER_GUIDE.md §4), rendered as a
 # collapsible panel so the working view stays clean but help is one click away.
 _HELP_MD = """
-**What this app does.** Finds and scrubs patient identifiers (PII/PHI) in free-text fields, writing a per-span flag table plus sanitized copies of each scanned domain. It reads only the columns you confirm below — its single purpose is finding and removing PHI from text.
+**What this app does.** Finds and scrubs patient identifiers (PII/PHI) in free-text fields, writing a per-span flag table plus sanitized copies of each scanned domain. It reads only the columns you confirm below; its single purpose is finding and removing PHI from text.
 
-**What it needs.** Domain CSVs only — no dictionary or reference file of any kind is required. Files named `*meddra*` are skipped automatically (they're reference data, not fields to scrub).
+**What it needs.** Domain CSVs only. No dictionary or reference file of any kind is required. Files named `*meddra*` are skipped automatically (they're reference data, not fields to scrub).
 
 ### How columns are discovered (content-based)
-This app scans **every column that is not strictly numeric** — text, dates, coded values and flags alike — because PHI can hide anywhere and a pre-specified list of column names is guaranteed to have gaps. Only columns pandas typed as a number are skipped. There is no name rule to edit; your control point is the confirmation multi-select in step 4.
+This app scans **every column that is not strictly numeric** (text, dates, coded values and flags alike), because PHI can hide anywhere and a pre-specified list of column names is guaranteed to have gaps. Only columns pandas typed as a number are skipped. There is no name rule to edit; your control point is the confirmation multi-select in step 4.
 
-> ⚠ Structured fields (dates, IDs) are scanned too. If one matches an identifier pattern — e.g. an ISO date matching the DOB rule — it will be flagged. Review flags before trusting them, or deselect a known-safe column.
+> ⚠ Structured fields (dates, IDs) are scanned too. If one matches an identifier pattern (for example an ISO date matching the DOB rule), it will be flagged. Review flags before trusting them, or deselect a known-safe column.
 
 ### Step by step
-1. **Point at your data** (sidebar 📂 1) — type a cut-folder path and/or upload domain CSVs.
-2. **Read how discovery works** (sidebar 🔎 2) — explains the content-based rule above.
-3. **Set the operating point** (sidebar ⚖ 3) — the Redaction gate slider (default **0.85**), recorded in the audit with the run.
-4. **Confirm the columns to scan** (sidebar 🎯 4 + pre-flight panel) — every non-numeric column is pre-selected; deselect any you do not want scrubbed (e.g. a date or coded field you know is safe). The panel shows exactly which columns will be scanned per domain.
-5. **Execute** — click 🚀 Execute PII/PHI Flagging.
+1. **Point at your data** (sidebar 📂 1): type a cut-folder path and/or upload domain CSVs.
+2. **Read how discovery works** (sidebar 🔎 2): it explains the content-based rule above.
+3. **Set the operating point** (sidebar ⚖ 3): the Redaction gate slider (default **0.85**), recorded in the audit with the run.
+4. **Confirm the columns to scan** (sidebar 🎯 4 + pre-flight panel): every non-numeric column is pre-selected; deselect any you do not want scrubbed (e.g. a date or coded field you know is safe). The panel shows exactly which columns will be scanned per domain.
+5. **Execute**: click 🚀 Execute PII/PHI Flagging.
 
 ### Direct vs indirect identifiers
-A *direct* identifier (name, phone, MRN, DOB, address, SSN) scrubs on its own merit. An *indirect* attribute (age, postcode/ZIP, initials, rare condition) scrubs **only when two or more co-occur in the same field** — the "mosaic" rule that catches re-identification risk no single value shows.
+A *direct* identifier (name, phone, MRN, DOB, address, SSN) scrubs on its own merit. An *indirect* attribute (age, ZIP code, initials, rare condition) scrubs **only when two or more co-occur in the same field**: the "mosaic" rule that catches re-identification risk no single value shows.
 
 ### Reading the outputs
-- **`phi_flags.csv`** — one row per scrubbed span: `DOMAIN`, `USUBJID`, `ROW`, `FIELD`, `SPAN`, `ENTITY`, in-field `START`/`END`, `P_REDACT`, `ACTION`. The audit evidence of exactly what was masked, with what confidence, at what position.
-- **`sanitized/<domain>.csv`** — a copy of each scanned domain carrying the original columns plus `SAN_<field>` (scrubbed text) and `<field>_PHI_FLAG` (`Y` if that cell changed, else `N`). Missing values stay missing — never `"nan"`.
+- **`phi_flags.csv`** has one row per scrubbed span: `DOMAIN`, `USUBJID`, `ROW`, `FIELD`, `SPAN`, `ENTITY`, in-field `START`/`END`, `P_REDACT`, `ACTION`. The audit evidence of exactly what was masked, with what confidence, at what position.
+- **`sanitized/<domain>.csv`** is a copy of each scanned domain carrying the original columns plus `SAN_<field>` (scrubbed text) and `<field>_PHI_FLAG` (`Y` if that cell changed, else `N`). Missing values stay missing, never `"nan"`.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
 Without trained weights, Tiers 2–4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): guarded regexes for spans + rule-based probabilities. It reproduces its worked trace exactly because identifier detection is pattern-shaped and the scrub is a string replace. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
 ### Troubleshooting
-- **A date / ID column got flagged:** that is content-based discovery working as designed — it scans every non-numeric field. If you know that column is safe, deselect it in step 4 and re-run; review any flags before trusting a scrub.
+- **A date / ID column got flagged:** that is content-based discovery working as designed: it scans every non-numeric field. If you know that column is safe, deselect it in step 4 and re-run; review any flags before trusting a scrub.
 - **Blank cells:** missing values stay missing through the run (never `"nan"`), so an empty field correctly reports flag `N` rather than scanning silently clean.
 
 ### What this build does NOT do
-No scanned-document / bounding-box path, no safety/DLT logic, nothing leaves the machine. The PHI output is compliance-*enabling*, not a certification — that remains an organizational determination. See Deck A for full governance and limits.
+No scanned-document / bounding-box path, no safety/DLT logic, nothing leaves the machine. The output supports a de-identification review; it is not a certification, which remains an organizational determination. Every redaction needs human review: on held-out synthetic text the stand-in left 108 of 308 identifiers readable (the real model path: 91 of 308). What was measured is in the [evaluation](https://patrickiben.github.io/ecrf-pipeline-apps/evaluation.html); the limits are in the [case study](https://patrickiben.github.io/ecrf-pipeline-apps/case-study.html).
 """
 if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")
 with st.expander("📖 How to use this app"):
@@ -627,7 +627,7 @@ _use_sample = st.sidebar.checkbox("Use the bundled synthetic sample data",
 if HOSTED: _use_sample = True
 folder = st.sidebar.text_input("Cut folder path (domain CSVs)", value=(_SAMPLE_DIR if _use_sample else ""), disabled=HOSTED,
     help="Path to a folder of domain CSVs. A meddra*.csv here is IGNORED (this "
-         "program needs no dictionary). Domain names are irrelevant -- the "
+         "program needs no dictionary). Domain names are irrelevant; the "
          "columns to scan are discovered by content (see section 2).")
 if HOSTED: folder = _SAMPLE_DIR            # never trust a client-sent value in hosted mode
 up_dom = st.sidebar.file_uploader("...or upload domain files (CSV or SAS .sas7bdat)",
@@ -639,7 +639,7 @@ if HOSTED: up_dom = None
 #      miss PHI hiding elsewhere. The operator's control point is the multiselect in
 #      section 4 (confirm / deselect), not an allow-list here. ----
 st.sidebar.markdown("---"); st.sidebar.header("🔎 2. How columns are discovered")
-st.caption("**Every column that is NOT strictly numeric is scanned** -- text, dates, "
+st.caption("**Every column that is NOT strictly numeric is scanned**: text, dates, "
            "coded values and flags alike, because PHI can hide in any of them. Only "
            "columns pandas typed as a number (int/float) are skipped. This replaces the "
            "old suffix/exact-name rule, which could miss an identifier in any column "
@@ -707,7 +707,7 @@ st.sidebar.markdown("---"); st.sidebar.header("🎯 4. Confirm the inputs (pre-f
 ft_sel = st.sidebar.multiselect("Columns to scan for PHI (this program reads ONLY these)",
     options=ft_flat, default=ft_flat,
     help="Pre-selected: every non-numeric column in each domain. Deselect any "
-         "column you do NOT want scanned/scrubbed -- e.g. a date or coded column "
+         "column you do NOT want scanned or scrubbed, for example a date or coded column "
          "you know is safe.")
 
 # ---- mode banner: per-tier path from the runtime probe (see meddra_app.py for
@@ -717,7 +717,7 @@ banner = "Tier 2: %s | Tier 3: %s | Tier 4: %s" % (
     "REAL needle3 extraction + [SI] patterns" if REAL_T2 else "STAND-IN [SI] (guarded regex)",
     ("REAL laya" + ("" if "calibration NONE" not in _R["info"].get("laya","") else " (UNCALIBRATED)")) if REAL_T3 else "STAND-IN [SI]",
     "REAL xgboost span gate" if REAL_T4 else "STAND-IN [SI]")
-st.info("**Mode banner** — "+banner+" · a [SI] stand-in is never the component; the "
+st.info("**Mode banner:** "+banner+" · a [SI] stand-in is never the component; the "
         "audit records which path ran per tier. eCRF path = string scrub + flag; the "
         "bounding-box burn-in is the PDF path and is not exercised here.")
 
@@ -726,7 +726,7 @@ st.info("**Mode banner** — "+banner+" · a [SI] stand-in is never the componen
 #      in the code. ----
 st.subheader("📋 Input contract (pre-flight)")
 if load_err: st.error(f"Import failed: {load_err}")
-elif not domains: st.warning("No domain CSVs loaded yet — set the folder path or upload files.")
+elif not domains: st.warning("No domain CSVs loaded yet. Set the folder path or upload files.")
 else:
     c1,c2=st.columns(2)
     with c1:
@@ -738,7 +738,7 @@ else:
         st.dataframe(pd.DataFrame([(d,", ".join(cs) if cs else "(none)") for d,cs in discovered.items()],
                      columns=["domain","columns scanned"]), width="stretch", hide_index=True)
         st.write(f"Selected to scrub → {len(ft_sel)} column(s)")
-    st.caption("This program reads ONLY the columns selected above and scrubs them -- its sole job is "
+    st.caption("This program reads ONLY the columns selected above and scrubs them; its sole job is "
                "finding and removing PHI from free text. Because discovery is content-based, it may scan "
                "any column you select purely to strip identifiers embedded in its text. No dictionary or "
                "reference file is required or loaded here.")
@@ -800,10 +800,10 @@ elapsed=(time.perf_counter()-t0)*1000
 #      SAN_<field> + <field>_PHI_FLAG), computed from the operator's files. ----
 st.subheader(f"Tier 2–4 · results (computed from your files; {elapsed:.2f} ms)")
 if phi_rows:
-    st.markdown("**PHI flags** — one row per scrubbed span")
+    st.markdown("**PHI flags**: one row per scrubbed span")
     st.dataframe(pd.DataFrame(phi_rows), width="stretch")
 if san_dfs:
-    st.markdown("**Sanitized domain rows** — original columns + SAN_<field> + flag")
+    st.markdown("**Sanitized domain rows**: original columns + SAN_<field> + flag")
     for d,sdf in san_dfs.items(): st.write(f"`{d}.csv`"); st.dataframe(sdf, width="stretch")
 st.expander("Processing log").write("\n".join(log))
 

@@ -160,8 +160,8 @@ AETERM_SYNONYMS = ["AETERM","VERBATIM","AE_TERM","REPORTED_TERM"]
 
 # --------------------------------------------------------------------------- #
 # Hosted-demo safety mode. ON when the environment variable ECRF_HOSTED=1 is set
-# or the Streamlit secret "hosted = true" exists (Streamlit Community Cloud: app
-# Settings > Secrets). A public demo must never take in real data, so in this
+# or the Streamlit secret "hosted = true" exists (.streamlit/secrets.toml on a
+# server you run; the in-browser pages set ECRF_HOSTED=1). A public demo must never take in real data, so in this
 # mode every input that could bring data in (the uploaders, the folder path, the
 # models dir and, in the coding app, the .asc folder) is DISABLED in the UI and
 # its value is also OVERWRITTEN in code: a disabled widget only stops the
@@ -734,7 +734,7 @@ def _guard_artifacts(models_dir):
         miss=[l for l in libs if not HAVE.get(l,False)]
         if os.path.exists(os.path.join(models_dir,art)) and miss:
             st.error(f"{art} present but {', '.join(repr(m) for m in miss)} not installed (laya also needs "
-                     f"torch and transformers). Install it or remove the artifact -- the engine will NOT "
+                     f"torch and transformers). Install it or remove the artifact; the engine will NOT "
                      f"silently substitute a stand-in."); st.stop()
 
 def _load_laya(d,cal):
@@ -847,18 +847,18 @@ if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 # Built-in, app-specific instruction manual (from USER_GUIDE.md §3), rendered as a
 # collapsible panel so the working view stays clean but help is one click away.
 _HELP_MD = """
-**What this app does.** Proposes a MedDRA code (`LLT → PT → HLT → HLGT → SOC`) for each adverse-event verbatim, then either auto-commits it or routes it to a human coder. It reads only the one verbatim column you select — nothing else in your data is opened or modified.
+**What this app does.** Proposes a MedDRA code (`LLT → PT → HLT → HLGT → SOC`) for each adverse-event verbatim, then either auto-commits it or routes it to a human coder. It reads only the one verbatim column you select; nothing else in your data is opened or modified.
 
 **What it needs.** Domain CSVs with the terms to code, plus exactly **one** MedDRA dictionary.
 
 ### Step by step
-1. **Point at your data** (sidebar 📂 1) — type a cut-folder path and/or upload domain CSVs. Every `*.csv` except one named `*meddra*` loads as a domain; the verbatim column is found by name synonym inside whatever loads (`AETERM`, `VERBATIM`, `AE_TERM`, `REPORTED_TERM`).
-2. **Provide the dictionary** — choose exactly one shape:
+1. **Point at your data** (sidebar 📂 1): type a cut-folder path and/or upload domain CSVs. Every `*.csv` except one named `*meddra*` loads as a domain; the verbatim column is found by name synonym inside whatever loads (`AETERM`, `VERBATIM`, `AE_TERM`, `REPORTED_TERM`).
+2. **Provide the dictionary** in exactly one shape:
    - *Flattened CSV (recommended):* upload it, or drop a `meddra*.csv` in the cut folder to auto-find it. Needs an LLT-name + PT-name column; codes and SOC are detected by synonym when present.
    - *ASCII release (.asc):* give the folder with `llt.asc / pt.asc / hlt.asc / hlgt.asc / soc.asc`. Filtered to active terms (`currency == 'Y'`) and joined across the full chain; `hlt.asc`/`hlgt.asc` are optional.
-3. **Set the operating point** (sidebar ⚖ 2) — the Auto-commit gate slider (default **0.88**). Candidates scoring at/above it auto-commit; below it route to a human. The value you end at is written to the audit with the run.
-4. **Confirm the input** (sidebar 🎯 3 + pre-flight panel) — pick the verbatim column from the dropdown and check the panel: domains loaded, dictionary source + rows, detected columns, the Hierarchy chain this dictionary carries, and whether it has PT codes.
-5. **Execute** — click 🚀 Execute MedDRA Auto-Coding. Results render on screen and write to the output folder (default `meddra_output`).
+3. **Set the operating point** (sidebar ⚖ 2): the Auto-commit gate slider (default **0.88**). Candidates scoring at/above it auto-commit; below it route to a human. The value you end at is written to the audit with the run.
+4. **Confirm the input** (sidebar 🎯 3 + pre-flight panel): pick the verbatim column from the dropdown and check the panel: domains loaded, dictionary source + rows, detected columns, the Hierarchy chain this dictionary carries, and whether it has PT codes.
+5. **Execute**: click 🚀 Execute MedDRA Auto-Coding. Results render on screen and write to the output folder (default `meddra_output`).
 
 ### The hierarchy
 MedDRA groups related preferred terms into **High Level Terms (HLT)** by anatomy/pathology/physiology/etiology/function; HLTs link to **High Level Group Terms (HLGT)**; HLGTs group into **System Organ Classes (SOC)**. Every candidate carries the full `LLT → PT → HLT → HLGT → SOC` path as evidence columns.
@@ -871,23 +871,23 @@ One row per candidate (top-3), so a coder sees the whole pre-populated list, not
 | `VERBATIM` | The term exactly as typed (never rewritten). |
 | `rank` | 1 = top candidate; 2–3 are alternatives. |
 | `AEDECOD` / `AEPTCD` | Preferred-term decode + code to write back. |
-| `HLT`, `HLGT` | Evidence columns — full path; never scored, not SDTM write-back. |
+| `HLT`, `HLGT` | Evidence columns: the full path, never scored and not written back to SDTM. |
 | `AESOC` | System Organ Class. |
 | `cosine`, `lev`, `jaro`, `S` | The readable numbers the decision is made from. |
 | `AECODSTAT` | `AUTO_COMMIT_TO_SDTM` (rank 1 only) or `FLAGGED_FOR_HUMAN_CODER`; ranks 2–3 are `ALT_CANDIDATE`. |
 
-> A **name-only dictionary** (no PT codes) forces every verbatim to route to a human — an `AEPTCD` without a number is not submission-grade. The pre-flight panel warns you up front.
+> A **name-only dictionary** (no PT codes) forces every verbatim to route to a human, because there is no code to write to `AEPTCD`. The pre-flight panel warns you up front.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
 Without trained weights, Tiers 2–4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
 ### Troubleshooting
 - **"No MedDRA source found":** provide exactly one dictionary shape (upload CSV / set the .asc folder / name it `meddra*.csv` in the cut folder).
-- **Everything routes to a human:** your dictionary is likely name-only — pre-flight says "Has PT codes → NO".
+- **Everything routes to a human:** your dictionary is likely name-only (pre-flight says "Has PT codes → NO").
 - **Verbatim column not detected:** rename it to `AETERM`, or add its spelling to `AETERM_SYNONYMS` at the top of this file.
 
 ### What this build does NOT do
-No scanned-document path, no safety/DLT logic, no negation feature, nothing leaves the machine. See Deck A for full governance and limits.
+No scanned-document path, no safety/DLT logic, no negation feature, nothing leaves the machine. Every proposed code needs a coder's review. What was measured, on synthetic data only, is in the [evaluation](https://patrickiben.github.io/ecrf-pipeline-apps/evaluation.html); the limits are in the [case study](https://patrickiben.github.io/ecrf-pipeline-apps/case-study.html).
 """
 if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")
 with st.expander("📖 How to use this app"):
@@ -916,7 +916,7 @@ up_dom = st.sidebar.file_uploader("...or upload domain files (CSV or SAS .sas7bd
 if HOSTED: up_dom = None
 # The dictionary shape is an explicit radio so the operator states intent rather
 # than the app guessing between a flat CSV and an .asc release.
-st.sidebar.markdown("**MedDRA dictionary** — provide exactly one shape:")
+st.sidebar.markdown("**MedDRA dictionary**: provide exactly one shape.")
 kind = st.sidebar.radio("Source shape", ["Flattened CSV (recommended)","ASCII release (llt/pt/hlt/hlgt/soc.asc)"])
 up_med=None; asc_dir=""
 # Hosted mode: the radio stays live, but both dictionary inputs are disabled and
@@ -930,7 +930,7 @@ if kind.startswith("Flattened"):
 else:
     asc_dir = st.sidebar.text_input("Folder with llt.asc / pt.asc / hlt.asc / hlgt.asc / soc.asc", disabled=HOSTED,
         help="Pipe-delimited release; filtered to currency=='Y', joined "
-             "LLT→PT→HLT→HLGT→SOC. The hlt/hlgt files are optional -- if absent, "
+             "LLT→PT→HLT→HLGT→SOC. The hlt/hlgt files are optional; if absent, "
              "those levels simply do not appear on the candidates.")
     if HOSTED: asc_dir = ""
 
@@ -989,7 +989,7 @@ verb_sel = st.sidebar.selectbox("Verbatim source column (this program reads ONLY
     options=vopts if vopts else ["(none detected)"], index=0, disabled=not vopts,
     help="Lists every loaded column matching an AETERM synonym. If yours has an "
          "unusual name, rename it to AETERM in the CSV or add it to "
-         "AETERM_SYNONYMS at the top of this file -- do not hard-code a column.")
+         "AETERM_SYNONYMS at the top of this file; do not hard-code a column.")
 
 # ---- mode banner: which path ran PER TIER, computed from the runtime probe, not
 #      from a constant. This is the [SI]/[RM] discipline made visible: a stand-in
@@ -998,7 +998,7 @@ banner = "Tier 2: %s | Tier 3: %s | Tier 4: %s" % (
     "REAL needle3+hnsw" if REAL_T2 else "STAND-IN [SI] (lexical)",
     ("REAL laya" + ("" if "calibration NONE" not in _R["info"].get("laya","") else " (UNCALIBRATED)")) if REAL_T3 else "STAND-IN [SI]",
     "REAL xgboost re-ranker" if REAL_T4 else "STAND-IN [SI]")
-st.info("**Mode banner** — "+banner+" · a [SI] stand-in is never the component; the "
+st.info("**Mode banner:** "+banner+" · a [SI] stand-in is never the component; the "
         "audit records which path ran per tier. Without the trained encoder, Tier-2 "
         "retrieval is lexical and will not reproduce semantic MedDRA mappings.")
 
@@ -1007,7 +1007,7 @@ st.info("**Mode banner** — "+banner+" · a [SI] stand-in is never the componen
 #      here, fix it in the sidebar (selector / rule inputs), NOT in the code. ----
 st.subheader("📋 Input contract (pre-flight)")
 if load_err: st.error(f"Import failed: {load_err}")
-elif not domains: st.warning("No domain CSVs loaded yet — set the folder path or upload files.")
+elif not domains: st.warning("No domain CSVs loaded yet. Set the folder path or upload files.")
 else:
     c1,c2=st.columns(2)
     with c1:
@@ -1029,7 +1029,7 @@ else:
             # the operator is not surprised by 100% routing later.
             hc = "pt_code" in meddra.columns and meddra["pt_code"].notna().any()
             st.write("Has PT codes → "+("YES" if hc else "NO (name-only → all coding routes to a human)"))
-    st.caption("This program reads ONLY the verbatim column above -- nothing else in your data "
+    st.caption("This program reads ONLY the verbatim column above; nothing else in your data "
                "is opened or modified.")
 
 # ---- Run button: disabled until BOTH a domain and a dictionary are loaded, so
