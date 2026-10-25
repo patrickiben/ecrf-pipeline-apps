@@ -11,8 +11,10 @@ Five planted scorers on simulated lab clusters, each with an answer the statisti
   (d) good enough              q_c ~ Beta(97, 3): passes the floor at 120 clusters and beats the keyword rule
   (e) bound coverage           true accuracy 0.85 with intraclass correlation 0.2: the Gate A bound sits below
                                0.85 in at least 93% of datasets
-Like eval/sibling_eval.py it refuses to run unless the plan's SHA-256 matches eval/sibling_plan.sha256, and it
-reads every parameter from the plan. The statistics are the ones sibling_eval.py uses, imported from it.
+Like eval/sibling_eval.py it refuses to run unless the plan's SHA-256 matches eval/sibling_plan.sha256 and every
+input file's SHA-256 matches the plan (it reads the lab sets from eval/data/sibling_sets.csv), and it reads every
+parameter from the plan. It never calls the coding app's scorer, so unlike sibling_eval.py it does not check the
+scorer fingerprint. The statistics are the ones sibling_eval.py uses, imported from it.
 tests/test_sibling.py runs the same demo at reduced replicates.
 """
 import argparse, csv, math, os, sys
@@ -143,7 +145,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Known-answer demo for the within-sibling evaluation (eval/sibling_plan.md, section 13)")
     ap.add_argument("--out", default=S.RESULTS); ap.add_argument("--plan", default=S.PLAN, help=argparse.SUPPRESS)
     a = ap.parse_args(argv)
-    try: P, sha = S.check_plan(a.plan, S.PLAN_HASH)
+    try:
+        P, sha = S.check_plan(a.plan, S.PLAN_HASH)
+        S.check_inputs(P)                       # exit 3 on a changed input; the demo reads eval/data/sibling_sets.csv
     except S.Refusal as e: print("REFUSED: " + str(e), file=sys.stderr); return e.code
     rows, _ = run_knownanswer(P)
     os.makedirs(a.out, exist_ok=True); p = os.path.join(a.out, "sibling_knownanswer.csv")

@@ -58,7 +58,7 @@ python eval/sibling_knownanswer.py             # known-answer demo -> results/si
 python tests/test_sibling.py                   # its checks, also run in CI
 ```
 
-Both scripts refuse to run unless the SHA-256 of `sibling_plan.md` equals the committed `sibling_plan.sha256`, and they read every parameter from the plan. A change to the plan, to an input file or to the coding app's scoring code needs a new registration before any scoring.
+Both scripts refuse to run unless the SHA-256 of `sibling_plan.md` equals the committed `sibling_plan.sha256` and each input file's SHA-256 equals the value the plan registers, and they read every parameter from the plan. `sibling_eval.py` also refuses when the coding app's scoring code differs from the plan's fingerprint; `sibling_knownanswer.py` never calls that code, so it does not check it. A change to the plan, to an input file or to the scoring code needs a new registration before any scoring.
 
 `run_eval.py` re-fits the Laya temperatures and retrains both gates, writing them into the models dir (and copying them to `eval/artifacts/`). Everything is seeded and CPU inference is deterministic, so a rerun on the same versions reproduces the committed files. A `--smoke` run writes `*_smoke` result files and leaves `eval/artifacts/` alone, but it does overwrite the artifacts in the models dir, so finish with a full run.
 
@@ -76,8 +76,8 @@ Two Laya details matter when you refit. Laya fits a temperature per answer type 
 | `fetch_models.py` | builds a models dir |
 | `sibling_sets.py` | the within-sibling check's sibling sets (lab direction, body site), from preferred-term names only -> `data/sibling_sets.csv` |
 | `sibling_plan.md`, `sibling_plan.sha256` | the within-sibling check's plan, registered before any scoring, and its SHA-256 lock |
-| `sibling_eval.py` | the within-sibling check: scores, nulls, keyword comparator, routing gates, negative control (refuses on a plan hash mismatch) |
-| `sibling_knownanswer.py` | the within-sibling check's known-answer demo (planted scorers a to e) |
+| `sibling_eval.py` | the within-sibling check: scores, nulls, keyword comparator, routing gates, negative control (refuses on a plan, input or scorer mismatch) |
+| `sibling_knownanswer.py` | the within-sibling check's known-answer demo (planted scorers a to e; refuses on a plan or input mismatch) |
 | `data/` | the generated data (committed; regenerate with `make_data.py`) |
 | `artifacts/` | the trained, synthetic-data artifacts (committed, small) |
 | `results/` | measured outputs (committed) |

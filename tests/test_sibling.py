@@ -10,8 +10,9 @@ What is checked (S-checks):
   S2   the exact tail of F (convolution) equals brute-force enumeration, for 1 to 8 clusters
   S3   one item per cluster under N1: the tail equals the Poisson-binomial tail with p_c = 1/K_c (by DFT)
   S4   the plan guard: an edited plan is refused (function and both scripts, exit 2, nothing written); the
-       committed plan passes; an input file whose hash differs is refused; the scorer fingerprint matches the
-       registration, ignores a comment edit and catches a code edit
+       committed plan passes; an input file whose hash differs is refused (function and both scripts, exit 3,
+       nothing written); the scorer fingerprint matches the registration, ignores a comment edit and catches a
+       code edit
   S5   the statistics: Clopper-Pearson attainability 0.05^(1/m), Gate A with every item correct, BH/BY on a
        hand-checked case, KS on uniform draws, the keyword rule's matching
   S6   the known-answer demo (a) to (e) at reduced replicates (60 datasets, 300 for coverage, B = 999), with
@@ -128,6 +129,22 @@ def s4():
     c2 = os.path.join(TMP, "app_code.py"); open(c2, "w", encoding="utf-8").write(app.replace("SI_W=[0.40,0.25,0.20,0.15]", "SI_W=[0.45,0.20,0.20,0.15]", 1))
     check("S4e the scorer fingerprint matches the registration, ignores a comment edit and catches a code edit",
           fp0 == P["scorer_fingerprint"] and S.scorer_fingerprint(c1) == fp0 and S.scorer_fingerprint(c2) != fp0, fp0)
+    # S4f: each script's main() refuses a changed input file before it computes anything. The inputs are copied to
+    # a scratch root with sibling_sets.csv edited, and sibling_eval's ROOT points there; the run functions are
+    # replaced by ones that raise, so a script that got past its guard fails this check instead of running.
+    fake = os.path.join(TMP, "fake_root"); os.makedirs(os.path.join(fake, "eval", "data"))
+    for rel in P["inputs_sha256"]: shutil.copy(os.path.join(ROOT, rel), os.path.join(fake, rel))
+    with open(os.path.join(fake, "eval", "data", "sibling_sets.csv"), "a", encoding="utf-8") as f: f.write("lab,X,increased,0,x\n")
+    def ran(*a, **k): raise AssertionError("ran past the input guard")
+    for name, mod, fn in (("sibling_eval.py", S, "run"), ("sibling_knownanswer.py", KA, "run_knownanswer")):
+        out = os.path.join(TMP, "refused_input_" + name); os.makedirs(out)
+        saved_root, saved_fn, err, se = S.ROOT, getattr(mod, fn), io.StringIO(), sys.stderr
+        S.ROOT = fake; setattr(mod, fn, ran); sys.stderr = err
+        try: rc = mod.main(["--out", out])
+        except AssertionError as e: rc = repr(e)
+        finally: S.ROOT = saved_root; setattr(mod, fn, saved_fn); sys.stderr = se
+        check(f"S4f {name} refuses an input file whose SHA-256 differs from the plan: exit 3, names the file, writes nothing",
+              rc == 3 and "sibling_sets.csv" in err.getvalue() and not os.listdir(out), dict(rc=rc, err=err.getvalue()[-200:]))
 block("S4", s4)
 
 # ---------------------------------------------------------------- S5 statistics
