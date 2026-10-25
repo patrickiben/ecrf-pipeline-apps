@@ -590,7 +590,7 @@ This app scans **every column that is not strictly numeric** (text, dates, coded
 5. **Execute**: click 🚀 Execute PII/PHI Flagging.
 
 ### Direct vs indirect identifiers
-A *direct* identifier (name, phone, MRN, DOB, address, SSN) scrubs on its own merit. An *indirect* attribute (age, ZIP code, initials, rare condition) scrubs **only when two or more co-occur in the same field**: the "mosaic" rule that catches re-identification risk no single value shows.
+A *direct* identifier (name, phone, email, MRN, DOB) scrubs on its own merit. An *indirect* attribute (age, ZIP code, initials) scrubs **only when two or more co-occur in the same field**: the "mosaic" rule that catches re-identification risk no single value shows. The stand-in's patterns find names only after a title (Patient, Mr, Ms, Mrs, Dr) or in surname-comma form, MRNs only as `123-456-78`, dates of birth only as `MM/DD/YYYY` or `YYYY-MM-DD`, and ages only as "NN-year-old" or "NN yo"; it has no pattern for addresses, SSNs or rare conditions, so those are never flagged.
 
 ### Reading the outputs
 - **`phi_flags.csv`** has one row per scrubbed span: `DOMAIN`, `USUBJID`, `ROW`, `FIELD`, `SPAN`, `ENTITY`, in-field `START`/`END`, `P_REDACT`, `ACTION`. The audit evidence of exactly what was masked, with what confidence, at what position.
