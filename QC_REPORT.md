@@ -12,11 +12,13 @@ of a production system and not independent double programming by a second person
 | `python tests/qc_test.py` | **266 passed, 0 failed, 5 skipped** (RM1 to RM5 need a models dir with the real model artifacts) | macOS, Python 3.14.7, Streamlit 1.65.0, pandas 3.0.6, numpy 2.5.4, with the optional extras (pyreadstat 1.3.6, scikit-learn 1.9.1, POT 0.9.7.post1, scipy 1.18.1); no models dir; `ECRF_HOSTED` unset |
 | `python3 tools/sync_browser_apps.py --check` | OK: 12 byte-identical copies, 4 rendered pages, 3 pinned wheels, stlite 1.12.0 | standard library only |
 | The four in-browser pages | 4 of 4: Execute on the sample data, the results survive a download, the downloaded file is byte-identical to a native run, zero page errors (details below) | Chrome 155.0.8059.86 (headless), puppeteer-core 25.16.0, `docs/` served locally under `/ecrf-pipeline-apps/` as GitHub Pages serves it |
-| The static pages | `index.html`, `evaluation.html`, `case-study.html` and both redirect stubs: zero page errors and console errors, no off-site request, no horizontal scroll at 1440 px or 390 px; each stub lands on `case-study.html` (rechecked after the last page edit) | same |
+| The static pages | `index.html`, `evaluation.html`, `case-study.html` and both redirect stubs: zero page errors and console errors, no off-site request, no horizontal scroll at 1440 px or 390 px; each stub lands on `case-study.html`; at 390 px no participant ID or sequence number in a table wraps (rechecked after the last page edit) | same |
 | CI (`.github/workflows/qc.yml`) | Not run for this branch: its commits are local and have not been pushed. The workflow runs the harness in three legs (stand-in, optional extras, the browser's Python 3.14.0 stack) and the browser-build check on every push and pull request | GitHub Actions |
 
-The same 266 / 0 / 5 result was recorded on the same machine before this pass's changes, so the renaming and the
-help-text edits changed no tested behavior.
+The same 266 / 0 / 5 result was recorded on the same machine before this pass's changes and after its first part
+(the renaming and the help-text edits), and again after the review fixes listed below. The review fixes changed one
+boundary in the risk app (a QTc of exactly 500 ms no longer counts; no sample value is 500 ms, so no score moved) and
+the wording of its lab and QTc reasons in `risk_scores.csv`; checks R13, R14 and R16 cover those reasons and passed.
 
 **In-browser checks, in detail** (each page, a fresh tab, in a run outside the harness; screenshots kept outside the
 repository):
@@ -24,8 +26,8 @@ repository):
 - Each page showed its tab title ("Coding QC assist: in-browser demo" and so on), the app name as its heading, its
   Limits line and the privacy note, both hosted-mode banners, and the sample-data box checked and locked. (On the
   coding page the sidebar renders a moment after the Execute button, so the run's own read often came too early; a
-  separate read 3 s later found the box checked and disabled.) Each page became interactive in about 4.5 s with the
-  runtime cached; the first page of a run took 7 to 33 s.
+  separate read 3 s later found the box checked and disabled.) Each page became interactive in about 4.3 to 4.5 s
+  with the runtime cached; the first page of a run took 5 to 33 s across the runs of this pass.
 - Execute rendered the results with no Streamlit exception. The first download button of each app saved its file
   (`ae_coded.csv`, `phi_flags.csv`, `risk_scores.csv`, `anomalies.csv`), and afterward the results, the success
   message and every download button were still on screen. Each file was byte-identical to a native run of the same
@@ -35,11 +37,12 @@ repository):
 - Zero page errors. The only console errors are the known, harmless ones: each download button makes stlite probe
   its placeholder host `stlite.invalid`, which the page's policy blocks, and Streamlit logs that as a download-button
   fetch error; the downloads themselves work.
-- The build environment's network dropped the first request for stlite's stylesheet on the first page in three of
-  the five runs; the page's own retry restyled the app each time, and no reload was needed.
+- The build environment's network dropped the first request for stlite's stylesheet on the first page in most runs
+  of this pass (three of the first five, and all four runs after the review fixes); the page's own retry restyled the
+  app each time, and no reload was needed.
 - Not tested: Safari, Firefox, iOS and Android browsers.
 
-**What changed in this pass** (2026-10-25; no computation, widget label or output changed):
+**What changed in this pass** (2026-10-25). First part (no computation, widget label or output changed):
 
 - **One name per app everywhere a person sees it** (title, tab title, in-browser page title, launchers, README,
   USER_GUIDE): Coding QC assist, De-identification review assist, Participant risk screening, Central statistical
@@ -57,10 +60,43 @@ repository):
   deck copies: D1 requires exactly those pages and that each stub redirects to an existing page; D2 and D3 apply the
   self-containment and local-link checks to every page. Each was seen to fail on a scratch copy for the fault it
   guards: a stray page, a stub pointing elsewhere, an off-site stylesheet, a broken local link.
-- **Screenshots** in `docs/img/` were recaptured from the in-browser pages in the final run above (light color
+- **Screenshots** in `docs/img/` were recaptured from the in-browser pages in that part's final run (light color
   scheme, 1440 by 960 px app area), so they show the current names and wording.
 - This report now puts the current status first; the dated record follows under History, with statements about the
   retired Streamlit Community Cloud deployment marked as history.
+
+Review fixes, later on 2026-10-25:
+
+- **The risk app's lab criteria described as they are.** Its help and USER_GUIDE section 5 said the discontinuation
+  score used "grade 3 or higher labs" and that labs were scored against "stopping multiples". The app does no CTCAE
+  grading: it counts any analyte above a built-in multiple of the upper limit of normal (ALT or AST above 3x,
+  creatinine above 1.5x), which in NCI CTCAE v5.0 are grade 2 entry points, and these are not the discontinuation
+  criteria of FDA's *Drug-Induced Liver Injury: Premarketing Clinical Evaluation* (July 2009). The help, USER_GUIDE,
+  the data README and the code comments now say so, and an exported reason reads `ALT 5.1x ULN ([SI] criterion >3x
+  ULN)` instead of `(>3x SAP)`, since the app reads no SAP.
+- **QTc criterion aligned to the ICH E14 tier.** The cardiac criterion was QTc at or above 500 ms; it is now above
+  500 ms, the top E14 categorical tier. The help and USER_GUIDE say the app applies only that tier, with no change
+  from baseline, and does not know whether the column holds QTcF or QTcB. The reason reads `QTc 505 ms ([SI]
+  criterion >500 ms)`. The sample-data generator's `CLINSIG` flag uses the same strict cutoff, and regenerating
+  `sample_data/` gave byte-identical files. The data README now says `ABNORMAL` is set above 460 ms, as the generator
+  does.
+- **Labels.** The risk and monitoring apps' sidebar field is now "Models dir (no trained model in this build)" (it
+  said "optional real model"; the harness labels were updated to match). The local caption says "runs locally, no
+  network calls" instead of "air-gapped". The fallback screenshot's alt text on the four in-browser pages uses the app
+  names.
+- **Source headers.** The four apps' header comments said each app "is validated as its own computer-system scope
+  with its own audit trail". They now say the apps are kept separate so each could be validated on its own scope, and
+  that none is a validated system.
+- **Docs.** The evaluation page no longer says every number on it is read from a result file: the per-format leak and
+  false-positive breakdowns, the mean `P(direct)`, the case-sensitivity example and the Stage 0 examples come from
+  `docs/EVALUATION.md` and `docs/FEASIBILITY.md`, which its provenance table now lists (EVALUATION.md says the same).
+  The case study's corrections table says which claims were still in the decks when they were retired and which were
+  only in earlier versions, replaced with measured values on 2026-10-22; EVALUATION.md attributes them the same way.
+  USER_GUIDE section 11 says the determinism checks cover the coding, risk and monitoring apps (there is none for the
+  de-identification app), and section 7 gives 0.9 to 1.6 s per note. At 390 px the case study's coding table keeps
+  its identifiers on one line and its header row is 61 px tall instead of 176 px.
+- **Screenshots.** `risk_results.png` and `anomaly_results.png` were recaptured in the final browser run (they show the
+  new sidebar label); the coding and de-identification screens did not change, so their screenshots were kept.
 
 ## How to re-run the tests
 
@@ -138,7 +174,7 @@ The two new checks are A2c and A6d; RM1 to RM5 are skipped because no models dir
 The earlier hosted demos on Streamlit Community Cloud had started to answer with a sign-in page, so the four apps moved into the visitor's browser and the Community Cloud deployment is no longer used. stlite 1.12.0 runs Streamlit 1.65.0 on Pyodide 314.0.3 (Python 3.14) inside the tab, and GitHub Pages serves one page per app from `docs/app/`. What changed:
 
 - **Downloads keep the results (all four apps).** Every `st.download_button` now passes `on_click="ignore"`. Before, a click reran the script and, because the results sit behind the Execute button, wiped the tables and the other download buttons, so a second file needed a second run.
-- **Accurate wording in the browser.** Under Pyodide (`sys.platform == "emscripten"`) the caption says "runs in this browser tab" instead of "air-gapped", the help panel says nothing you load is uploaded instead of "nothing leaves the machine", the Output-folder help explains that the folder is in the tab's memory, and the success message says the files are in the tab's memory and points to the download buttons instead of "Wrote /tmp/...". A local run is unchanged; no widget label, header or button text changed.
+- **Accurate wording in the browser.** Under Pyodide (`sys.platform == "emscripten"`) the caption says "runs in this browser tab" instead of "air-gapped", the help panel says nothing you load is uploaded instead of "nothing leaves the machine", the Output-folder help explains that the folder is in the tab's memory, and the success message says the files are in the tab's memory and points to the download buttons instead of "Wrote /tmp/...". A local run is unchanged; no widget label, header or button text changed. (Note, 2026-10-25: the local caption now says "runs locally, no network calls" instead of "air-gapped".)
 - **The browser build.** `tools/sync_browser_apps.py` copies the four `.py` files and every CSV in `sample_data/` and `anomaly_data/` into `docs/app/`, renders the four pages from `tools/browser_app_template.html` and checks three pinned pure-Python wheels (`itsdangerous`, `python-multipart`, `toml`) that the Streamlit build needs and Pyodide does not ship. Serving those from Pages means a visit contacts only GitHub Pages and cdn.jsdelivr.net, never PyPI. The pages set `ECRF_HOSTED=1`, pin stlite and Pyodide by exact version, check stlite's stylesheet and two core modules with Subresource Integrity, and carry a Content-Security-Policy that allows connections only to the site and the CDN.
 - **New check D4.** `tools/sync_browser_apps.py --check` must pass: byte-identical copies, pages exactly as rendered, wheel hashes, and no stray file. It also runs as its own CI job (`browser-build`). It was seen to fail on scratch copies for an edited app, a new source CSV, a deleted copy, a stray copy, a hand-edited page, a corrupted wheel and a missing screenshot, and to pass again after a sync.
 
