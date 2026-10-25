@@ -1,5 +1,5 @@
 #!/bin/sh
-# One-command launcher for the MedDRA auto-coding app.
+# One-command launcher for the Coding QC assist (meddra_app.py).
 # Creates .venv on first run, installs requirements, then starts Streamlit.
 set -e
 cd "$(dirname "$0")"
@@ -19,5 +19,5 @@ if [ ! -d .venv ]; then
 fi
 ./.venv/bin/pip install --quiet --disable-pip-version-check -r requirements.txt
 
-echo "Starting MedDRA Auto-Coding Engine at http://localhost:${PORT:-8501}"
+echo "Starting Coding QC assist [meddra_app.py] at http://localhost:${PORT:-8501}"
 exec ./.venv/bin/streamlit run meddra_app.py --server.port "${PORT:-8501}" "$@"

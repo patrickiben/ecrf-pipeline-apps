@@ -1,5 +1,5 @@
 @echo off
-rem One-command launcher for the data anomaly & drift-detection app (Windows).
+rem One-command launcher for Central statistical monitoring, anomaly_app.py (Windows).
 rem Creates .venv on first run, installs requirements, then starts Streamlit.
 setlocal
 cd /d "%~dp0"
@@ -19,7 +19,7 @@ if not exist ".venv\Scripts\python.exe" (
 ".venv\Scripts\pip.exe" install --quiet --disable-pip-version-check -r requirements.txt || goto :err
 
 if "%PORT%"=="" set PORT=8504
-echo Starting Data Anomaly & Drift Detection at http://localhost:%PORT%
+echo Starting Central statistical monitoring [anomaly_app.py] at http://localhost:%PORT%
 ".venv\Scripts\streamlit.exe" run anomaly_app.py --server.port %PORT% %*
 exit /b 0
 :err

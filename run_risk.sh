@@ -1,5 +1,5 @@
 #!/bin/sh
-# One-command launcher for the participant risk-scoring app.
+# One-command launcher for Participant risk screening (risk_app.py).
 # Creates .venv on first run, installs requirements, then starts Streamlit.
 set -e
 cd "$(dirname "$0")"
@@ -19,5 +19,5 @@ if [ ! -d .venv ]; then
 fi
 ./.venv/bin/pip install --quiet --disable-pip-version-check -r requirements.txt
 
-echo "Starting Participant Risk Scoring Engine at http://localhost:${PORT:-8503}"
+echo "Starting Participant risk screening [risk_app.py] at http://localhost:${PORT:-8503}"
 exec ./.venv/bin/streamlit run risk_app.py --server.port "${PORT:-8503}" "$@"

@@ -558,12 +558,12 @@ def _contract_error(R):
 # panel, then Run. The operator confirms which columns will be scanned/scrubbed
 # BEFORE compute, so a column that should not be touched (or one the operator wants
 # excluded) is caught on screen and deselected there.
-st.set_page_config(page_title="De-identification Review Assist", layout="wide")
+st.set_page_config(page_title="De-identification review assist", layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
 if HOSTED: st.set_option("client.showErrorDetails", "none")
-st.title("🛡 PII/PHI Flagging & Redaction Engine")
+st.title("🛡 De-identification review assist")
 # In the browser only the [SI] stand-ins can run (see README), so the caption names those instead.
 st.caption(("Tier 1 intake → Tier 2 guarded patterns [SI] → Tier 3 direct and mosaic rules [SI] → Tier 4 redaction gate [SI] · "
             if IN_BROWSER else "Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · ")

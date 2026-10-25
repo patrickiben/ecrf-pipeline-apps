@@ -1,14 +1,14 @@
-# User Guide — eCRF Pipeline Apps
+# User guide: eCRF pipeline apps
 
 A step-by-step manual for running the four apps in this folder:
 
-- **[meddra_app.py](meddra_app.py)** — *MedDRA Auto-Coding Engine*: proposes a MedDRA code
+- **Coding QC assist** ([`meddra_app.py`](meddra_app.py)): proposes a MedDRA-style code
   (LLT → PT → HLT → HLGT → SOC) for each adverse-event verbatim.
-- **[phi_app.py](phi_app.py)** — *PII/PHI Flagging & Redaction Engine*: finds and scrubs
+- **De-identification review assist** ([`phi_app.py`](phi_app.py)): finds and scrubs
   patient identifiers in free-text fields.
-- **[risk_app.py](risk_app.py)** — *Participant Safety & Discontinuation Risk Scoring*: scores each
+- **Participant risk screening** ([`risk_app.py`](risk_app.py)): scores each
   participant on risk to their safety (0–100) and risk of discontinuing (0–1) from AE + lab/ECG/vitals/PE.
-- **[anomaly_app.py](anomaly_app.py)** — *Data Anomaly & Distributional-Drift Detection*: flags
+- **Central statistical monitoring** ([`anomaly_app.py`](anomaly_app.py)): flags
   per-participant anomalies and measures cohort drift over time with Sinkhorn optimal transport, on
   longitudinal (per-visit) data.
 
@@ -83,7 +83,7 @@ system.
 
 ---
 
-## 3. App 1 — MedDRA Auto-Coding (`meddra_app.py`)
+## 3. Coding QC assist (`meddra_app.py`)
 
 ### What it needs
 - **Domain CSVs** containing the verbatim terms to code (e.g. `ae.csv`). The verbatim column is located
@@ -144,7 +144,7 @@ Key columns:
 
 ---
 
-## 4. App 2 — PII/PHI Flagging & Redaction (`phi_app.py`)
+## 4. De-identification review assist (`phi_app.py`)
 
 ### What it needs
 - **Domain CSVs only.** It needs **no dictionary** and ignores any `meddra*.csv` in the folder, so all
@@ -185,7 +185,7 @@ or more co-occur in the same field** — the "mosaic" rule that catches re-ident
 
 ---
 
-## 5. App 3 — Participant Safety & Discontinuation Risk Scoring (`risk_app.py`)
+## 5. Participant risk screening (`risk_app.py`)
 
 > ⚠ This app is **decision support, not a clinical determination.** It ranks and flags participants for human
 > review; it does not diagnose, predict an outcome with validated accuracy, or replace medical judgment.
@@ -226,7 +226,7 @@ One row per participant: `USUBJID`, both scores + categories, and a human-readab
 
 ---
 
-## 6. App 4 — Data Anomaly & Distributional-Drift Detection (`anomaly_app.py`)
+## 6. Central statistical monitoring (`anomaly_app.py`)
 
 > ⚠ This app is **decision support, not a data-quality certification or clinical determination.** It ranks and flags participants/columns for human review; it does not certify your data or make a medical judgment.
 

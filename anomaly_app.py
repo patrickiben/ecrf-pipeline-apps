@@ -580,12 +580,12 @@ def _guard_artifacts(models_dir):
                  f"[SI] engine is the only scorer. Remove the file to run."); st.stop()
 
 # ============================ UI ============================
-st.set_page_config(page_title="Anomaly and Drift Checks", layout="wide")
+st.set_page_config(page_title="Central statistical monitoring", layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
 if HOSTED: st.set_option("client.showErrorDetails", "none")
-st.title("🔎 Data Anomaly & Distributional-Drift Detection")
+st.title("🔎 Central statistical monitoring")
 # In the browser only the [SI] stand-ins can run (numpy and pandas only), so the caption names those instead.
 st.caption(("Tier 1 intake → Tier 2 numeric outliers (robust-z [SI]) → "
             "Tier 3 drift (1-D Wasserstein [SI]; cohort + per-lab + between-lab) → Tier 3b text outliers (bag-of-words [SI]) → Tier 4 categorize · "

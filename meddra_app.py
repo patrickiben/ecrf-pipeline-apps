@@ -831,12 +831,12 @@ def _contract_error(R):
 # then the pre-flight CONTRACT panel, then Run. The operator confirms the input
 # contract BEFORE any compute, so a mis-pointed folder or a wrong verbatim column
 # is caught on screen, not after a silent wrong answer.
-st.set_page_config(page_title="Coding QC Assist", layout="wide")
+st.set_page_config(page_title="Coding QC assist", layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
 if HOSTED: st.set_option("client.showErrorDetails", "none")
-st.title("🏷 MedDRA Auto-Coding Engine")
+st.title("🏷 Coding QC assist")
 # In the browser only the [SI] stand-ins can run (see README), so the caption names those instead.
 st.caption(("Tier 1 intake → Tier 2 lexical retrieval [SI] → Tier 3 off [SI] → Tier 4 weighted re-rank and gate [SI] · "
             if IN_BROWSER else "Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · ")

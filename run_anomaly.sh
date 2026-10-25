@@ -1,5 +1,5 @@
 #!/bin/sh
-# One-command launcher for the data anomaly & drift-detection app.
+# One-command launcher for Central statistical monitoring (anomaly_app.py).
 # Creates .venv on first run, installs requirements, then starts Streamlit.
 set -e
 cd "$(dirname "$0")"
@@ -19,5 +19,5 @@ if [ ! -d .venv ]; then
 fi
 ./.venv/bin/pip install --quiet --disable-pip-version-check -r requirements.txt
 
-echo "Starting Data Anomaly & Drift Detection at http://localhost:${PORT:-8504}"
+echo "Starting Central statistical monitoring [anomaly_app.py] at http://localhost:${PORT:-8504}"
 exec ./.venv/bin/streamlit run anomaly_app.py --server.port "${PORT:-8504}" "$@"

@@ -1,4 +1,4 @@
-# eCRF Pipeline Apps — MedDRA Auto-Coding · PII/PHI Redaction · Risk Scoring · Anomaly & Drift
+# eCRF pipeline apps: Coding QC assist, De-identification review assist, Participant risk screening, Central statistical monitoring
 
 [![QC](https://github.com/patrickiben/ecrf-pipeline-apps/actions/workflows/qc.yml/badge.svg)](https://github.com/patrickiben/ecrf-pipeline-apps/actions/workflows/qc.yml)
 
@@ -10,10 +10,10 @@ Four independent Streamlit apps that run on local, air-gapped hardware and read 
 
 | App | Reads | Needs | Writes |
 |---|---|---|---|
-| [meddra_app.py](meddra_app.py) — *MedDRA Auto-Coding* | the one verbatim column you select (`AETERM`-synonym) | domain CSVs **+** a MedDRA dictionary (flattened CSV or `.asc`) | `ae_coded.csv`, `audit_log.csv` |
-| [phi_app.py](phi_app.py) — *PII/PHI Redaction* | **every non-numeric column** (content-based; confirmed in pre-flight) | domain CSVs only — **no dictionary**; ignores any `meddra*.csv` | `phi_flags.csv`, `sanitized/<domain>.csv`, `audit_log.csv` |
-| [risk_app.py](risk_app.py) — *Risk Scoring* | safety domains (`ae`/`lb`/`eg`/`vs`/`pe`) classified by content | those CSVs only — **no dictionary, no SAP file**; scores against built-in `[SI]` criteria | `risk_scores.csv`, `audit_log.csv` |
-| [anomaly_app.py](anomaly_app.py) — *Anomaly & Drift Detection* | measurable numeric columns + optional time/visit, lab/site and free-text columns, aligned by `USUBJID` | longitudinal CSVs/SAS only — **no dictionary**; scores against built-in `[SI]` criteria | `anomalies.csv`, `drift.csv`, `lab_drift.csv`, `lab_compare.csv`, `text_anomalies.csv`, `audit_log.csv` |
+| **Coding QC assist** ([`meddra_app.py`](meddra_app.py)) | the one verbatim column you select (`AETERM`-synonym) | domain CSVs **+** a MedDRA dictionary (flattened CSV or `.asc`) | `ae_coded.csv`, `audit_log.csv` |
+| **De-identification review assist** ([`phi_app.py`](phi_app.py)) | **every non-numeric column** (content-based; confirmed in pre-flight) | domain CSVs only — **no dictionary**; ignores any `meddra*.csv` | `phi_flags.csv`, `sanitized/<domain>.csv`, `audit_log.csv` |
+| **Participant risk screening** ([`risk_app.py`](risk_app.py)) | safety domains (`ae`/`lb`/`eg`/`vs`/`pe`) classified by content | those CSVs only — **no dictionary, no SAP file**; scores against built-in `[SI]` criteria | `risk_scores.csv`, `audit_log.csv` |
+| **Central statistical monitoring** ([`anomaly_app.py`](anomaly_app.py)) | measurable numeric columns + optional time/visit, lab/site and free-text columns, aligned by `USUBJID` | longitudinal CSVs/SAS only — **no dictionary**; scores against built-in `[SI]` criteria | `anomalies.csv`, `drift.csv`, `lab_drift.csv`, `lab_compare.csv`, `text_anomalies.csv`, `audit_log.csv` |
 
 Each app writes its own audit log with the files it read, the per-tier path that ran (REAL or
 labeled stand-in `[SI]`), and every effective threshold — so a run is reproducible from its audit

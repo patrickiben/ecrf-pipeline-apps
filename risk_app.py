@@ -568,12 +568,12 @@ def _guard_artifacts(models_dir):
 # read and how each file classified, then the banner, then the pre-flight CONTRACT panel, then
 # Run. The operator confirms the input contract BEFORE any compute, so a mis-pointed folder or
 # an unrecognized domain is caught on screen, not after a silent wrong answer.
-st.set_page_config(page_title="Participant Risk Screening", layout="wide")
+st.set_page_config(page_title="Participant risk screening", layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
 if HOSTED: st.set_option("client.showErrorDetails", "none")
-st.title("⚖ Participant Safety & Discontinuation Risk Scoring")
+st.title("⚖ Participant risk screening")
 st.caption("Tier 1 intake → Tier 2 signals → Tier 3 aggregate [SI] → Tier 4 categorize · "
            "decision support, not a clinical determination · " + RUNS_WHERE + " · no sample data in this file")
 # Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
