@@ -59,22 +59,34 @@ WHEELS = [
 # numpy and pandas are what the apps import (both come from the Pyodide distribution on the CDN); toml as above.
 REQUIREMENTS = ["numpy", "pandas", "toml"]
 
+# What each page must say about its own limits, next to the privacy note, so a visitor reads the measured
+# shortfall before the results (docs/EVALUATION.md has the numbers; they are synthetic-data results).
+EVALUATION = "https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/docs/EVALUATION.md"
 APPS = {
     "meddra": dict(entry="meddra_app.py", data="sample_data", title="MedDRA Auto-Coding",
         description="The coding app running in your browser on synthetic adverse-event data: top three dictionary candidates per verbatim and an auto-commit gate.",
         img="meddra_results.png",
+        limits="Measured on held-out synthetic verbatims, this lexical stand-in ranked the right preferred term first "
+               "for 54% (the real model path: 78%) and auto-coded 7 of 96 negated verbatims at the default gate; every "
+               "code needs a coder's review.", limits_link=EVALUATION,
         alt="Coding app results table: each adverse-event verbatim with its top three candidate terms, ranks and 99-prefixed placeholder codes, followed by the success message and download buttons."),
     "phi": dict(entry="phi_app.py", data="sample_data", title="PII/PHI Flagging and Redaction",
         description="The PHI app running in your browser on synthetic eCRF text: flagged identifier spans and sanitized domain tables.",
         img="phi_results.png",
+        limits="On held-out synthetic text this stand-in left 108 of 308 identifiers readable (the real model path: "
+               "91 of 308); every output needs human review.", limits_link=EVALUATION,
         alt="PHI app results: a table of flagged spans such as invented phone numbers, names, a ZIP code and initials, each with its entity type, offsets, redaction probability and action, above the sanitized domain rows."),
     "risk": dict(entry="risk_app.py", data="sample_data", title="Participant Risk Scoring",
         description="The risk app running in your browser on synthetic safety domains: per-participant safety and discontinuation scores with their reasons.",
         img="risk_results.png",
+        limits="Both scores are capped, weighted sums of built-in [SI] rules, not probabilities or a validated model; every "
+               "flag needs clinical review.",
         alt="Risk app results: per-participant safety and discontinuation scores and categories with contributing factors, the fatal case pinned to the top, and a category summary."),
     "anomaly": dict(entry="anomaly_app.py", data="anomaly_data", title="Anomaly and Drift Detection",
         description="The anomaly app running in your browser on a synthetic longitudinal lab cut: numeric outliers, cohort drift, per-lab drift and text outliers.",
         img="anomaly_results.png",
+        limits="Here every detector runs its [SI] stand-in (robust z, 1-D Wasserstein drift, bag-of-words text "
+               "isolation) with built-in thresholds; every flag needs human review.",
         alt="Anomaly app results: flagged per-participant numeric outliers with their extreme columns, a cohort-wide drift table per column, and the start of the per-lab drift table."),
 }
 HAND_EDITED = ["launch.js", "app.css"]          # live in docs/app/ only; must exist
@@ -129,6 +141,8 @@ def render_page(key):
         "CSP": html.escape(csp, quote=False), "STLITE_CSS": f"{STLITE_BUILD}/stlite.css", "STLITE_CSS_SRI": STLITE_SRI["stlite.css"],
         "CDN": CDN, "IMPORTMAP": importmap, "CONFIG": cfg, "IMG": a["img"], "ALT": html.escape(a["alt"]),
         "LOADING_NOTICE": html.escape(LOADING_NOTICE), "PRIVACY_NOTE": html.escape(PRIVACY_NOTE),
+        "LIMITS": html.escape(a["limits"]) + (f' <a href="{a["limits_link"]}">How this was measured</a>.'
+                                               if a.get("limits_link") else ""),
         "RUN_LOCALLY": RUN_LOCALLY, "STLITE_VERSION": STLITE_VERSION,
     }
     out = _read(TEMPLATE).decode("utf-8")
