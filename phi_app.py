@@ -52,7 +52,7 @@
 #   (hashlib hashes the loaded artifacts for the audit; numpy builds the Tier-4
 #    feature matrix on the real path. Both ship with pandas.)
 
-import hashlib, importlib, json, os, platform, re, tempfile, time, warnings
+import hashlib, importlib, json, os, platform, re, sys, tempfile, time, warnings
 import numpy as np, pandas as pd, streamlit as st
 
 # Air gap -- same as meddra_app.py: set BEFORE any optional runtime is imported, so
@@ -132,6 +132,14 @@ DEF_REDACT_GATE=0.85
 HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real patient data. "
                  "Run locally for real data.")
 _HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
+# In-browser build (stlite on Pyodide, served from docs/app/ on GitHub Pages): sys.platform is
+# "emscripten" there and nowhere else. The flag only rewords text that would be wrong in a browser
+# tab ("air-gapped", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
+# help); a local run is unchanged.
+IN_BROWSER = sys.platform == "emscripten"
+RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "air-gapped"
+OUT_HELP_BROWSER = ("In this in-browser build the folder lives in the tab's memory, not on your disk, and is "
+                    "gone when the tab closes. Save results with the download buttons.")
 def _hosted():
     if os.environ.get("ECRF_HOSTED","").strip().lower() not in _HOSTED_OFF: return True
     # load_if_toml_exists() is asked FIRST (it returns False rather than raising when no
@@ -557,7 +565,7 @@ HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("🛡 PII/PHI Flagging & Redaction Engine")
 st.caption("Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · "
-           "scrubs free-text eCRF fields only · air-gapped · no sample data in this file")
+           "scrubs free-text eCRF fields only · " + RUNS_WHERE + " · no sample data in this file")
 if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
 # Built-in, app-specific instruction manual (from USER_GUIDE.md §4), rendered as a
@@ -596,6 +604,7 @@ Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[
 ### What this build does NOT do
 No scanned-document / bounding-box path, no safety/DLT logic, nothing leaves the machine. The PHI output is compliance-*enabling*, not a certification — that remains an organizational determination. See Deck A for full governance and limits.
 """
+if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")
 with st.expander("📖 How to use this app"):
     st.markdown(_HELP_MD)
 
@@ -651,7 +660,7 @@ if HOSTED and "_hosted_out" not in st.session_state:
     st.session_state["_hosted_tmp"] = tempfile.TemporaryDirectory(prefix="phi_output_", ignore_cleanup_errors=True)
     st.session_state["_hosted_out"] = st.session_state["_hosted_tmp"].name
 out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"] if HOSTED else "phi_output"), disabled=HOSTED,
-    help="Where phi_flags.csv + sanitized/*.csv + audit_log.csv are written on Run.")
+    help=(OUT_HELP_BROWSER if IN_BROWSER else "Where phi_flags.csv + sanitized/*.csv + audit_log.csv are written on Run."))
 if HOSTED: out_dir = st.session_state["_hosted_out"]
 models_dir = st.sidebar.text_input("Models dir (optional real weights)","models", disabled=HOSTED,
     help="If a trained artifact is present here but its runtime is not installed, "
@@ -828,6 +837,8 @@ for d,sdf in san_dfs.items():
     os.makedirs(os.path.join(out_dir,"sanitized"), exist_ok=True)
     sdf.to_csv(os.path.join(out_dir,"sanitized",f"{d}.csv"), index=False)
 audit.to_csv(os.path.join(out_dir,"audit_log.csv"), index=False)
-st.success(f"Wrote `{out_dir}/phi_flags.csv`, `{out_dir}/sanitized/*.csv`, `{out_dir}/audit_log.csv`")
-st.download_button("⬇ phi_flags.csv",(pd.DataFrame(phi_rows) if phi_rows else pd.DataFrame()).to_csv(index=False).encode(),"phi_flags.csv","text/csv")
-st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv")
+if IN_BROWSER: st.success("Done: `phi_flags.csv`, `sanitized/*.csv` and `audit_log.csv` are in this browser tab's memory only. "
+                          "Save `phi_flags.csv` and `audit_log.csv` with the download buttons below; the sanitized tables are shown on this page.")
+else: st.success(f"Wrote `{out_dir}/phi_flags.csv`, `{out_dir}/sanitized/*.csv`, `{out_dir}/audit_log.csv`")
+st.download_button("⬇ phi_flags.csv",(pd.DataFrame(phi_rows) if phi_rows else pd.DataFrame()).to_csv(index=False).encode(),"phi_flags.csv","text/csv", on_click="ignore")
+st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv", on_click="ignore")

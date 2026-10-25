@@ -54,7 +54,7 @@
 #        exactly what it uses, matching phi_app.py's discipline.)
 #   real path (flips banner to [RM]):  a validated survival/risk model replacing Tier 3
 
-import json, os, re, tempfile, time
+import json, os, re, sys, tempfile, time
 import pandas as pd, streamlit as st
 
 # --------------------------------------------------------------------------- #
@@ -136,6 +136,14 @@ VITAL_KEY = {"SYSBP": "SYSBP_HIGH_MMHG", "DIASTP": "DIASTP_HIGH_MMHG", "TEMPC": 
 HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real patient data. "
                  "Run locally for real data.")
 _HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
+# In-browser build (stlite on Pyodide, served from docs/app/ on GitHub Pages): sys.platform is
+# "emscripten" there and nowhere else. The flag only rewords text that would be wrong in a browser
+# tab ("air-gapped", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
+# help); a local run is unchanged.
+IN_BROWSER = sys.platform == "emscripten"
+RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "air-gapped"
+OUT_HELP_BROWSER = ("In this in-browser build the folder lives in the tab's memory, not on your disk, and is "
+                    "gone when the tab closes. Save results with the download buttons.")
 def _hosted():
     if os.environ.get("ECRF_HOSTED","").strip().lower() not in _HOSTED_OFF: return True
     # load_if_toml_exists() is asked FIRST (it returns False rather than raising when no
@@ -567,7 +575,7 @@ HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("⚖ Participant Safety & Discontinuation Risk Scoring")
 st.caption("Tier 1 intake → Tier 2 signals → Tier 3 aggregate [SI] → Tier 4 categorize · "
-           "decision support, not a clinical determination · air-gapped · no sample data in this file")
+           "decision support, not a clinical determination · " + RUNS_WHERE + " · no sample data in this file")
 # Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
 if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
@@ -605,6 +613,7 @@ Without a validated model installed, Tier 3 runs as the labelled deterministic s
 ### What this build does NOT do
 No free-text PDF/Word protocol or SAP parsing, no clinical determination, nothing leaves the machine. See USER_GUIDE.md §5 for full details and §10 for the complete limits list.
 """
+if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")
 with st.expander("📖 How to use this app"):
     st.markdown(_HELP_MD)
 
@@ -644,7 +653,7 @@ if HOSTED and "_hosted_out" not in st.session_state:
     st.session_state["_hosted_tmp"] = tempfile.TemporaryDirectory(prefix="risk_output_", ignore_cleanup_errors=True)
     st.session_state["_hosted_out"] = st.session_state["_hosted_tmp"].name
 out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"] if HOSTED else "risk_output"), disabled=HOSTED,
-    help="Where risk_scores.csv + audit_log.csv are written on Run (also offered as downloads).")
+    help=(OUT_HELP_BROWSER if IN_BROWSER else "Where risk_scores.csv + audit_log.csv are written on Run (also offered as downloads)."))
 if HOSTED: out_dir = st.session_state["_hosted_out"]
 models_dir = st.sidebar.text_input("Models dir (optional real model)","models", disabled=HOSTED,
     help="This build has no trained-model path for this app: the labeled [SI] engine is the only scorer, "
@@ -736,6 +745,7 @@ out_results = results.drop(columns=["_fatal"]) if len(results) else pd.DataFrame
 os.makedirs(out_dir, exist_ok=True)
 if len(out_results): out_results.to_csv(os.path.join(out_dir,"risk_scores.csv"), index=False)
 audit.to_csv(os.path.join(out_dir,"audit_log.csv"), index=False)
-st.success(f"Wrote `{out_dir}/risk_scores.csv` and `{out_dir}/audit_log.csv`")
-st.download_button("⬇ risk_scores.csv",out_results.to_csv(index=False).encode(),"risk_scores.csv","text/csv")
-st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv")
+if IN_BROWSER: st.success("Done: `risk_scores.csv` and `audit_log.csv` are in this browser tab's memory only. Save them with the download buttons below.")
+else: st.success(f"Wrote `{out_dir}/risk_scores.csv` and `{out_dir}/audit_log.csv`")
+st.download_button("⬇ risk_scores.csv",out_results.to_csv(index=False).encode(),"risk_scores.csv","text/csv", on_click="ignore")
+st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv", on_click="ignore")

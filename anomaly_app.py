@@ -57,7 +57,7 @@
 #   real numeric-outlier path:         pip install scikit-learn     (Isolation Forest)
 #   real drift path (flips banner):    pip install POT scipy
 
-import json, os, re, tempfile, time
+import json, os, re, sys, tempfile, time
 import numpy as np, pandas as pd, streamlit as st
 
 # --------------------------------------------------------------------------- #
@@ -140,6 +140,14 @@ SYN = {
 HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real patient data. "
                  "Run locally for real data.")
 _HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
+# In-browser build (stlite on Pyodide, served from docs/app/ on GitHub Pages): sys.platform is
+# "emscripten" there and nowhere else. The flag only rewords text that would be wrong in a browser
+# tab ("air-gapped", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
+# help); a local run is unchanged.
+IN_BROWSER = sys.platform == "emscripten"
+RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "air-gapped"
+OUT_HELP_BROWSER = ("In this in-browser build the folder lives in the tab's memory, not on your disk, and is "
+                    "gone when the tab closes. Save results with the download buttons.")
 def _hosted():
     if os.environ.get("ECRF_HOSTED","").strip().lower() not in _HOSTED_OFF: return True
     # load_if_toml_exists() is asked FIRST (it returns False rather than raising when no
@@ -578,7 +586,7 @@ if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("🔎 Data Anomaly & Distributional-Drift Detection")
 st.caption("Tier 1 intake → Tier 2 numeric outliers (robust-z + Isolation Forest) → "
            "Tier 3 Sinkhorn OT drift (cohort + per-lab + between-lab) → Tier 3b text outliers → Tier 4 categorize · "
-           "decision support, not a data-quality certification · air-gapped · no sample data in this file")
+           "decision support, not a data-quality certification · " + RUNS_WHERE + " · no sample data in this file")
 # Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
 if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
@@ -617,6 +625,7 @@ _HELP_MD = """
 ### What this build does NOT do
 No clinical determination, no data-quality certification, nothing leaves the machine. It flags for human review; a flagged row is a lead to investigate, not a verdict.
 """
+if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")
 with st.expander("📖 How to use this app"):
     st.markdown(_HELP_MD)
 
@@ -654,8 +663,8 @@ if HOSTED and "_hosted_out" not in st.session_state:
     st.session_state["_hosted_tmp"] = tempfile.TemporaryDirectory(prefix="anomaly_output_", ignore_cleanup_errors=True)
     st.session_state["_hosted_out"] = st.session_state["_hosted_tmp"].name
 out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"] if HOSTED else "anomaly_output"), disabled=HOSTED,
-    help="Where anomalies.csv + drift.csv + lab_drift.csv + text_anomalies.csv + audit_log.csv are "
-         "written on Run (also offered as downloads).")
+    help=(OUT_HELP_BROWSER if IN_BROWSER else "Where anomalies.csv + drift.csv + lab_drift.csv + text_anomalies.csv + audit_log.csv are "
+         "written on Run (also offered as downloads)."))
 if HOSTED: out_dir = st.session_state["_hosted_out"]
 models_dir = st.sidebar.text_input("Models dir (optional real model)","models", disabled=HOSTED,
     help="This build has no trained-model path for this app: the labeled [SI] engine is the only scorer, "
@@ -773,11 +782,13 @@ if len(lcat): lcat.to_csv(os.path.join(out_dir,"lab_drift.csv"), index=False)
 if len(ccat): ccat.to_csv(os.path.join(out_dir,"lab_compare.csv"), index=False)
 if len(tcat): tcat.to_csv(os.path.join(out_dir,"text_anomalies.csv"), index=False)
 audit.to_csv(os.path.join(out_dir,"audit_log.csv"), index=False)
-st.success(f"Wrote `{out_dir}/anomalies.csv`, `drift.csv`, `lab_drift.csv`, `lab_compare.csv`, "
-           f"`text_anomalies.csv` and `audit_log.csv`")
-st.download_button("⬇ anomalies.csv",(anom if len(anom) else pd.DataFrame()).to_csv(index=False).encode(),"anomalies.csv","text/csv")
-st.download_button("⬇ drift.csv",(dcat if len(dcat) else pd.DataFrame()).to_csv(index=False).encode(),"drift.csv","text/csv")
-st.download_button("⬇ lab_drift.csv",(lcat if len(lcat) else pd.DataFrame()).to_csv(index=False).encode(),"lab_drift.csv","text/csv")
-st.download_button("⬇ lab_compare.csv",(ccat if len(ccat) else pd.DataFrame()).to_csv(index=False).encode(),"lab_compare.csv","text/csv")
-st.download_button("⬇ text_anomalies.csv",(tcat if len(tcat) else pd.DataFrame()).to_csv(index=False).encode(),"text_anomalies.csv","text/csv")
-st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv")
+if IN_BROWSER: st.success("Done: `anomalies.csv`, `drift.csv`, `lab_drift.csv`, `lab_compare.csv`, `text_anomalies.csv` and "
+                          "`audit_log.csv` are in this browser tab's memory only. Save them with the download buttons below.")
+else: st.success(f"Wrote `{out_dir}/anomalies.csv`, `drift.csv`, `lab_drift.csv`, `lab_compare.csv`, "
+                 f"`text_anomalies.csv` and `audit_log.csv`")
+st.download_button("⬇ anomalies.csv",(anom if len(anom) else pd.DataFrame()).to_csv(index=False).encode(),"anomalies.csv","text/csv", on_click="ignore")
+st.download_button("⬇ drift.csv",(dcat if len(dcat) else pd.DataFrame()).to_csv(index=False).encode(),"drift.csv","text/csv", on_click="ignore")
+st.download_button("⬇ lab_drift.csv",(lcat if len(lcat) else pd.DataFrame()).to_csv(index=False).encode(),"lab_drift.csv","text/csv", on_click="ignore")
+st.download_button("⬇ lab_compare.csv",(ccat if len(ccat) else pd.DataFrame()).to_csv(index=False).encode(),"lab_compare.csv","text/csv", on_click="ignore")
+st.download_button("⬇ text_anomalies.csv",(tcat if len(tcat) else pd.DataFrame()).to_csv(index=False).encode(),"text_anomalies.csv","text/csv", on_click="ignore")
+st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv", on_click="ignore")

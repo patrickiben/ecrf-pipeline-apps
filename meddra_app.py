@@ -65,7 +65,7 @@
 #   tempfile -> per-session output folder in hosted-demo mode (see _hosted)
 #   importlib/json/platform/warnings -> binding the optional runtimes, reading
 #              the re-ranker's feature contract, the per-OS engine file name
-import hashlib, importlib, json, os, platform, re, tempfile, time, warnings, zlib
+import hashlib, importlib, json, os, platform, re, sys, tempfile, time, warnings, zlib
 import numpy as np, pandas as pd, streamlit as st
 
 # --------------------------------------------------------------------------- #
@@ -183,6 +183,14 @@ AETERM_SYNONYMS = ["AETERM","VERBATIM","AE_TERM","REPORTED_TERM"]
 HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real patient data. "
                  "Run locally for real data.")
 _HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
+# In-browser build (stlite on Pyodide, served from docs/app/ on GitHub Pages): sys.platform is
+# "emscripten" there and nowhere else. The flag only rewords text that would be wrong in a browser
+# tab ("air-gapped", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
+# help); a local run is unchanged.
+IN_BROWSER = sys.platform == "emscripten"
+RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "air-gapped"
+OUT_HELP_BROWSER = ("In this in-browser build the folder lives in the tab's memory, not on your disk, and is "
+                    "gone when the tab closes. Save results with the download buttons.")
 def _hosted():
     if os.environ.get("ECRF_HOSTED","").strip().lower() not in _HOSTED_OFF: return True
     # load_if_toml_exists() is asked FIRST (it returns False rather than raising when no
@@ -830,7 +838,7 @@ HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("🏷 MedDRA Auto-Coding Engine")
 st.caption("Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · "
-           "codes verbatim AETERM only · air-gapped · no sample data in this file")
+           "codes verbatim AETERM only · " + RUNS_WHERE + " · no sample data in this file")
 # Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
 if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
@@ -879,6 +887,7 @@ Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[
 ### What this build does NOT do
 No scanned-document path, no safety/DLT logic, no negation feature, nothing leaves the machine. See Deck A for full governance and limits.
 """
+if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")
 with st.expander("📖 How to use this app"):
     st.markdown(_HELP_MD)
 
@@ -938,7 +947,7 @@ if HOSTED and "_hosted_out" not in st.session_state:
     st.session_state["_hosted_tmp"] = tempfile.TemporaryDirectory(prefix="meddra_output_", ignore_cleanup_errors=True)
     st.session_state["_hosted_out"] = st.session_state["_hosted_tmp"].name
 out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"] if HOSTED else "meddra_output"), disabled=HOSTED,
-    help="Where ae_coded.csv + audit_log.csv are written on Run (also offered as downloads).")
+    help=(OUT_HELP_BROWSER if IN_BROWSER else "Where ae_coded.csv + audit_log.csv are written on Run (also offered as downloads)."))
 if HOSTED: out_dir = st.session_state["_hosted_out"]
 models_dir = st.sidebar.text_input("Models dir (optional real weights)","models", disabled=HOSTED,
     help="If a trained artifact is present here but its runtime is not installed, "
@@ -1090,6 +1099,7 @@ audit=pd.DataFrame([dict(program="meddra_coder", timestamp=pd.Timestamp.now().is
 os.makedirs(out_dir, exist_ok=True)
 if coded_rows: pd.DataFrame(coded_rows).to_csv(os.path.join(out_dir,"ae_coded.csv"), index=False)
 audit.to_csv(os.path.join(out_dir,"audit_log.csv"), index=False)
-st.success(f"Wrote `{out_dir}/ae_coded.csv` and `{out_dir}/audit_log.csv`")
-st.download_button("⬇ ae_coded.csv",(pd.DataFrame(coded_rows) if coded_rows else pd.DataFrame()).to_csv(index=False).encode(),"ae_coded.csv","text/csv")
-st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv")
+if IN_BROWSER: st.success("Done: `ae_coded.csv` and `audit_log.csv` are in this browser tab's memory only. Save them with the download buttons below.")
+else: st.success(f"Wrote `{out_dir}/ae_coded.csv` and `{out_dir}/audit_log.csv`")
+st.download_button("⬇ ae_coded.csv",(pd.DataFrame(coded_rows) if coded_rows else pd.DataFrame()).to_csv(index=False).encode(),"ae_coded.csv","text/csv", on_click="ignore")
+st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv", on_click="ignore")
