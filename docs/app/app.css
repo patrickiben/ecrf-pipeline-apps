@@ -66,7 +66,7 @@ main#stage { flex: 1 1 auto; position: relative; min-height: 0; }
 #root [data-testid="stAppViewContainer"] > div,
 #root [data-testid="stMain"] { height: 100% !important; }
 /* Hosted mode locks every data input, and Streamlit draws a disabled widget's label at 40% of the text color
-   (2.2:1 on the light sidebar). Inactive controls are exempt from WCAG 1.4.3, but these labels say what is locked,
+   (2.56:1 on the light sidebar with text color #101218). Inactive controls are exempt from WCAG 1.4.3, but these labels say what is locked,
    so draw them at 60%, as Streamlit draws captions (4.7:1 light, about 6:1 dark), still lighter than a live label. */
 #root [data-testid="stWidgetLabel"][disabled] { color: inherit; opacity: .6; }
 /* A disabled checkbox (the locked sample-data box) sets that 40% color on its <label> instead. Restore the text
