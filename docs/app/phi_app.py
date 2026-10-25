@@ -558,7 +558,7 @@ def _contract_error(R):
 # panel, then Run. The operator confirms which columns will be scanned/scrubbed
 # BEFORE compute, so a column that should not be touched (or one the operator wants
 # excluded) is caught on screen and deselected there.
-st.set_page_config(page_title="PII/PHI Flagging Engine", layout="wide")
+st.set_page_config(page_title="De-identification Review Assist", layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.

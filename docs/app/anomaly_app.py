@@ -580,7 +580,7 @@ def _guard_artifacts(models_dir):
                  f"[SI] engine is the only scorer. Remove the file to run."); st.stop()
 
 # ============================ UI ============================
-st.set_page_config(page_title="Data Anomaly & Drift Detection", layout="wide")
+st.set_page_config(page_title="Anomaly and Drift Checks", layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.

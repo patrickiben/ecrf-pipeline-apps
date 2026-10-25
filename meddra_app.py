@@ -831,7 +831,7 @@ def _contract_error(R):
 # then the pre-flight CONTRACT panel, then Run. The operator confirms the input
 # contract BEFORE any compute, so a mis-pointed folder or a wrong verbatim column
 # is caught on screen, not after a silent wrong answer.
-st.set_page_config(page_title="MedDRA Auto-Coding Engine", layout="wide")
+st.set_page_config(page_title="Coding QC Assist", layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
