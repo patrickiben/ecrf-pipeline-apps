@@ -2,14 +2,15 @@
 # eCRF fields.
 #
 # READ THIS FIRST (for whoever maintains this file):
-#   * This is ONE of two separate programs. The other is meddra_app.py. They do
-#     NOT import each other and share NO module. The helpers _have/_col/
-#     load_domains are DELIBERATELY DUPLICATED from meddra_app.py. Do not factor
-#     them into a shared module: a shared module is a coupling point that would
-#     let a retrain of one head silently change the other's behavior, and the
-#     two heads are kept separate so each could be validated on its own scope,
-#     with its own audit log (neither is a validated system; the audit log is a
-#     plain CSV). Duplication is intentional.
+#   * This is ONE of four separate programs in this folder (the others are
+#     meddra_app.py, risk_app.py and anomaly_app.py). They do NOT import each
+#     other and share NO module. The helpers _have/_col/load_domains are
+#     DELIBERATELY DUPLICATED in each of the four. Do not factor them into a
+#     shared module: a shared module is a coupling point that would let a
+#     retrain of one head silently change another's behavior, and the heads are
+#     kept separate so each could be validated on its own scope, with its own
+#     audit log (none is a validated system; the audit log is a plain CSV).
+#     Duplication is intentional.
 #   * This program scrubs free text ONLY. It never codes a verbatim and never
 #     reads AETERM -- that is meddra_app.py's job. It needs NO MedDRA dictionary;
 #     a stray meddra*.csv in the cut folder is IGNORED here so the two programs
@@ -588,7 +589,7 @@ This app scans **every column that is not strictly numeric** (text, dates, coded
 2. **Read how discovery works** (sidebar 🔎 2): it explains the content-based rule above.
 3. **Set the operating point** (sidebar ⚖ 3): the Redaction gate slider (default **0.85**), recorded in the audit with the run.
 4. **Confirm the columns to scan** (sidebar 🎯 4 + pre-flight panel): every non-numeric column is pre-selected; deselect any you do not want scrubbed (e.g. a date or coded field you know is safe). The panel shows exactly which columns will be scanned per domain.
-5. **Execute**: click 🚀 Execute PII/PHI Flagging.
+5. **Execute**: click 🚀 Execute De-identification review assist.
 
 ### Direct vs indirect identifiers
 A *direct* identifier (name, phone, email, MRN, DOB) scrubs on its own merit. An *indirect* attribute (age, ZIP code, initials) scrubs **only when two or more co-occur in the same field**: the "mosaic" rule that catches re-identification risk no single value shows. The stand-in's patterns find names only after a title (Patient, Mr, Ms, Mrs, Dr) or in surname-comma form, MRNs only as `123-456-78`, dates of birth only as `MM/DD/YYYY` or `YYYY-MM-DD`, and ages only as "NN-year-old" or "NN yo"; it has no pattern for addresses, SSNs or rare conditions, so those are never flagged.
@@ -598,7 +599,7 @@ A *direct* identifier (name, phone, email, MRN, DOB) scrubs on its own merit. An
 - **`sanitized/<domain>.csv`** is a copy of each scanned domain carrying the original columns plus `SAN_<field>` (scrubbed text) and `<field>_PHI_FLAG` (`Y` if that cell changed, else `N`). Missing values stay missing, never `"nan"`.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
-Without trained weights, Tiers 2–4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): guarded regexes for spans + rule-based probabilities. It reproduces its worked trace exactly because identifier detection is pattern-shaped and the scrub is a string replace. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
+Without trained weights, Tiers 2 to 4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): guarded regexes for spans + rule-based probabilities. It reproduces its worked trace exactly because identifier detection is pattern-shaped and the scrub is a string replace. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
 ### Troubleshooting
 - **A date / ID column got flagged:** that is content-based discovery working as designed: it scans every non-numeric field. If you know that column is safe, deselect it in step 4 and re-run; review any flags before trusting a scrub.
@@ -746,7 +747,7 @@ else:
 
 # ---- Run button: disabled until a domain is loaded AND at least one column is
 #      selected, so an empty selection cannot produce a misleading 'no PHI' run. ----
-if not st.button("🚀 Execute PII/PHI Flagging", type="primary", disabled=not (domains and ft_sel)):
+if not st.button("🚀 Execute De-identification review assist", type="primary", disabled=not (domains and ft_sel)):
     st.stop()
 
 # ---- execute the tiers; rebuild the per-domain column lists FROM the
@@ -799,7 +800,7 @@ elapsed=(time.perf_counter()-t0)*1000
 
 # ---- results: the flag table + the sanitized domain rows (original columns +
 #      SAN_<field> + <field>_PHI_FLAG), computed from the operator's files. ----
-st.subheader(f"Tier 2–4 · results (computed from your files; {elapsed:.2f} ms)")
+st.subheader(f"Tiers 2 to 4 · results (computed from your files; {elapsed:.2f} ms)")
 if phi_rows:
     st.markdown("**PHI flags**: one row per scrubbed span")
     st.dataframe(pd.DataFrame(phi_rows), width="stretch")

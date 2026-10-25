@@ -1,15 +1,16 @@
 # meddra_app.py -- INDEPENDENT program: MedDRA auto-coding of verbatim AE terms.
 #
 # READ THIS FIRST (for whoever maintains this file):
-#   * This is ONE of two separate programs. The other is phi_app.py. They do NOT
-#     import each other and share NO module. The small helpers near the bottom of
-#     this header (_have, _col, load_domains) are DELIBERATELY DUPLICATED in
-#     phi_app.py. Do not "refactor" them into a shared pipeline.py: a shared
+#   * This is ONE of four separate programs in this folder (the others are
+#     phi_app.py, risk_app.py and anomaly_app.py). They do NOT import each other
+#     and share NO module. The small helpers near the bottom of this header
+#     (_have, _col, load_domains) are DELIBERATELY DUPLICATED in each of the
+#     other three. Do not "refactor" them into a shared pipeline.py: a shared
 #     module is a coupling point that would let a retrain of one head silently
-#     change the other's behavior, and the two heads are kept separate so each
-#     could be validated on its own scope, with its own audit log (neither is a
-#     validated system; the audit log is a plain CSV). Duplication is the price
-#     of that independence, and it is intentional.
+#     change another's behavior, and the heads are kept separate so each could
+#     be validated on its own scope, with its own audit log (none is a validated
+#     system; the audit log is a plain CSV). Duplication is the price of that
+#     independence, and it is intentional.
 #   * This program codes verbatims ONLY. It never opens a free-text comment
 #     column and never flags PHI -- that is phi_app.py's job, with its own audit.
 #     The pre-flight panel at the bottom enforces this by listing exactly the one
@@ -859,7 +860,7 @@ _HELP_MD = """
    - *ASCII release (.asc):* give the folder with `llt.asc / pt.asc / hlt.asc / hlgt.asc / soc.asc`. Filtered to active terms (`currency == 'Y'`) and joined across the full chain; `hlt.asc`/`hlgt.asc` are optional.
 3. **Set the operating point** (sidebar ⚖ 2): the Auto-commit gate slider (default **0.88**). Candidates scoring at/above it auto-commit; below it route to a human. The value you end at is written to the audit with the run.
 4. **Confirm the input** (sidebar 🎯 3 + pre-flight panel): pick the verbatim column from the dropdown and check the panel: domains loaded, dictionary source + rows, detected columns, the Hierarchy chain this dictionary carries, and whether it has PT codes.
-5. **Execute**: click 🚀 Execute MedDRA Auto-Coding. Results render on screen and write to the output folder (default `meddra_output`).
+5. **Execute**: click 🚀 Execute Coding QC assist. Results render on screen and write to the output folder (default `meddra_output`).
 
 ### The hierarchy
 MedDRA groups related preferred terms into **High Level Terms (HLT)** by anatomy/pathology/physiology/etiology/function; HLTs link to **High Level Group Terms (HLGT)**; HLGTs group into **System Organ Classes (SOC)**. Every candidate carries the full `LLT → PT → HLT → HLGT → SOC` path as evidence columns.
@@ -870,17 +871,17 @@ One row per candidate (top-3), so a coder sees the whole pre-populated list, not
 | Column | Meaning |
 |---|---|
 | `VERBATIM` | The term exactly as typed (never rewritten). |
-| `rank` | 1 = top candidate; 2–3 are alternatives. |
+| `rank` | 1 = top candidate; 2 and 3 are alternatives. |
 | `AEDECOD` / `AEPTCD` | Preferred-term decode + code to write back. |
 | `HLT`, `HLGT` | Evidence columns: the full path, never scored and not written back to SDTM. |
 | `AESOC` | System Organ Class. |
 | `cosine`, `lev`, `jaro`, `S` | The readable numbers the decision is made from. |
-| `AECODSTAT` | `AUTO_COMMIT_TO_SDTM` (rank 1 only) or `FLAGGED_FOR_HUMAN_CODER`; ranks 2–3 are `ALT_CANDIDATE`. |
+| `AECODSTAT` | `AUTO_COMMIT_TO_SDTM` (rank 1 only) or `FLAGGED_FOR_HUMAN_CODER`; ranks 2 and 3 are `ALT_CANDIDATE`. |
 
 > A **name-only dictionary** (no PT codes) forces every verbatim to route to a human, because there is no code to write to `AEPTCD`. The pre-flight panel warns you up front.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
-Without trained weights, Tiers 2–4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
+Without trained weights, Tiers 2 to 4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
 ### Troubleshooting
 - **"No MedDRA source found":** provide exactly one dictionary shape (upload CSV / set the .asc folder / name it `meddra*.csv` in the cut folder).
@@ -1035,7 +1036,7 @@ else:
 
 # ---- Run button: disabled until BOTH a domain and a dictionary are loaded, so
 #      an empty/partial input cannot produce a misleading empty result. ----
-if not st.button("🚀 Execute MedDRA Auto-Coding", type="primary", disabled=not (domains and meddra is not None)):
+if not st.button("🚀 Execute Coding QC assist", type="primary", disabled=not (domains and meddra is not None)):
     st.stop()
 
 # ---- execute the tiers on the already-loaded frames; time the whole run for the
@@ -1074,7 +1075,7 @@ elapsed=(time.perf_counter()-t0)*1000
 
 # ---- results: these tables ARE the tier outputs, computed from the operator's
 #      files; no reference/expected table is embedded anywhere in this file. ----
-st.subheader(f"Tier 2–4 · results (computed from your files; {elapsed:.2f} ms)")
+st.subheader(f"Tiers 2 to 4 · results (computed from your files; {elapsed:.2f} ms)")
 if coded_rows:
     st.dataframe(pd.DataFrame(coded_rows), width="stretch")
     st.caption("cosine/S are computed from your dictionary by the active Tier-2 path "

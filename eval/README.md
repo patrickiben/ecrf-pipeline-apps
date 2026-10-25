@@ -48,6 +48,18 @@ python eval/deck_b_worked.py --models models   # Stage 4: the case study's worke
 ECRF_MODELS_DIR=models python tests/qc_test.py # adds the RM real-path checks (skipped without it)
 ```
 
+The within-sibling check of the Coding QC assist (`docs/EVALUATION.md`, "Within-sibling discrimination") needs no models for its stand-in path:
+
+```bash
+python eval/sibling_sets.py --check            # the sibling sets in data/sibling_sets.csv are current
+python eval/sibling_eval.py                    # stand-in path -> results/sibling_summary.json, sibling_items.csv
+python eval/sibling_eval.py --models models    # adds the real path
+python eval/sibling_knownanswer.py             # known-answer demo -> results/sibling_knownanswer.csv (about 3 min)
+python tests/test_sibling.py                   # its checks, also run in CI
+```
+
+Both scripts refuse to run unless the SHA-256 of `sibling_plan.md` equals the committed `sibling_plan.sha256` and each input file's SHA-256 equals the value the plan registers, and they read every parameter from the plan. `sibling_eval.py` also refuses when the coding app's scoring code differs from the plan's fingerprint; `sibling_knownanswer.py` never calls that code, so it does not check it. A change to the plan, to an input file or to the scoring code needs a new registration before any scoring.
+
 `run_eval.py` re-fits the Laya temperatures and retrains both gates, writing them into the models dir (and copying them to `eval/artifacts/`). Everything is seeded and CPU inference is deterministic, so a rerun on the same versions reproduces the committed files. A `--smoke` run writes `*_smoke` result files and leaves `eval/artifacts/` alone, but it does overwrite the artifacts in the models dir, so finish with a full run.
 
 Two Laya details matter when you refit. Laya fits a temperature per answer type and option count (the `noul:2` bucket) only from 2,000 records or more; below that it fits the type-level `noul` scalar, and that is what it applies. The calibration splits here are smaller, so the files hold the type-level scalar, and the two PHI questions share it. Each calibration file also records the checkpoint it was fitted for (`convaiinnovations/laya@<commit>` and the checkpoint config). The apps accept a file whose only difference is the path, because a models dir moves between machines, and stop on one fitted for a different checkpoint config.
@@ -62,6 +74,10 @@ Two Laya details matter when you refit. Laya fits a temperature per answer type 
 | `run_eval.py` | Stages 2 and 3 |
 | `deck_b_worked.py` | Stage 4: runs both apps end to end on `sample_data/` and records the worked values shown in the case study (named for the retired Deck B, which the case study replaced) |
 | `fetch_models.py` | builds a models dir |
+| `sibling_sets.py` | the within-sibling check's sibling sets (lab direction, body site), from preferred-term names only -> `data/sibling_sets.csv` |
+| `sibling_plan.md`, `sibling_plan.sha256` | the within-sibling check's plan, registered before any scoring, and its SHA-256 lock |
+| `sibling_eval.py` | the within-sibling check: scores, nulls, keyword comparator, routing gates, negative control (refuses on a plan, input or scorer mismatch) |
+| `sibling_knownanswer.py` | the within-sibling check's known-answer demo (planted scorers a to e; refuses on a plan or input mismatch) |
 | `data/` | the generated data (committed; regenerate with `make_data.py`) |
 | `artifacts/` | the trained, synthetic-data artifacts (committed, small) |
 | `results/` | measured outputs (committed) |

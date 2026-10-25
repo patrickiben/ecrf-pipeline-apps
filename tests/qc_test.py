@@ -54,7 +54,7 @@ check("M2 verbatim selector populated", sel.value == "ae :: AETERM", sel.value)
 md1 = "\n".join(m.value for m in at.markdown)
 check("M2b pre-flight shows full hierarchy chain", "Hierarchy → LLT > PT > HLT > HLGT > SOC" in md1, "")
 find(at,"text_input","Output folder").set_value(out1).run()
-btn = find(at,"button","🚀 Execute MedDRA Auto-Coding")
+btn = find(at,"button","🚀 Execute Coding QC assist")
 check("M3 run button enabled with data+dict", not btn.disabled)
 btn.set_value(True).run()
 check("M4 no exception on execute", not at.exception, [str(e.value) for e in at.exception])
@@ -86,7 +86,7 @@ out2 = os.path.join(SCRATCH, "meddra_run2"); shutil.rmtree(out2, ignore_errors=T
 at2 = AppTest.from_file(os.path.join(APP_DIR,"meddra_app.py"), default_timeout=120); at2.run()
 find(at2,"text_input","Cut folder path (domain CSVs)").set_value(SAMPLE).run()
 find(at2,"text_input","Output folder").set_value(out2).run()
-find(at2,"button","🚀 Execute MedDRA Auto-Coding").set_value(True).run()
+find(at2,"button","🚀 Execute Coding QC assist").set_value(True).run()
 c1 = os.path.join(out1,"ae_coded.csv"); c2 = os.path.join(out2,"ae_coded.csv")
 check("M10 deterministic across runs (crc32 fix)", sha(c1)==sha(c2), f"{sha(c1)} vs {sha(c2)}")
 
@@ -105,7 +105,7 @@ if med_up is not None:
     med_up.upload("meddra_demo.csv", content, "text/csv").run()
     check("M12 no exception after upload", not at3.exception, [str(e.value) for e in at3.exception])
     find(at3,"text_input","Output folder").set_value(out3).run()
-    b3 = find(at3,"button","🚀 Execute MedDRA Auto-Coding")
+    b3 = find(at3,"button","🚀 Execute Coding QC assist")
     check("M13 button enabled with uploaded dict", not b3.disabled)
     if not b3.disabled:
         b3.set_value(True).run()
@@ -125,7 +125,7 @@ check("M15 no exception, name-only dict", not at4.exception, [str(e.value) for e
 md = "\n".join(m.value for m in at4.markdown)
 check("M16 pre-flight warns name-only routes to human", "name-only" in md, "")
 find(at4,"text_input","Output folder").set_value(out4).run()
-b4 = find(at4,"button","🚀 Execute MedDRA Auto-Coding")
+b4 = find(at4,"button","🚀 Execute Coding QC assist")
 if not b4.disabled:
     b4.set_value(True).run()
     dfs4=[d.value for d in at4.dataframe]
@@ -160,7 +160,7 @@ find(at6,"text_input","Cut folder path (domain CSVs)").set_value(ascdir).run()
 md6 = "\n".join(m.value for m in at6.markdown)
 check("M19 .asc release auto-found, hierarchy shown", "Hierarchy → LLT > PT > HLT > HLGT > SOC" in md6 and ".asc release in cut folder" in md6, "")
 find(at6,"text_input","Output folder").set_value(out5).run()
-b6 = find(at6,"button","🚀 Execute MedDRA Auto-Coding")
+b6 = find(at6,"button","🚀 Execute Coding QC assist")
 check("M20 run button enabled with .asc dict", not b6.disabled)
 if not b6.disabled:
     b6.set_value(True).run()
@@ -192,7 +192,7 @@ if HAVE_PYRS:
     find(ats,"text_input","Output folder").set_value(out_s).run()
     ssel = [w for w in ats.selectbox if "Verbatim source" in w.label][0]
     check("SAS1 .sas7bdat domain loads + verbatim found", ssel.value=="ae :: AETERM", ssel.value)
-    bs = find(ats,"button","🚀 Execute MedDRA Auto-Coding")
+    bs = find(ats,"button","🚀 Execute Coding QC assist")
     if not bs.disabled:
         bs.set_value(True).run()
         check("SAS2 execute OK on .sas7bdat input", not ats.exception, [str(e.value)[:150] for e in ats.exception])
@@ -218,7 +218,7 @@ EXPECTED_SCAN=expected_scan(SAMPLE)
 check("P2 content-based discovery scans every non-numeric column", set(ms.value)==EXPECTED_SCAN, ms.value)
 check("P2b AETERM now scanned (old name-rule missed it)", "ae::AETERM" in set(ms.value), ms.value)
 find(ap,"text_input","Output folder").set_value(outp).run()
-bp = find(ap,"button","🚀 Execute PII/PHI Flagging")
+bp = find(ap,"button","🚀 Execute De-identification review assist")
 check("P3 run button enabled", not bp.disabled)
 bp.set_value(True).run()
 check("P4 no exception on execute", not ap.exception, [str(e.value) for e in ap.exception])
@@ -269,7 +269,7 @@ pre = next((df for df in (d.value for d in ar.dataframe)
 check("R2 pre-flight classifies all five safety domains",
       pre is not None and {"ae","lb","eg","vs","pe"} <= set(pre["domain"]), list(getattr(pre,"domain",[])))
 find(ar,"text_input","Output folder").set_value(outr1).run()
-br = find(ar,"button","🚀 Execute Risk Scoring")
+br = find(ar,"button","🚀 Execute Participant risk screening")
 check("R3 run button enabled with safety data", not br.disabled)
 br.set_value(True).run()
 check("R4 no exception on execute", not ar.exception, [str(e.value) for e in ar.exception])
@@ -323,7 +323,7 @@ outr2 = os.path.join(SCRATCH,"risk_run2"); shutil.rmtree(outr2, ignore_errors=Tr
 ar2 = AppTest.from_file(os.path.join(APP_DIR,"risk_app.py"), default_timeout=120); ar2.run()
 find(ar2,"text_input","Cut folder path (safety domains)").set_value(SAFETY).run()
 find(ar2,"text_input","Output folder").set_value(outr2).run()
-find(ar2,"button","🚀 Execute Risk Scoring").set_value(True).run()
+find(ar2,"button","🚀 Execute Participant risk screening").set_value(True).run()
 check("R17 deterministic across runs", sha(os.path.join(outr1,"risk_scores.csv"))==sha(os.path.join(outr2,"risk_scores.csv")), "")
 
 # ---------------------------------------------------------------- risk app (unrecognized wide-format file, R18)
@@ -374,7 +374,7 @@ check("A2b pre-flight detects lab col (per-lab drift ON) + free-text col (text o
 check("A2c pre-flight counts participants, not rows (150 in the 600-row demo)",
       "Participants aligned → **150**" in mda, [l for l in mda.splitlines() if "aligned" in l])
 find(aa,"text_input","Output folder").set_value(outa1).run()
-ba = find(aa,"button","🚀 Execute Anomaly & Drift Detection")
+ba = find(aa,"button","🚀 Execute Central statistical monitoring")
 check("A3 run button enabled with longitudinal data", not ba.disabled)
 ba.set_value(True).run()
 check("A4 no exception on execute", not aa.exception, [str(e.value)[:150] for e in aa.exception])
@@ -431,7 +431,7 @@ outa2 = os.path.join(SCRATCH,"anom_run2"); shutil.rmtree(outa2, ignore_errors=Tr
 aa2 = AppTest.from_file(os.path.join(APP_DIR,"anomaly_app.py"), default_timeout=120); aa2.run()
 find(aa2,"text_input","Cut folder path (CSV or SAS .sas7bdat)").set_value(ANOM).run()
 find(aa2,"text_input","Output folder").set_value(outa2).run()
-find(aa2,"button","🚀 Execute Anomaly & Drift Detection").set_value(True).run()
+find(aa2,"button","🚀 Execute Central statistical monitoring").set_value(True).run()
 # determinism now covers every output table that was written (pure arithmetic -> bit-reproducible)
 _cmp=[f for f in ["anomalies.csv","drift.csv","lab_drift.csv","lab_compare.csv","text_anomalies.csv"] if os.path.exists(os.path.join(outa1,f))]
 check("A11 deterministic across runs", len(_cmp)>=2 and all(sha(os.path.join(outa1,f))==sha(os.path.join(outa2,f)) for f in _cmp), str(_cmp))
@@ -450,7 +450,7 @@ aa3 = AppTest.from_file(os.path.join(APP_DIR, "anomaly_app.py"), default_timeout
 find(aa3, "text_input", "Cut folder path (CSV or SAS .sas7bdat)").set_value(mixed).run()
 check("A19 mixed longitudinal+cross-sectional upload: no exception on load", not aa3.exception, [str(e.value)[:200] for e in aa3.exception])
 find(aa3, "text_input", "Output folder").set_value(outa3).run()
-b3 = find(aa3, "button", "\U0001F680 Execute Anomaly & Drift Detection")
+b3 = find(aa3, "button", "\U0001F680 Execute Central statistical monitoring")
 check("A19b run button enabled with mixed upload", not b3.disabled)
 b3.set_value(True).run()
 check("A20 mixed upload: no exception on execute", not aa3.exception, [str(e.value)[:200] for e in aa3.exception])
@@ -568,19 +568,19 @@ DICT_UP = "Upload flattened MedDRA CSV"
 HAPPS = [
     dict(c="M", app="coding", file="meddra_app.py", folder="Cut folder path (domain CSVs)",
          up="...or upload domain files (CSV or SAS .sas7bdat)", models="Models dir (optional real weights)",
-         btn="🚀 Execute MedDRA Auto-Coding", out="meddra_output", sample=SAMPLE, local_run=out1,
+         btn="🚀 Execute Coding QC assist", out="meddra_output", sample=SAMPLE, local_run=out1,
          decoy="cut", src=SRC_AE, pre="verbatim selector = 'ae :: AETERM'"),
     dict(c="P", app="PHI", file="phi_app.py", folder="Cut folder path (domain CSVs)",
          up="...or upload domain files (CSV or SAS .sas7bdat)", models="Models dir (optional real weights)",
-         btn="🚀 Execute PII/PHI Flagging", out="phi_output", sample=SAMPLE, local_run=outp,
+         btn="🚀 Execute De-identification review assist", out="phi_output", sample=SAMPLE, local_run=outp,
          decoy="cut", src=SRC_AE, pre="PHI scan set = expected_scan(sample)"),
     dict(c="R", app="risk", file="risk_app.py", folder="Cut folder path (safety domains)",
          up="...or upload safety files (CSV or SAS .sas7bdat)", models="Models dir (no trained model in this build)",
-         btn="🚀 Execute Risk Scoring", out="risk_output", sample=SAMPLE, local_run=outr1,
+         btn="🚀 Execute Participant risk screening", out="risk_output", sample=SAMPLE, local_run=outr1,
          decoy="cut", src=SRC_AE, pre="pre-flight classifies ae/lb/eg/vs/pe"),
     dict(c="A", app="anomaly", file="anomaly_app.py", folder="Cut folder path (CSV or SAS .sas7bdat)",
          up="...or upload files (CSV or SAS .sas7bdat)", models="Models dir (no trained model in this build)",
-         btn="🚀 Execute Anomaly & Drift Detection", out="anomaly_output", sample=ANOM, local_run=outa1,
+         btn="🚀 Execute Central statistical monitoring", out="anomaly_output", sample=ANOM, local_run=outa1,
          decoy="labs", src=SRC_LABS, pre="pre-flight detects VISITNUM + ALT"),
 ]
 def _preflight(c, at):

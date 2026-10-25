@@ -1,5 +1,6 @@
-# QC: runs the end-to-end AppTest harness (tests/qc_test.py) against all four independent apps, and
-# checks that the in-browser build GitHub Pages serves from docs/app/ is in step with the apps.
+# QC: runs the end-to-end AppTest harness (tests/qc_test.py) against all four independent apps, the
+# within-sibling evaluation tests (tests/test_sibling.py), and checks that the in-browser build GitHub
+# Pages serves from docs/app/ is in step with the apps.
 #
 # browser-build      tools/sync_browser_apps.py --check, standard library only: docs/app/ must hold
 #                    byte-identical copies of the four .py files and of every sample_data/ and
@@ -96,3 +97,8 @@ jobs:
 
       - name: Run QC harness
         run: python tests/qc_test.py
+
+      # Plan guard, exact tails, known-answer demo at reduced replicates, make_data byte-identity, and a
+      # rerun of eval/sibling_eval.py against the committed results (stand-in path; about 30 s).
+      - name: Run the within-sibling evaluation tests
+        run: python tests/test_sibling.py
