@@ -1,9 +1,16 @@
-# QC: runs the end-to-end AppTest harness (tests/qc_test.py) against all four independent apps.
+# QC: runs the end-to-end AppTest harness (tests/qc_test.py) against all four independent apps, and
+# checks that the in-browser build GitHub Pages serves from docs/app/ is in step with the apps.
 #
-# Two matrix variants so BOTH dependency paths stay tested on every push / PR:
-#   stand-in         requirements.txt only (what a plain install or a Streamlit Community Cloud
-#                    deploy gets); the SAS check asserts the clear "install pyreadstat" message
-#                    and the anomaly checks assert the labeled [SI] stand-in paths are recorded.
+# browser-build      tools/sync_browser_apps.py --check, standard library only: docs/app/ must hold
+#                    byte-identical copies of the four .py files and of every sample_data/ and
+#                    anomaly_data/ CSV, the four pages exactly as rendered from
+#                    tools/browser_app_template.html and the pinned wheels (sha256). Fix a failure with
+#                    `python tools/sync_browser_apps.py` and commit the result.
+#
+# Two matrix variants of the harness so BOTH dependency paths stay tested on every push / PR:
+#   stand-in         requirements.txt only (what a plain install gets); the SAS check asserts the
+#                    clear "install pyreadstat" message and the anomaly checks assert the labeled
+#                    [SI] stand-in paths are recorded.
 #   optional-extras  requirements.txt plus pyreadstat, scikit-learn, POT and scipy, which flips the
 #                    SAS .sas7bdat, Isolation-Forest and Sinkhorn checks on.
 #
@@ -25,6 +32,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  browser-build:
+    name: browser build (docs/app copies)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check docs/app/ against the apps, the bundled data and the pinned wheels
+        run: python tools/sync_browser_apps.py --check
+
   qc:
     name: qc (${{ matrix.variant }})
     runs-on: ubuntu-latest

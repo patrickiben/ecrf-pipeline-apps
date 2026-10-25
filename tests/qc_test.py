@@ -871,6 +871,10 @@ finally:
 #       entry, poster, data, refresh target and CSS url(). Remote URLs (the CI badge), #anchors and
 #       mailto:/data: are skipped. Each file must hold at least one local reference, and every docs/img/
 #       file must be used by at least one of them, so the check cannot pass with nothing to check.
+#   D4  the in-browser build in docs/app/ is in step with its sources: tools/sync_browser_apps.py --check
+#       passes (byte-identical copies of the four apps and of every sample_data/ and anomaly_data/ CSV, the
+#       four pages exactly as rendered from tools/browser_app_template.html, the pinned wheels by sha256,
+#       no stray file). Fix: run python tools/sync_browser_apps.py and commit what it changes.
 from html.parser import HTMLParser
 from urllib.parse import unquote
 DOCS = os.path.join(APP_DIR,"docs"); PRES = os.path.join(APP_DIR,"presentations"); INDEX = os.path.join(DOCS,"index.html")
@@ -952,6 +956,14 @@ try:
     check("D3 every local link and image in README.md and docs/index.html exists on disk (and every docs/img/ file is used)",
           not miss and nloc["readme"]>=1 and nloc["index"]>=1 and not unused, dict(local_refs=nloc, missing=miss, unused_images=unused))
 except Exception as e: check("D3 docs references block raised", False, repr(e))
+
+try:
+    import subprocess
+    _sync = subprocess.run([sys.executable, os.path.join(APP_DIR,"tools","sync_browser_apps.py"), "--check"],
+                           capture_output=True, text=True, timeout=120)
+    check("D4 docs/app/ (the in-browser build) matches the apps, the bundled data and the pinned wheels",
+          _sync.returncode==0, (_sync.stdout + _sync.stderr).strip()[-300:])
+except Exception as e: check("D4 browser-build block raised", False, repr(e))
 
 # ---------------------------------------------------------------- real model path (RM / RW checks)
 # Two kinds of check for the coding and PHI apps' REAL path (Needle3 + hnswlib + Laya + XGBoost):
