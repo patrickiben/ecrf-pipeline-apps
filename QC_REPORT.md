@@ -12,11 +12,12 @@ of a production system and not independent double programming by a second person
 | `python tests/qc_test.py` | **268 passed, 0 failed, 5 skipped** (RM1 to RM5 need a models dir with the real model artifacts) | macOS, Python 3.14.7, Streamlit 1.65.0, pandas 3.0.6, numpy 2.5.4, with the optional extras (pyreadstat 1.3.6, scikit-learn 1.9.1, POT 0.9.7.post1, scipy 1.18.1); no models dir; `ECRF_HOSTED` unset |
 | `python tests/test_sibling.py` | **45 passed, 0 failed** (the within-sibling evaluation: sets, exact tails, plan and input guards of both scripts, statistics, direct checks of the gates, known answers at reduced replicates, `make_data.py` byte-identity, real-path wiring with stand-in runtimes, a rerun against the committed results) | the same macOS environment; also 45 / 0 on Python 3.12.13 (Streamlit 1.66.1, pandas 3.1.0, numpy 2.5.4) and on the browser stack (Python 3.14.0, Streamlit 1.65.0, pandas 3.0.2, numpy 2.4.3) |
 | `python3 tools/sync_browser_apps.py --check` | OK: 12 byte-identical copies, 4 rendered pages, 3 pinned wheels, stlite 1.12.0 | standard library only |
-| The four in-browser pages | 4 of 4, rechecked after the live-audit fixes: Execute on the sample data, the results survive a download, the downloaded file is byte-identical to a native run, the tab title keeps "in-browser demo", zero page errors, no axe-core serious or critical violation from this repository's code in light or dark mode (details at the end of this section) | Chrome 155.0.8059.86 (headless), puppeteer-core 25.16.0, `docs/` served locally under `/ecrf-pipeline-apps/` as GitHub Pages serves it |
-| The static pages | `index.html`, `evaluation.html`, `case-study.html` and both redirect stubs: zero page errors and console errors, no off-site request, no horizontal scroll at 1440 px or 390 px; each stub lands on `case-study.html` (rechecked after the evaluation page gained its within-sibling section, and again after its review fixes); at 390 px no participant ID or sequence number in a case-study table wraps (checked before that edit). After the live-audit fixes: the same at 1280 and 390 px, plus zero axe-core 4.14.0 violations in light and dark mode; the new `404.html` returned status 404 with working links from three depths of a missing address, with zero axe violations and no horizontal scroll at 390 px | same |
+| The four in-browser pages | 4 of 4, rechecked after the live-audit fixes and again after their review fixes: Execute on the sample data, the results survive a download, the downloaded file is byte-identical to a native run, the tab title keeps "in-browser demo", zero page errors, no axe-core serious or critical violation from this repository's code in light or dark mode, with each app's "How to use this app" panel closed or open (details at the end of this section) | Chrome 155.0.8059.86 (headless), puppeteer-core 25.16.0, `docs/` served locally under `/ecrf-pipeline-apps/` as GitHub Pages serves it |
+| The static pages | `index.html`, `evaluation.html`, `case-study.html` and both redirect stubs: zero page errors and console errors, no off-site request, no horizontal scroll at 1440 px or 390 px; each stub lands on `case-study.html` (rechecked after the evaluation page gained its within-sibling section, and again after its review fixes); at 390 px no participant ID or sequence number in a case-study table wraps (checked before that edit). After the live-audit fixes: the same at 1280 and 390 px, plus zero axe-core 4.14.0 violations in light and dark mode (`index.html`, `evaluation.html` and `case-study.html` rechecked after the review fixes); the new `404.html` returned status 404 with working links from three depths of a missing address, with zero axe violations and no horizontal scroll at 390 px | same |
 | CI (`.github/workflows/qc.yml`) | **Passed** on `main` at `82ba2fa` (push run of 2026-10-25, 18:40 UTC): the harness and `tests/test_sibling.py` in all three legs (stand-in, optional extras, the browser's Python 3.14.0 stack) and the browser-build check. The live-audit fixes below (branch `polish/live-audit`) are local commits, not yet pushed, so CI has not run on them | GitHub Actions |
 
-The live-audit fixes at the end of this section add checks R9b and A8c, so the harness now reports 268 / 0 / 5. Before
+The live-audit fixes at the end of this section add checks R9b and A8c, so the harness now reports 268 / 0 / 5, and their
+review fixes left that unchanged. Before
 them, the same 266 / 0 / 5 result was recorded on the same machine before this pass's changes and after its first part
 (the renaming and the help-text edits), again after the review fixes listed below, after each app, test and docs
 commit of the within-sibling pass at the end of this section, and after that pass's review fixes. The review fixes changed one
@@ -188,10 +189,11 @@ one major and nine minor, all fixed here):
   measured limits, but the Participant risk screening and Central statistical monitoring pages gave no number and no
   link. Neither app has a labeled evaluation, so no accuracy was measured, and both pages now say so. Each Limits line
   gives the known answers the harness checks and links to the evaluation's "What this does not show" section, which
-  carries the same figures. Risk screening: the 5 test-case participants planted in the 52-participant cut get the
-  category or reason they were built for (checks R10 to R16). Monitoring: on the 150-participant demo it flags all 3
-  injected numeric outliers plus 1 participant with no injected outlier (`SUBJ-A150`, MODERATE at z = 3.0, a side
-  effect of the injected LAB-C AST shift) and exactly the 3 injected notes (A14). How the figures were obtained: a
+  carries the same figures. Risk screening: 5 of the 6 test-case participants planted in the 52-participant cut, the
+  5 the harness checks, get the category or reason they were built for (checks R10 to R16). Monitoring: on the
+  150-participant demo it flags all 3 injected numeric outliers plus 1 participant with no injected outlier
+  (`SUBJ-A150`, MODERATE at z = 3.0, a side effect of the injected LAB-C AST shift) and exactly the 3 injected notes
+  (A14). How the figures were obtained: a
   hosted-mode `AppTest` run of each app with the optional extras hidden, as in the browser (52 rows in
   `risk_scores.csv`, 4 in `anomalies.csv`); the same 4 participants with scikit-learn installed; and the browser's
   download of `anomalies.csv`, byte-identical to that run. New checks R9b (52 participants, one row each) and A8c
@@ -207,9 +209,11 @@ one major and nine minor, all fixed here):
   warning, error and success text. The apps still follow the system's light or dark setting. `docs/app/app.css` draws
   the hosted pages' disabled widget labels at 60% of the text color instead of 40% (inactive controls are exempt
   under WCAG 1.4.3, but these labels say what is locked) and a slider's value in the text color, because in dark mode
-  no primary color passes both under white button text and as slider text on the sidebar.
+  no primary color passes both under white button text and as slider text on the sidebar. (Correction from the
+  review fixes below: the sample-data checkbox's label stayed at 40% until then.)
 - **Heading order.** The pre-flight and results sections use `st.header` (h2) instead of `st.subheader` (h3), so
-  each app goes from h1 to h2. The results heading is larger, so the four screenshots in `docs/img/` were recaptured
+  each app goes from h1 to h2 (correction from the review fixes below: with the help panel open it still went from h1
+  to h3 until then). The results heading is larger, so the four screenshots in `docs/img/` were recaptured
   (light mode, 1440 by 960 px app area).
 - **Phone header.** Below 600 px wide or 500 px tall, the privacy note and Limits line sit in a "Privacy and limits"
   box that is open while the app loads and folds to one line once it is up; one tap opens it. Header height once the
@@ -264,6 +268,63 @@ puppeteer-core 25.16.0, axe-core 4.14.0; `docs/` served locally under `/ecrf-pip
   (`ERR_SOCKET_NOT_CONNECTED`) and the new pages 0 of 6, so this is the build environment's network, not the change.
 - Not tested: Safari, Firefox, iOS and Android browsers.
 
+Review fixes to the live-audit pass, later on 2026-10-25 (same branch; an outside review confirmed five minor
+findings, all fixed here, and the recheck found a sixth, also fixed):
+
+- **Risk Limits line.** The page said the QC suite checks "the 5 test-case participants planted" in the cut.
+  `sample_data/generate.py` plants 6 (`SUBJ-9001`, `9002`, `9003`, `9013`, `9014` and `9015`), and checks R10 to R16
+  cover all but `SUBJ-9003` (severe pneumonia, creatinine 1.8x ULN). The line now says 5 of the 6 are checked, and
+  the risk bullet above says the same. No check was added for `SUBJ-9003`, because the generator does not record
+  which category it was built for.
+- **Help-panel headings.** The "How to use this app" panel's section headings were `###` (h3) right under the app's
+  h1, so opening the panel brought back an axe heading-order violation on every app. They are now `##` (h2) in all
+  four apps, and with the panel open each page goes from h1 to h2 throughout.
+- **Help-panel quote blocks (found in the recheck).** With the panel open, a sweep that scrolled the coding page from
+  top to bottom in light mode found the inline code `AEPTCD` at 2.56:1. Streamlit draws a `>` quote block at 60%
+  opacity, which takes the theme's green code text below 4.5:1. The risk and monitoring panels also had inline code
+  in a quote block (not measured before the change), and the de-identification panel had one without code. All
+  four notes are now plain paragraphs with the same text.
+- **Disabled checkbox label.** `docs/app/app.css` drew the disabled text-input and uploader labels at 60% but not
+  the locked "Use the bundled synthetic sample data" checkbox. Its `<label data-disabled="true">` carries Streamlit's
+  40% color (2.56:1 on the light sidebar, 3.54:1 on the dark one). A new rule restores the text color on that label
+  and draws only its text at 60%; the box, the tick and the help icon keep Streamlit's colors. Every sidebar label
+  on the four pages now measures 60% or more of the text color, in light and dark mode.
+- **Local contrast claim.** The README said `.streamlit/config.toml` gives text and buttons that meet WCAG AA
+  contrast. In a local run in dark mode a slider's value is 3.2:1 on the sidebar, as the file's comment and Known
+  limits already said; the README line now names that exception.
+- **Streamlit floor.** Streamlit reads the `[theme.light]` and `[theme.dark]` sections from 1.51 on; 1.49 and 1.50
+  ignore them with a warning (the reviewer's check with `streamlit config show`). A local run on a version
+  `requirements.txt` allowed therefore got Streamlit's default colors. `requirements.txt` now asks for
+  `streamlit>=1.51`, and `config.toml` says why. Every CI leg installs 1.65 or later, so CI could not catch this;
+  Streamlit 1.51 itself was not installed and run here.
+- **Screenshots.** The four in `docs/img/` were recaptured from the in-browser pages (light mode, 1440 by 960 px app
+  area), because their sidebars show the sample-data checkbox label, now drawn at 60%.
+
+**Rerun after these review fixes** (the same machine and tools as the rerun above; `docs/` served locally under
+`/ecrf-pipeline-apps/`; the browser checks ran twice, the second time on the committed tree, with the same results):
+
+- Harness 268 / 0 / 5 (unchanged), `tests/test_sibling.py` 45 / 0, and the sync check passes.
+- Each app page at 1280 px, light mode: interactive in 5.1 to 8.4 s (the longest was the first page of a run); the
+  tab title kept "in-browser demo" after Execute; the results rendered under an h2 heading with no Streamlit
+  exception; the first download saved its file, and the results, the success message and every download button
+  stayed. No horizontal scroll, zero page errors.
+- Each app page at 1280 px in dark mode, and at 390 by 844 px in dark mode with `?demo=1`: Execute rendered the
+  results. On the phone the sample-data box was checked, the header folded to 59 px and there was no horizontal
+  scroll. Zero page errors.
+- axe-core 4.14.0 after Execute, with the help panel closed and open in light mode, open in dark mode, and closed
+  on the phone: no heading-order or color-contrast violation, including a sweep that scrolled the main column and the
+  sidebar from top to bottom with the panel open, in light and dark. What remains are the three findings in
+  Streamlit's own markup listed above.
+- `index.html`, `evaluation.html` and `case-study.html` at 1280 and 390 px, in light and dark mode: zero axe
+  violations, no horizontal scroll, zero page or console errors, no off-site request. The redirect stubs and
+  `404.html` did not change and were not rechecked.
+- A local `streamlit run` of the coding app with this `.streamlit/config.toml` (`?demo=1`, Execute, help panel open):
+  h1 then h2 throughout, and no contrast violation in light mode; in dark mode, only the slider's value at 3.2:1.
+  axe also reports `region` (moderate: content outside a landmark) on Streamlit's local page, which the in-browser
+  pages do not have.
+- Every page started on the first try. In each run the first page load logged one failed resource fetch
+  (`ERR_SOCKET_NOT_CONNECTED`, the build environment's network, as above) and still ran normally.
+
 ## How to re-run the tests
 
 The harness lives in [`tests/qc_test.py`](tests/qc_test.py) (portable: its paths
@@ -278,7 +339,7 @@ Exit code 0 = every check passes, and the last line reports how many passed, fai
 `streamlit.testing.v1.AppTest.from_file(...)`, points the coding/PHI/risk apps at `sample_data/`
 and the anomaly app at `anomaly_data/`, clicks Execute, and asserts on the rendered dataframes and
 written CSVs, including a synthetic `.asc` release (HLT/HLGT + currency filter), content-based
-PHI discovery, SAS `.sas7bdat` input routing, the risk-app anchor participants, and the anomaly app's injected drift column + per-participant outliers. It also runs each app in hosted mode (the H checks, which set and clear `ECRF_HOSTED` and their own scratch secrets themselves, so leave `ECRF_HOSTED` unset and keep any secrets file out of `~/.streamlit/` and `.streamlit/` while it runs) and checks the `docs/` pages and the in-browser build in `docs/app/` (the D checks). The assertions above are the acceptance criteria; keep them green before sharing a change.
+PHI discovery, SAS `.sas7bdat` input routing, 5 of the 6 risk-app anchor participants, and the anomaly app's injected drift column + per-participant outliers. It also runs each app in hosted mode (the H checks, which set and clear `ECRF_HOSTED` and their own scratch secrets themselves, so leave `ECRF_HOSTED` unset and keep any secrets file out of `~/.streamlit/` and `.streamlit/` while it runs) and checks the `docs/` pages and the in-browser build in `docs/app/` (the D checks). The assertions above are the acceptance criteria; keep them green before sharing a change.
 
 ## Known limits
 
@@ -287,9 +348,10 @@ PHI discovery, SAS `.sas7bdat` input routing, the risk-app anchor participants, 
   outputs (`phi_flags.csv`, the original columns in `sanitized/`) still contain the identifiers.
 - Only headless Chrome was tested for the in-browser pages; Safari, Firefox and iOS were not.
 - Accessibility: axe-core finds no violation from this repository's code on the published pages in light or dark
-  mode. Three remain in Streamlit's own markup on every app page (`aria-expanded` on the sidebar's `<section>`, an
-  empty header cell in `st.dataframe`, a presentation role on the file uploaders), and a local run in dark mode shows
-  a slider's value at 3.2:1 on the sidebar. No screen-reader or manual keyboard test was done.
+  mode, with each app's help panel closed or open. Three remain in Streamlit's own markup on every app page
+  (`aria-expanded` on the sidebar's `<section>`, an empty header cell in `st.dataframe`, a presentation role on the
+  file uploaders), and a local run in dark mode shows a slider's value at 3.2:1 on the sidebar. No screen-reader or
+  manual keyboard test was done.
 - Participant risk screening and Central statistical monitoring have no labeled evaluation: no accuracy,
   sensitivity or false-positive rate was measured. The harness checks only the signals planted in the synthetic data.
 - Coding stand-in retrieval is lexical: `[SI]` scores will not match trained-run
