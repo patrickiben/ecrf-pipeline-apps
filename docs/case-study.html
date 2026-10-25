@@ -250,10 +250,10 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
       rejected all four <span class="tag">[RM]</span>.</li>
     <li><strong>The mosaic case.</strong> The PR note's initials and ZIP code are each harmless alone; the stand-in
       redacts indirect attributes only when two or more co-occur in a field, which they do here.</li>
-    <li><strong>Laya's field probabilities are where the old deck's numbers failed most.</strong>
+    <li><strong>Laya's field probabilities are where an earlier version of Deck B failed most.</strong>
       <span class="tag">[RM]</span> <code>P(quasi)</code> behaved as designed: 0.713 on the PR note, 0.404 or lower
       elsewhere. <code>P(direct)</code> did not: 0.673 on AE 1, but 0.013 on AE 2 and 0.036 on PR 1, though both hold
-      direct identifiers, and 0.012 on the clean EG note. (The retired deck showed 0.998.) The redactions are right
+      direct identifiers, and 0.012 on the clean EG note. (An earlier version of the deck showed 0.998.) The redactions are right
       anyway because the gate leans on the span evidence. The stand-in reports <code>P(direct)</code> 0.99 when a direct
       span exists and 0.05 otherwise, and <code>P(quasi)</code> 0.96 when two or more indirect spans co-occur.</li>
   </ul>
@@ -315,18 +315,20 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
 <section aria-labelledby="corrections">
   <h2 id="corrections">Corrections to the retired decks</h2>
   <p>The two decks this page replaces said several things the build does not support. They are corrected here rather
-    than kept:</p>
+    than kept. The first four rows were still in the decks when they were retired; the last four were in earlier
+    versions of the decks and had already been replaced with measured values on 2026-10-22, before the decks were
+    retired.</p>
   <div class="tbl"><table>
-    <thead><tr><th>The decks said</th><th>What is true</th></tr></thead>
+    <thead><tr><th>The decks said</th><th>Where</th><th>What is true</th></tr></thead>
     <tbody>
-      <tr><td>Sign-off "is captured under 21 CFR Part 11"; overrides are logged</td><td>No sign-off, override or Part 11 control exists in the apps</td></tr>
-      <tr><td>An editable write-back table, and an Approve-Redaction action that logs reviewer and time</td><td>Neither screen exists; the apps show read-only tables and download buttons</td></tr>
-      <tr><td>The PHI log keeps redacted spans "without retaining raw PHI in secondary storage"</td><td><code>phi_flags.csv</code> holds each span's text and the sanitized files keep the original column</td></tr>
-      <tr><td>The entity schema is the HIPAA Safe Harbor set</td><td>A subset of identifier types, listed above</td></tr>
-      <tr><td>A 384-dim SapBERT encoder; about 178 MB resident for a full release</td><td>Needle3, 3072-dim and not biomedical; about 1 GB at release size (measured on random vectors)</td></tr>
-      <tr><td>A sub-50 ms per-record target</td><td>About 0.4 s (coding) and 0.9 to 1.6 s (de-identification) per record on a 4-vCPU CPU</td></tr>
-      <tr><td>Illustrative re-rank scores 0.958, 0.971, 0.934, 0.882 with three of four auto-coded</td><td>0.04 to 0.12, all four routed to a coder</td></tr>
-      <tr><td>Laya <code>P(direct)</code> 0.998 on the worked fields</td><td>0.01 to 0.67</td></tr>
+      <tr><td>Sign-off "is captured under 21 CFR Part 11"; overrides are logged</td><td>the retired Deck A</td><td>No sign-off, override or Part 11 control exists in the apps</td></tr>
+      <tr><td>An editable write-back table, and an Approve-Redaction action that logs reviewer and time</td><td>the retired Deck B</td><td>Neither screen exists; the apps show read-only tables and download buttons</td></tr>
+      <tr><td>The PHI log keeps redacted spans "without retaining raw PHI in secondary storage"</td><td>the retired Deck A</td><td><code>phi_flags.csv</code> holds each span's text and the sanitized files keep the original column</td></tr>
+      <tr><td>The entity schema is the HIPAA Safe Harbor set</td><td>the retired Deck B</td><td>A subset of identifier types, listed above</td></tr>
+      <tr><td>A 384-dim SapBERT encoder; about 178 MB resident for a full release</td><td>Deck A, and Deck B for the encoder, until 2026-10-22</td><td>Needle3, 3072-dim and not biomedical; about 1 GB at release size (measured on random vectors)</td></tr>
+      <tr><td>A sub-50 ms per-record target</td><td>Deck A until 2026-10-22</td><td>About 0.4 s (coding) and 0.9 to 1.6 s (de-identification) per record on a 4-vCPU CPU</td></tr>
+      <tr><td>Illustrative re-rank scores 0.958, 0.971, 0.934, 0.882 with three of four auto-coded</td><td>Deck B until 2026-10-22</td><td>0.04 to 0.12, all four routed to a coder</td></tr>
+      <tr><td>Laya <code>P(direct)</code> 0.998 on the worked fields</td><td>Deck B until 2026-10-22</td><td>0.01 to 0.67</td></tr>
     </tbody>
   </table></div>
 </section>

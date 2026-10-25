@@ -140,7 +140,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
         reproduced: on the real path all four worked verbatims got the right preferred term at rank 1 but scored 0.04
         to 0.12, so all four went to a human coder. See the <a href="case-study.html">case study</a>.</li>
       <li><strong>Slow on a CPU.</strong> About 0.4 s per verbatim and 0.9 to 1.6 s per note, one record at a time, on a
-        4-vCPU cloud CPU. The real path is a batch job, not the sub-50 ms interactive tool the first deck targeted.</li>
+        4-vCPU cloud CPU. The real path is a batch job, not the sub-50 ms interactive tool an earlier version of Deck A targeted.</li>
       <li><strong>The re-ranker lowered top-3.</strong> It raised top-1 over plain retrieval order (0.747 to 0.778) but
         lowered top-3 (0.885 to 0.854), because several lowest-level terms under one preferred term crowd the right
         one out of the three exported candidates.</li>
