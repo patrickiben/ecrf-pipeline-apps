@@ -45,16 +45,18 @@ different questions (cross-sectional safety, and change over time).
   - `SUBJ-A017`: SYSBP = 215
   - `SUBJ-A029`: CREAT = 6.8
 
-  These are the **only** participants written to `anomalies.csv` (flagged-only output); each cites its extreme
-  column and z, and the Isolation Forest corroborator when `scikit-learn` is installed.
+  All three are flagged CRITICAL or HIGH in `anomalies.csv` (flagged-only output); each cites its extreme column and
+  z, and the Isolation Forest corroborator when `scikit-learn` is installed. A fourth participant is flagged too:
+  `SUBJ-A150`, a LAB-C participant whose AST rose by about 40 (z = 3.0, exactly the flag threshold), lands at
+  MODERATE. That is a side effect of the injected LAB-C AST shift, not a fourth injected outlier.
 - **Three text outliers in `LABCOM`:** unusual or erroneous notes with no close neighbor among the field's notes,
   flagged by retrieval isolation (`text_anomalies.csv`). The note text is quoted exactly as stored:
   - `SUBJ-A011` V3: "SAMPLE HEMOLYZED -- RESULT UNRELIABLE, RECOLLECT IMMEDIATELY"
   - `SUBJ-A042` V2: "value entered in wrong units; see correction log 9999-99-99"
   - `SUBJ-A077` V4: "patient not found at site; data may be from a prior study"
 
-A correct run flags exactly the three numeric outliers and the three unusual notes, shows `ALT` as the dominant
-cohort drift column, and isolates LAB-C × AST in per-lab drift. That shows the three signals are separate: an
+A correct run flags the three injected numeric outliers (plus `SUBJ-A150` at MODERATE) and exactly the three
+unusual notes, shows `ALT` as the dominant cohort drift column, and isolates LAB-C × AST in per-lab drift. That shows the three signals are separate: an
 outlier is one participant, drift is the whole cohort or one lab, and text isolation is one note.
 
 ## Regenerate
