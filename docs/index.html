@@ -105,8 +105,10 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
         On held-out synthetic verbatims its stand-in ranked the right preferred term first for 54% (the real model path: 78%).</li>
       <li><a href="app/phi.html">De-identification review assist</a> (<code>phi_app.py</code>): flags and redacts identifiers in free text.
         On held-out synthetic text its stand-in left 108 of 308 identifiers readable (the real model path: 91 of 308); every output needs human review.</li>
-      <li><a href="app/risk.html">Participant risk screening</a> (<code>risk_app.py</code>): a safety listing ranked by rule-based safety and discontinuation scores, which are capped rule sums, not probabilities.</li>
-      <li><a href="app/anomaly.html">Central statistical monitoring</a> (<code>anomaly_app.py</code>): checks for numeric outliers, distributional drift and unusual free-text notes.</li>
+      <li><a href="app/risk.html">Participant risk screening</a> (<code>risk_app.py</code>): a safety listing ranked by rule-based safety and discontinuation scores, which are capped rule sums, not probabilities.
+        No accuracy was measured: there is no labeled evaluation.</li>
+      <li><a href="app/anomaly.html">Central statistical monitoring</a> (<code>anomaly_app.py</code>): checks for numeric outliers, distributional drift and unusual free-text notes.
+        On its synthetic demo it flagged the 3 injected outliers plus 1 participant with none injected; with no labeled evaluation, no accuracy was measured.</li>
     </ul>
     <p class="muted" style="margin:10px 0 0">Each opens in hosted mode on the bundled synthetic sample data: every data
       input is locked, a banner says so, and the audit records <code>hosted_mode=true</code>. Click Execute, then save

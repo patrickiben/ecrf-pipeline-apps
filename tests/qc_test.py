@@ -295,6 +295,9 @@ if res is not None:
     # all four safety categories present across the bulk cut
     cats=set(res["safety_category"])
     check("R9 all four safety categories present", {"LOW","MODERATE","HIGH","CRITICAL"} <= cats, sorted(cats))
+    # The in-browser page's Limits line (tools/sync_browser_apps.py) and docs/evaluation.html give this count.
+    check("R9b one row per participant: 52 in the bundled cut (the count the Limits line states)",
+          len(res)==52 and res["USUBJID"].is_unique, (len(res), int(res["USUBJID"].nunique())))
     def subj(uid): return res[res["USUBJID"].astype(str)==uid]
     # anchor assertions (clinically-meaningful; each lands with margin in its band)
     check("R10 fatal SUBJ-9015 -> CRITICAL", len(subj("SUBJ-9015"))==1 and subj("SUBJ-9015").iloc[0]["safety_category"]=="CRITICAL", "")
@@ -402,6 +405,12 @@ if anomf is not None:
     check("A8 all 3 injected outliers in top-6 anomalies", inj <= top6, sorted(inj & top6))
     # flagged-only: every emitted participant is at least MODERATE (no LOW rows leak into the output)
     check("A8b flagged-only output (no LOW-category participants emitted)", int((anomf["anomaly_category"]=="LOW").sum())==0, sorted(set(anomf["anomaly_category"])))
+    # The in-browser page's Limits line and docs/evaluation.html say the demo flags the 3 injected outliers plus
+    # 1 participant with none injected (SUBJ-A150, MODERATE: a side effect of the injected LAB-C AST shift).
+    check("A8c exactly 4 participants flagged: the 3 injected outliers plus SUBJ-A150 at MODERATE (as the Limits line states)",
+          set(anomf["USUBJID"])==inj|{"SUBJ-A150"} and len(anomf)==4
+          and anomf.loc[anomf["USUBJID"]=="SUBJ-A150","anomaly_category"].tolist()==["MODERATE"],
+          anomf[["USUBJID","anomaly_category"]].values.tolist())
     if HAVE_SKLEARN:
         check("A16 numeric outliers cite the IsolationForest detector", anomf["detectors"].astype(str).str.contains("IsolationForest").all(), list(anomf["detectors"]))
 if driftf is not None:
