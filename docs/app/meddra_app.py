@@ -871,17 +871,17 @@ One row per candidate (top-3), so a coder sees the whole pre-populated list, not
 | Column | Meaning |
 |---|---|
 | `VERBATIM` | The term exactly as typed (never rewritten). |
-| `rank` | 1 = top candidate; 2–3 are alternatives. |
+| `rank` | 1 = top candidate; 2 and 3 are alternatives. |
 | `AEDECOD` / `AEPTCD` | Preferred-term decode + code to write back. |
 | `HLT`, `HLGT` | Evidence columns: the full path, never scored and not written back to SDTM. |
 | `AESOC` | System Organ Class. |
 | `cosine`, `lev`, `jaro`, `S` | The readable numbers the decision is made from. |
-| `AECODSTAT` | `AUTO_COMMIT_TO_SDTM` (rank 1 only) or `FLAGGED_FOR_HUMAN_CODER`; ranks 2–3 are `ALT_CANDIDATE`. |
+| `AECODSTAT` | `AUTO_COMMIT_TO_SDTM` (rank 1 only) or `FLAGGED_FOR_HUMAN_CODER`; ranks 2 and 3 are `ALT_CANDIDATE`. |
 
 > A **name-only dictionary** (no PT codes) forces every verbatim to route to a human, because there is no code to write to `AEPTCD`. The pre-flight panel warns you up front.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
-Without trained weights, Tiers 2–4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
+Without trained weights, Tiers 2 to 4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
 ### Troubleshooting
 - **"No MedDRA source found":** provide exactly one dictionary shape (upload CSV / set the .asc folder / name it `meddra*.csv` in the cut folder).
@@ -1075,7 +1075,7 @@ elapsed=(time.perf_counter()-t0)*1000
 
 # ---- results: these tables ARE the tier outputs, computed from the operator's
 #      files; no reference/expected table is embedded anywhere in this file. ----
-st.subheader(f"Tier 2–4 · results (computed from your files; {elapsed:.2f} ms)")
+st.subheader(f"Tiers 2 to 4 · results (computed from your files; {elapsed:.2f} ms)")
 if coded_rows:
     st.dataframe(pd.DataFrame(coded_rows), width="stretch")
     st.caption("cosine/S are computed from your dictionary by the active Tier-2 path "

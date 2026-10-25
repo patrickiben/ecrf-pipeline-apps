@@ -721,7 +721,7 @@ results = tier4_categorize(scores, thr)             # Tier 4: categories + contr
 elapsed=(time.perf_counter()-t0)*1000
 
 # ---- results: these tables ARE the tier outputs, computed from the operator's files. ----
-st.subheader(f"Tier 2–4 · per-participant risk (computed from your files; {elapsed:.2f} ms)")
+st.subheader(f"Tiers 2 to 4 · per-participant risk (computed from your files; {elapsed:.2f} ms)")
 if len(results):
     # fatal participants pinned to the top (internal _fatal key), then by safety score -- so a fatal
     # outcome always ranks at/above every non-fatal participant regardless of comorbidity load. The

@@ -599,7 +599,7 @@ A *direct* identifier (name, phone, email, MRN, DOB) scrubs on its own merit. An
 - **`sanitized/<domain>.csv`** is a copy of each scanned domain carrying the original columns plus `SAN_<field>` (scrubbed text) and `<field>_PHI_FLAG` (`Y` if that cell changed, else `N`). Missing values stay missing, never `"nan"`.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
-Without trained weights, Tiers 2–4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): guarded regexes for spans + rule-based probabilities. It reproduces its worked trace exactly because identifier detection is pattern-shaped and the scrub is a string replace. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
+Without trained weights, Tiers 2 to 4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): guarded regexes for spans + rule-based probabilities. It reproduces its worked trace exactly because identifier detection is pattern-shaped and the scrub is a string replace. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
 ### Troubleshooting
 - **A date / ID column got flagged:** that is content-based discovery working as designed: it scans every non-numeric field. If you know that column is safe, deselect it in step 4 and re-run; review any flags before trusting a scrub.
@@ -800,7 +800,7 @@ elapsed=(time.perf_counter()-t0)*1000
 
 # ---- results: the flag table + the sanitized domain rows (original columns +
 #      SAN_<field> + <field>_PHI_FLAG), computed from the operator's files. ----
-st.subheader(f"Tier 2–4 · results (computed from your files; {elapsed:.2f} ms)")
+st.subheader(f"Tiers 2 to 4 · results (computed from your files; {elapsed:.2f} ms)")
 if phi_rows:
     st.markdown("**PHI flags**: one row per scrubbed span")
     st.dataframe(pd.DataFrame(phi_rows), width="stretch")

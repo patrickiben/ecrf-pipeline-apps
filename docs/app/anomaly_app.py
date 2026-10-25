@@ -733,7 +733,7 @@ anom, dcat, lcat, ccat, tcat = tier4_categorize(sig, drift, lab_drift, lab_cmp, 
 elapsed=(time.perf_counter()-t0)*1000
 
 # ---- results: these tables ARE the tier outputs, computed from the operator's files. ----
-st.subheader(f"Tier 2–4 · anomalies & drift (computed from your files; {elapsed:.2f} ms)")
+st.subheader(f"Tiers 2 to 4 · anomalies & drift (computed from your files; {elapsed:.2f} ms)")
 if len(anom):
     shown=anom.sort_values("anomaly_score", ascending=False)
     st.markdown("**Per-participant numeric outliers** (flagged only)"); st.dataframe(shown, width="stretch")
