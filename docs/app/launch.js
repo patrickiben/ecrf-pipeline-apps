@@ -171,6 +171,17 @@ async function main() {
       streamlitConfig: {
         "browser.gatherUsageStats": false,
         "client.toolbarMode": "viewer",
+        // The same theme as .streamlit/config.toml (keep the two in step): colors that meet WCAG AA contrast
+        // (4.5:1 for text) where Streamlit's defaults do not. The app still follows the visitor's light or dark
+        // setting. Light: the primary color (white text on the Execute button), captions (drawn at 60% opacity of
+        // the text color), and the warning, error and success text. Dark: the primary color, for the Execute
+        // button's white text. app.css draws a slider's value in the text color, which the theme cannot do.
+        "theme.light.primaryColor": "#0757BF",
+        "theme.light.textColor": "#101218",
+        "theme.light.yellowTextColor": "#7A5A00",
+        "theme.light.redTextColor": "#A3262A",
+        "theme.light.greenTextColor": "#11752F",
+        "theme.dark.primaryColor": "#1F6FEB",
       },
       disableProgressToasts: true,   // progress shows in the notice above the app instead
     },

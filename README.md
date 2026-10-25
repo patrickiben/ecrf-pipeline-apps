@@ -102,7 +102,9 @@ checked. Use a local run for real data.
   app's results until Python is ready, and keeps the screenshot with a short explanation if the app cannot start.
   If stlite's stylesheet does not load (the app then runs unstyled), the page fetches it again, twice at most and
   after a pause, and if that fails shows a notice with a Reload button above the app.
-- `launch.js` and `app.css`: the shared loader and page style.
+- `launch.js` and `app.css`: the shared loader and page style. `launch.js` also passes the apps' color theme,
+  the same as `.streamlit/config.toml`, so the Execute button, captions and banners meet WCAG AA contrast in
+  light and dark mode.
 - Byte-identical copies of the four `.py` files and of every CSV in `sample_data/` and `anomaly_data/`, which the
   pages load from Pages.
 - `wheels/`: three small pure-Python wheels the Streamlit build needs that Pyodide does not ship (`itsdangerous`
@@ -249,7 +251,8 @@ run_phi.sh    / .bat     the same, De-identification review assist on port 8502
 run_risk.sh   / .bat     the same, Participant risk screening on port 8503
 run_anomaly.sh/ .bat     the same, Central statistical monitoring on port 8504
 Launch *.command         macOS double-click launchers; Finder runs them in Terminal
-.streamlit/config.toml   disables Streamlit usage stats, so nothing leaves the machine
+.streamlit/config.toml   disables Streamlit usage stats, so nothing leaves the machine, and sets a light and dark
+                         color theme whose text and buttons meet WCAG AA contrast
 .github/workflows/qc.yml CI: runs tests/qc_test.py and tests/test_sibling.py on every push and pull request in
                          three variants (stand-in and optional-extras on Python 3.12; browser-stack on Python 3.14.0
                          with the Streamlit, pandas, numpy and pyarrow versions the in-browser pages run), and checks
