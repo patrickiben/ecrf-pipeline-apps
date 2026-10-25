@@ -599,7 +599,7 @@ _HELP_MD = """
 1. **Point at your data** (sidebar 📂 1): type a cut-folder path and/or upload safety CSVs. Every `*.csv` except one named `*meddra*` loads; each file is classified by its *content* (signature columns), not its name, so `ae.csv`, `adverse_events.csv`, or an oddly-named dump all work.
 2. **Set outputs** (sidebar ⚖ 2): output folder (default `risk_output`) and a models dir field. This build has no trained risk model, so leave the models dir empty; a `risk_model.json` there stops the run. There is no gate slider: the operating point is the built-in `[SI]` criteria, recorded in the audit.
 3. **Confirm the input** (pre-flight panel): check which domains loaded, how each file classified, and the participant count.
-4. **Execute**: click 🚀 Execute Risk Scoring. Results render on screen (highest-risk first) and write to the output folder.
+4. **Execute**: click 🚀 Execute Participant risk screening. Results render on screen (highest-risk first) and write to the output folder.
 
 ### How scoring works (`[SI]` transparent engine)
 - **Safety score (0 to 100)** = four capped components: adverse events (severity-weighted, times 1.5 if serious), analytes above their built-in ULN multiple, QTc above the cardiac criterion, and vital-sign breaches, all against built-in `[SI]` criteria. A **fatal outcome scores 100** so it always ranks at or above every non-fatal participant; death is by definition the highest safety risk.
@@ -710,7 +710,7 @@ else:
 # ---- Run button: disabled until at least one participant is aligned, so an empty input cannot
 #      produce a misleading empty result. ----
 n_ready = len(set().union(*[set(v.index) for v in views.values()])) if views else 0
-if not st.button("🚀 Execute Risk Scoring", type="primary", disabled=not n_ready):
+if not st.button("🚀 Execute Participant risk screening", type="primary", disabled=not n_ready):
     st.stop()
 
 # ---- execute the tiers on the already-loaded frames; time the whole run for the latency figure. ----

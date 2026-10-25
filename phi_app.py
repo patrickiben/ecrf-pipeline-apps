@@ -589,7 +589,7 @@ This app scans **every column that is not strictly numeric** (text, dates, coded
 2. **Read how discovery works** (sidebar 🔎 2): it explains the content-based rule above.
 3. **Set the operating point** (sidebar ⚖ 3): the Redaction gate slider (default **0.85**), recorded in the audit with the run.
 4. **Confirm the columns to scan** (sidebar 🎯 4 + pre-flight panel): every non-numeric column is pre-selected; deselect any you do not want scrubbed (e.g. a date or coded field you know is safe). The panel shows exactly which columns will be scanned per domain.
-5. **Execute**: click 🚀 Execute PII/PHI Flagging.
+5. **Execute**: click 🚀 Execute De-identification review assist.
 
 ### Direct vs indirect identifiers
 A *direct* identifier (name, phone, email, MRN, DOB) scrubs on its own merit. An *indirect* attribute (age, ZIP code, initials) scrubs **only when two or more co-occur in the same field**: the "mosaic" rule that catches re-identification risk no single value shows. The stand-in's patterns find names only after a title (Patient, Mr, Ms, Mrs, Dr) or in surname-comma form, MRNs only as `123-456-78`, dates of birth only as `MM/DD/YYYY` or `YYYY-MM-DD`, and ages only as "NN-year-old" or "NN yo"; it has no pattern for addresses, SSNs or rare conditions, so those are never flagged.
@@ -747,7 +747,7 @@ else:
 
 # ---- Run button: disabled until a domain is loaded AND at least one column is
 #      selected, so an empty selection cannot produce a misleading 'no PHI' run. ----
-if not st.button("🚀 Execute PII/PHI Flagging", type="primary", disabled=not (domains and ft_sel)):
+if not st.button("🚀 Execute De-identification review assist", type="primary", disabled=not (domains and ft_sel)):
     st.stop()
 
 # ---- execute the tiers; rebuild the per-domain column lists FROM the

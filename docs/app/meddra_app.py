@@ -860,7 +860,7 @@ _HELP_MD = """
    - *ASCII release (.asc):* give the folder with `llt.asc / pt.asc / hlt.asc / hlgt.asc / soc.asc`. Filtered to active terms (`currency == 'Y'`) and joined across the full chain; `hlt.asc`/`hlgt.asc` are optional.
 3. **Set the operating point** (sidebar ⚖ 2): the Auto-commit gate slider (default **0.88**). Candidates scoring at/above it auto-commit; below it route to a human. The value you end at is written to the audit with the run.
 4. **Confirm the input** (sidebar 🎯 3 + pre-flight panel): pick the verbatim column from the dropdown and check the panel: domains loaded, dictionary source + rows, detected columns, the Hierarchy chain this dictionary carries, and whether it has PT codes.
-5. **Execute**: click 🚀 Execute MedDRA Auto-Coding. Results render on screen and write to the output folder (default `meddra_output`).
+5. **Execute**: click 🚀 Execute Coding QC assist. Results render on screen and write to the output folder (default `meddra_output`).
 
 ### The hierarchy
 MedDRA groups related preferred terms into **High Level Terms (HLT)** by anatomy/pathology/physiology/etiology/function; HLTs link to **High Level Group Terms (HLGT)**; HLGTs group into **System Organ Classes (SOC)**. Every candidate carries the full `LLT → PT → HLT → HLGT → SOC` path as evidence columns.
@@ -1036,7 +1036,7 @@ else:
 
 # ---- Run button: disabled until BOTH a domain and a dictionary are loaded, so
 #      an empty/partial input cannot produce a misleading empty result. ----
-if not st.button("🚀 Execute MedDRA Auto-Coding", type="primary", disabled=not (domains and meddra is not None)):
+if not st.button("🚀 Execute Coding QC assist", type="primary", disabled=not (domains and meddra is not None)):
     st.stop()
 
 # ---- execute the tiers on the already-loaded frames; time the whole run for the

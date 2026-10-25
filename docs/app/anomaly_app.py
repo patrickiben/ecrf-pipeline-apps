@@ -606,7 +606,7 @@ _HELP_MD = """
 1. **Point at your data** (sidebar 📂 1): type a cut-folder path and/or upload files. Every `*.csv`/`.sas7bdat` except one named `*meddra*` loads; columns are located by content/synonym, not file name.
 2. **Set outputs** (sidebar ⚖ 2): output folder (default `anomaly_output`) and a models dir field. This build has no trained anomaly model, so leave the models dir empty; an `anomaly_model.json` there stops the run. There is no gate slider: the operating point is the built-in `[SI]` criteria, recorded in the audit.
 3. **Confirm the input** (pre-flight panel): check which measurable numeric columns were found, whether a time column was detected (drift on/off), whether a lab column was detected (per-lab drift on/off), and which free-text columns will be scanned.
-4. **Execute**: click 🚀 Execute Anomaly & Drift Detection. Results render on screen and write to the output folder.
+4. **Execute**: click 🚀 Execute Central statistical monitoring. Results render on screen and write to the output folder.
 
 ### How it works (`[SI]` / real): three separate signals, fast algorithms only
 - **Numeric outliers (Tier 2).** Per participant × column, a robust z-score of each participant's change-from-baseline against the cohort's distribution of changes is the interpretable gate; **Isolation Forest** (scikit-learn, REAL when installed) corroborates it. A participant is flagged when its worst |z| ≥ `ANOM_Z` (3). The score is `min(1, max|z| / ANOM_Z_TOP)` so it stays discriminative in [0,1] instead of every flagged participant saturating at exactly 1.0. Only flagged participants are emitted; `extreme_columns` names the exact column(s) and z that fired, and `detectors` says which detector(s) agreed.
@@ -719,7 +719,7 @@ else:
 
 # ---- Run button: disabled until at least one participant + one measurable column is aligned. ----
 n_ready = meta["n_subjects"] if (meta["numcols"]) else 0
-if not st.button("🚀 Execute Anomaly & Drift Detection", type="primary", disabled=not n_ready):
+if not st.button("🚀 Execute Central statistical monitoring", type="primary", disabled=not n_ready):
     st.stop()
 
 # ---- execute the tiers on the already-loaded frames; time the whole run for the latency figure. ----

@@ -140,7 +140,7 @@ system.
    carries (for example `LLT > PT > HLT > HLGT > SOC`), and whether it has PT codes. *If your header spells the
    verbatim differently*, add it to `AETERM_SYNONYMS` at the top of `meddra_app.py`.
 
-5. **Execute.** Click **🚀 Execute MedDRA Auto-Coding**. Results render on screen and are written to the output
+5. **Execute.** Click **🚀 Execute Coding QC assist**. Results render on screen and are written to the output
    folder (default `meddra_output`).
 
 ### Reading the results (`ae_coded.csv`)
@@ -187,7 +187,7 @@ multiselect below.
 4. **Confirm the columns to scan** (sidebar section *🎯 4* and the main pre-flight panel). Every non-numeric
    column is pre-selected; **deselect any you do not want scrubbed** (for example a date or coded field you know
    is safe). The panel shows exactly which columns will be scanned in each domain.
-5. **Execute.** Click **🚀 Execute PII/PHI Flagging**.
+5. **Execute.** Click **🚀 Execute De-identification review assist**.
 
 ### Reading the results
 - **`phi_flags.csv`** has one row **per scrubbed span**: `DOMAIN`, `USUBJID`, `ROW`, `FIELD`, `SPAN`, `ENTITY`,
@@ -241,7 +241,7 @@ QC assist).
    the audit.
 3. **Confirm the input (pre-flight).** Check which domains loaded and how each was classified, plus the
    participant count.
-4. **Execute.** Click **🚀 Execute Risk Scoring**.
+4. **Execute.** Click **🚀 Execute Participant risk screening**.
 
 ### How scoring works (`[SI]` transparent engine)
 - **Safety score (0 to 100)** is the sum of four capped components: adverse events (severity-weighted, times 1.5
@@ -313,7 +313,7 @@ Only **flagged** observations are written; normal participants and routine notes
 3. **Confirm the input (pre-flight).** Check which measurable numeric columns were found, whether a time column
    was detected (drift on or off), whether a lab/site column was detected (per-lab drift on or off), and which
    free-text columns will be scanned for text outliers.
-4. **Execute.** Click **🚀 Execute Anomaly & Drift Detection**.
+4. **Execute.** Click **🚀 Execute Central statistical monitoring**.
 
 ### How it works (`[SI]` and real)
 - **Numeric outlier score (0 to 1)** = `min(1, max|robust z| / ANOM_Z_TOP)`, where the robust z compares each
