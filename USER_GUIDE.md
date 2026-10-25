@@ -66,7 +66,7 @@ The same four programs also run inside your browser tab, on the bundled syntheti
 [PHI app](https://patrickiben.github.io/ecrf-pipeline-apps/app/phi.html),
 [risk app](https://patrickiben.github.io/ecrf-pipeline-apps/app/risk.html) and
 [anomaly app](https://patrickiben.github.io/ecrf-pipeline-apps/app/anomaly.html).
-Each page uses stlite (Streamlit on Pyodide, Python compiled to WebAssembly) to run the unchanged program on your
+Each page uses stlite (Streamlit on Pyodide, Python compiled to WebAssembly) to run the same program on your
 device, so there is no server. The first visit downloads about 30 MB, then the app opens on the sample cut; click
 **Execute** and save results with the download buttons (the output folder lives in the tab's memory).
 Privacy: runs in your browser; files are processed on your device and not uploaded by the app; the page is
@@ -349,8 +349,8 @@ in their own output folders; they share no module.
 
 ## 10. What this build does NOT do
 
-No scanned-document / bounding-box path (input is tabular eCRF), no negation feature, no clinical variable derivation — and nothing
-leaves the machine. The PHI output is compliance-*enabling*, not a certification; that remains an organizational determination. **The
+No scanned-document / bounding-box path (input is tabular eCRF), no negation feature and no clinical variable derivation, and nothing
+leaves the machine (in the browser build, nothing you load is uploaded by the app). The PHI output is compliance-*enabling*, not a certification; that remains an organizational determination. **The
 risk app is decision support only** — it does not make a clinical determination and scores raw data against built-in `[SI]` criteria
 rather than parsing free-text PDF/Word protocols or SAPs. **The anomaly app is decision support too** — it ranks and flags participants/columns for human review but does not certify data quality, make a clinical determination, or replace a validated anomaly model (install `POT` + `scipy` to run real Sinkhorn drift; the default `[SI]` path is a labeled 1-D-Wasserstein stand-in). See [Deck A](presentations/deck_a_four_tier_pipeline.md) for the full governance and limits section.
 
