@@ -71,25 +71,25 @@ APPS = {
         limits="The demo dictionary uses 99-prefixed placeholder codes, not MedDRA. Measured on held-out synthetic verbatims, this lexical stand-in ranked the right preferred term first "
                "for 54% (the real model path: 78%) and auto-coded 7 of 96 negated verbatims at the default gate; every "
                "code needs a coder's review.", limits_link=EVALUATION + "#coding",
-        alt="Coding app results table: each adverse-event verbatim with its top three candidate terms, ranks and 99-prefixed placeholder codes, followed by the success message and download buttons."),
+        alt="Coding QC assist results table: each adverse-event verbatim with its top three candidate terms, ranks and 99-prefixed placeholder codes, followed by the success message and download buttons."),
     "phi": dict(entry="phi_app.py", data="sample_data", title="De-identification review assist",
         description="A de-identification review assist running in your browser on synthetic eCRF text: flagged identifier spans and sanitized copies of each table, for a person to review.",
         img="phi_results.png",
         limits="On held-out synthetic text this stand-in left 108 of 308 identifiers readable (the real model path: "
                "91 of 308); every output needs human review.", limits_link=EVALUATION + "#deid",
-        alt="PHI app results: a table of flagged spans such as invented phone numbers, names, a ZIP code and initials, each with its entity type, offsets, redaction probability and action, above the sanitized domain rows."),
+        alt="De-identification review assist results: a table of flagged spans such as invented phone numbers, names, a ZIP code and initials, each with its entity type, offsets, redaction probability and action, above the sanitized domain rows."),
     "risk": dict(entry="risk_app.py", data="sample_data", title="Participant risk screening",
         description="Participant risk screening running in your browser on synthetic safety domains: a safety listing that ranks participants against built-in criteria standing in for a protocol's, with the reasons for each flag.",
         img="risk_results.png",
         limits="Both scores are capped, weighted sums of built-in [SI] rules, not probabilities or a validated model; every "
                "flag needs clinical review.",
-        alt="Risk app results: per-participant safety and discontinuation scores and categories with contributing factors, the fatal case pinned to the top, and a category summary."),
+        alt="Participant risk screening results: per-participant safety and discontinuation scores and categories with contributing factors, the fatal participant pinned to the top, and a category summary."),
     "anomaly": dict(entry="anomaly_app.py", data="anomaly_data", title="Central statistical monitoring",
         description="Central statistical monitoring checks running in your browser on a synthetic longitudinal lab cut: numeric outliers, cohort drift, per-lab drift and unusual free-text notes.",
         img="anomaly_results.png",
         limits="Here every detector runs its [SI] stand-in (robust z, 1-D Wasserstein drift, bag-of-words text "
                "isolation) with built-in thresholds; every flag needs human review.",
-        alt="Anomaly app results: flagged per-participant numeric outliers with their extreme columns, a cohort-wide drift table per column, and the start of the per-lab drift table."),
+        alt="Central statistical monitoring results: flagged per-participant numeric outliers with their extreme columns, a cohort-wide drift table per column, and the start of the per-lab drift table."),
 }
 HAND_EDITED = ["launch.js", "app.css"]          # live in docs/app/ only; must exist
 LOADING_NOTICE = "Starting Python in your browser; first visit downloads about 30 MB."
