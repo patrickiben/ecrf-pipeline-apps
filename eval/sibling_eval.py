@@ -440,11 +440,13 @@ def negative_control(items_f, T_f, P, fam_idx):
     return out
 
 # ============================================================ run
-def _r(x, nd=6):
-    if isinstance(x, float): return round(x, nd)
-    if isinstance(x, dict): return {k: _r(v, nd) for k, v in x.items()}
-    if isinstance(x, list): return [_r(v, nd) for v in x]
-    if isinstance(x, (np.floating,)): return round(float(x), nd)
+SIG_KEYS = ("p", "q_bh", "q_by")    # p- and q-values keep 6 significant figures, so an exact tail of 3e-11 is not written as 0
+
+def _r(x, nd=6, key=None):
+    """Floats for the JSON: 6 decimals, except the p- and q-values (SIG_KEYS), which keep 6 significant figures."""
+    if isinstance(x, (float, np.floating)): return float(f"{float(x):.6g}") if key in SIG_KEYS else round(float(x), nd)
+    if isinstance(x, dict): return {k: _r(v, nd, k) for k, v in x.items()}
+    if isinstance(x, list): return [_r(v, nd, key) for v in x]
     if isinstance(x, (np.integer,)): return int(x)
     if isinstance(x, (np.bool_,)): return bool(x)
     return x

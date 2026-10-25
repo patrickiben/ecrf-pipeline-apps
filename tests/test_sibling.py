@@ -21,8 +21,9 @@ What is checked (S-checks):
   S8   the real-path scoring wiring, with stand-in runtimes: the cosine is used when the re-ranker's contract
        has ret_rank (and why is recorded), the re-ranker score when its contract fits any candidate
   S9   the committed results: produced under the committed plan and inputs; the lab family routes to human
-       coding (the registered known answer); every known-answer criterion met; and a rerun of
-       eval/sibling_eval.py into a temp folder reproduces the committed decisions and statistics
+       coding (the registered known answer); every known-answer criterion met; a rerun of
+       eval/sibling_eval.py into a temp folder reproduces the committed decisions and statistics; and no p- or
+       q-value is written as 0 (lab's N1 accuracy tail on all items is (1/3)^22, about 3.2e-11)
 """
 import csv, io, itertools, json, math, os, shutil, subprocess, sys, tempfile
 import numpy as np
@@ -282,6 +283,14 @@ def s9():
         if not same_items: diffs.append("sibling_items.csv differs")
     check("S9e a rerun of eval/sibling_eval.py reproduces the committed decisions, gates, p-values (M within 3 MCSE) and item rows",
           ok and not diffs, dict(rc=r.returncode, err=r.stderr[-300:], diffs=diffs[:5]))
+    # Every lab term has at least 2 of its 3 variants picked right, so the observed 60 of 66 is the most any null
+    # draw can reach, and only when all 22 pseudo-golds are the gold: the exact N1 tail is (1/3)^22.
+    tests = [r for f in ("lab", "site") for rows in s["results"][f]["standin"]["null_tests"].values() for r in rows if r.get("p") is not None]
+    zero = [(r["stat"], r["subset"], k, r[k]) for r in tests for k in ("p", "q_bh", "q_by") if k in r and not r[k] > 0]
+    lab_all = s["results"]["lab"]["standin"]["null_tests"]["N1"][0]
+    check("S9f no p- or q-value in the committed summary is written as 0, and lab's N1 accuracy tail on all items is (1/3)^22 to 6 significant figures",
+          tests and not zero and (lab_all["stat"], lab_all["subset"]) == ("F", "all") and abs(lab_all["p"] / (1 / 3) ** 22 - 1) < 1e-5,
+          dict(zero=zero[:4], lab_all=lab_all))
 block("S9", s9)
 
 shutil.rmtree(TMP, ignore_errors=True)
