@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <!-- stlite 1.12.0, an exact pinned release. Subresource Integrity: the browser refuses the stylesheet,
      and (where import-map integrity is supported) the two core modules, if their content changes. -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/browser@1.12.0/build/stlite.css" integrity="sha384-nMY1QbA8+CIsSUwemJXUxjUlxoaTVytN3oKA4RhBMsdJgRaucGjAuus4FPhQV8Ui" crossorigin="anonymous">
+<link rel="stylesheet" id="stlite-css" data-stlite-css href="https://cdn.jsdelivr.net/npm/@stlite/browser@1.12.0/build/stlite.css" integrity="sha384-nMY1QbA8+CIsSUwemJXUxjUlxoaTVytN3oKA4RhBMsdJgRaucGjAuus4FPhQV8Ui" crossorigin="anonymous">
 <link rel="stylesheet" href="app.css">
 <script type="importmap">{
   "integrity": {
@@ -28,6 +28,7 @@
   <nav class="crumbs" aria-label="Breadcrumb"><a href="../">eCRF pipeline apps</a> <span aria-hidden="true">/</span> <span aria-current="page">Anomaly and Drift Checks</span></nav>
   <p class="privacy"><strong>Privacy:</strong> Runs in your browser; files are processed on your device and not uploaded by the app; the page is downloaded from GitHub Pages and the CDN, which see your IP address; synthetic data only; not a validated or Part 11 system.</p>
   <p class="limits"><strong>Limits:</strong> Here every detector runs its [SI] stand-in (robust z, 1-D Wasserstein drift, bag-of-words text isolation) with built-in thresholds; every flag needs human review.</p>
+  <p id="style-error" class="style-error" role="alert" hidden></p>
 </header>
 <main id="stage">
   <div id="root"></div>

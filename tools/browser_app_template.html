@@ -14,7 +14,7 @@
 <link rel="preconnect" href="{{CDN}}" crossorigin>
 <!-- stlite {{STLITE_VERSION}}, an exact pinned release. Subresource Integrity: the browser refuses the stylesheet,
      and (where import-map integrity is supported) the two core modules, if their content changes. -->
-<link rel="stylesheet" href="{{STLITE_CSS}}" integrity="{{STLITE_CSS_SRI}}" crossorigin="anonymous">
+<link rel="stylesheet" id="stlite-css" data-stlite-css href="{{STLITE_CSS}}" integrity="{{STLITE_CSS_SRI}}" crossorigin="anonymous">
 <link rel="stylesheet" href="app.css">
 <script type="importmap">{{IMPORTMAP}}</script>
 </head>
@@ -23,6 +23,7 @@
   <nav class="crumbs" aria-label="Breadcrumb"><a href="../">eCRF pipeline apps</a> <span aria-hidden="true">/</span> <span aria-current="page">{{TITLE}}</span></nav>
   <p class="privacy"><strong>Privacy:</strong> {{PRIVACY_NOTE}}</p>
   <p class="limits"><strong>Limits:</strong> {{LIMITS}}</p>
+  <p id="style-error" class="style-error" role="alert" hidden></p>
 </header>
 <main id="stage">
   <div id="root"></div>

@@ -73,7 +73,7 @@ The pages run each app in **hosted mode** (`ECRF_HOSTED=1`): every data input (t
 
 `docs/app/` holds what GitHub Pages serves for the four apps:
 
-- `meddra.html`, `phi.html`, `risk.html`, `anomaly.html`: one page per app, rendered from `tools/browser_app_template.html`. Each shows a loading notice and a screenshot of the app's results until Python is ready, and keeps the screenshot with a short explanation if the app cannot start.
+- `meddra.html`, `phi.html`, `risk.html`, `anomaly.html`: one page per app, rendered from `tools/browser_app_template.html`. Each shows a loading notice and a screenshot of the app's results until Python is ready, and keeps the screenshot with a short explanation if the app cannot start. If stlite's stylesheet does not load (the app then runs unstyled), the page fetches it again, twice at most and after a pause, and if that fails shows a notice with a Reload button above the app.
 - `launch.js` and `app.css`: the shared loader and page style.
 - Byte-identical copies of the four `.py` files and of every CSV in `sample_data/` and `anomaly_data/`, which the pages load from Pages.
 - `wheels/`: three small pure-Python wheels the Streamlit build needs that Pyodide does not ship (`itsdangerous` 2.2.0, BSD-3-Clause; `python-multipart` 0.0.32, Apache-2.0; `toml` 0.10.2, MIT), pinned by sha256 and served from Pages so a visit never contacts PyPI. Each wheel carries its license text in its `.dist-info` folder.

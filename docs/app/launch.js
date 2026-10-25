@@ -24,6 +24,75 @@ function ready() {
   settled = true;
   $("boot").hidden = true;
   document.body.classList.add("app-ready");
+  checkStyles();
+}
+
+// stlite's stylesheet comes from the CDN like the runtime, but the app starts without it: if that request fails
+// (a dropped connection, or a changed file refused by Subresource Integrity), the app works unstyled, with icon
+// names showing as text. So the page fetches the stylesheet again, twice at most and after a pause (an immediate
+// retry was seen to hit the same dropped connection), and if that fails too it says so above the app.
+const STYLE_NOTICE = "The app's styles did not load, so it may look broken (icon names show as text). Reloading the page usually fixes this.";
+const STYLE_RETRY_DELAYS_MS = [1000, 4000];
+let styleRetry = null;
+
+function stylesLoaded() {
+  return [...document.querySelectorAll("link[data-stlite-css]")].some((link) => {
+    try { return !!(link.sheet && link.sheet.cssRules.length > 0); } catch { return false; }
+  });
+}
+
+function showStyleNotice(show) {
+  const box = $("style-error");
+  if (!box) return;
+  if (show && box.hidden) {
+    box.textContent = STYLE_NOTICE;
+    const again = document.createElement("button");
+    again.type = "button";
+    again.textContent = "Reload";
+    again.addEventListener("click", () => location.reload());
+    box.append(" ", again);
+  }
+  box.hidden = !show;
+}
+
+// One more copy of the stylesheet link, in the same place in the cascade (ahead of app.css). Resolves true if
+// it loaded; a copy that fails is removed again.
+function addStylesheetCopy(first) {
+  return new Promise((resolve) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.crossOrigin = "anonymous";
+    link.integrity = first.integrity;
+    link.href = first.href;
+    link.dataset.stliteCss = "retry";
+    link.addEventListener("load", () => resolve(stylesLoaded()));
+    link.addEventListener("error", () => { link.remove(); resolve(stylesLoaded()); });
+    first.after(link);
+  });
+}
+
+function retryStyles() {
+  const first = $("stlite-css");
+  if (!first) return Promise.resolve(stylesLoaded());
+  styleRetry = styleRetry || (async () => {
+    for (const ms of STYLE_RETRY_DELAYS_MS) {
+      await new Promise((r) => setTimeout(r, ms));
+      if (stylesLoaded() || (await addStylesheetCopy(first))) return true;
+    }
+    return stylesLoaded();
+  })();
+  return styleRetry;
+}
+
+async function checkStyles() {
+  if (stylesLoaded()) return;
+  if (!(await retryStyles())) showStyleNotice(true);
+}
+
+// A stylesheet that fails after this script starts is retried at once; one that arrives late clears the notice.
+for (const link of document.querySelectorAll("link[data-stlite-css]")) {
+  link.addEventListener("error", () => { retryStyles(); });
+  link.addEventListener("load", () => { if (stylesLoaded()) showStyleNotice(false); });
 }
 
 // One readable line from an error (a Python traceback's last "...Error: ..." line, for example).
