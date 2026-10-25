@@ -261,8 +261,10 @@ def tier1_align(domains):
     out=pd.concat(frames, ignore_index=True).set_index("USUBJID")
     for c in numcols:
         if c in out.columns: out[c]=_num(out[c])
+    # n_subjects counts PARTICIPANTS (unique USUBJID), not rows: a longitudinal file has one row per
+    # participant per visit, so len(out) would report 600 for the 150-participant demo.
     meta=dict(numcols=sorted(numcols), timecol=timecol, labcol=labcol,
-              textcols=sorted(textcols), n_subjects=len(out))
+              textcols=sorted(textcols), n_subjects=int(out.index.nunique()))
     return out, meta
 
 # ============================ TIER 2 (numeric outlier) ============================

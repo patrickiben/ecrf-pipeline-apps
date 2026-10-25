@@ -369,6 +369,10 @@ mda = "\n".join(m.value for m in aa.markdown)
 check("A2 pre-flight detects time column + measurable cols", "VISITNUM" in mda and "ALT" in mda, mda[:300])
 check("A2b pre-flight detects lab col (per-lab drift ON) + free-text col (text outliers ON)",
       "Per-lab drift → ON" in mda and "Text outliers → ON" in mda, mda[:400])
+# labs.csv has 600 rows: 150 participants x 4 visits. The pre-flight count (and the audit's n_subjects) is
+# participants, not rows.
+check("A2c pre-flight counts participants, not rows (150 in the 600-row demo)",
+      "Participants aligned → **150**" in mda, [l for l in mda.splitlines() if "aligned" in l])
 find(aa,"text_input","Output folder").set_value(outa1).run()
 ba = find(aa,"button","🚀 Execute Anomaly & Drift Detection")
 check("A3 run button enabled with longitudinal data", not ba.disabled)
@@ -383,6 +387,8 @@ if auda is not None:
     check("A6b numeric-outlier path recorded matches runtime", ("Isolation Forest" in nop)==HAVE_SKLEARN, nop)
     tpath = str(auda.iloc[0]["text_path"]) if "text_path" in auda else ""
     check("A6c text path recorded as [SI] bag-of-words (internal pkgs absent here)", "bag-of-words" in tpath, tpath)
+    check("A6d audit n_subjects is the participant count (150), not the row count (600)",
+          "n_subjects" in auda and int(auda.iloc[0]["n_subjects"])==150, auda.iloc[0].get("n_subjects"))
 labf = pd.read_csv(os.path.join(outa1,"lab_drift.csv")) if os.path.exists(os.path.join(outa1,"lab_drift.csv")) else None
 cmpf = pd.read_csv(os.path.join(outa1,"lab_compare.csv")) if os.path.exists(os.path.join(outa1,"lab_compare.csv")) else None
 txf  = pd.read_csv(os.path.join(outa1,"text_anomalies.csv")) if os.path.exists(os.path.join(outa1,"text_anomalies.csv")) else None
