@@ -245,12 +245,20 @@ QC assist).
 
 ### How scoring works (`[SI]` transparent engine)
 - **Safety score (0 to 100)** is the sum of four capped components: adverse events (severity-weighted, times 1.5
-  if serious), labs breaching their built-in multiple of the upper limit of normal, QTc at or over the cardiac
-  limit, and vital-sign breaches. A **fatal outcome sets the safety score to 100 and the category to CRITICAL**, so
-  a fatal participant always ranks at or above every non-fatal one.
+  if serious), analytes above their built-in multiple of the upper limit of normal, QTc above the cardiac
+  criterion, and vital-sign breaches. A **fatal outcome sets the safety score to 100 and the category to CRITICAL**,
+  so a fatal participant always ranks at or above every non-fatal one.
 - **Discontinuation score (0 to 1)** adds serious-AE burden, the share of related AEs, maximum severity, a fatal
-  flag, grade 3 or higher labs, QTc and vital-sign breaches and source-system clinically significant findings, and
-  caps the total at 1.
+  flag, analytes above their built-in ULN multiple, QTc and vital-sign breaches and source-system clinically
+  significant findings, and caps the total at 1.
+- **The built-in `[SI]` criteria** are: ALT or AST above 3x ULN and creatinine above 1.5x ULN; QTc above 500 ms;
+  systolic blood pressure above 180 mmHg, diastolic above 110 mmHg and temperature above 38.5 °C. They are screening
+  criteria standing in for a protocol's, not CTCAE grades (in NCI CTCAE v5.0, ALT or AST above 3.0x ULN with a normal
+  baseline and creatinine above 1.5x ULN are grade 2 entry points) and not the discontinuation criteria in FDA's
+  *Drug-Induced Liver Injury: Premarketing Clinical Evaluation* (July 2009), which are ALT or AST above 8x ULN, above
+  5x for more than 2 weeks, or above 3x with total bilirubin above 2x ULN, INR above 1.5 or symptoms. The QTc cutoff
+  is the top ICH E14 categorical tier (above 500 ms) only: the app does not apply the 450 and 480 ms tiers or the
+  change from baseline, and it does not know whether the column holds QTcF or QTcB.
 - Neither score is a probability. A fatal outcome's contributing factors cite its `AEOUTCOME=DIED` evidence, so
   "fatal" is backed by data rather than inferred from severity alone. Categories come from built-in `[SI]` cuts; a
   human-readable **contributing factors** column explains *why* each participant landed where they did.

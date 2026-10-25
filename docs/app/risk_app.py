@@ -38,8 +38,8 @@
 #                      file by CONTENT (signature columns, not file name), align rows
 #                      to participants by USUBJID; copy values through UNCHANGED.
 #   Tier 2 signals  -> per participant, extract READABLE risk signals: n_AE, n_SAE, max
-#                      severity, fatal flag, which labs breach their SAP multiple and
-#                      by how much, QTc vs the cardiac limit, vitals vs protocol limits,
+#                      severity, fatal flag, which labs exceed their built-in [SI] ULN multiple
+#                      and by how much, QTc vs the cardiac criterion, vitals vs built-in limits,
 #                      notable physical-exam findings. Proposes nothing; measures only.
 #   Tier 3 aggregate-> weighted sum of those signals -> safety_risk_score (0-100) and
 #                      discontinuation_risk_score (0-1). Weights and thresholds are DECLARED
@@ -75,8 +75,15 @@ HAVE = {m: _have(m) for m in ("xgboost","pyreadstat")}
 # [SI] everywhere they drive a number (banner + audit); a real deployment would replace them
 # with study-specific declared criteria or a validated model.
 DEFAULT_THR = {
-    "ALT_ULN_MULT": 3.0, "AST_ULN_MULT": 3.0, "CREAT_ULN_MULT": 1.5,   # lab stopping multiples (x ULN)
-    "QTC_ABS_MS": 500,                                                 # cardiac criterion (ms)
+    # Lab criteria (x ULN): a value ABOVE the multiple counts. These are [SI] screening criteria, not CTCAE
+    # grades (in CTCAE v5.0, ALT/AST >3.0x ULN and creatinine >1.5x ULN are grade 2 entry points) and not
+    # the discontinuation criteria in FDA's DILI guidance (July 2009): ALT/AST >8x ULN; >5x for more than
+    # 2 weeks; >3x with TBL >2x ULN or INR >1.5; >3x with symptoms.
+    "ALT_ULN_MULT": 3.0, "AST_ULN_MULT": 3.0, "CREAT_ULN_MULT": 1.5,
+    # Cardiac criterion: QTc strictly ABOVE 500 ms, the top ICH E14 categorical tier (>450, >480, >500 ms).
+    # The app applies only this tier, no change from baseline, and does not know whether the column is
+    # QTcF or QTcB.
+    "QTC_ABS_MS": 500,
     "SYSBP_HIGH_MMHG": 180, "DIASTP_HIGH_MMHG": 110, "TEMPC_HIGH_C": 38.5,  # vital-sign limits
     "SAFETY_CAT_MODERATE": 25, "SAFETY_CAT_HIGH": 50, "SAFETY_CAT_CRITICAL": 75,   # safety category cuts (score)
     "DISC_CAT_MODERATE": 0.3, "DISC_CAT_HIGH": 0.6,                    # discontinuation category cuts (prob)
@@ -91,9 +98,9 @@ SEV_WEIGHT = {"MILD": 2, "MODERATE": 6, "SEVERE": 16, "LIFETHREATENING": 28}   #
 SERIOUS_MULT = 1.5        # x a serious AE (AESER=Y)
 FATAL_ADDER = 35          # flat adder for any fatal outcome (AELIFE=Y); added ON TOP of the capped AE load
 AE_CAP = 45               # cap on the non-fatal AE severity load
-LAB_PER_BREACH = lambda ratio, thr: min(15, round((ratio - thr) * 4))   # points per lab breach (x ULN beyond SAP multiple)
+LAB_PER_BREACH = lambda ratio, thr: min(15, round((ratio - thr) * 4))   # points per lab breach (x ULN beyond the [SI] multiple)
 LAB_CAP = 30              # cap on the whole lab component
-ECG_BASE, ECG_SLOPE, ECG_CAP = 6, 4, 12     # QTc>=limit -> min(cap, base + round((qtc-limit)/slope))
+ECG_BASE, ECG_SLOPE, ECG_CAP = 6, 4, 12     # QTc>limit -> min(cap, base + round((qtc-limit)/slope))
 VIT_BASE, VIT_SLOPE, VIT_PER, VIT_CAP = 2, 4, 8, 13   # per vital breach -> min(per, base+round((val-limit)/slope)); cap whole component
 
 # Discontinuation model weights ([SI]): additive contributions squashed to [0,1].
@@ -101,8 +108,8 @@ DISC_SERIOUS_EACH, DISC_SERIOUS_CAP = 0.25, 0.6   # per serious AE, capped
 DISC_RELATED_FRAC = 0.2                           # x (fraction of AEs related)
 DISC_MAXSEV = {"MILD": 0.0, "MODERATE": 0.1, "SEVERE": 0.25, "LIFETHREATENING": 0.4}
 DISC_FATAL = 0.3                                  # any fatal outcome
-DISC_LAB_EACH, DISC_LAB_CAP = 0.15, 0.3           # per analyte breaching its SAP multiple, capped
-DISC_QTC = 0.15                                   # QTc at/over the cardiac limit
+DISC_LAB_EACH, DISC_LAB_CAP = 0.15, 0.3           # per analyte above its [SI] ULN multiple, capped
+DISC_QTC = 0.15                                   # QTc above the cardiac criterion
 DISC_VITAL = 0.1                                  # any vital-sign breach
 DISC_CLINSIG_EACH, DISC_CLINSIG_CAP = 0.1, 0.2    # per source-system clinically-significant finding, capped
 
@@ -360,14 +367,14 @@ def tier2_signals(views, thr):
                 if pd.isna(val) or pd.isna(uln) or not uln: continue
                 ratio=val/uln
                 if thr_v is not None and ratio>thr_v:
-                    breaches.append(f"{code} {ratio:.1f}x ULN (>{thr_v:g}x SAP)")
+                    breaches.append(f"{code} {ratio:.1f}x ULN ([SI] criterion >{thr_v:g}x ULN)")
         return breaches
 
     def eg_sig(s):
         if eg is not None and s in eg.index:
             q=eg.loc[s,"EGQTC"] if isinstance(eg.loc[s],pd.Series) else eg.loc[s].iloc[0]["EGQTC"]
             lim=thr.get("QTC_ABS_MS")
-            if pd.notna(q) and lim is not None and q>=lim: return f"QTc {q:g} ms (>={lim:g})"
+            if pd.notna(q) and lim is not None and q>lim: return f"QTc {q:g} ms ([SI] criterion >{lim:g} ms)"
         return None
 
     def vs_sig(s):
@@ -421,7 +428,7 @@ def tier2_signals(views, thr):
 #           and discontinuation_risk_score (0-1). [SI] transparent weighted engine.
 # Per-AE severity weighting needs each AE's own severity (not just a participant max), so Tier 3
 # consumes BOTH the readable signal table AND the raw aligned AE view. Every weight is a declared
-# constant above ([SI]); every threshold comes from `thr` (SAP file or labeled default). The
+# constant above ([SI]); every threshold comes from `thr` (the built-in [SI] criteria). The
 # decision is a function of numbers already on screen -- no hidden feature.
 def tier3_scores(sig, views, thr):
     ae=views.get("ae")
@@ -437,7 +444,7 @@ def tier3_scores(sig, views, thr):
         else:
             load=0.0
         ae_comp=min(AE_CAP,load)+(FATAL_ADDER if r["fatal"] else 0)
-        # --- lab component: points per analyte breaching its SAP multiple, capped. Only
+        # --- lab component: points per analyte above its [SI] ULN multiple, capped. Only
         #     BREACHES count (ratio > declared threshold); a sub-threshold lab contributes 0,
         #     never a negative point -- that guard is what keeps every score in [0,100]. ---
         lab_pts=0.0
@@ -445,9 +452,9 @@ def tier3_scores(sig, views, thr):
             t=thr.get(f"{code}_ULN_MULT")
             if t is not None and ratio>t: lab_pts+=LAB_PER_BREACH(ratio,t)
         lab_comp=min(LAB_CAP,lab_pts)
-        # --- ECG component: QTc at/over the cardiac limit ---
+        # --- ECG component: QTc above the cardiac criterion ---
         qtc=_qtc_value(views,s); lim=thr.get("QTC_ABS_MS")
-        ecg_comp=min(ECG_CAP,ECG_BASE+round((qtc-lim)/ECG_SLOPE)) if (pd.notna(qtc) and lim is not None and qtc>=lim) else 0
+        ecg_comp=min(ECG_CAP,ECG_BASE+round((qtc-lim)/ECG_SLOPE)) if (pd.notna(qtc) and lim is not None and qtc>lim) else 0
         # --- vitals component: per vital breach, capped ---
         vit_pts=0
         for par,val in _vital_values(views,s):
@@ -478,7 +485,7 @@ def tier3_scores(sig, views, thr):
 
 def _lab_ratios(views,s):
     """Yield (analyte_code, value/ULN ratio) for participant s -- the raw detail Tier 3 needs to
-    weight each breach by how far past its SAP multiple it is."""
+    weight each breach by how far past its [SI] ULN multiple it is."""
     lb=views.get("lb")
     if lb is None or s not in lb.index: return []
     r=lb.loc[s] if isinstance(lb.loc[s],pd.DataFrame) else pd.DataFrame([lb.loc[s]])
@@ -594,8 +601,9 @@ _HELP_MD = """
 4. **Execute**: click 🚀 Execute Risk Scoring. Results render on screen (highest-risk first) and write to the output folder.
 
 ### How scoring works (`[SI]` transparent engine)
-- **Safety score (0–100)** = four capped components: adverse events (severity-weighted, ×1.5 if serious), labs breaching their stopping multiple, QTc at/over the cardiac limit, and vital-sign breaches, all against built-in `[SI]` criteria. A **fatal outcome scores 100** so it always ranks at/above every non-fatal participant; death is by definition the highest safety risk.
-- **Discontinuation score (0–1)** = serious-AE burden + relatedness fraction + max severity + fatal flag + grade≥3 labs + QTc/vital breaches + source-system clinically-significant findings, squashed to [0,1].
+- **Safety score (0 to 100)** = four capped components: adverse events (severity-weighted, times 1.5 if serious), analytes above their built-in ULN multiple, QTc above the cardiac criterion, and vital-sign breaches, all against built-in `[SI]` criteria. A **fatal outcome scores 100** so it always ranks at or above every non-fatal participant; death is by definition the highest safety risk.
+- **Discontinuation score (0 to 1)** = serious-AE burden + relatedness fraction + max severity + fatal flag + analytes above their built-in ULN multiple + QTc/vital breaches + source-system clinically significant findings, capped at 1.
+- **The built-in criteria** (`[SI]`): ALT or AST above 3x ULN and creatinine above 1.5x ULN; QTc above 500 ms; systolic BP above 180 mmHg, diastolic above 110 mmHg, temperature above 38.5 °C. They are screening criteria, not CTCAE grades (in CTCAE v5.0 those lab multiples are grade 2 entry points) and not the FDA DILI discontinuation rules; the QTc cutoff is the top ICH E14 categorical tier only, with no change from baseline, whichever correction (QTcF or QTcB) the column holds.
 - Categories come from built-in `[SI]` cuts; a human-readable **contributing factors** column explains *why* each participant landed where it did.
 
 ### Reading risk_scores.csv
