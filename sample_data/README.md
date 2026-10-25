@@ -2,12 +2,12 @@
 
 This folder is **one synthetic cut** that all four apps read without interfering. It starts from the
 worked scenario in [Deck B](../presentations/deck_b_implementation_walkthrough.md) (protocol
-PROTO-2026-X89) and then appends a larger bulk set of subjects so you can see how the apps behave on
+PROTO-2026-X89) and then appends a larger bulk set of participants so you can see how the apps behave on
 more/varied data — not just six hand-picked rows. Point any app's **Cut folder path** at this directory
 and Execute: `meddra_demo.csv` is auto-found as the coding dictionary, and every other app ignores it
 (it needs none).
 
-> **Everything here is synthetic.** No real patient, study, or licensed dictionary; subject IDs, values
+> **Everything here is synthetic.** No real patient, study, or licensed dictionary; participant IDs, values
 > and clinical notes are invented for demonstration. Regenerate with `python3 generate.py` (deterministic,
 > seed 42) — a given edit reproduces the same cut.
 
@@ -34,7 +34,7 @@ than inferred from severity.
 **Coding app** (`meddra_app.py`, default gate 0.88):
 - Pre-flight lists the domains; dictionary source "flattened CSV in cut folder (meddra_demo.csv)"; verbatim column `ae :: AETERM`.
 - The worked row 5 (`headache`) → **AUTO_COMMIT_TO_SDTM** at S = 1.0 (exact token match).
-- The other worked rows and the bulk semantic-gap verbatims → **FLAGGED_FOR_HUMAN_CODER** with top-3 candidates pre-populated — honest `[SI]` behaviour: the lexical stand-in cannot bridge gaps like "marked prolonged heart rhythm interval" → QT prolonged. Dragging the gate down to ~0.75 auto-codes worked row 1, showing the gate is a movable operating point.
+- The other worked rows and the bulk semantic-gap verbatims → **FLAGGED_FOR_HUMAN_CODER** with top-3 candidates pre-populated — honest `[SI]` behavior: the lexical stand-in cannot bridge gaps like "marked prolonged heart rhythm interval" → QT prolonged. Dragging the gate down to ~0.75 auto-codes worked row 1, showing the gate is a movable operating point.
 - `ae_coded.csv`: one row per candidate (rank 1–3); rank-1 carries the status, others are `ALT_CANDIDATE`. Each row also carries `HLT` and `HLGT` as **evidence columns** — full hierarchy path, never scored, not SDTM write-back.
 
 **PHI app** (`phi_app.py`, default redaction gate 0.85):
@@ -44,6 +44,6 @@ than inferred from severity.
 - PR row: all four spans scrubbed — MRN/DOB on their own merit, initials + postcode because two indirect attributes co-occur (the mosaic).
 - EG row and the blank AE row 6: untouched, flag `N`, sanitized cell stays empty (never `"nan"`).
 
-**Risk app** (`risk_app.py`): reads `ae`/`lb`/`eg`/`vs`/`pe` from this same folder — no SAP or protocol file. Anchor subjects land where designed (fatal `SUBJ-9015` → CRITICAL with the fatality cited alongside its `AEOUTCOME=DIED`; multi-system `SUBJ-9001` → CRITICAL; severe-AE `SUBJ-9002` → HIGH; lab-driven `SUBJ-9013` cites an ALT breach; ECG-driven `SUBJ-9014` cites QTc). See [USER_GUIDE.md](../USER_GUIDE.md) §5.
+**Risk app** (`risk_app.py`): reads `ae`/`lb`/`eg`/`vs`/`pe` from this same folder — no SAP or protocol file. Anchor participants land where designed (fatal `SUBJ-9015` → CRITICAL with the fatality cited alongside its `AEOUTCOME=DIED`; multi-system `SUBJ-9001` → CRITICAL; severe-AE `SUBJ-9002` → HIGH; lab-driven `SUBJ-9013` cites an ALT breach; ECG-driven `SUBJ-9014` cites QTc). See [USER_GUIDE.md](../USER_GUIDE.md) §5.
 
-> Every domain here now carries `AVISIT`/`VISITNUM`, so the **anomaly/drift app** can read this folder directly — or you can mix it with the true-longitudinal demo in [`../anomaly_data/`](../anomaly_data/) (one row per subject per visit, with injected drift) in a single cut.
+> Every domain here now carries `AVISIT`/`VISITNUM`, so the **anomaly/drift app** can read this folder directly — or you can mix it with the true-longitudinal demo in [`../anomaly_data/`](../anomaly_data/) (one row per participant per visit, with injected drift) in a single cut.

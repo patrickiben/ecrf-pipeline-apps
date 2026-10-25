@@ -4,13 +4,17 @@
 `AppTest` harness (Python 3.14, Streamlit 1.65, pandas 3.0, scikit-learn) against the unified sample cut in
 `sample_data/` and the anomaly app's longitudinal demo in `anomaly_data/`, plus targeted edge cases
 (uploaded dictionary, name-only dictionary, missing dictionary, blank fields, a synthetic
-`.asc` release with HLT/HLGT + an inactive term, SAS `.sas7bdat` input routing, risk-app anchor subjects, and the anomaly app's injected numeric outliers + cohort/per-lab/between-lab drift + text outliers + a mixed longitudinal/cross-sectional upload). **Result: 95/95 checks pass.**
+`.asc` release with HLT/HLGT + an inactive term, SAS `.sas7bdat` input routing, risk-app anchor participants, and the anomaly app's injected numeric outliers + cohort/per-lab/between-lab drift + text outliers + a mixed longitudinal/cross-sectional upload). **Result: 95/95 checks pass.**
 
 **Update, 2026-10-21:** the harness now runs 247 checks with the optional extras installed and 244 with `requirements.txt` only, all passing; see [New this pass: hosted-demo safety mode, CI and docs checks](#new-this-pass-hosted-demo-safety-mode-ci-and-docs-checks).
 
 **Update, 2026-10-22:** the coding and PHI apps' real model path is wired and measured, and the harness adds 16 always-run wiring checks and 5 real-model checks that are reported as skipped when no models dir is given; see [New this pass: the real model path](#new-this-pass-the-real-model-path).
 
-**Sample-cut enrichment (this pass):** every domain in `sample_data/` now carries an `AVISIT` + `VISITNUM` visit/timepoint dimension, assigned deterministically from row position — deliberately *not* the seeded RNG stream — so no existing value, anchor subject, or PHI-bearing note moved. Labs keep their file-provided reference range (`LBNRHI`), which is exactly what the risk app scores each lab against (option: ranges live in a column of the lab file). All 95 checks still pass on the enriched cut.
+**Update, 2026-10-24:** the four apps also run in the browser from GitHub Pages (stlite), every download button keeps the results on screen, and the harness adds D4, which checks the browser build in `docs/app/` against the apps and their data; see [New this pass: the apps in the browser](#new-this-pass-the-apps-in-the-browser).
+
+**Update, 2026-10-24 (review fixes):** each in-browser page states its measured limits, the docs and app text say participant, the anomaly app counts participants rather than rows, and CI adds a leg on the browser's Python 3.14 stack; see [New this pass: review fixes to the browser build](#new-this-pass-review-fixes-to-the-browser-build).
+
+**Sample-cut enrichment (this pass):** every domain in `sample_data/` now carries an `AVISIT` + `VISITNUM` visit/timepoint dimension, assigned deterministically from row position — deliberately *not* the seeded RNG stream — so no existing value, anchor participant, or PHI-bearing note moved. Labs keep their file-provided reference range (`LBNRHI`), which is exactly what the risk app scores each lab against (option: ranges live in a column of the lab file). All 95 checks still pass on the enriched cut.
 
 ## Bugs found and fixed
 
@@ -25,14 +29,14 @@
 | 7 | phi | Cosmetic scrub artifact | `RE_INIT` (`\b[A-Z]\.[A-Z]\.?\b`) backtracked and dropped the trailing dot of "J.M.", so scrubbing left an orphaned "." in sanitized text ("[REDACTED_INITIALS]."). | Trailing dot now consumed only when it ends the initials (`(?:\.(?=[^0-9a-zA-Z]|$))?`); chained initials like "U.S.A" keep the previous heuristic. |
 | 8 | meddra | **Crash on .asc load** | The `.asc` branch never selected `llt.asc`'s `pt_code` LINK column, so every ASCII-release load crashed with `KeyError('pt_code')`. Latent — it only surfaced once the `.asc` path was actually exercised by a test (M19–M23). | Select and carry the link column (`l_ptc = _col(llt,"pt_code","ptcd")`) into the join, and validate all required keys before joining. |
 | 9 | sample data | **Silent column shift** | `sample_data/eg.csv` declared 3 headers (`STUDYID,USUBJID,EGCOM`) but each row had 4 values, so pandas shifted every value left and dropped `PROTO-2026-X89`, leaving `USUBJID` holding the numeric sequence. The old name-based PHI discovery hid it (it never scanned USUBJID); content-based discovery surfaced it. | Added the missing `EGSEQ` header column; eg.csv now parses with correct alignment. |
-| 10 | risk generator | **Lost fatal flag** | `sample_data/generate.py` wrote a hardcoded `"N"` into every row's `AELIFE` column, so the anchor subject designed as fatal (`SUBJ-9015`) never carried its fatal flag and scored MODERATE instead of CRITICAL. | The generator now writes each anchor's declared `life` value (seeded subjects stay `"N"`). |
-| 11 | risk | **Negative safety scores** | Tier 3 summed lab points over *all* labs without a breach guard, so a sub-threshold lab contributed negative points and two subjects scored −1/−2. | Lab component now counts only breaches (`ratio > declared threshold`); every score is clamped to [0,100]. |
-| 12 | risk | **Relatedness never counted** | Tier 1's AE column list omitted `AEREL`, so the discontinuation model's relatedness term was always zero (e.g. a QTc-only subject scored LOW instead of MODERATE). | Added `AEREL` to the aligned AE columns; relatedness now feeds the discontinuation score. |
-| 13 | risk | **Crash on first render** | The pre-flight panel computed the subject count from an undefined frame variable (`df`) left over from when domains loaded into a single frame, so the app raised `NameError` before any domain aligned. | Subject count now derived from the per-domain views; pre-flight renders cleanly (check R2). |
-| 14 | anomaly data | **Fatal flag not evidence-backed** | The synthetic cut set `AELIFE=Y` on a subject with only life-threatening severity and no death record, so "fatal" was inferred from severity rather than backed by an outcome. A reviewer correctly flagged this as wrong. | Added an SDTM-standard `AEOUTCOME` column: `AELIFE=Y` now always pairs with `AEOUTCOME=DIED`; a life-threatening-but-survived subject (e.g. SUBJ-9001's cardiac arrest) stays non-fatal. The risk app cites the evidence in its contributing factors (checks R10b/R10d). |
-| 15 | anomaly | **Crash on mixed upload** | Uploading a longitudinal file (`labs.csv`, with `VISITNUM`) together with cross-sectional safety files crashed `_change_matrix` at `np.nanargmin`: subjects present only in a domain without the detected time column had an all-NaN time slice. | Per-subject time-axis guard (fall back to first-row + a static-outlier flag when no valid time value exists); Tier 2 now picks change-vs-static **per column** from whether that column's subjects carry a time axis, so mixed cuts score every column honestly without crashing (checks A19–A20b). |
+| 10 | risk generator | **Lost fatal flag** | `sample_data/generate.py` wrote a hardcoded `"N"` into every row's `AELIFE` column, so the anchor participant designed as fatal (`SUBJ-9015`) never carried its fatal flag and scored MODERATE instead of CRITICAL. | The generator now writes each anchor's declared `life` value (seeded participants stay `"N"`). |
+| 11 | risk | **Negative safety scores** | Tier 3 summed lab points over *all* labs without a breach guard, so a sub-threshold lab contributed negative points and two participants scored −1/−2. | Lab component now counts only breaches (`ratio > declared threshold`); every score is clamped to [0,100]. |
+| 12 | risk | **Relatedness never counted** | Tier 1's AE column list omitted `AEREL`, so the discontinuation model's relatedness term was always zero (e.g. a QTc-only participant scored LOW instead of MODERATE). | Added `AEREL` to the aligned AE columns; relatedness now feeds the discontinuation score. |
+| 13 | risk | **Crash on first render** | The pre-flight panel computed the participant count from an undefined frame variable (`df`) left over from when domains loaded into a single frame, so the app raised `NameError` before any domain aligned. | Participant count now derived from the per-domain views; pre-flight renders cleanly (check R2). |
+| 14 | anomaly data | **Fatal flag not evidence-backed** | The synthetic cut set `AELIFE=Y` on a participant with only life-threatening severity and no death record, so "fatal" was inferred from severity rather than backed by an outcome. A reviewer correctly flagged this as wrong. | Added an SDTM-standard `AEOUTCOME` column: `AELIFE=Y` now always pairs with `AEOUTCOME=DIED`; a life-threatening-but-survived participant (e.g. SUBJ-9001's cardiac arrest) stays non-fatal. The risk app cites the evidence in its contributing factors (checks R10b/R10d). |
+| 15 | anomaly | **Crash on mixed upload** | Uploading a longitudinal file (`labs.csv`, with `VISITNUM`) together with cross-sectional safety files crashed `_change_matrix` at `np.nanargmin`: participants present only in a domain without the detected time column had an all-NaN time slice. | Per-participant time-axis guard (fall back to first-row + a static-outlier flag when no valid time value exists); Tier 2 now picks change-vs-static **per column** from whether that column's participants carry a time axis, so mixed cuts score every column honestly without crashing (checks A19–A20b). |
 
-## Behaviour change: PHI discovery is now content-based
+## Behavior change: PHI discovery is now content-based
 
 Per reviewer direction, the PHI app no longer gates on column names. The old rule
 (a suffix list `COM;DESC;DSC` + an exact-name list) was removed because a
@@ -61,7 +65,7 @@ editing a name rule. This change surfaced bug #9 above and is covered by checks 
 
 ## New this pass: anomaly & drift app + Sinkhorn metric decision
 
-**`anomaly_app.py`** is a fourth independent program (no shared module, same `[SI]`/real discipline). It detects two separate signals over longitudinal data: per-subject anomalies (robust z-score of each subject's change-from-baseline vs the cohort's distribution of changes) and distributional drift (transport distance between an early "reference" window and a late "current" window, per measurable column). Anomaly uses `anomaly_data/labs.csv` — its own longitudinal demo — because drift needs a time axis the cross-sectional shared cut lacks.
+**`anomaly_app.py`** is a fourth independent program (no shared module, same `[SI]`/real discipline). It detects two separate signals over longitudinal data: per-participant anomalies (robust z-score of each participant's change-from-baseline vs the cohort's distribution of changes) and distributional drift (transport distance between an early "reference" window and a late "current" window, per measurable column). Anomaly uses `anomaly_data/labs.csv` — its own longitudinal demo — because drift needs a time axis the cross-sectional shared cut lacks.
 
 **Sinkhorn regularization decision.** The real drift path calls `ot.sinkhorn2` with a linear (L1) cost. Regularization must scale to the data's typical inter-point spacing, not its full range: scaling it to the **range** lets one tail/outlier stretch reg far beyond the bulk spread, which smears mass and inflates the transport cost — measured **+140…+186% vs exact 1-D Wasserstein** on tight columns (CREAT/AST/SYSBP), falsely pushing them toward HIGH drift. Scaling reg to the **reference window's robust spread** (IQR-based, already computed for the ratio denominator) keeps Sinkhorn within ~5–28% of exact W1 across all demo columns while staying numerically stable even when a column has drifted far (`ALT`). Verified against exact 1-D Wasserstein ground truth; checks A9/A10 assert `ALT` is the top drift column and every stable column stays LOW/MODERATE.
 
@@ -69,10 +73,10 @@ editing a name rule. This change surfaced bug #9 above and is covered by checks 
 
 The anomaly app was redesigned from a two-signal detector into an **ensemble of fast, scalable detectors** across numeric AND free-text fields — there are many ways data can be anomalous. What changed and what the harness now asserts:
 
-- **Numeric outliers corroborated by Isolation Forest.** The robust-z change-from-baseline gate is unchanged as the interpretable score; a real **Isolation Forest** (scikit-learn) now fits the subject×column change matrix and corroborates each flag, with the `detectors` column citing which detector(s) agreed. Check A16 asserts flagged rows cite IsolationForest when sklearn is installed.
-- **Discriminative, flagged-only scoring.** The old score was `min(1, |z|/3)`, so every flagged subject saturated at exactly 1.0 (uninformative). It is now `min(1, max|z| / ANOM_Z_TOP)` with `ANOM_Z_TOP=8`, and **only flagged subjects are emitted** (worst |z| ≥ `ANOM_Z`). Check A8b asserts no LOW-category subject leaks into the output.
+- **Numeric outliers corroborated by Isolation Forest.** The robust-z change-from-baseline gate is unchanged as the interpretable score; a real **Isolation Forest** (scikit-learn) now fits the participant×column change matrix and corroborates each flag, with the `detectors` column citing which detector(s) agreed. Check A16 asserts flagged rows cite IsolationForest when sklearn is installed.
+- **Discriminative, flagged-only scoring.** The old score was `min(1, |z|/3)`, so every flagged participant saturated at exactly 1.0 (uninformative). It is now `min(1, max|z| / ANOM_Z_TOP)` with `ANOM_Z_TOP=8`, and **only flagged participants are emitted** (worst |z| ≥ `ANOM_Z`). Check A8b asserts no LOW-category participant leaks into the output.
 - **Per-lab drift.** In addition to cohort-wide Sinkhorn drift, a categorical `LAB` column enables per-`LAB × column` drift (`lab_drift.csv`), isolating a site/lab assay change that cohort-wide drift dilutes away. Checks A12/A13 assert LAB-C×AST is CRITICAL while the other labs' AST stays LOW/MODERATE.
-- **Text outliers.** Free-text columns (e.g. `LABCOM`) are scanned for retrieval-isolation — Needle3/Laya when installed, else a labelled bag-of-words isolation stand-in `[SI]` — emitting only flagged notes to `text_anomalies.csv`. Checks A14/A15 assert exactly the three injected anomalous notes are flagged in LABCOM.
+- **Text outliers.** Free-text columns (e.g. `LABCOM`) are scanned for retrieval-isolation — Needle3/Laya when installed, else a labeled bag-of-words isolation stand-in `[SI]` — emitting only flagged notes to `text_anomalies.csv`. Checks A14/A15 assert exactly the three injected anomalous notes are flagged in LABCOM.
 - **Bug found & fixed (pandas 3 StringDtype).** Free-text detection used `is_object_dtype`, which is False for pandas-3's dedicated string dtype, so `LABCOM` was silently not detected and no text outliers ran. Detection now accepts both object and string dtypes (`is_object_dtype OR is_string_dtype`).
 
 ## New this pass: between-lab/site comparison + mixed-upload robustness
@@ -80,7 +84,7 @@ The anomaly app was redesigned from a two-signal detector into an **ensemble of 
 Two additions to the anomaly app, both verified end-to-end by the harness:
 
 - **Between-lab/site comparison (`lab_compare.csv`).** Per-lab drift asks *how much one lab moved over time*; it cannot see a site that systematically measures differently from every other site. The new Tier-3 signal compares each `LAB × column` current-window distribution against the POOLED-OTHERS (leave-one-out) distribution via the same Sinkhorn/Wasserstein transport distance, normalized by the robust spread → a unitless `between_lab_ratio`. A lab that agrees with the rest shows ~0; an outlier site stands out. Checks A17/A18 assert LAB-C×AST is the between-lab standout (HIGH/CRITICAL) while the other labs' AST stays LOW/MODERATE.
-- **Mixed-upload robustness (bug found & fixed).** Uploading a longitudinal file (`labs.csv`, with `VISITNUM`) together with cross-sectional safety files used to crash: `_change_matrix` called `np.nanargmin` on an all-NaN time slice for subjects present only in a domain without the detected time column. The change matrix now guards each subject's time axis (falls back to first-row + a static-outlier flag when no valid time value exists), and Tier 2 picks change-vs-static **per column** from whether that column's subjects carry a time axis — so mixed cuts score every column honestly without crashing or mixing signal definitions within one column. Checks A19–A20b build a temp cut of `labs.csv` + the cross-sectional safety files, assert no exception on load/execute, and confirm the three injected numeric outliers are still flagged (the longitudinal signal survives alongside cross-sectional data).
+- **Mixed-upload robustness (bug found & fixed).** Uploading a longitudinal file (`labs.csv`, with `VISITNUM`) together with cross-sectional safety files used to crash: `_change_matrix` called `np.nanargmin` on an all-NaN time slice for participants present only in a domain without the detected time column. The change matrix now guards each participant's time axis (falls back to first-row + a static-outlier flag when no valid time value exists), and Tier 2 picks change-vs-static **per column** from whether that column's participants carry a time axis — so mixed cuts score every column honestly without crashing or mixing signal definitions within one column. Checks A19–A20b build a temp cut of `labs.csv` + the cross-sectional safety files, assert no exception on load/execute, and confirm the three injected numeric outliers are still flagged (the longitudinal signal survives alongside cross-sectional data).
 
 ## New this pass: hosted-demo safety mode, CI and docs checks
 
@@ -99,7 +103,7 @@ With nothing set (the local default) every app behaves as before; its audit only
 
 **The switch fails closed** (see `_hosted()` in each app). A security review found three ways a public app could end up unlocked with nothing on the page to show it, all fixed this pass: (1) a secrets file that exists but does not parse (`hosted = True` with a capital T, or any stray bad line) made Streamlit's loader report "no secrets", so the app ran in local mode while Streamlit only logged the parse error on the server; (2) `ECRF_HOSTED` values such as `on` or `y` were read as off; (3) a top-level `ECRF_HOSTED` key in the secrets overwrote a host-set `ECRF_HOSTED=1`, because Streamlit copies top-level secrets into the environment. Now any `ECRF_HOSTED` or `hosted` value other than empty, `0`, `false`, `no` or `off` turns hosted mode on, so does a secrets file or folder that exists but does not load, and so does an `ECRF_HOSTED` key in the secrets. With no secrets file at all, a local run is unchanged. The README deploy steps now end with opening the app and confirming the banner, and say how to cap upload sizes on a self-managed host (`--server.maxUploadSize 1`): Streamlit's upload endpoint keeps bytes a crafted client sends to a disabled uploader in server memory until the session expires, although the apps never read them.
 
-**CI.** `.github/workflows/qc.yml` runs `python tests/qc_test.py` on Python 3.12 on every push and pull request, in two matrix variants: `stand-in` (`requirements.txt` only, what a plain install or a Community Cloud deploy gets) and `optional-extras` (plus `pyreadstat`, `scikit-learn`, `POT` and `scipy`). A guard step fails the job if the runner has `ECRF_HOSTED` set, so every run starts from the local default; the hosted checks set and clear it inside the harness process. `requirements.txt` now asks for `streamlit>=1.49`, the oldest release that accepts `st.dataframe(width="stretch")` (1.36 to 1.48 raise `TypeError` on load). The harness itself needs Streamlit 1.56 or newer (`AppTest.file_uploader`), which a fresh install satisfies.
+**CI.** `.github/workflows/qc.yml` runs `python tests/qc_test.py` on Python 3.12 on every push and pull request, in two matrix variants: `stand-in` (`requirements.txt` only, what a plain install gets) and `optional-extras` (plus `pyreadstat`, `scikit-learn`, `POT` and `scipy`). A guard step fails the job if the runner has `ECRF_HOSTED` set, so every run starts from the local default; the hosted checks set and clear it inside the harness process. `requirements.txt` now asks for `streamlit>=1.49`, the oldest release that accepts `st.dataframe(width="stretch")` (1.36 to 1.48 raise `TypeError` on load). The harness itself needs Streamlit 1.56 or newer (`AppTest.file_uploader`), which a fresh install satisfies.
 
 **New check groups (152 checks).**
 
@@ -146,13 +150,72 @@ The "Verified working" list below still describes the 95 app checks; all of them
 | `requirements.txt` only (CI variant `stand-in`) | **260 passed, 0 failed, 5 skipped** (244 + 16 RW; RM skipped) |
 | the real runtimes, no optional extras, `ECRF_MODELS_DIR` set to a models dir built with `eval/fetch_models.py` and trained with `eval/run_eval.py` | **265 passed, 0 failed, 0 skipped** (244 + 16 RW + 5 RM) |
 
+## New this pass: the apps in the browser
+
+**Date:** 2026-10-24 · **Method:** the `AppTest` harness on Python 3.14.7 with Streamlit 1.65.0, pandas 3.0.6 and numpy 2.5.4 (the optional extras and the real runtimes installed, no models dir), plus headless Chrome 155 driven by puppeteer-core 25.16.0 against `docs/` served locally under `/ecrf-pipeline-apps/`, as GitHub Pages serves it.
+
+The Streamlit Community Cloud links had started to answer with a sign-in page, so the four apps now run in the visitor's browser instead. stlite 1.12.0 runs Streamlit 1.65.0 on Pyodide 314.0.3 (Python 3.14) inside the tab, and GitHub Pages serves one page per app from `docs/app/`. What changed:
+
+- **Downloads keep the results (all four apps).** Every `st.download_button` now passes `on_click="ignore"`. Before, a click reran the script and, because the results sit behind the Execute button, wiped the tables and the other download buttons, so a second file needed a second run.
+- **Accurate wording in the browser.** Under Pyodide (`sys.platform == "emscripten"`) the caption says "runs in this browser tab" instead of "air-gapped", the help panel says nothing you load is uploaded instead of "nothing leaves the machine", the Output-folder help explains that the folder is in the tab's memory, and the success message says the files are in the tab's memory and points to the download buttons instead of "Wrote /tmp/...". A local run is unchanged; no widget label, header or button text changed.
+- **The browser build.** `tools/sync_browser_apps.py` copies the four `.py` files and every CSV in `sample_data/` and `anomaly_data/` into `docs/app/`, renders the four pages from `tools/browser_app_template.html` and checks three pinned pure-Python wheels (`itsdangerous`, `python-multipart`, `toml`) that the Streamlit build needs and Pyodide does not ship. Serving those from Pages means a visit contacts only GitHub Pages and cdn.jsdelivr.net, never PyPI. The pages set `ECRF_HOSTED=1`, pin stlite and Pyodide by exact version, check stlite's stylesheet and two core modules with Subresource Integrity, and carry a Content-Security-Policy that allows connections only to the site and the CDN.
+- **New check D4.** `tools/sync_browser_apps.py --check` must pass: byte-identical copies, pages exactly as rendered, wheel hashes, and no stray file. It also runs as its own CI job (`browser-build`). It was seen to fail on scratch copies for an edited app, a new source CSV, a deleted copy, a stray copy, a hand-edited page, a corrupted wheel and a missing screenshot, and to pass again after a sync.
+
+**Browser checks** (each app, run outside the harness; screenshots kept outside the repository):
+
+- Each page shows the loading notice ("Starting Python in your browser; first visit downloads about 30 MB.") and the privacy note word for word, and becomes interactive in 4.1 to 5.3 seconds on this machine (29.3 seconds with the network throttled to 10 Mbps and 100 ms).
+- In hosted mode both banners show, the sample box is ticked and locked, and Execute renders the results with no exception.
+- The first download button saves its file, and the results, the success message and every download button are still on screen afterward. The four downloaded files (`ae_coded.csv`, `phi_flags.csv`, `risk_scores.csv`, `anomalies.csv`) are byte-identical to a native run of the same apps in hosted mode with the optional extras hidden, so every tier ran its `[SI]` path in both.
+- `?demo=1` works at 390 px phone width, with no horizontal scroll while loading, when ready or with results on screen, and the last download button can be scrolled into view. With hosted mode switched off for a test run only, `?demo=1` ticks the sample box and its absence leaves it unticked, so the query parameter reaches Python in the browser.
+- There were zero page errors. Every request went to the local server or cdn.jsdelivr.net (none to PyPI), and none was a POST or other non-GET request. An off-site fetch from the page, or from a worker it creates, is refused by the policy. Changed copies of `stlite.css`, `stlite.js` or its core chunk are refused by the browser.
+- With the CDN blocked, the page keeps the screenshot and explains that the app could not start. The test sandbox's own network dropped an occasional CDN request: in the final run, 2 of 10 page loads failed to start on the first try, showed that message with the advice to reload, and passed after one reload.
+- Known, harmless console noise: each download button logs a blocked request to stlite's placeholder host `stlite.invalid` when it appears; the download itself works. Only headless Chrome was tested; Safari and Firefox were not.
+
+**Results.**
+
+| Configuration | Result |
+|---|---|
+| `requirements.txt` plus the optional extras and the real runtimes, no models dir (Python 3.14.7, Streamlit 1.65.0) | **264 passed, 0 failed, 5 skipped** (the 263 earlier checks + D4; RM1 to RM5 skipped: no models dir) |
+
+## New this pass: review fixes to the browser build
+
+**Date:** 2026-10-24 · **Method:** the `AppTest` harness in three configurations (table below), plus headless Chrome 155 driven by puppeteer-core 25.16.0 against `docs/` served locally under `/ecrf-pipeline-apps/`, as GitHub Pages serves it.
+
+What changed after review:
+
+- **Measured limits on each page.** Every in-browser page carries a "Limits" line under the privacy note. The PHI page says that on held-out synthetic text the stand-in left 108 of 308 identifiers readable (the real model path: 91 of 308); the coding page gives the stand-in's 54% top-1 (real path: 78%) and its 7 of 96 auto-coded negated verbatims; the risk page says both scores are capped, weighted rule sums, not probabilities; the anomaly page says every detector runs its `[SI]` stand-in. The landing page repeats the coding and PHI figures.
+- **"Participant", not "subject".** The docs and the text the apps show say participant(s) and per-participant ("Participants aligned", "per-participant risk"). Identifiers (`n_subjects`), CDISC names (`USUBJID`, `SUBJ-` IDs), the PHI title regexes and the synthetic note text are unchanged. British spellings in the same places became American (labeled, behavior, neighbor, judgment, etiology).
+- **Anomaly app counted rows as participants (bug fixed).** The pre-flight panel and the audit's `n_subjects` reported 600 for the 150-participant, 4-visit demo. It now counts unique `USUBJID`. New checks A2c (pre-flight shows 150) and A6d (audit records 150).
+- **Page names and captions.** The pages are titled Coding QC Assist (MedDRA-style, demo dictionary), De-identification Review Assist, Participant Risk Screening and Anomaly and Drift Checks, and the apps' tab titles match. In the browser the coding, PHI and anomaly captions name the `[SI]` stand-ins that run there instead of Needle3, Laya, XGBoost, Isolation Forest and Sinkhorn.
+- **Stylesheet retry.** If stlite's stylesheet fails to load, the page fetches it again (after 1 s, then 4 s) and otherwise shows a notice with a Reload button above the app, instead of looking ready while unstyled.
+- **CI.** Actions pinned to release commits (checkout v7.0.1, setup-python v7.1.0, both Node 24), and a third harness leg, `browser-stack`: Python 3.14.0 with Streamlit 1.65.0, pandas 3.0.2, numpy 2.4.3 and pyarrow 22.0.0, the versions stlite 1.12.0 runs on Pyodide 314.0.3.
+- **Screenshots** in `docs/img/` were recaptured from the in-browser pages, so they say "per-participant" and show the hosted-mode banner and the in-tab "Done" message.
+- `CHANGES_FOR_PUBLIC.md` was removed from the tree (a copy is kept privately; it remains in git history).
+
+**Browser checks** (each app, run outside the harness):
+
+- Every page shows the loading notice and the privacy note word for word, its Limits line, and the new tab title; each became interactive in 5.1 to 5.6 s on this machine, at desktop width and with `?demo=1` at 390 px, with no reload needed. Execute rendered results with no exception; the pre-flight panels read "Participants aligned → 52" (risk) and "→ 150" (anomaly); no visible app text outside the tables says "subject".
+- The first download saved its file and the results stayed on screen. The four files are byte-identical to a native run of the same apps in hosted mode on the browser stack (Python 3.14.0, Streamlit 1.65.0, pandas 3.0.2), with the optional extras hidden.
+- No horizontal scroll at 390 px while loading, when ready or with results; the last download button can be scrolled into view. `?demo=1` reaches Python when hosted mode is switched off for a test run. With the CDN blocked, the page keeps the screenshot and says the app could not start. Zero page errors; every request went to the local server or cdn.jsdelivr.net, none to PyPI, all GET. Off-site fetches from the page and from a worker are refused by the policy, and changed copies of `stlite.js`, its core chunk or `stlite.css` are refused by Subresource Integrity.
+- Stylesheet failure: with the first `stlite.css` request aborted, the retry styled the app and no notice showed; with every request aborted, or the file changed so SRI refused it, the notice and Reload button showed (desktop and 390 px) and the app stayed usable. In the final verifier run the test sandbox's network dropped the first `stlite.css` request in 5 of 8 page loads; the retry recovered all 5, so none needed a reload.
+
+**Results.**
+
+| Configuration | Result |
+|---|---|
+| `requirements.txt` only (Python 3.14.7, Streamlit 1.65.0, pandas 3.1.0) | **263 passed, 0 failed, 5 skipped** |
+| `requirements.txt` plus `pyreadstat`, `scikit-learn`, `POT`, `scipy` (Python 3.12.13, Streamlit 1.66.1), the CI `optional-extras` leg | **266 passed, 0 failed, 5 skipped** |
+| browser stack: Python 3.14.0, Streamlit 1.65.0, pandas 3.0.2, numpy 2.4.3, pyarrow 22.0.0, the CI `browser-stack` leg | **263 passed, 0 failed, 5 skipped** |
+
+The two new checks are A2c and A6d; RM1 to RM5 are skipped because no models dir was given.
+
 ## Verified working (95 checks)
 
 **meddra_app.py:** domain + dictionary load from folder and via upload · verbatim
 selector populated from synonyms · pre-flight contract panel · execute produces
 one row per candidate (top-3) with integer ranks · exact-match verbatim
 AUTO_COMMIT_TO_SDTM, semantic-gap verbatims FLAGGED_FOR_HUMAN_CODER (honest `[SI]`
-behaviour) · name-only dictionary forces 100% routing and warns in pre-flight ·
+behavior) · name-only dictionary forces 100% routing and warns in pre-flight ·
 missing-dictionary error surfaced as plain text, not a stack trace · `.asc`
 release auto-discovered with the full LLT→PT→HLT→HLGT→SOC hierarchy shown in
 pre-flight and an inactive PT dropped by the currency filter · `ae_coded.csv`
@@ -172,17 +235,17 @@ field stays missing, never `"nan"` · PHI flags Y/Y/N/N/N/N as designed · outpu
 (`phi_flags.csv`, `sanitized/*.csv`, `audit_log.csv`) written.
 
 **risk_app.py:** all five safety domains classified by content from `sample_data/` ·
-pre-flight shows the classification + subject count and records the `[SI]` criteria source in the audit ·
+pre-flight shows the classification + participant count and records the `[SI]` criteria source in the audit ·
 every safety score lands in [0,100] and every discontinuation score in [0,1] · all four
 safety categories (LOW/MODERATE/HIGH/CRITICAL) are present across the bulk cut · anchor
-subjects land where designed — fatal `SUBJ-9015` → CRITICAL with its fatality cited alongside the
+participants land where designed — fatal `SUBJ-9015` → CRITICAL with its fatality cited alongside the
 `AEOUTCOME=DIED` evidence, multi-system `SUBJ-9001` → CRITICAL (its life-threatening cardiac arrest
 correctly NOT called fatal since it survived), severe-AE `SUBJ-9002` → HIGH, lab-driven `SUBJ-9013`
-cites an ALT breach, ECG-driven `SUBJ-9014` cites QTc · the fatal subject ranks at/above every
-non-fatal subject · discontinuation categories for the anchors are correct (fatal → HIGH,
+cites an ALT breach, ECG-driven `SUBJ-9014` cites QTc · the fatal participant ranks at/above every
+non-fatal participant · discontinuation categories for the anchors are correct (fatal → HIGH,
 QTc-only → MODERATE) · the raw count/severity/fatal signals are internal and not exported (R5b) · outputs (`risk_scores.csv`, `audit_log.csv`) written · **bit-identical output across two runs**.
 
-**anomaly_app.py:** loads its longitudinal demo from `anomaly_data/` and detects the time column, measurable columns, lab column (per-lab drift ON) and free-text column (text outliers ON) in pre-flight · execute produces flagged-only numeric outliers, cohort + per-lab drift + between-lab/site comparison, and text outliers with no exception · all three injected numeric outliers (`SUBJ-A003`, `SUBJ-A017`, `SUBJ-A029`) are the only subjects emitted and each cites its extreme column/z plus the IsolationForest corroborator (A8/A8b/A16) · scores stay discriminative in [0,1] rather than saturating at 1.0 · `ALT` is the top cohort drift column while every stable column stays LOW/MODERATE (A9/A10) — confirming anomaly and drift are separate signals · per-lab drift isolates LAB-C×AST as CRITICAL while the other labs' AST stays LOW/MODERATE (A12/A13) · between-lab/site comparison flags LAB-C×AST as the standout vs the pooled others while the other labs stay LOW/MODERATE (A17/A18) · a mixed longitudinal + cross-sectional upload runs with no exception and still flags all three injected numeric outliers (A19–A20b) · exactly the three injected anomalous notes are flagged in `LABCOM` (A14/A15) · the audit records which numeric/drift/text path ran, matching the installed runtimes (A6/A6b/A6c) · outputs (`anomalies.csv`, `drift.csv`, `lab_drift.csv`, `lab_compare.csv`, `text_anomalies.csv`, `audit_log.csv`) written · **bit-identical output across two runs**.
+**anomaly_app.py:** loads its longitudinal demo from `anomaly_data/` and detects the time column, measurable columns, lab column (per-lab drift ON) and free-text column (text outliers ON) in pre-flight · execute produces flagged-only numeric outliers, cohort + per-lab drift + between-lab/site comparison, and text outliers with no exception · all three injected numeric outliers (`SUBJ-A003`, `SUBJ-A017`, `SUBJ-A029`) are the only participants emitted and each cites its extreme column/z plus the IsolationForest corroborator (A8/A8b/A16) · scores stay discriminative in [0,1] rather than saturating at 1.0 · `ALT` is the top cohort drift column while every stable column stays LOW/MODERATE (A9/A10) — confirming anomaly and drift are separate signals · per-lab drift isolates LAB-C×AST as CRITICAL while the other labs' AST stays LOW/MODERATE (A12/A13) · between-lab/site comparison flags LAB-C×AST as the standout vs the pooled others while the other labs stay LOW/MODERATE (A17/A18) · a mixed longitudinal + cross-sectional upload runs with no exception and still flags all three injected numeric outliers (A19–A20b) · exactly the three injected anomalous notes are flagged in `LABCOM` (A14/A15) · the audit records which numeric/drift/text path ran, matching the installed runtimes (A6/A6b/A6c) · outputs (`anomalies.csv`, `drift.csv`, `lab_drift.csv`, `lab_compare.csv`, `text_anomalies.csv`, `audit_log.csv`) written · **bit-identical output across two runs**.
 
 ## How to re-run the tests
 
@@ -191,11 +254,11 @@ derive from its own location). With the app dependencies installed:
 
     pip install -r requirements.txt && python tests/qc_test.py
 
-Exit code 0 = every check passes: 263 checks with the optional extras (`pyreadstat`, `scikit-learn`, `POT`, `scipy`) installed, or 260 with `requirements.txt` only, where SAS2, SAS3 and A16 do not run; in both, the 5 real-model checks (RM1 to RM5) are reported as skipped. To run them, build a models dir as in [`eval/README.md`](eval/README.md) and run `ECRF_MODELS_DIR=<models dir> python tests/qc_test.py` with the real runtimes installed. It drives each app end-to-end via
+Exit code 0 = every check passes, and the last line reports how many passed, failed and were skipped. With `requirements.txt` only, SAS2, SAS3 and A16 do not run (they need `pyreadstat` or `scikit-learn`); without a models dir, the 5 real-model checks (RM1 to RM5) are reported as skipped. The latest counts are in the newest "New this pass" section above. To run them, build a models dir as in [`eval/README.md`](eval/README.md) and run `ECRF_MODELS_DIR=<models dir> python tests/qc_test.py` with the real runtimes installed. It drives each app end-to-end via
 `streamlit.testing.v1.AppTest.from_file(...)`, points the coding/PHI/risk apps at `sample_data/`
 and the anomaly app at `anomaly_data/`, clicks Execute, and asserts on the rendered dataframes and
 written CSVs — including a synthetic `.asc` release (HLT/HLGT + currency filter), content-based
-PHI discovery, SAS `.sas7bdat` input routing, the risk-app anchor subjects, and the anomaly app's injected drift column + per-subject outliers. It also runs each app in hosted mode (the H checks, which set and clear `ECRF_HOSTED` and their own scratch secrets themselves, so leave `ECRF_HOSTED` unset and keep any secrets file out of `~/.streamlit/` and `.streamlit/` while it runs) and checks `docs/` (the D checks). The assertions above are the acceptance criteria; keep them green before sharing a change.
+PHI discovery, SAS `.sas7bdat` input routing, the risk-app anchor participants, and the anomaly app's injected drift column + per-participant outliers. It also runs each app in hosted mode (the H checks, which set and clear `ECRF_HOSTED` and their own scratch secrets themselves, so leave `ECRF_HOSTED` unset and keep any secrets file out of `~/.streamlit/` and `.streamlit/` while it runs) and checks `docs/`, including the in-browser build in `docs/app/` (the D checks). The assertions above are the acceptance criteria; keep them green before sharing a change.
 
 ## Known limits (unchanged by QC)
 
@@ -206,8 +269,8 @@ PHI discovery, SAS `.sas7bdat` input routing, the risk-app anchor subjects, and 
   MedDRA release or on real site notes.
 - eCRF path only; no scanned-document/bounding-box capability exists here.
 - The risk app is **decision support**, not a clinical determination: its `[SI]` weighted
-  engine ranks and flags subjects for human review but does not predict outcomes with validated
+  engine ranks and flags participants for human review but does not predict outcomes with validated
   accuracy, and it scores raw data against built-in `[SI]` criteria rather than parsing free-text PDF/Word protocols or SAPs.
-- The anomaly app's detectors default to labelled `[SI]` stand-ins where the runtime is absent: drift uses a 1-D-Wasserstein stand-in (install `POT` + `scipy` for real Sinkhorn optimal transport), numeric outliers run the robust-z gate alone (install `scikit-learn` to add a real Isolation Forest corroborator), and text outliers use bag-of-words isolation (install the internal `cactus-needle`/`laya` packages for real retrieval-isolation). It is decision support — it does not certify data quality or make a clinical determination.
+- The anomaly app's detectors default to labeled `[SI]` stand-ins where the runtime is absent: drift uses a 1-D-Wasserstein stand-in (install `POT` + `scipy` for real Sinkhorn optimal transport), numeric outliers run the robust-z gate alone (install `scikit-learn` to add a real Isolation Forest corroborator), and text outliers use bag-of-words isolation (install the internal `cactus-needle`/`laya` packages for real retrieval-isolation). It is decision support — it does not certify data quality or make a clinical determination.
 - `sample_data/meddra_demo.csv` is synthetic demo data, not licensed MedDRA.
 - Everything in `sample_data/` and `anomaly_data/` is **synthetic** — no real patient, study, or licensed dictionary; regenerate with `python3 sample_data/generate.py` (ae/lb/eg/vs/pe) and `python3 anomaly_data/generate.py` (labs.csv), both deterministic at seed 42.

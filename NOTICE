@@ -4,3 +4,7 @@ Copyright 2026 Patrick Iben
 Licensed under the Apache License, Version 2.0 (see LICENSE).
 The bundled sample data is synthetic and the demo dictionary is not MedDRA.
 MedDRA is a licensed product of the ICH MedDRA MSSO and is not included.
+
+docs/app/wheels/ redistributes three unmodified third-party wheels for the in-browser build:
+itsdangerous 2.2.0 (BSD-3-Clause), python-multipart 0.0.32 (Apache-2.0) and toml 0.10.2 (MIT).
+Each wheel's license text is inside its .dist-info folder.

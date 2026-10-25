@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>eCRF Pipeline Apps</title>
-<meta name="description" content="Four independent Streamlit apps for synthetic clinical eCRF extracts: auto-coding, PII/PHI redaction, risk scoring, and anomaly and drift detection.">
+<meta name="description" content="Four independent Streamlit apps for synthetic clinical eCRF extracts, runnable in the browser: auto-coding, PII/PHI redaction, risk scoring, and anomaly and drift detection.">
 <meta name="color-scheme" content="light dark">
 <!-- One self-contained page for GitHub Pages (served from the main branch, /docs). Inline CSS only:
      no external scripts, stylesheets, fonts or images (QC check D2 enforces this). -->
@@ -75,7 +75,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <p class="lede">Four independent Streamlit apps that read clinical eCRF extracts and write audit-ready outputs:
     auto-coding of adverse-event verbatims, PII/PHI flagging and redaction, participant safety and discontinuation
     risk scoring, and data anomaly and drift detection. Each app is a separate program with its own audit log, so a
-    run can be reproduced from its audit alone.</p>
+    run can be reproduced from its audit alone. All four also run in your browser on the bundled synthetic data.</p>
   <ul class="links">
     <li><a href="https://github.com/patrickiben/ecrf-pipeline-apps">Source on GitHub</a></li>
     <li><a href="deck_a_four_tier_pipeline.html">Deck A: the four-tier pipeline</a></li>
@@ -90,19 +90,28 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
 <main>
 
 <section aria-labelledby="demos">
-  <h2 id="demos">Try a hosted demo</h2>
-  <p>Each app runs as its own Streamlit Community Cloud deployment in hosted mode: every data input is locked to the
-    bundled synthetic cut, outputs go to a per-session temporary folder, a banner says so on every page, and the audit
-    records <code>hosted_mode=true</code>. For real data, run the apps locally (see the README).</p>
+  <h2 id="demos">Run the apps in your browser</h2>
+  <p>Each page runs the same Python program inside your browser tab with stlite (Streamlit on Pyodide, Python compiled
+    to WebAssembly), so there is no server to sleep, wake or sign in to. The page downloads Python and the app's
+    packages from a CDN, fetches the program and its synthetic data from this site, and runs everything on your device.</p>
   <div class="demolinks">
     <ul>
-      <li><a href="https://ecrf-coding.streamlit.app/?demo=1">Coding app</a> (<code>meddra_app.py</code>): MedDRA-style auto-coding of adverse-event verbatims</li>
-      <li><a href="https://ecrf-phi.streamlit.app/?demo=1">PHI app</a> (<code>phi_app.py</code>): PII/PHI flagging and redaction</li>
-      <li><a href="https://ecrf-risk.streamlit.app/?demo=1">Risk app</a> (<code>risk_app.py</code>): participant safety and discontinuation risk scoring</li>
-      <li><a href="https://ecrf-anomaly.streamlit.app/?demo=1">Anomaly app</a> (<code>anomaly_app.py</code>): numeric outliers, distributional drift and text outliers</li>
+      <li><a href="app/meddra.html">Coding app</a> (<code>meddra_app.py</code>): a coding QC assist that proposes MedDRA-style terms for adverse-event verbatims from a demo dictionary.
+        On held-out synthetic verbatims its stand-in ranked the right preferred term first for 54% (the real model path: 78%).</li>
+      <li><a href="app/phi.html">PHI app</a> (<code>phi_app.py</code>): a de-identification review assist that flags and redacts identifiers in free text.
+        On held-out synthetic text its stand-in left 108 of 308 identifiers readable (the real model path: 91 of 308); every output needs human review.</li>
+      <li><a href="app/risk.html">Risk app</a> (<code>risk_app.py</code>): participant risk screening, a safety listing ranked by rule-based safety and discontinuation scores</li>
+      <li><a href="app/anomaly.html">Anomaly app</a> (<code>anomaly_app.py</code>): central statistical monitoring checks for numeric outliers, distributional drift and text outliers</li>
     </ul>
-    <p class="muted" style="margin:10px 0 0">Each opens on the bundled synthetic sample data; click Execute to run it. An app that has been idle may take
-      about 30 seconds to wake up.</p>
+    <p class="muted" style="margin:10px 0 0">Each opens in hosted mode on the bundled synthetic sample data: every data
+      input is locked, a banner says so, and the audit records <code>hosted_mode=true</code>. Click Execute, then save
+      results with the download buttons. The first visit downloads about 30 MB. For real data, run the apps locally (see
+      the README).</p>
+  </div>
+  <div class="note" role="note">
+    <p><strong>Privacy.</strong> Runs in your browser; files are processed on your device and not uploaded by the app;
+      the page is downloaded from GitHub Pages and the CDN, which see your IP address; synthetic data only; not a
+      validated or Part 11 system.</p>
   </div>
 </section>
 
@@ -152,8 +161,8 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <p>Every app runs the same discipline: four tiers in sequence, each handing named, readable columns to the next, so
     a decision is a row of numbers a reviewer can inspect and its threshold is a parameter a reviewer can move.</p>
   <ol class="tiers">
-    <li><strong>Tier 1, intake.</strong> Aligns each row to its subject, copies every value through unchanged (missing stays missing) and locates the columns to read by content.</li>
-    <li><strong>Tier 2, retrieval and extraction.</strong> Proposes and measures: candidate dictionary terms, typed identifier spans, or per-subject signals. It decides nothing.</li>
+    <li><strong>Tier 1, intake.</strong> Aligns each row to its participant, copies every value through unchanged (missing stays missing) and locates the columns to read by content.</li>
+    <li><strong>Tier 2, retrieval and extraction.</strong> Proposes and measures: candidate dictionary terms, typed identifier spans, or per-participant signals. It decides nothing.</li>
     <li><strong>Tier 3, context and calibration.</strong> Adds calibrated probabilities, an ambiguity score, aggregate risk scores or drift distances.</li>
     <li><strong>Tier 4, decision.</strong> Applies an explicit rule to the earlier tiers' columns only: the auto-commit gate (default 0.88), the redaction gate (default 0.85), or the risk and anomaly categories.</li>
   </ol>
@@ -171,7 +180,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
 
 <section aria-labelledby="shots">
   <h2 id="shots">Screenshots</h2>
-  <p class="muted">Local runs on the bundled synthetic data, opened with <code>?demo=1</code> and captured after Execute. Select an image to open it at full size.</p>
+  <p class="muted">Captured from the in-browser pages (hosted mode, bundled synthetic data) after Execute; a local run on the stand-in path shows the same tables. Select an image to open it at full size.</p>
   <figure>
     <a href="img/meddra_results.png"><img src="img/meddra_results.png" width="1440" height="960" loading="lazy"
          alt="Coding app results table: each adverse-event verbatim with its top three candidate terms, ranks and 99-prefixed placeholder codes, followed by the success message and download buttons."></a>
@@ -184,12 +193,12 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   </figure>
   <figure>
     <a href="img/risk_results.png"><img src="img/risk_results.png" width="1440" height="960" loading="lazy"
-         alt="Risk app results: per-subject safety and discontinuation scores and categories with contributing factors, the fatal subject pinned to the top, and a category summary."></a>
-    <figcaption>Risk app: per-subject safety and discontinuation scores, sorted highest risk first, with the reasons for each.</figcaption>
+         alt="Risk app results: per-participant safety and discontinuation scores and categories with contributing factors, the fatal participant pinned to the top, and a category summary."></a>
+    <figcaption>Risk app: per-participant safety and discontinuation scores, sorted highest risk first, with the reasons for each.</figcaption>
   </figure>
   <figure>
     <a href="img/anomaly_results.png"><img src="img/anomaly_results.png" width="1440" height="960" loading="lazy"
-         alt="Anomaly app results: flagged per-subject numeric outliers with their extreme columns, a cohort-wide drift table per column, and the start of the per-lab drift table."></a>
+         alt="Anomaly app results: flagged per-participant numeric outliers with their extreme columns, a cohort-wide drift table per column, and the start of the per-lab drift table."></a>
     <figcaption>Anomaly app: flagged numeric outliers, cohort-wide drift per column and per-lab drift on the longitudinal demo.</figcaption>
   </figure>
 </section>
@@ -208,7 +217,9 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
 <section aria-labelledby="about">
   <h2 id="about">About this page</h2>
   <p>This is a single static file, <code>docs/index.html</code>, with no external scripts, stylesheets or fonts. GitHub
-    Pages serves it from the <code>main</code> branch's <code>/docs</code> folder.</p>
+    Pages serves it from the <code>main</code> branch's <code>/docs</code> folder. The four app pages in
+    <code>docs/app/</code> load a pinned stlite release and Python from the jsDelivr CDN; the README explains how they
+    are built and checked.</p>
 </section>
 
 </main>

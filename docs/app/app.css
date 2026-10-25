@@ -1,0 +1,82 @@
+/* Page frame for the in-browser apps (docs/app/*.html): a slim header with the privacy note, then the
+   Streamlit app filling the rest of the viewport. Colors match docs/index.html, light and dark. */
+:root {
+  --bg: #F6F7F8; --surface: #FFFFFF; --text: #18212B; --muted: #4F5B67; --line: #D5DBE1;
+  --accent: #0757BF; --error-bg: #FBECEA; --error-line: #B3261E;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12171D; --surface: #1A2129; --text: #E6EAEE; --muted: #A9B3BD; --line: #323C47;
+    --accent: #7DB5FF; --error-bg: #3A1F1D; --error-line: #F2B8B5;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12171D; --surface: #1A2129; --text: #E6EAEE; --muted: #A9B3BD; --line: #323C47;
+  --accent: #7DB5FF; --error-bg: #3A1F1D; --error-line: #F2B8B5;
+}
+
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden;
+  font: 400 1rem/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+header.bar {
+  flex: 0 0 auto; padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
+  font-size: .875rem; line-height: 1.4; overflow-wrap: anywhere;
+}
+header.bar .crumbs { margin: 0 0 2px; font-weight: 600; }
+header.bar .crumbs span[aria-current] { color: var(--text); }
+header.bar .privacy { margin: 0; color: var(--muted); font-size: .8125rem; }
+header.bar .privacy strong { color: var(--text); }
+header.bar .limits { margin: 2px 0 0; color: var(--muted); font-size: .8125rem; }
+header.bar .limits strong { color: var(--text); }
+/* Shown by launch.js only if stlite's stylesheet failed to load twice: the app works but is unstyled. */
+header.bar .style-error {
+  margin: 6px 0 0; padding: 6px 10px; background: var(--error-bg); border-left: 4px solid var(--error-line);
+  border-radius: 4px; color: var(--text);
+}
+header.bar .style-error[hidden] { display: none; }
+header.bar .style-error button {
+  margin-left: 8px; padding: 2px 10px; font: inherit; color: var(--accent); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 4px; cursor: pointer;
+}
+header.bar .style-error button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* The Streamlit app is laid out against #root: `contain` makes #root the containing block for Streamlit's
+   fixed header and mobile sidebar, so they stay below the page header instead of covering it. */
+main#stage { flex: 1 1 auto; position: relative; min-height: 0; }
+#root { position: absolute; inset: 0; overflow: hidden; overflow: clip; contain: layout paint; }
+/* Streamlit sizes its main column to the whole viewport (height: 100dvh). Here the app gets the viewport
+   minus the page header, so size the column to its container instead; otherwise the bottom of the app
+   (the download buttons) could never be scrolled into view. */
+#root [data-testid="stAppViewContainer"] > div,
+#root [data-testid="stMain"] { height: 100% !important; }
+
+/* Start-up notice and screenshot, over the app until its first render. */
+#boot { position: absolute; inset: 0; z-index: 10; overflow: auto; background: var(--bg); }
+#boot[hidden] { display: none; }
+.boot-inner { max-width: 920px; margin: 0 auto; padding: 20px 16px 32px; overflow-wrap: anywhere; }
+.notice { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; font-size: 1.05rem; font-weight: 600; }
+.step { margin: 0 0 16px; color: var(--muted); font-size: .9rem; min-height: 1.4em; }
+.error { margin: 0 0 16px; padding: 10px 14px; background: var(--error-bg); border-left: 4px solid var(--error-line); border-radius: 4px; }
+.spinner {
+  flex: 0 0 auto; width: 18px; height: 18px; border-radius: 50%;
+  border: 3px solid var(--line); border-top-color: var(--accent); animation: spin .9s linear infinite;
+}
+body.app-failed .spinner { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+figure.preview { margin: 0; }
+figure.preview img {
+  display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; background: #FFFFFF;
+}
+figure.preview figcaption { margin-top: 8px; color: var(--muted); font-size: .875rem; }
+
+@media (max-width: 480px) {
+  header.bar { padding: 6px 16px; }
+  .boot-inner { padding: 16px 16px 24px; }
+}

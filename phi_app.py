@@ -6,7 +6,7 @@
 #     NOT import each other and share NO module. The helpers _have/_col/
 #     load_domains are DELIBERATELY DUPLICATED from meddra_app.py. Do not factor
 #     them into a shared module: a shared module is a coupling point that would
-#     let a retrain of one head silently change the other's behaviour, and the
+#     let a retrain of one head silently change the other's behavior, and the
 #     two heads are validated as separate computer-system scopes with separate
 #     audit trails. Duplication is intentional.
 #   * This program scrubs free text ONLY. It never codes a verbatim and never
@@ -52,7 +52,7 @@
 #   (hashlib hashes the loaded artifacts for the audit; numpy builds the Tier-4
 #    feature matrix on the real path. Both ship with pandas.)
 
-import hashlib, importlib, json, os, platform, re, tempfile, time, warnings
+import hashlib, importlib, json, os, platform, re, sys, tempfile, time, warnings
 import numpy as np, pandas as pd, streamlit as st
 
 # Air gap -- same as meddra_app.py: set BEFORE any optional runtime is imported, so
@@ -132,6 +132,14 @@ DEF_REDACT_GATE=0.85
 HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real patient data. "
                  "Run locally for real data.")
 _HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
+# In-browser build (stlite on Pyodide, served from docs/app/ on GitHub Pages): sys.platform is
+# "emscripten" there and nowhere else. The flag only rewords text that would be wrong in a browser
+# tab ("air-gapped", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
+# help); a local run is unchanged.
+IN_BROWSER = sys.platform == "emscripten"
+RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "air-gapped"
+OUT_HELP_BROWSER = ("In this in-browser build the folder lives in the tab's memory, not on your disk, and is "
+                    "gone when the tab closes. Save results with the download buttons.")
 def _hosted():
     if os.environ.get("ECRF_HOSTED","").strip().lower() not in _HOSTED_OFF: return True
     # load_if_toml_exists() is asked FIRST (it returns False rather than raising when no
@@ -227,7 +235,7 @@ def discover_scan_cols(df):
 #           between DIRECT and INDIRECT classes is the load-bearing design:
 #           a DIRECT span scrubs on its own merit; an INDIRECT span scrubs ONLY
 #           when Tier 3 says the field's JOINT re-identification risk is high.
-#           That judgement is Tier 3's, never Tier 2's -- which is exactly why
+#           That judgment is Tier 3's, never Tier 2's -- which is exactly why
 #           the two are separate tiers.
 DIRECT={"PERSON_NAME","PHONE","EMAIL","MRN","DOB","ADDRESS","SSN"}
 INDIRECT={"AGE","RARE_CONDITION","ZIP","INITIALS"}
@@ -343,7 +351,7 @@ def t2_phi(text):
 # CONTRACT: Tier 3 is its own hop because span localization (Tier 2) cannot see
 #           JOINT risk: initials + a postcode + a rare condition are each harmless
 #           alone and none is a DIRECT span, yet together they re-identify. That
-#           is a field-level judgement and must come back as its own number so
+#           is a field-level judgment and must come back as its own number so
 #           Tier 4 can weigh it explicitly rather than as a hidden weight.
 # ONE local English checkpoint, loaded once per process by load_real (not Laya's
 # Router, which sends short English text to the uncalibrated multilingual model).
@@ -550,14 +558,16 @@ def _contract_error(R):
 # panel, then Run. The operator confirms which columns will be scanned/scrubbed
 # BEFORE compute, so a column that should not be touched (or one the operator wants
 # excluded) is caught on screen and deselected there.
-st.set_page_config(page_title="PII/PHI Flagging Engine", layout="wide")
+st.set_page_config(page_title="De-identification Review Assist", layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
 if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("🛡 PII/PHI Flagging & Redaction Engine")
-st.caption("Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · "
-           "scrubs free-text eCRF fields only · air-gapped · no sample data in this file")
+# In the browser only the [SI] stand-ins can run (see README), so the caption names those instead.
+st.caption(("Tier 1 intake → Tier 2 guarded patterns [SI] → Tier 3 direct and mosaic rules [SI] → Tier 4 redaction gate [SI] · "
+            if IN_BROWSER else "Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · ")
+           + "scrubs free-text eCRF fields only · " + RUNS_WHERE + " · no sample data in this file")
 if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
 # Built-in, app-specific instruction manual (from USER_GUIDE.md §4), rendered as a
@@ -587,7 +597,7 @@ A *direct* identifier (name, phone, MRN, DOB, address, SSN) scrubs on its own me
 - **`sanitized/<domain>.csv`** — a copy of each scanned domain carrying the original columns plus `SAN_<field>` (scrubbed text) and `<field>_PHI_FLAG` (`Y` if that cell changed, else `N`). Missing values stay missing — never `"nan"`.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
-Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[SI]` in the banner and audit): guarded regexes for spans + rule-based probabilities. It reproduces its worked trace exactly because identifier detection is pattern-shaped and the scrub is a string replace. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
+Without trained weights, Tiers 2–4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): guarded regexes for spans + rule-based probabilities. It reproduces its worked trace exactly because identifier detection is pattern-shaped and the scrub is a string replace. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
 ### Troubleshooting
 - **A date / ID column got flagged:** that is content-based discovery working as designed — it scans every non-numeric field. If you know that column is safe, deselect it in step 4 and re-run; review any flags before trusting a scrub.
@@ -596,6 +606,7 @@ Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[
 ### What this build does NOT do
 No scanned-document / bounding-box path, no safety/DLT logic, nothing leaves the machine. The PHI output is compliance-*enabling*, not a certification — that remains an organizational determination. See Deck A for full governance and limits.
 """
+if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")
 with st.expander("📖 How to use this app"):
     st.markdown(_HELP_MD)
 
@@ -651,7 +662,7 @@ if HOSTED and "_hosted_out" not in st.session_state:
     st.session_state["_hosted_tmp"] = tempfile.TemporaryDirectory(prefix="phi_output_", ignore_cleanup_errors=True)
     st.session_state["_hosted_out"] = st.session_state["_hosted_tmp"].name
 out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"] if HOSTED else "phi_output"), disabled=HOSTED,
-    help="Where phi_flags.csv + sanitized/*.csv + audit_log.csv are written on Run.")
+    help=(OUT_HELP_BROWSER if IN_BROWSER else "Where phi_flags.csv + sanitized/*.csv + audit_log.csv are written on Run."))
 if HOSTED: out_dir = st.session_state["_hosted_out"]
 models_dir = st.sidebar.text_input("Models dir (optional real weights)","models", disabled=HOSTED,
     help="If a trained artifact is present here but its runtime is not installed, "
@@ -828,6 +839,8 @@ for d,sdf in san_dfs.items():
     os.makedirs(os.path.join(out_dir,"sanitized"), exist_ok=True)
     sdf.to_csv(os.path.join(out_dir,"sanitized",f"{d}.csv"), index=False)
 audit.to_csv(os.path.join(out_dir,"audit_log.csv"), index=False)
-st.success(f"Wrote `{out_dir}/phi_flags.csv`, `{out_dir}/sanitized/*.csv`, `{out_dir}/audit_log.csv`")
-st.download_button("⬇ phi_flags.csv",(pd.DataFrame(phi_rows) if phi_rows else pd.DataFrame()).to_csv(index=False).encode(),"phi_flags.csv","text/csv")
-st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv")
+if IN_BROWSER: st.success("Done: `phi_flags.csv`, `sanitized/*.csv` and `audit_log.csv` are in this browser tab's memory only. "
+                          "Save `phi_flags.csv` and `audit_log.csv` with the download buttons below; the sanitized tables are shown on this page.")
+else: st.success(f"Wrote `{out_dir}/phi_flags.csv`, `{out_dir}/sanitized/*.csv`, `{out_dir}/audit_log.csv`")
+st.download_button("⬇ phi_flags.csv",(pd.DataFrame(phi_rows) if phi_rows else pd.DataFrame()).to_csv(index=False).encode(),"phi_flags.csv","text/csv", on_click="ignore")
+st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv", on_click="ignore")

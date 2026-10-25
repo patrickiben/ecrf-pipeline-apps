@@ -1,0 +1,77 @@
+<!doctype html>
+<!-- RENDERED FILE: edit tools/browser_app_template.html and run `python tools/sync_browser_apps.py`.
+     CI fails if this page differs from the template as rendered (`--check`). -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval' blob: data: 'sha256-ExTtubG4w25k2MenusPPeqiiwUT8/nd+jgsjQxvrKNg='; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; font-src https://cdn.jsdelivr.net data:; img-src 'self' https://cdn.jsdelivr.net data: blob:; connect-src 'self' https://cdn.jsdelivr.net blob: data:; worker-src blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Participant Risk Screening: in-browser demo</title>
+<meta name="description" content="Participant risk screening running in your browser on synthetic safety domains: a safety listing that ranks participants against built-in criteria standing in for a protocol&#x27;s, with the reasons for each flag.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<!-- stlite 1.12.0, an exact pinned release. Subresource Integrity: the browser refuses the stylesheet,
+     and (where import-map integrity is supported) the two core modules, if their content changes. -->
+<link rel="stylesheet" id="stlite-css" data-stlite-css href="https://cdn.jsdelivr.net/npm/@stlite/browser@1.12.0/build/stlite.css" integrity="sha384-nMY1QbA8+CIsSUwemJXUxjUlxoaTVytN3oKA4RhBMsdJgRaucGjAuus4FPhQV8Ui" crossorigin="anonymous">
+<link rel="stylesheet" href="app.css">
+<script type="importmap">{
+  "integrity": {
+    "https://cdn.jsdelivr.net/npm/@stlite/browser@1.12.0/build/stlite.js": "sha384-3IQsZ2w/7wJJ4Fxwpnzw+hHGanfH1/gZx90qxuEwmIdnsD1C+mMpZTk5+rMRPNOC",
+    "https://cdn.jsdelivr.net/npm/@stlite/browser@1.12.0/build/index-B1FrxEMd-BsPMjC5n.js": "sha384-An7Ztv5V2jtm0k4yPzlb/6bULPYO9ABz8trQtKGWiz3zY1pxDZcFhZC35qT7iSl6"
+  }
+}</script>
+</head>
+<body>
+<header class="bar">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="../">eCRF pipeline apps</a> <span aria-hidden="true">/</span> <span aria-current="page">Participant Risk Screening</span></nav>
+  <p class="privacy"><strong>Privacy:</strong> Runs in your browser; files are processed on your device and not uploaded by the app; the page is downloaded from GitHub Pages and the CDN, which see your IP address; synthetic data only; not a validated or Part 11 system.</p>
+  <p class="limits"><strong>Limits:</strong> Both scores are capped, weighted sums of built-in [SI] rules, not probabilities or a validated model; every flag needs clinical review.</p>
+  <p id="style-error" class="style-error" role="alert" hidden></p>
+</header>
+<main id="stage">
+  <div id="root"></div>
+  <section id="boot" aria-labelledby="boot-notice">
+    <div class="boot-inner">
+      <p id="boot-notice" class="notice" role="status" aria-live="polite"><span class="spinner" aria-hidden="true"></span><span id="boot-text">Starting Python in your browser; first visit downloads about 30 MB.</span></p>
+      <p id="boot-step" class="step">Loading the page code.</p>
+      <p id="boot-error" class="error" role="alert" hidden></p>
+      <noscript><p class="error">This app needs JavaScript to run in your browser. The screenshot below shows its results on the bundled synthetic data; you can also <a href="https://github.com/patrickiben/ecrf-pipeline-apps#run-locally">run it locally</a>.</p></noscript>
+      <figure class="preview">
+        <img src="../img/risk_results.png" width="1440" height="960" alt="Risk app results: per-participant safety and discontinuation scores and categories with contributing factors, the fatal case pinned to the top, and a category summary.">
+        <figcaption>Screenshot of this app's results on the bundled synthetic data. To use your own files, <a href="https://github.com/patrickiben/ecrf-pipeline-apps#run-locally">run it locally</a>.</figcaption>
+      </figure>
+    </div>
+  </section>
+</main>
+<script type="application/json" id="stlite-config">
+{
+  "app": "risk",
+  "entry": "risk_app.py",
+  "data": [
+    "sample_data/ae.csv",
+    "sample_data/eg.csv",
+    "sample_data/lb.csv",
+    "sample_data/meddra_demo.csv",
+    "sample_data/pe.csv",
+    "sample_data/pr.csv",
+    "sample_data/vs.csv"
+  ],
+  "stlite": "https://cdn.jsdelivr.net/npm/@stlite/browser@1.12.0/build/stlite.js",
+  "pyodide": "https://cdn.jsdelivr.net/pyodide/v314.0.3/full/pyodide.mjs",
+  "requirements": [
+    "numpy",
+    "pandas",
+    "toml"
+  ],
+  "wheels": [
+    "wheels/itsdangerous-2.2.0-py3-none-any.whl",
+    "wheels/python_multipart-0.0.32-py3-none-any.whl",
+    "wheels/toml-0.10.2-py2.py3-none-any.whl"
+  ]
+}
+</script>
+<script type="module" src="launch.js"></script>
+</body>
+</html>

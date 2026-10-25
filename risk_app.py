@@ -1,4 +1,4 @@
-# risk_app.py -- INDEPENDENT program: per-subject safety & discontinuation RISK SCORING.
+# risk_app.py -- INDEPENDENT program: per-participant safety & discontinuation RISK SCORING.
 #
 # READ THIS FIRST (for whoever maintains this file):
 #   * This is ONE of four separate programs in this folder (the others are
@@ -6,18 +6,18 @@
 #     module. The small helpers near the top (_have, _col) are DELIBERATELY
 #     DUPLICATED from the siblings. Do not "refactor" them into a shared file:
 #     a shared module is a coupling point that would let a change to one head
-#     silently move another's behaviour, and each head is validated as its own
+#     silently move another's behavior, and each head is validated as its own
 #     computer-system scope with its own audit trail. Duplication is the price
 #     of that independence, and it is intentional.
 #   * This program SCORES RISK ONLY. It never codes a verbatim (that is
 #     meddra_app.py), never scrubs PHI (phi_app.py), and never detects anomalies/drift
 #     (anomaly_app.py). It reads safety domains -- AE / LB / EG / VS / PE -- from raw data
-#     only, aligns everything to subjects by USUBJID, and emits one risk row per subject.
+#     only, aligns everything to participants by USUBJID, and emits one risk row per participant.
 #     A stray meddra*.csv in the cut folder is IGNORED so all four programs can share one
 #     folder without interfering.
-#   * This build ships as a TRANSPARENT, LABELLED STAND-IN ([SI]): a weighted
+#   * This build ships as a TRANSPARENT, LABELED STAND-IN ([SI]): a weighted
 #     rule engine driven by declared criteria. It is DECISION SUPPORT -- it ranks
-#     and flags subjects for human review; it does NOT make a clinical
+#     and flags participants for human review; it does NOT make a clinical
 #     determination and is not a validated survival model. A real deployment would
 #     replace Tier 3 with a trained, externally-validated risk/survival model and
 #     flip the banner to [RM]; that is an external validation step this file never
@@ -36,8 +36,8 @@
 # readable numbers, never a hidden weight -- see the [SI]/[RM] discipline):
 #   Tier 1 intake   -> load AE/LB/EG/VS/PE from raw data, classify each
 #                      file by CONTENT (signature columns, not file name), align rows
-#                      to subjects by USUBJID; copy values through UNCHANGED.
-#   Tier 2 signals  -> per subject, extract READABLE risk signals: n_AE, n_SAE, max
+#                      to participants by USUBJID; copy values through UNCHANGED.
+#   Tier 2 signals  -> per participant, extract READABLE risk signals: n_AE, n_SAE, max
 #                      severity, fatal flag, which labs breach their SAP multiple and
 #                      by how much, QTc vs the cardiac limit, vitals vs protocol limits,
 #                      notable physical-exam findings. Proposes nothing; measures only.
@@ -54,7 +54,7 @@
 #        exactly what it uses, matching phi_app.py's discipline.)
 #   real path (flips banner to [RM]):  a validated survival/risk model replacing Tier 3
 
-import json, os, re, tempfile, time
+import json, os, re, sys, tempfile, time
 import pandas as pd, streamlit as st
 
 # --------------------------------------------------------------------------- #
@@ -136,6 +136,14 @@ VITAL_KEY = {"SYSBP": "SYSBP_HIGH_MMHG", "DIASTP": "DIASTP_HIGH_MMHG", "TEMPC": 
 HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real patient data. "
                  "Run locally for real data.")
 _HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
+# In-browser build (stlite on Pyodide, served from docs/app/ on GitHub Pages): sys.platform is
+# "emscripten" there and nowhere else. The flag only rewords text that would be wrong in a browser
+# tab ("air-gapped", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
+# help); a local run is unchanged.
+IN_BROWSER = sys.platform == "emscripten"
+RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "air-gapped"
+OUT_HELP_BROWSER = ("In this in-browser build the folder lives in the tab's memory, not on your disk, and is "
+                    "gone when the tab closes. Save results with the download buttons.")
 def _hosted():
     if os.environ.get("ECRF_HOSTED","").strip().lower() not in _HOSTED_OFF: return True
     # load_if_toml_exists() is asked FIRST (it returns False rather than raising when no
@@ -158,7 +166,7 @@ def _hosted():
 # ============================ IMPORT LAYER ============================
 # The ONLY place this program touches the outside world. It reads safety-domain CSVs and
 # NOTHING else -- there is no built-in dataset and no external SAP/protocol file, so every
-# number downstream is computed from the operator's raw data against the labelled [SI]
+# number downstream is computed from the operator's raw data against the labeled [SI]
 # criteria above.
 
 def _col(df, *syn):
@@ -267,7 +275,7 @@ def _classify_reason(df):
 # ============================ TIER 1 ============================
 # CONSUMES: the loaded domain frames. EMITS: per-domain typed views keyed by USUBJID.
 # INVARIANT: Tier 1 NEVER rewrites a value -- it only locates columns and aligns rows to
-#           subjects, so Tier 2 measures against exactly what the site recorded.
+#           participants, so Tier 2 measures against exactly what the site recorded.
 def _num(series):
     """Coerce a column to float, leaving unparseable cells as NaN (never a crash). A stray
     text token in a numeric field must degrade that one cell's signal, not abort the run."""
@@ -284,7 +292,7 @@ def tier1_align(domains):
         kind=classify_domain(df)
         if kind is None: continue
         subj=_col(df,*SYN["USUBJID"])
-        if not subj: continue   # cannot align to subjects without an id column
+        if not subj: continue   # cannot align to participants without an id column
         view=pd.DataFrame({subj:[s for s in df[subj]]})
         def pick(*syn):
             c=_col(df,*syn)
@@ -305,14 +313,14 @@ def tier1_align(domains):
     return out
 
 # ============================ TIER 2 ============================
-# CONSUMES: the aligned Tier-1 views + thresholds. EMITS: per-subject READABLE signals.
+# CONSUMES: the aligned Tier-1 views + thresholds. EMITS: per-participant READABLE signals.
 # CONTRACT: Tier 2 PROPOSES and MEASURES; it decides nothing. Every signal is a number or
 #           short string a reviewer can read -- no hidden feature, so Tier 3's decision is
 #           always traceable to something on screen.
 def tier2_signals(views, thr):
-    """One row per subject with the readable signals that drive scoring: counts, max
+    """One row per participant with the readable signals that drive scoring: counts, max
     severity, fatal flag, and the specific breaches (which lab/QTc/vital crossed which
-    declared limit). Subjects appear if they have ANY safety-domain row."""
+    declared limit). Participants appear if they have ANY safety-domain row."""
     ae=views.get("ae"); lb=views.get("lb"); eg=views.get("eg")
     vs=views.get("vs"); pe=views.get("pe")
     subjects=set()
@@ -331,7 +339,7 @@ def tier2_signals(views, thr):
         order=["LIFETHREATENING","SEVERE","MODERATE","MILD"]
         mx=next((o for o in order if (sev==o).any()), "")
         # AEOUTCOME is the explicit evidence behind a fatal flag: AELIFE=Y should pair with an
-        # outcome like DIED. We surface it so the contributing-factors line shows WHY a subject
+        # outcome like DIED. We surface it so the contributing-factors line shows WHY a participant
         # is called fatal -- life-threatening SEVERITY alone never sets this.
         oc=""
         if "AEOUTCOME" in r and life.any():
@@ -382,7 +390,7 @@ def tier2_signals(views, thr):
 
     def clinsig_sig(s):
         """Source-system CLINSIG=Y findings across lb/eg/vs, as (count, readable list). This is the
-        site's own clinical judgement carried alongside our numeric criteria -- corroborating context,
+        site's own clinical judgment carried alongside our numeric criteria -- corroborating context,
         and a modest discontinuation signal (a flagged finding usually precedes intervention). It does
         NOT alter the objective safety score."""
         items=[]
@@ -411,9 +419,9 @@ def tier2_signals(views, thr):
 # ============================ TIER 3 ============================
 # CONSUMES: ONLY the named Tier-2 signals + thresholds. EMITS: safety_risk_score (0-100)
 #           and discontinuation_risk_score (0-1). [SI] transparent weighted engine.
-# Per-AE severity weighting needs each AE's own severity (not just a subject max), so Tier 3
+# Per-AE severity weighting needs each AE's own severity (not just a participant max), so Tier 3
 # consumes BOTH the readable signal table AND the raw aligned AE view. Every weight is a declared
-# constant above ([SI]); every threshold comes from `thr` (SAP file or labelled default). The
+# constant above ([SI]); every threshold comes from `thr` (SAP file or labeled default). The
 # decision is a function of numbers already on screen -- no hidden feature.
 def tier3_scores(sig, views, thr):
     ae=views.get("ae")
@@ -447,8 +455,8 @@ def tier3_scores(sig, views, thr):
             if pd.notna(val) and vlim is not None and val>vlim: vit_pts+=min(VIT_PER,VIT_BASE+round((val-vlim)/VIT_SLOPE))
         vit_comp=min(VIT_CAP,vit_pts)
 
-        # A fatal outcome is the ceiling of safety risk -- it scores 100 so a fatal subject
-        # always ranks at/above every non-fatal subject (death outranks any comorbidity load).
+        # A fatal outcome is the ceiling of safety risk -- it scores 100 so a fatal participant
+        # always ranks at/above every non-fatal participant (death outranks any comorbidity load).
         safety=100 if r["fatal"] else min(100, round(ae_comp+lab_comp+ecg_comp+vit_comp))
 
         # --- discontinuation score: additive contributions squashed to [0,1] ---
@@ -469,7 +477,7 @@ def tier3_scores(sig, views, thr):
     return pd.DataFrame(out)
 
 def _lab_ratios(views,s):
-    """Yield (analyte_code, value/ULN ratio) for subject s -- the raw detail Tier 3 needs to
+    """Yield (analyte_code, value/ULN ratio) for participant s -- the raw detail Tier 3 needs to
     weight each breach by how far past its SAP multiple it is."""
     lb=views.get("lb")
     if lb is None or s not in lb.index: return []
@@ -529,7 +537,7 @@ def tier4_categorize(scores, thr):
         # The output carries only the decision + its evidence. n_AE / n_SAE / max_severity /
         # fatal are internal signals (they drive scoring and the contributing-factors line above)
         # but are NOT exported -- a reviewer reads WHY from contributing_factors, not raw counts.
-        # _fatal is kept as an internal sort key so a fatal subject always pins to the top; it is
+        # _fatal is kept as an internal sort key so a fatal participant always pins to the top; it is
         # dropped before display/export in the UI block below.
         rows.append(dict(USUBJID=r["USUBJID"], _fatal=1 if r["fatal"] else 0,
             safety_risk_score=int(r["safety_risk_score"]), safety_category=s_cat(r),
@@ -560,14 +568,14 @@ def _guard_artifacts(models_dir):
 # read and how each file classified, then the banner, then the pre-flight CONTRACT panel, then
 # Run. The operator confirms the input contract BEFORE any compute, so a mis-pointed folder or
 # an unrecognized domain is caught on screen, not after a silent wrong answer.
-st.set_page_config(page_title="Participant Risk Scoring Engine", layout="wide")
+st.set_page_config(page_title="Participant Risk Screening", layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
 if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("⚖ Participant Safety & Discontinuation Risk Scoring")
 st.caption("Tier 1 intake → Tier 2 signals → Tier 3 aggregate [SI] → Tier 4 categorize · "
-           "decision support, not a clinical determination · air-gapped · no sample data in this file")
+           "decision support, not a clinical determination · " + RUNS_WHERE + " · no sample data in this file")
 # Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
 if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
@@ -575,36 +583,37 @@ if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 # panel so the working view stays clean but help is one click away. Self-contained: it refers to
 # nothing outside this program.
 _HELP_MD = """
-**What this app does.** Scores each study participant on two axes — **risk to their safety** (0–100) and **risk of discontinuing from the study** (0–1) — from raw adverse events plus lab, ECG, vital-sign and physical-exam data. It ranks and flags subjects for human review; it is **decision support, not a clinical determination**.
+**What this app does.** Scores each study participant on two axes — **risk to their safety** (0–100) and **risk of discontinuing from the study** (0–1) — from raw adverse events plus lab, ECG, vital-sign and physical-exam data. It ranks and flags participants for human review; it is **decision support, not a clinical determination**.
 
-**What it needs.** Safety-domain CSVs (`ae`, `lb`, `eg`, `vs`, `pe`) with a subject-id column — that's all. No dictionary, no SAP or protocol file: the app scores raw data against clearly-labelled built-in criteria. Files named `*meddra*` are skipped automatically (reference data for another program).
+**What it needs.** Safety-domain CSVs (`ae`, `lb`, `eg`, `vs`, `pe`) with a participant ID column — that's all. No dictionary, no SAP or protocol file: the app scores raw data against clearly-labeled built-in criteria. Files named `*meddra*` are skipped automatically (reference data for another program).
 
 ### Step by step
 1. **Point at your data** (sidebar 📂 1) — type a cut-folder path and/or upload safety CSVs. Every `*.csv` except one named `*meddra*` loads; each file is classified by its *content* (signature columns), not its name, so `ae.csv`, `adverse_events.csv`, or an oddly-named dump all work.
 2. **Set outputs** (sidebar ⚖ 2) — output folder (default `risk_output`) and an optional models dir for a real trained model. There is no gate slider: the operating point is the built-in `[SI]` criteria, recorded in the audit.
-3. **Confirm the input** (pre-flight panel) — check which domains loaded, how each file classified, and the subject count.
+3. **Confirm the input** (pre-flight panel) — check which domains loaded, how each file classified, and the participant count.
 4. **Execute** — click 🚀 Execute Risk Scoring. Results render on screen (highest-risk first) and write to the output folder.
 
 ### How scoring works (`[SI]` transparent engine)
-- **Safety score (0–100)** = four capped components: adverse events (severity-weighted, ×1.5 if serious), labs breaching their stopping multiple, QTc at/over the cardiac limit, and vital-sign breaches — all against built-in `[SI]` criteria. A **fatal outcome scores 100** so it always ranks at/above every non-fatal subject; death is by definition the highest safety risk.
+- **Safety score (0–100)** = four capped components: adverse events (severity-weighted, ×1.5 if serious), labs breaching their stopping multiple, QTc at/over the cardiac limit, and vital-sign breaches — all against built-in `[SI]` criteria. A **fatal outcome scores 100** so it always ranks at/above every non-fatal participant; death is by definition the highest safety risk.
 - **Discontinuation score (0–1)** = serious-AE burden + relatedness fraction + max severity + fatal flag + grade≥3 labs + QTc/vital breaches + source-system clinically-significant findings, squashed to [0,1].
-- Categories come from built-in `[SI]` cuts; a human-readable **contributing factors** column explains *why* each subject landed where it did.
+- Categories come from built-in `[SI]` cuts; a human-readable **contributing factors** column explains *why* each participant landed where it did.
 
 ### Reading risk_scores.csv
-One row per subject: counts, max severity, fatal flag, both scores + categories, and a human-readable **contributing factors** string. The on-screen table is pre-sorted highest-risk first (fatal subjects pinned to the top).
+One row per participant: counts, max severity, fatal flag, both scores + categories, and a human-readable **contributing factors** string. The on-screen table is pre-sorted highest-risk first (fatal participants pinned to the top).
 
-> This build ships as a labelled stand-in (`[SI]`): a transparent weighted rule engine driven by built-in criteria — there is no external SAP/protocol file to import. A real deployment replaces Tier 3 with study-specific declared criteria or a trained, externally-validated survival/risk model and flips the banner to `[RM]`. The weights are declared constants written to the audit — not hidden.
+> This build ships as a labeled stand-in (`[SI]`): a transparent weighted rule engine driven by built-in criteria — there is no external SAP/protocol file to import. A real deployment replaces Tier 3 with study-specific declared criteria or a trained, externally-validated survival/risk model and flips the banner to `[RM]`. The weights are declared constants written to the audit — not hidden.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
-Without a validated model installed, Tier 3 runs as the labelled deterministic stand-in (`[SI]` in the banner and every audit row). Install/validate a real risk model (and `xgboost`) to flip it; columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app **stops** rather than silently substituting a stand-in.
+Without a validated model installed, Tier 3 runs as the labeled deterministic stand-in (`[SI]` in the banner and every audit row). Install/validate a real risk model (and `xgboost`) to flip it; columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app **stops** rather than silently substituting a stand-in.
 
 ### Troubleshooting
-- **"No safety domains loaded":** point at a folder with at least one of `ae`/`lb`/`eg`/`vs`/`pe`, or upload files. A file is only scored if it has a subject-id column (`USUBJID`).
+- **"No safety domains loaded":** point at a folder with at least one of `ae`/`lb`/`eg`/`vs`/`pe`, or upload files. A file is only scored if it has a participant ID column (`USUBJID`).
 - **A domain shows as unrecognized:** its columns don't match the synonyms — rename them (e.g. severity → `AESEV`) or add the spelling to `SYN` at the top of this file.
 
 ### What this build does NOT do
 No free-text PDF/Word protocol or SAP parsing, no clinical determination, nothing leaves the machine. See USER_GUIDE.md §5 for full details and §10 for the complete limits list.
 """
+if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")
 with st.expander("📖 How to use this app"):
     st.markdown(_HELP_MD)
 
@@ -644,7 +653,7 @@ if HOSTED and "_hosted_out" not in st.session_state:
     st.session_state["_hosted_tmp"] = tempfile.TemporaryDirectory(prefix="risk_output_", ignore_cleanup_errors=True)
     st.session_state["_hosted_out"] = st.session_state["_hosted_tmp"].name
 out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"] if HOSTED else "risk_output"), disabled=HOSTED,
-    help="Where risk_scores.csv + audit_log.csv are written on Run (also offered as downloads).")
+    help=(OUT_HELP_BROWSER if IN_BROWSER else "Where risk_scores.csv + audit_log.csv are written on Run (also offered as downloads)."))
 if HOSTED: out_dir = st.session_state["_hosted_out"]
 models_dir = st.sidebar.text_input("Models dir (optional real model)","models", disabled=HOSTED,
     help="This build has no trained-model path for this app: the labeled [SI] engine is the only scorer, "
@@ -682,14 +691,14 @@ else:
     with c2:
         st.markdown("**Scoring criteria**"); st.write("Built-in `[SI]` defaults (no external SAP/protocol file)")
         n_subj=len(set().union(*[set(v.index) for v in views.values()])) if views else 0
-        st.write(f"Subjects aligned → **{n_subj}**")
+        st.write(f"Participants aligned → **{n_subj}**")
         present=", ".join(k for k in ("ae","lb","eg","vs","pe") if k in views) or "(none)"
         st.write("Safety domains → "+present)
     st.caption("This program reads ONLY the safety domains above and scores them against built-in [SI] "
-               "criteria -- it flags subjects for human review, not a clinical determination. A fatal "
+               "criteria -- it flags participants for human review, not a clinical determination. A fatal "
                "outcome forces a CRITICAL safety category.")
 
-# ---- Run button: disabled until at least one subject is aligned, so an empty input cannot
+# ---- Run button: disabled until at least one participant is aligned, so an empty input cannot
 #      produce a misleading empty result. ----
 n_ready = len(set().union(*[set(v.index) for v in views.values()])) if views else 0
 if not st.button("🚀 Execute Risk Scoring", type="primary", disabled=not n_ready):
@@ -697,23 +706,23 @@ if not st.button("🚀 Execute Risk Scoring", type="primary", disabled=not n_rea
 
 # ---- execute the tiers on the already-loaded frames; time the whole run for the latency figure. ----
 t0=time.perf_counter()
-sig = tier2_signals(views, thr)                     # Tier 2: readable per-subject signals
+sig = tier2_signals(views, thr)                     # Tier 2: readable per-participant signals
 scores = tier3_scores(sig, views, thr)              # Tier 3: [SI] weighted aggregation
 results = tier4_categorize(scores, thr)             # Tier 4: categories + contributing factors
 elapsed=(time.perf_counter()-t0)*1000
 
 # ---- results: these tables ARE the tier outputs, computed from the operator's files. ----
-st.subheader(f"Tier 2–4 · per-subject risk (computed from your files; {elapsed:.2f} ms)")
+st.subheader(f"Tier 2–4 · per-participant risk (computed from your files; {elapsed:.2f} ms)")
 if len(results):
-    # fatal subjects pinned to the top (internal _fatal key), then by safety score -- so a fatal
-    # outcome always ranks at/above every non-fatal subject regardless of comorbidity load. The
+    # fatal participants pinned to the top (internal _fatal key), then by safety score -- so a fatal
+    # outcome always ranks at/above every non-fatal participant regardless of comorbidity load. The
     # _fatal sort key is dropped before display/export; it never reaches risk_scores.csv.
     shown=results.sort_values(["_fatal","safety_risk_score"], ascending=[False,False]).drop(columns="_fatal")
     st.dataframe(shown, width="stretch")
     dist=results["safety_category"].value_counts().to_dict()
     st.caption(f"Safety categories → " + ", ".join(f"{k}: {v}" for k,v in sorted(dist.items())))
 st.expander("Processing log").write(
-    f"Tier 1 aligned {n_ready} subjects across {', '.join(sorted(views)) or 'no'} domains · "
+    f"Tier 1 aligned {n_ready} participants across {', '.join(sorted(views)) or 'no'} domains · "
     f"criteria: built-in [SI] defaults")
 
 # ---- audit: one row per run, recording the CONTRACT (which files/classifications), the criteria
@@ -736,6 +745,7 @@ out_results = results.drop(columns=["_fatal"]) if len(results) else pd.DataFrame
 os.makedirs(out_dir, exist_ok=True)
 if len(out_results): out_results.to_csv(os.path.join(out_dir,"risk_scores.csv"), index=False)
 audit.to_csv(os.path.join(out_dir,"audit_log.csv"), index=False)
-st.success(f"Wrote `{out_dir}/risk_scores.csv` and `{out_dir}/audit_log.csv`")
-st.download_button("⬇ risk_scores.csv",out_results.to_csv(index=False).encode(),"risk_scores.csv","text/csv")
-st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv")
+if IN_BROWSER: st.success("Done: `risk_scores.csv` and `audit_log.csv` are in this browser tab's memory only. Save them with the download buttons below.")
+else: st.success(f"Wrote `{out_dir}/risk_scores.csv` and `{out_dir}/audit_log.csv`")
+st.download_button("⬇ risk_scores.csv",out_results.to_csv(index=False).encode(),"risk_scores.csv","text/csv", on_click="ignore")
+st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv", on_click="ignore")

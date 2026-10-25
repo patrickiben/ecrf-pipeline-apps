@@ -6,7 +6,7 @@
 #     this header (_have, _col, load_domains) are DELIBERATELY DUPLICATED in
 #     phi_app.py. Do not "refactor" them into a shared pipeline.py: a shared
 #     module is a coupling point that would let a retrain of one head silently
-#     change the other's behaviour, and the two heads are validated as separate
+#     change the other's behavior, and the two heads are validated as separate
 #     computer-system scopes with separate audit trails. Duplication is the
 #     price of that independence, and it is intentional.
 #   * This program codes verbatims ONLY. It never opens a free-text comment
@@ -25,7 +25,7 @@
 #
 # WHAT IT DOES, TIER BY TIER (the chain is the product; the weights are
 # swappable underneath it -- see the [SI]/[RM] discipline in the banner/audit):
-#   Tier 1 intake   -> align rows to subjects; copy the verbatim through
+#   Tier 1 intake   -> align rows to participants; copy the verbatim through
 #                      UNCHANGED (Tier 2 must measure closeness to what the site
 #                      actually typed, so rewriting here would corrupt it).
 #   Tier 2 Needle3  -> embed the verbatim to a UNIT vector (Cactus Needle3:
@@ -65,7 +65,7 @@
 #   tempfile -> per-session output folder in hosted-demo mode (see _hosted)
 #   importlib/json/platform/warnings -> binding the optional runtimes, reading
 #              the re-ranker's feature contract, the per-OS engine file name
-import hashlib, importlib, json, os, platform, re, tempfile, time, warnings, zlib
+import hashlib, importlib, json, os, platform, re, sys, tempfile, time, warnings, zlib
 import numpy as np, pandas as pd, streamlit as st
 
 # --------------------------------------------------------------------------- #
@@ -183,6 +183,14 @@ AETERM_SYNONYMS = ["AETERM","VERBATIM","AE_TERM","REPORTED_TERM"]
 HOSTED_BANNER = ("Public demo: synthetic data only. Do not enter or upload real patient data. "
                  "Run locally for real data.")
 _HOSTED_OFF = ("", "0", "false", "no", "off")   # the ONLY values that leave a switch off
+# In-browser build (stlite on Pyodide, served from docs/app/ on GitHub Pages): sys.platform is
+# "emscripten" there and nowhere else. The flag only rewords text that would be wrong in a browser
+# tab ("air-gapped", "nothing leaves the machine", the "Wrote <folder>" message and the Output-folder
+# help); a local run is unchanged.
+IN_BROWSER = sys.platform == "emscripten"
+RUNS_WHERE = "runs in this browser tab" if IN_BROWSER else "air-gapped"
+OUT_HELP_BROWSER = ("In this in-browser build the folder lives in the tab's memory, not on your disk, and is "
+                    "gone when the tab closes. Save results with the download buttons.")
 def _hosted():
     if os.environ.get("ECRF_HOSTED","").strip().lower() not in _HOSTED_OFF: return True
     # load_if_toml_exists() is asked FIRST (it returns False rather than raising when no
@@ -240,8 +248,8 @@ def ingest_meddra(source_kind, source_ref, _key=None):
                    HLGT->SOC on soc_code.
     The full MedDRA chain is LLT -> PT -> HLT -> HLGT -> SOC: related preferred
     terms are grouped into High Level Terms by anatomy, pathology, physiology,
-    aetiology or function; related HLTs in turn link to High Level Group Terms;
-    and HLGTs group into System Organ Classes (by aetiology, manifestation site
+    etiology or function; related HLTs in turn link to High Level Group Terms;
+    and HLGTs group into System Organ Classes (by etiology, manifestation site
     or purpose). HLT/HLGT ride along on every candidate as EVIDENCE columns --
     they are never scored by Tier 4 and are not SDTM write-back fields (the
     write-back stays AEDECOD/AEPTCD/AESOC).
@@ -441,7 +449,7 @@ def collect_verbatims(domains, domain, col):
     through (USUBJID + AESEQ if present and non-missing, else ID, else the 1-based
     row number) so ae_coded.csv is joinable back to the source. Blank/NaN
     verbatims are dropped -- there is nothing to code, and an empty string would
-    retrieve a meaningless nearest neighbour. NOTE: `domain`/`col` arrive from
+    retrieve a meaningless nearest neighbor. NOTE: `domain`/`col` arrive from
     splitting the selectbox option string; the option format here ('{d} :: {c}')
     and the split separator in the UI MUST match, or this unpacks wrong -- see
     the UI section comment."""
@@ -823,14 +831,16 @@ def _contract_error(R):
 # then the pre-flight CONTRACT panel, then Run. The operator confirms the input
 # contract BEFORE any compute, so a mis-pointed folder or a wrong verbatim column
 # is caught on screen, not after a silent wrong answer.
-st.set_page_config(page_title="MedDRA Auto-Coding Engine", layout="wide")
+st.set_page_config(page_title="Coding QC Assist", layout="wide")
 HOSTED = _hosted()   # after set_page_config: no Streamlit call may precede it
 # Hosted: an uncaught exception shows a generic message, not a traceback with server
 # paths (a crafted widget value can raise one). Process-wide, like the switch itself.
 if HOSTED: st.set_option("client.showErrorDetails", "none")
 st.title("🏷 MedDRA Auto-Coding Engine")
-st.caption("Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · "
-           "codes verbatim AETERM only · air-gapped · no sample data in this file")
+# In the browser only the [SI] stand-ins can run (see README), so the caption names those instead.
+st.caption(("Tier 1 intake → Tier 2 lexical retrieval [SI] → Tier 3 off [SI] → Tier 4 weighted re-rank and gate [SI] · "
+            if IN_BROWSER else "Tier 1 intake → Tier 2 Cactus Needle3 → Tier 3 Laya → Tier 4 XGBoost · ")
+           + "codes verbatim AETERM only · " + RUNS_WHERE + " · no sample data in this file")
 # Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
 if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
@@ -851,7 +861,7 @@ _HELP_MD = """
 5. **Execute** — click 🚀 Execute MedDRA Auto-Coding. Results render on screen and write to the output folder (default `meddra_output`).
 
 ### The hierarchy
-MedDRA groups related preferred terms into **High Level Terms (HLT)** by anatomy/pathology/physiology/aetiology/function; HLTs link to **High Level Group Terms (HLGT)**; HLGTs group into **System Organ Classes (SOC)**. Every candidate carries the full `LLT → PT → HLT → HLGT → SOC` path as evidence columns.
+MedDRA groups related preferred terms into **High Level Terms (HLT)** by anatomy/pathology/physiology/etiology/function; HLTs link to **High Level Group Terms (HLGT)**; HLGTs group into **System Organ Classes (SOC)**. Every candidate carries the full `LLT → PT → HLT → HLGT → SOC` path as evidence columns.
 
 ### Reading ae_coded.csv
 One row per candidate (top-3), so a coder sees the whole pre-populated list, not just the winner.
@@ -869,7 +879,7 @@ One row per candidate (top-3), so a coder sees the whole pre-populated list, not
 > A **name-only dictionary** (no PT codes) forces every verbatim to route to a human — an `AEPTCD` without a number is not submission-grade. The pre-flight panel warns you up front.
 
 ### Stand-in vs real (`[SI]` / `[RM]`)
-Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
+Without trained weights, Tiers 2–4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
 ### Troubleshooting
 - **"No MedDRA source found":** provide exactly one dictionary shape (upload CSV / set the .asc folder / name it `meddra*.csv` in the cut folder).
@@ -879,6 +889,7 @@ Without trained weights, Tiers 2–4 run as labelled deterministic stand-ins (`[
 ### What this build does NOT do
 No scanned-document path, no safety/DLT logic, no negation feature, nothing leaves the machine. See Deck A for full governance and limits.
 """
+if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")
 with st.expander("📖 How to use this app"):
     st.markdown(_HELP_MD)
 
@@ -938,7 +949,7 @@ if HOSTED and "_hosted_out" not in st.session_state:
     st.session_state["_hosted_tmp"] = tempfile.TemporaryDirectory(prefix="meddra_output_", ignore_cleanup_errors=True)
     st.session_state["_hosted_out"] = st.session_state["_hosted_tmp"].name
 out_dir = st.sidebar.text_input("Output folder",(st.session_state["_hosted_out"] if HOSTED else "meddra_output"), disabled=HOSTED,
-    help="Where ae_coded.csv + audit_log.csv are written on Run (also offered as downloads).")
+    help=(OUT_HELP_BROWSER if IN_BROWSER else "Where ae_coded.csv + audit_log.csv are written on Run (also offered as downloads)."))
 if HOSTED: out_dir = st.session_state["_hosted_out"]
 models_dir = st.sidebar.text_input("Models dir (optional real weights)","models", disabled=HOSTED,
     help="If a trained artifact is present here but its runtime is not installed, "
@@ -1090,6 +1101,7 @@ audit=pd.DataFrame([dict(program="meddra_coder", timestamp=pd.Timestamp.now().is
 os.makedirs(out_dir, exist_ok=True)
 if coded_rows: pd.DataFrame(coded_rows).to_csv(os.path.join(out_dir,"ae_coded.csv"), index=False)
 audit.to_csv(os.path.join(out_dir,"audit_log.csv"), index=False)
-st.success(f"Wrote `{out_dir}/ae_coded.csv` and `{out_dir}/audit_log.csv`")
-st.download_button("⬇ ae_coded.csv",(pd.DataFrame(coded_rows) if coded_rows else pd.DataFrame()).to_csv(index=False).encode(),"ae_coded.csv","text/csv")
-st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv")
+if IN_BROWSER: st.success("Done: `ae_coded.csv` and `audit_log.csv` are in this browser tab's memory only. Save them with the download buttons below.")
+else: st.success(f"Wrote `{out_dir}/ae_coded.csv` and `{out_dir}/audit_log.csv`")
+st.download_button("⬇ ae_coded.csv",(pd.DataFrame(coded_rows) if coded_rows else pd.DataFrame()).to_csv(index=False).encode(),"ae_coded.csv","text/csv", on_click="ignore")
+st.download_button("⬇ audit_log.csv",audit.to_csv(index=False).encode(),"audit_log.csv","text/csv", on_click="ignore")

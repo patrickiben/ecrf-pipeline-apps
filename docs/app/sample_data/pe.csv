@@ -1,0 +1,101 @@
+USUBJID,AVISIT,VISITNUM,PEDECOD,PEFIND
+SUBJ-9001,V1,1,Murmur,Absent
+SUBJ-9001,V2,2,Tachycardia,Present
+SUBJ-9001,V3,3,Dry cough,Absent
+SUBJ-9002,V4,4,Peripheral edema,Absent
+SUBJ-9002,V1,1,Dry cough,Absent
+SUBJ-9003,V2,2,Rash,Absent
+SUBJ-9003,V3,3,Hepatomegaly,Absent
+SUBJ-9004,V4,4,Peripheral edema,Absent
+SUBJ-9005,V1,1,Lymphadenopathy,Absent
+SUBJ-9005,V2,2,Murmur,Absent
+SUBJ-9005,V3,3,Tachycardia,Absent
+SUBJ-9006,V4,4,Dry cough,Absent
+SUBJ-9006,V1,1,Tachycardia,Absent
+SUBJ-9006,V2,2,Murmur,Absent
+SUBJ-9007,V3,3,Jaundice,Absent
+SUBJ-9007,V4,4,Murmur,Absent
+SUBJ-9007,V1,1,Lymphadenopathy,Absent
+SUBJ-9008,V2,2,Tachycardia,Absent
+SUBJ-9009,V3,3,Dry cough,Absent
+SUBJ-9009,V4,4,Tachycardia,Absent
+SUBJ-9009,V1,1,Hepatomegaly,Absent
+SUBJ-9010,V2,2,Dry cough,Absent
+SUBJ-9010,V3,3,Hepatomegaly,Absent
+SUBJ-9010,V4,4,Peripheral edema,Absent
+SUBJ-9011,V1,1,Dry cough,Absent
+SUBJ-9011,V2,2,Peripheral edema,Absent
+SUBJ-9012,V3,3,Tachycardia,Absent
+SUBJ-9013,V4,4,Dry cough,Absent
+SUBJ-9013,V1,1,Jaundice,Absent
+SUBJ-9013,V2,2,Murmur,Absent
+SUBJ-9014,V3,3,Hepatomegaly,Present
+SUBJ-9015,V4,4,Hepatomegaly,Absent
+SUBJ-9015,V1,1,Jaundice,Absent
+SUBJ-9016,V2,2,Hepatomegaly,Absent
+SUBJ-9016,V3,3,Tachycardia,Absent
+SUBJ-9017,V4,4,Lymphadenopathy,Absent
+SUBJ-9018,V1,1,Lymphadenopathy,Absent
+SUBJ-9019,V2,2,Peripheral edema,Absent
+SUBJ-9019,V3,3,Rash,Absent
+SUBJ-9020,V4,4,Tachycardia,Absent
+SUBJ-9020,V1,1,Dry cough,Absent
+SUBJ-9021,V2,2,Hepatomegaly,Absent
+SUBJ-9021,V3,3,Lymphadenopathy,Absent
+SUBJ-9021,V4,4,Rash,Absent
+SUBJ-9022,V1,1,Hepatomegaly,Absent
+SUBJ-9022,V2,2,Peripheral edema,Absent
+SUBJ-9022,V3,3,Murmur,Absent
+SUBJ-9023,V4,4,Jaundice,Absent
+SUBJ-9023,V1,1,Murmur,Absent
+SUBJ-9023,V2,2,Dry cough,Absent
+SUBJ-9024,V3,3,Murmur,Absent
+SUBJ-9024,V4,4,Dry cough,Absent
+SUBJ-9025,V1,1,Lymphadenopathy,Absent
+SUBJ-9025,V2,2,Murmur,Absent
+SUBJ-9026,V3,3,Jaundice,Absent
+SUBJ-9027,V4,4,Tachycardia,Absent
+SUBJ-9027,V1,1,Rash,Absent
+SUBJ-9027,V2,2,Jaundice,Absent
+SUBJ-9028,V3,3,Murmur,Absent
+SUBJ-9028,V4,4,Rash,Absent
+SUBJ-9028,V1,1,Tachycardia,Absent
+SUBJ-9029,V2,2,Jaundice,Absent
+SUBJ-9029,V3,3,Hepatomegaly,Absent
+SUBJ-9030,V4,4,Jaundice,Absent
+SUBJ-9030,V1,1,Tachycardia,Absent
+SUBJ-9030,V2,2,Hepatomegaly,Absent
+SUBJ-9031,V3,3,Murmur,Absent
+SUBJ-9032,V4,4,Hepatomegaly,Absent
+SUBJ-9032,V1,1,Dry cough,Absent
+SUBJ-9032,V2,2,Tachycardia,Absent
+SUBJ-9033,V3,3,Dry cough,Absent
+SUBJ-9033,V4,4,Tachycardia,Absent
+SUBJ-9034,V1,1,Lymphadenopathy,Absent
+SUBJ-9034,V2,2,Peripheral edema,Absent
+SUBJ-9035,V3,3,Jaundice,Absent
+SUBJ-9036,V4,4,Rash,Absent
+SUBJ-9036,V1,1,Murmur,Absent
+SUBJ-9036,V2,2,Tachycardia,Absent
+SUBJ-9037,V3,3,Dry cough,Absent
+SUBJ-9037,V4,4,Lymphadenopathy,Absent
+SUBJ-9038,V1,1,Dry cough,Absent
+SUBJ-9038,V2,2,Murmur,Absent
+SUBJ-9038,V3,3,Jaundice,Absent
+SUBJ-9039,V4,4,Jaundice,Absent
+SUBJ-9040,V1,1,Rash,Absent
+SUBJ-9040,V2,2,Hepatomegaly,Absent
+SUBJ-9041,V3,3,Tachycardia,Absent
+SUBJ-9042,V4,4,Murmur,Absent
+SUBJ-9043,V1,1,Hepatomegaly,Absent
+SUBJ-9043,V2,2,Murmur,Absent
+SUBJ-9043,V3,3,Peripheral edema,Absent
+SUBJ-9044,V4,4,Rash,Absent
+SUBJ-9044,V1,1,Hepatomegaly,Absent
+SUBJ-9045,V2,2,Hepatomegaly,Absent
+SUBJ-9046,V3,3,Lymphadenopathy,Absent
+SUBJ-9046,V4,4,Dry cough,Absent
+SUBJ-9047,V1,1,Hepatomegaly,Absent
+SUBJ-9047,V2,2,Jaundice,Absent
+SUBJ-9048,V3,3,Murmur,Absent
+SUBJ-9048,V4,4,Peripheral edema,Absent
