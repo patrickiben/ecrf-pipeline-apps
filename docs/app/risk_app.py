@@ -591,36 +591,38 @@ if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 # Built-in, app-specific instruction manual (from USER_GUIDE.md §5), rendered as a collapsible
 # panel so the working view stays clean but help is one click away. Self-contained: it refers to
 # nothing outside this program.
+# Its section headings are `##` (h2): the panel sits right under the app's h1, so `###` would skip a level. It has
+# no `>` quote block: Streamlit draws one at 60% opacity, which takes inline code below 4.5:1 contrast in light mode.
 _HELP_MD = """
 **What this app does.** Scores each study participant on two axes, **risk to their safety** (0 to 100) and **risk of discontinuing from the study** (0 to 1), from raw adverse events plus lab, ECG, vital-sign and physical-exam data. Both scores are capped, weighted sums of built-in rules, not probabilities. It ranks and flags participants for human review; it is **decision support, not a clinical determination**.
 
 **What it needs.** Safety-domain CSVs (`ae`, `lb`, `eg`, `vs`, `pe`) with a participant ID column; nothing else. No dictionary, no SAP or protocol file: the app scores raw data against clearly-labeled built-in criteria. Files named `*meddra*` are skipped automatically (reference data for another program).
 
-### Step by step
+## Step by step
 1. **Point at your data** (sidebar 📂 1): type a cut-folder path and/or upload safety CSVs. Every `*.csv` except one named `*meddra*` loads; each file is classified by its *content* (signature columns), not its name, so `ae.csv`, `adverse_events.csv`, or an oddly-named dump all work.
 2. **Set outputs** (sidebar ⚖ 2): output folder (default `risk_output`) and a models dir field. This build has no trained risk model, so leave the models dir empty; a `risk_model.json` there stops the run. There is no gate slider: the operating point is the built-in `[SI]` criteria, recorded in the audit.
 3. **Confirm the input** (pre-flight panel): check which domains loaded, how each file classified, and the participant count.
 4. **Execute**: click 🚀 Execute Participant risk screening. Results render on screen (highest-risk first) and write to the output folder.
 
-### How scoring works (`[SI]` transparent engine)
+## How scoring works (`[SI]` transparent engine)
 - **Safety score (0 to 100)** = four capped components: adverse events (severity-weighted, times 1.5 if serious), analytes above their built-in ULN multiple, QTc above the cardiac criterion, and vital-sign breaches, all against built-in `[SI]` criteria. A **fatal outcome scores 100** so it always ranks at or above every non-fatal participant; death is by definition the highest safety risk.
 - **Discontinuation score (0 to 1)** = serious-AE burden + relatedness fraction + max severity + fatal flag + analytes above their built-in ULN multiple + QTc/vital breaches + source-system clinically significant findings, capped at 1.
 - **The built-in criteria** (`[SI]`): ALT or AST above 3x ULN and creatinine above 1.5x ULN; QTc above 500 ms; systolic BP above 180 mmHg, diastolic above 110 mmHg, temperature above 38.5 °C. They are screening criteria, not CTCAE grades (in CTCAE v5.0 those lab multiples are grade 2 entry points) and not the FDA DILI discontinuation rules; the QTc cutoff is the top ICH E14 categorical tier only, with no change from baseline, whichever correction (QTcF or QTcB) the column holds.
 - Categories come from built-in `[SI]` cuts; a human-readable **contributing factors** column explains *why* each participant landed where it did.
 
-### Reading risk_scores.csv
+## Reading risk_scores.csv
 One row per participant: `USUBJID`, both scores and categories, and a human-readable **contributing factors** string. The counts, maximum severity and fatal flag drive the scores but are not exported. The on-screen table is pre-sorted highest-risk first (fatal participants pinned to the top).
 
-> This build ships as a labeled stand-in (`[SI]`): a transparent weighted rule engine driven by built-in criteria; there is no external SAP/protocol file to import. A real deployment would replace Tier 3 with the protocol's own criteria or a trained, externally validated model. The weights are declared constants written to the audit, not hidden.
+This build ships as a labeled stand-in (`[SI]`): a transparent weighted rule engine driven by built-in criteria; there is no external SAP/protocol file to import. A real deployment would replace Tier 3 with the protocol's own criteria or a trained, externally validated model. The weights are declared constants written to the audit, not hidden.
 
-### Stand-in vs real (`[SI]` / `[RM]`)
+## Stand-in vs real (`[SI]` / `[RM]`)
 This build has no trained-model path: Tier 3 always runs the labeled deterministic stand-in (`[SI]` in the banner and every audit row). A `risk_model.json` in the models dir **stops** the run rather than being ignored or half-loaded.
 
-### Troubleshooting
+## Troubleshooting
 - **"No safety domains loaded":** point at a folder with at least one of `ae`/`lb`/`eg`/`vs`/`pe`, or upload files. A file is only scored if it has a participant ID column (`USUBJID`).
 - **A domain shows as unrecognized:** its columns do not match the synonyms: rename them (e.g. severity → `AESEV`) or add the spelling to `SYN` at the top of this file.
 
-### What this build does NOT do
+## What this build does NOT do
 No free-text PDF/Word protocol or SAP parsing, no clinical determination, nothing leaves the machine. See USER_GUIDE.md §5 for full details and §10 for the complete limits list.
 """
 if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")

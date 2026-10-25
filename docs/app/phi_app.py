@@ -575,38 +575,40 @@ if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
 # Built-in, app-specific instruction manual (from USER_GUIDE.md §4), rendered as a
 # collapsible panel so the working view stays clean but help is one click away.
+# Its section headings are `##` (h2): the panel sits right under the app's h1, so `###` would skip a level. It has
+# no `>` quote block: Streamlit draws one at 60% opacity, which takes inline code below 4.5:1 contrast in light mode.
 _HELP_MD = """
 **What this app does.** Finds and scrubs patient identifiers (PII/PHI) in free-text fields, writing a per-span flag table plus sanitized copies of each scanned domain. It reads only the columns you confirm below; its single purpose is finding and removing PHI from text.
 
 **What it needs.** Domain CSVs only. No dictionary or reference file of any kind is required. Files named `*meddra*` are skipped automatically (they're reference data, not fields to scrub).
 
-### How columns are discovered (content-based)
+## How columns are discovered (content-based)
 This app scans **every column that is not strictly numeric** (text, dates, coded values and flags alike), because PHI can hide anywhere and a pre-specified list of column names is guaranteed to have gaps. Only columns pandas typed as a number are skipped. There is no name rule to edit; your control point is the confirmation multi-select in step 4.
 
-> ⚠ Structured fields (dates, IDs) are scanned too. If one matches an identifier pattern (for example an ISO date matching the DOB rule), it will be flagged. Review flags before trusting them, or deselect a known-safe column.
+⚠ Structured fields (dates, IDs) are scanned too. If one matches an identifier pattern (for example an ISO date matching the DOB rule), it will be flagged. Review flags before trusting them, or deselect a known-safe column.
 
-### Step by step
+## Step by step
 1. **Point at your data** (sidebar 📂 1): type a cut-folder path and/or upload domain CSVs.
 2. **Read how discovery works** (sidebar 🔎 2): it explains the content-based rule above.
 3. **Set the operating point** (sidebar ⚖ 3): the Redaction gate slider (default **0.85**), recorded in the audit with the run.
 4. **Confirm the columns to scan** (sidebar 🎯 4 + pre-flight panel): every non-numeric column is pre-selected; deselect any you do not want scrubbed (e.g. a date or coded field you know is safe). The panel shows exactly which columns will be scanned per domain.
 5. **Execute**: click 🚀 Execute De-identification review assist.
 
-### Direct vs indirect identifiers
+## Direct vs indirect identifiers
 A *direct* identifier (name, phone, email, MRN, DOB) scrubs on its own merit. An *indirect* attribute (age, ZIP code, initials) scrubs **only when two or more co-occur in the same field**: the "mosaic" rule that catches re-identification risk no single value shows. The stand-in's patterns find names only after a title (Patient, Mr, Ms, Mrs, Dr) or in surname-comma form, MRNs only as `123-456-78`, dates of birth only as `MM/DD/YYYY` or `YYYY-MM-DD`, and ages only as "NN-year-old" or "NN yo"; it has no pattern for addresses, SSNs or rare conditions, so those are never flagged.
 
-### Reading the outputs
+## Reading the outputs
 - **`phi_flags.csv`** has one row per scrubbed span: `DOMAIN`, `USUBJID`, `ROW`, `FIELD`, `SPAN`, `ENTITY`, in-field `START`/`END`, `P_REDACT`, `ACTION`. The audit evidence of exactly what was masked, with what confidence, at what position.
 - **`sanitized/<domain>.csv`** is a copy of each scanned domain carrying the original columns plus `SAN_<field>` (scrubbed text) and `<field>_PHI_FLAG` (`Y` if that cell changed, else `N`). Missing values stay missing, never `"nan"`.
 
-### Stand-in vs real (`[SI]` / `[RM]`)
+## Stand-in vs real (`[SI]` / `[RM]`)
 Without trained weights, Tiers 2 to 4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): guarded regexes for spans + rule-based probabilities. It reproduces its worked trace exactly because identifier detection is pattern-shaped and the scrub is a string replace. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
-### Troubleshooting
+## Troubleshooting
 - **A date / ID column got flagged:** that is content-based discovery working as designed: it scans every non-numeric field. If you know that column is safe, deselect it in step 4 and re-run; review any flags before trusting a scrub.
 - **Blank cells:** missing values stay missing through the run (never `"nan"`), so an empty field correctly reports flag `N` rather than scanning silently clean.
 
-### What this build does NOT do
+## What this build does NOT do
 No scanned-document / bounding-box path, no safety/DLT logic, nothing leaves the machine. The output supports a de-identification review; it is not a certification, which remains an organizational determination. Every redaction needs human review: on held-out synthetic text the stand-in left 108 of 308 identifiers readable (the real model path: 91 of 308). What was measured is in the [evaluation](https://patrickiben.github.io/ecrf-pipeline-apps/evaluation.html); the limits are in the [case study](https://patrickiben.github.io/ecrf-pipeline-apps/case-study.html).
 """
 if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")

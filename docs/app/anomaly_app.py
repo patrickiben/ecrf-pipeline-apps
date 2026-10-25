@@ -598,24 +598,26 @@ st.caption(("Tier 1 intake → Tier 2 numeric outliers (robust-z [SI]) → "
 # Hosted banner on EVERY rerun, drawn before any st.stop() below can cut the page short.
 if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
+# Its section headings are `##` (h2): the panel sits right under the app's h1, so `###` would skip a level. It has
+# no `>` quote block: Streamlit draws one at 60% opacity, which takes inline code below 4.5:1 contrast in light mode.
 _HELP_MD = """
 **What this app does.** Flags anomalous observations and distributional drift over longitudinal safety/lab/vital data, across **numeric AND free-text** fields. It emits only the FLAGGED observations (participants whose measurements deviate far from the cohort, notes isolated from their field's corpus) plus per-column and per-lab drift tables. It ranks and flags for human review; it is **decision support, not a data-quality certification or clinical determination**. These are central statistical monitoring checks of the kind ICH E6(R3) describes as centralized monitoring (section 3.11.4.2); they produce leads for review and are not a risk-based quality management system.
 
 **What it needs.** A cut folder (or uploads) of CSV / SAS `.sas7bdat` with a participant ID column (`USUBJID`) and one or more numeric columns to measure. Optional: a **time/visit column** (e.g. `VISITNUM`, `AVISITD`, `STUDYDAY`) enables drift; a categorical **lab/site column** (e.g. `LAB`) enables per-lab drift; any long free-text column (e.g. `LABCOM`, `AECOM`) is scanned for text outliers. Missing optional columns disable that signal and are shown in pre-flight.
 
-### Step by step
+## Step by step
 1. **Point at your data** (sidebar 📂 1): type a cut-folder path and/or upload files. Every `*.csv`/`.sas7bdat` except one named `*meddra*` loads; columns are located by content/synonym, not file name.
 2. **Set outputs** (sidebar ⚖ 2): output folder (default `anomaly_output`) and a models dir field. This build has no trained anomaly model, so leave the models dir empty; an `anomaly_model.json` there stops the run. There is no gate slider: the operating point is the built-in `[SI]` criteria, recorded in the audit.
 3. **Confirm the input** (pre-flight panel): check which measurable numeric columns were found, whether a time column was detected (drift on/off), whether a lab column was detected (per-lab drift on/off), and which free-text columns will be scanned.
 4. **Execute**: click 🚀 Execute Central statistical monitoring. Results render on screen and write to the output folder.
 
-### How it works (`[SI]` / real): three separate signals, fast algorithms only
+## How it works (`[SI]` / real): three separate signals, fast algorithms only
 - **Numeric outliers (Tier 2).** Per participant × column, a robust z-score of each participant's change-from-baseline against the cohort's distribution of changes is the interpretable gate; **Isolation Forest** (scikit-learn, REAL when installed) corroborates it. A participant is flagged when its worst |z| ≥ `ANOM_Z` (3). The score is `min(1, max|z| / ANOM_Z_TOP)` so it stays discriminative in [0,1] instead of every flagged participant saturating at exactly 1.0. Only flagged participants are emitted; `extreme_columns` names the exact column(s) and z that fired, and `detectors` says which detector(s) agreed.
 - **Drift (Tier 3).** Transport distance between the reference (earliest) and current (latest) windows per measurable column: **Sinkhorn optimal transport** (`ot.sinkhorn2`, linear L1 cost regularized to the reference robust spread) when Python Optimal Transport + scipy are installed, else a labeled **1D-Wasserstein stand-in `[SI]`**. Reported as a unitless **drift ratio** (distance / reference spread). Runs cohort-wide AND per `LAB × column` (temporal drift within each lab/site), and separately **between labs/sites** (each lab's current-window distribution vs the pooled others, leave-one-out, in `lab_compare.csv`), so a site/lab assay shift that no single lab's own history reveals still stands out.
 - **Text outliers (Tier 3b).** Retrieval isolation of each note against the corpus in its field, by a labeled **bag-of-words isolation stand-in `[SI]`**. This build has no real text model, so this tier stays `[SI]` whatever is installed. A routine note is a near-duplicate of others (iso ≈ 0); an unusual/erroneous note has no close neighbor (iso → 1). Only flagged notes are emitted.
 - Categories come from built-in `[SI]` cuts; every row carries the readable numbers that produced it.
 
-### Reading the outputs
+## Reading the outputs
 - **`anomalies.csv`**, one row per FLAGGED participant: anomaly score, category, which detector(s) fired, and the extreme columns.
 - **`drift.csv`**, one row per measurable column (cohort-wide): window sizes, transport distance, drift ratio, category.
 - **`lab_drift.csv`**, one row per `LAB × column`: temporal drift within each lab/site (same shape as drift).
@@ -623,14 +625,14 @@ _HELP_MD = """
 - **`text_anomalies.csv`**, one row per FLAGGED note: participant, field, isolation score, category, and the note text.
 - The on-screen tables are pre-sorted highest-risk first with a category summary.
 
-> This build is transparent by construction: which detector path ran (real vs `[SI]`) is in the banner and every audit row; weights/thresholds are declared constants written to the audit, not hidden. A real deployment could replace any tier with a trained, externally validated model.
+This build is transparent by construction: which detector path ran (real vs `[SI]`) is in the banner and every audit row; weights/thresholds are declared constants written to the audit, not hidden. A real deployment could replace any tier with a trained, externally validated model.
 
-### Troubleshooting
+## Troubleshooting
 - **"No measurable columns":** your numeric columns may be stored as text: coerce them to numbers, or add their spelling to `SYN` at the top of this file.
 - **Drift shows OFF:** no time/visit column was detected; add one (e.g. `VISITNUM`) and re-run; per-participant anomalies still work without it.
 - **Per-lab drift shows OFF:** no lab/site column was detected by synonym; rename it to `LAB` or add its spelling to `SYN["LAB"]`.
 
-### What this build does NOT do
+## What this build does NOT do
 No clinical determination, no data-quality certification, nothing leaves the machine. It flags for human review; a flagged row is a lead to investigate, not a verdict.
 """
 if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")

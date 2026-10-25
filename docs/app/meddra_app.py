@@ -849,12 +849,14 @@ if HOSTED: st.warning(HOSTED_BANNER, icon="🔒")
 
 # Built-in, app-specific instruction manual (from USER_GUIDE.md §3), rendered as a
 # collapsible panel so the working view stays clean but help is one click away.
+# Its section headings are `##` (h2): the panel sits right under the app's h1, so `###` would skip a level. It has
+# no `>` quote block: Streamlit draws one at 60% opacity, which takes inline code below 4.5:1 contrast in light mode.
 _HELP_MD = """
 **What this app does.** Proposes a MedDRA code (`LLT → PT → HLT → HLGT → SOC`) for each adverse-event verbatim, then either auto-commits it or routes it to a human coder. It reads only the one verbatim column you select; nothing else in your data is opened or modified.
 
 **What it needs.** Domain CSVs with the terms to code, plus exactly **one** MedDRA dictionary.
 
-### Step by step
+## Step by step
 1. **Point at your data** (sidebar 📂 1): type a cut-folder path and/or upload domain CSVs. Every `*.csv` except one named `*meddra*` loads as a domain; the verbatim column is found by name synonym inside whatever loads (`AETERM`, `VERBATIM`, `AE_TERM`, `REPORTED_TERM`).
 2. **Provide the dictionary** in exactly one shape:
    - *Flattened CSV (recommended):* upload it, or drop a `meddra*.csv` in the cut folder to auto-find it. Needs an LLT-name + PT-name column; codes and SOC are detected by synonym when present.
@@ -863,10 +865,10 @@ _HELP_MD = """
 4. **Confirm the input** (sidebar 🎯 3 + pre-flight panel): pick the verbatim column from the dropdown and check the panel: domains loaded, dictionary source + rows, detected columns, the Hierarchy chain this dictionary carries, and whether it has PT codes.
 5. **Execute**: click 🚀 Execute Coding QC assist. Results render on screen and write to the output folder (default `meddra_output`).
 
-### The hierarchy
+## The hierarchy
 MedDRA groups related preferred terms into **High Level Terms (HLT)** by anatomy/pathology/physiology/etiology/function; HLTs link to **High Level Group Terms (HLGT)**; HLGTs group into **System Organ Classes (SOC)**. Every candidate carries the full `LLT → PT → HLT → HLGT → SOC` path as evidence columns.
 
-### Reading ae_coded.csv
+## Reading ae_coded.csv
 One row per candidate (top-3), so a coder sees the whole pre-populated list, not just the winner.
 
 | Column | Meaning |
@@ -879,17 +881,17 @@ One row per candidate (top-3), so a coder sees the whole pre-populated list, not
 | `cosine`, `lev`, `jaro`, `S` | The readable numbers the decision is made from. |
 | `AECODSTAT` | `AUTO_COMMIT_TO_SDTM` (rank 1 only) or `FLAGGED_FOR_HUMAN_CODER`; ranks 2 and 3 are `ALT_CANDIDATE`. |
 
-> A **name-only dictionary** (no PT codes) forces every verbatim to route to a human, because there is no code to write to `AEPTCD`. The pre-flight panel warns you up front.
+A **name-only dictionary** (no PT codes) forces every verbatim to route to a human, because there is no code to write to `AEPTCD`. The pre-flight panel warns you up front.
 
-### Stand-in vs real (`[SI]` / `[RM]`)
+## Stand-in vs real (`[SI]` / `[RM]`)
 Without trained weights, Tiers 2 to 4 run as labeled deterministic stand-ins (`[SI]` in the banner and audit): coding retrieval is lexical, so semantically-gapped verbatims flag to a human rather than auto-code. Install the pinned real-path runtimes and put the trained artifacts in the **Models dir** (layout and build steps: `eval/README.md`); a tier flips to REAL only when its artifact loads, and the audit records which files loaded. Columns, gates and exports do not move. If an artifact file is present but its runtime is missing, the app stops rather than silently substituting a stand-in.
 
-### Troubleshooting
+## Troubleshooting
 - **"No MedDRA source found":** provide exactly one dictionary shape (upload CSV / set the .asc folder / name it `meddra*.csv` in the cut folder).
 - **Everything routes to a human:** your dictionary is likely name-only (pre-flight says "Has PT codes → NO").
 - **Verbatim column not detected:** rename it to `AETERM`, or add its spelling to `AETERM_SYNONYMS` at the top of this file.
 
-### What this build does NOT do
+## What this build does NOT do
 No scanned-document path, no safety/DLT logic, no negation feature, nothing leaves the machine. Every proposed code needs a coder's review. What was measured, on synthetic data only, is in the [evaluation](https://patrickiben.github.io/ecrf-pipeline-apps/evaluation.html); the limits are in the [case study](https://patrickiben.github.io/ecrf-pipeline-apps/case-study.html).
 """
 if IN_BROWSER: _HELP_MD = _HELP_MD.replace("nothing leaves the machine", "nothing you load is uploaded by the app")
