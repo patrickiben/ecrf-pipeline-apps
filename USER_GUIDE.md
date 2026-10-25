@@ -385,8 +385,8 @@ What the real path does on synthetic data, measured, is in the
 [evaluation case study](https://patrickiben.github.io/ecrf-pipeline-apps/evaluation.html)
 ([docs/EVALUATION.md](docs/EVALUATION.md) is the long form). In short: better than the stand-in on misspelled
 verbatims and on names without a title, no better on colloquial verbatims (they still go to a human coder), still
-leaving 91 of 308 identifiers readable, and slow on a CPU (about 0.4 s per verbatim and 1 to 1.6 s per note, one
-at a time). The risk and monitoring apps have no trained-model path; a model file in their models dir stops the
+leaving 91 of 308 identifiers readable, and slow on a CPU (about 0.4 s per verbatim and 0.9 to 1.6 s per note,
+one at a time). The risk and monitoring apps have no trained-model path; a model file in their models dir stops the
 run.
 
 ---
@@ -471,7 +471,8 @@ run). The harness drives all four apps end to end, including a synthetic `.asc` 
 currency filter, content-based column discovery in the de-identification app, SAS `.sas7bdat` input routing, the
 risk app against `sample_data/` (anchor participants landing in their expected categories, valid score ranges, full
 category coverage, `[SI]` criteria recorded in the audit log) and the monitoring app catching its injected drift
-column and per-participant outliers. Output is checked to be bit-identical across two runs; hosted demo mode, the
+column and per-participant outliers. Output of the coding, risk and monitoring apps is checked to be bit-identical
+across two runs (there is no such check for the de-identification app); hosted demo mode, the
 `docs/` pages and the in-browser build in `docs/app/` are checked too. Leave `ECRF_HOSTED` unset and keep any
 Streamlit secrets file away while you run it: the hosted checks set both themselves. What was checked and what bugs
 were found and fixed: [QC_REPORT.md](QC_REPORT.md).
