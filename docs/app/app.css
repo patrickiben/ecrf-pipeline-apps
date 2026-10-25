@@ -34,6 +34,16 @@ header.bar .privacy { margin: 0; color: var(--muted); font-size: .8125rem; }
 header.bar .privacy strong { color: var(--text); }
 header.bar .limits { margin: 2px 0 0; color: var(--muted); font-size: .8125rem; }
 header.bar .limits strong { color: var(--text); }
+/* Privacy and Limits sit in a <details> (#notes). On a large screen it stays open and its summary line is hidden.
+   On a small one (narrower than 600 px or shorter than 500 px) the summary shows, and launch.js folds the box to
+   it once the app is up, so the header stops taking a third of a phone screen; one tap opens it again. */
+header.bar details.notes > summary { display: none; }
+@media (max-width: 600px), (max-height: 500px) {
+  header.bar details.notes > summary {
+    display: list-item; padding: 3px 0; color: var(--text); font-size: .8125rem; font-weight: 600; cursor: pointer;
+  }
+}
+header.bar details.notes > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 /* Shown by launch.js only if stlite's stylesheet failed to load twice: the app works but is unstyled. */
 header.bar .style-error {
   margin: 6px 0 0; padding: 6px 10px; background: var(--error-bg); border-left: 4px solid var(--error-line);

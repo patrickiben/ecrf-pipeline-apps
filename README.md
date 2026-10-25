@@ -98,8 +98,12 @@ checked. Use a local run for real data.
 `docs/app/` holds what GitHub Pages serves for the four apps:
 
 - `meddra.html`, `phi.html`, `risk.html`, `anomaly.html`: one page per app, rendered from
-  `tools/browser_app_template.html`. Each shows a loading notice, its measured limits and a screenshot of the
-  app's results until Python is ready, and keeps the screenshot with a short explanation if the app cannot start.
+  `tools/browser_app_template.html`. Each shows a loading notice, the privacy note, a Limits line linked to the
+  evaluation and a screenshot of the app's results until Python is ready, and keeps the screenshot with a short
+  explanation if the app cannot start. The Limits line gives the measured result where there is one (coding and
+  de-identification); for risk screening and monitoring, which have no labeled evaluation, it says no accuracy was
+  measured and gives the known answers the QC suite checks. On a phone the privacy note and Limits line fold to a
+  one-line "Privacy and limits" summary once the app is up (one tap opens them); they stay open while it loads.
   If stlite's stylesheet does not load (the app then runs unstyled), the page fetches it again, twice at most and
   after a pause, and if that fails shows a notice with a Reload button above the app.
 - `launch.js` and `app.css`: the shared loader and page style. `launch.js` also passes the apps' color theme,

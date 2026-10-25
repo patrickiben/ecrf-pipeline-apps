@@ -24,8 +24,21 @@ function ready() {
   settled = true;
   $("boot").hidden = true;
   document.body.classList.add("app-ready");
+  fitNotes();
   checkStyles();
 }
+
+// The Privacy and Limits box (<details id="notes">, open in the page source) stays open while the app loads. On a
+// small screen it folds to its one-line summary once the app is up, so the app gets the room; one tap opens it
+// again. On a large screen it is always open (its summary line is hidden there, see app.css).
+const SMALL_SCREEN = window.matchMedia("(max-width: 600px), (max-height: 500px)");
+function fitNotes() {
+  const notes = $("notes");
+  if (!notes) return;
+  if (!SMALL_SCREEN.matches) notes.open = true;
+  else if (document.body.classList.contains("app-ready")) notes.open = false;
+}
+SMALL_SCREEN.addEventListener("change", fitNotes);
 
 // stlite's stylesheet comes from the CDN like the runtime, but the app starts without it: if that request fails
 // (a dropped connection, or a changed file refused by Subresource Integrity), the app works unstyled, with icon
