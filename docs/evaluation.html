@@ -45,6 +45,7 @@ a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-ra
 code { font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.88em; background:var(--code-bg);
   padding:.1em .35em; border-radius:4px; overflow-wrap:anywhere; }
 pre { margin:0 0 14px; padding:12px 14px; background:var(--code-bg); border-radius:6px; overflow-x:auto; font-size:.85rem; line-height:1.5; }
+pre:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 pre code { background:none; padding:0; }
 .note, .fail, .label { margin:20px 0; padding:12px 16px; border-radius:4px; }
 .note { background:var(--note-bg); border-left:4px solid var(--note-line); }
@@ -52,6 +53,8 @@ pre code { background:none; padding:0; }
 .label { background:var(--surface); border:1px solid var(--line); }
 .note p:last-child, .fail p:last-child, .label p:last-child, .fail ul:last-child { margin-bottom:0; }
 .tbl { overflow-x:auto; margin:0 0 16px; border:1px solid var(--line); border-radius:6px; background:var(--surface); }
+/* each table box is a named, focusable region, so a keyboard user can scroll a wide table sideways on a phone */
+.tbl:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 table { border-collapse:collapse; width:100%; font-size:.9rem; }
 th, td { padding:7px 10px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); }
 th { font-weight:600; color:var(--muted); background:var(--bg); }
@@ -159,7 +162,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <h2 id="glance">Results at a glance</h2>
   <p>Held-out test splits only; nothing was fitted on them. "Stand-in" is the default <code>[SI]</code> path that runs
     anywhere, including in the browser; "real" is the optional local model path.</p>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Results at a glance (table)"><table>
     <thead><tr><th>Measure (test split)</th><th class="n">Stand-in <code>[SI]</code></th><th class="n">Real path</th></tr></thead>
     <tbody>
       <tr><td>Coding: right preferred term at rank 1 (288 verbatims with a correct code)</td><td class="n">54.2%</td><td class="n">77.8%</td></tr>
@@ -179,7 +182,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <p>All evaluation data come from <code>eval/make_data.py</code> (seed 42; rerunning it reproduces
     <code>eval/data/</code> byte for byte). Everything is invented: terms carry 99-prefixed placeholder codes, not
     MedDRA codes, and the groupings are not MedDRA's hierarchy.</p>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Evaluation data files (table)"><table>
     <thead><tr><th>File</th><th>What it holds</th></tr></thead>
     <tbody>
       <tr><td><code>dictionary.csv</code></td><td>3,371 lowest-level terms under 519 preferred terms, in the shape of the demo dictionary: body-site pain, stiffness and swelling; fractures, wounds and burns; lab values increased, decreased and abnormal; infections by organ; common symptoms.</td></tr>
@@ -207,7 +210,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     well by memorizing them. The splits are grouped instead: coding rows by <strong>preferred term</strong> (a test term
     never appears in training or calibration) and notes by <strong>template</strong> (a test template is never seen in
     training).</p>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Grouped splits (table)"><table>
     <thead><tr><th>Split</th><th>Used for</th><th class="n">Coding verbatims</th><th class="n">PHI notes (templates)</th></tr></thead>
     <tbody>
       <tr><td>train</td><td>fitting the XGBoost re-ranker and span gate</td><td class="n">1,152</td><td class="n">484 (22)</td></tr>
@@ -224,7 +227,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     function and reports the test split before (shipped) and after (fitted). Expected calibration error (ECE) uses 10
     equal-width bins; lower is better. A temperature changes how confident the probabilities are, not their order, so
     AUROC does not change.</p>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Calibration (table)"><table>
     <thead><tr><th>Question</th><th>Labeled true when</th><th class="n">Temperature</th><th class="n">Test n</th><th class="n">ECE before &rarr; after</th><th class="n">Brier before &rarr; after</th><th class="n">AUROC</th></tr></thead>
     <tbody>
       <tr><td>coding: <code>unambiguous</code></td><td>the verbatim is not negated</td><td class="n">1.98 &rarr; 1.45</td><td class="n">384</td><td class="n">0.119 &rarr; 0.084</td><td class="n">0.173 &rarr; 0.172</td><td class="n">0.736</td></tr>
@@ -244,7 +247,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <p>Test split: 384 verbatims (96 of each variant) coded against the 3,371-term dictionary. The real path retrieves the
     top 10 candidates with Needle3 and hnswlib, adds Laya's <code>unambiguous</code> probability, and re-ranks with a
     trained XGBoost classifier; the stand-in uses a hashed bag-of-words and a fixed weighted sum.</p>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Coding results by path (table)"><table>
     <thead><tr><th>Path</th><th class="n">Gate</th><th class="n">Top-1</th><th class="n">Top-3</th><th class="n">Auto-coded</th><th class="n">Wrong share of auto-codes</th><th class="n">Errors per 100</th><th class="n">Negated auto-coded</th></tr></thead>
     <tbody>
       <tr><td>stand-in <code>[SI]</code></td><td class="n">0.88</td><td class="n">0.542</td><td class="n">0.615</td><td class="n">25.5%</td><td class="n">7.1%</td><td class="n">1.8</td><td class="n">7 of 96</td></tr>
@@ -253,7 +256,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
       <tr><td>real</td><td class="n">0.90</td><td class="n">0.778</td><td class="n">0.854</td><td class="n">38.0%</td><td class="n">0.0%</td><td class="n">0.0</td><td class="n">0 of 96</td></tr>
     </tbody>
   </table></div>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Coding results by verbatim variant (table)"><table>
     <thead><tr><th>Variant (96 each)</th><th class="n">Stand-in top-1</th><th class="n">Real top-1</th><th class="n">Stand-in auto-coded (0.90)</th><th class="n">Real auto-coded (0.90)</th></tr></thead>
     <tbody>
       <tr><td>exact</td><td class="n">0.979</td><td class="n">1.000</td><td class="n">90.6%</td><td class="n">100%</td></tr>
@@ -262,7 +265,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
       <tr><td>negated</td><td class="n">no correct code</td><td class="n">no correct code</td><td class="n">1.0%</td><td class="n">0%</td></tr>
     </tbody>
   </table></div>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Coding ablations on the real path (table)"><table>
     <thead><tr><th>Ablation, real path (same 288 verbatims)</th><th class="n">Top-1</th><th class="n">Top-3</th></tr></thead>
     <tbody>
       <tr><td>Needle3 retrieval order only, no re-ranker</td><td class="n">0.747</td><td class="n">0.885</td></tr>
@@ -320,7 +323,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
       the keyword rule (one-sided 95% cluster-bootstrap lower bound above 0). A family that fails either gate, or could
       not reach 0.90 even with every item right, routes to human coding.</li>
   </ul>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Within-sibling families and their best attainable bounds (table)"><table>
     <thead><tr><th>Family (registered before scoring)</th><th class="n">Items</th><th class="n">Terms</th><th class="n">Best attainable bound</th><th>Assessable at 0.90</th></tr></thead>
     <tbody>
       <tr><td>lab direction</td><td class="n">66</td><td class="n">22</td><td class="n">0.873</td><td>no: not assessable at this size</td></tr>
@@ -330,14 +333,14 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <p class="caption">With every item right the bound is 0.05<sup>1/m</sup> for m terms, so a 0.90 floor needs at least 29
     terms and 0.95 needs 59. The locked plan's own table prints 0.940 for 48 terms and 0.951 for 59; the exact values
     round to 0.939 and 0.950. The scripts compute the bound themselves, so no decision used the printed values.</p>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Within-sibling results (table)"><table>
     <thead><tr><th>Stand-in path, test split</th><th class="n">Within-set accuracy</th><th class="n">Keyword rule</th><th class="n">Margin</th><th class="n">Gate A bound (best)</th><th class="n">Gate B lower bound</th><th>Routing</th></tr></thead>
     <tbody>
       <tr><td>lab direction</td><td class="n">0.909</td><td class="n">0.970</td><td class="n">0.156</td><td class="n">0.828 (0.873)</td><td class="n">-0.121</td><td>human coding: not assessable; fails Gates A and B</td></tr>
       <tr><td>body site</td><td class="n">0.861</td><td class="n">0.819</td><td class="n">0.166</td><td class="n">0.805 (0.939)</td><td class="n">-0.014</td><td>human coding: fails Gates A and B</td></tr>
     </tbody>
   </table></div>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Within-sibling results by variant (table)"><table>
     <thead><tr><th>Family, variant</th><th class="n">Items</th><th class="n">Tool</th><th class="n">Keyword rule</th><th class="n">Whole-dictionary top-1</th></tr></thead>
     <tbody>
       <tr><td>lab, exact</td><td class="n">22</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td></tr>
@@ -369,7 +372,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
       only candidates from the retrieved top 10, so the plan registers the Needle3 cosine as the real-path score.
       "calcium down on bloods" is picked correctly on the stand-in path; its Stage 3 failure is on the real path.</li>
   </ul>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Within-sibling known-answer checks (table)"><table>
     <thead><tr><th>Known-answer check (400 simulated datasets; 2,000 for coverage)</th><th>Must show</th><th>Result</th></tr></thead>
     <tbody>
       <tr><td>(a) accurate but not enough, mean accuracy 0.80</td><td>beats chance (q &lt; 0.05) and fails Gate A, each in at least 95%</td><td>100%; 100%</td></tr>
@@ -400,8 +403,9 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     FDA's January 2025 guidance on AI to support regulatory decision-making is a draft, not for implementation, and the
     FDA-EMA good AI practice principles (January 2026) are non-binding; this check is not a validation under either.</p>
   <p><strong>Citation.</strong> Iben P. What do within-site comparisons of AlphaGenome Atlas predictions measure? An
-    audit at ClinVar sites in 11 genes. Human Genomics, submitted. Preprint: doi:10.5281/zenodo.23543154. Code and data:
-    doi:10.5281/zenodo.23537469. The full write-up is in
+    audit at ClinVar sites in 11 genes. Human Genomics, submitted. Preprint:
+    <a href="https://doi.org/10.5281/zenodo.23543154">doi:10.5281/zenodo.23543154</a>. Code and data:
+    <a href="https://doi.org/10.5281/zenodo.23537469">doi:10.5281/zenodo.23537469</a>. The full write-up is in
     <a href="https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/docs/EVALUATION.md#within-sibling-discrimination">EVALUATION.md</a>.</p>
 </section>
 
@@ -411,7 +415,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     proposes spans with Needle3's typed extraction plus the stand-in's patterns, and a trained XGBoost gate decides each
     one; the stand-in uses the patterns and a fixed rule. "Needle3 alone" uses Needle3's values directly as redactions,
     with no patterns and no gate, to show what the extractor contributes on its own.</p>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="De-identification results by entity (table)"><table>
     <thead><tr><th>Entity</th><th class="n">Gold</th><th class="n">Stand-in P / R / F1</th><th class="n">Real P / R / F1</th><th class="n">Needle3 alone P / R</th></tr></thead>
     <tbody>
       <tr><td>PERSON_NAME</td><td class="n">66</td><td class="n">1.00 / 0.33 / 0.50</td><td class="n">0.94 / 0.74 / 0.83</td><td class="n">0.45 / 0.70</td></tr>
@@ -443,7 +447,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <h2 id="cost">Speed and index cost</h2>
   <p>One record at a time through each real tier, on the worked examples (25 timed calls after a warm-up; medians,
     ranges across four records):</p>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Speed per record (table)"><table>
     <thead><tr><th>App</th><th>Tier 2</th><th>Tier 3 (Laya, one call)</th><th>Tier 4 (XGBoost, with features)</th><th class="n">Per record</th></tr></thead>
     <tbody>
       <tr><td>coding</td><td>Needle3 embed and search: 40 to 48 ms</td><td>328 to 346 ms (1 question)</td><td>7 to 9 ms</td><td class="n">about 390 ms</td></tr>
@@ -487,7 +491,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
 
 <section aria-labelledby="provenance">
   <h2 id="provenance">Where the numbers come from</h2>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Where the numbers come from (table)"><table>
     <thead><tr><th>Numbers</th><th>Result file</th><th>Script</th></tr></thead>
     <tbody>
       <tr><td>Index size, latency, recall@10</td><td><code>eval/results/stage1_index.json</code></td><td><code>eval/bench_index.py</code></td></tr>
@@ -507,7 +511,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     committed files. To rerun, follow
     <a href="https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/eval/README.md">eval/README.md</a>: install the
     pinned runtimes, build a models dir with <code>python eval/fetch_models.py --out models</code>, then:</p>
-<pre><code>python eval/make_data.py                        # regenerate eval/data/ (byte-identical)
+<pre role="region" tabindex="0" aria-label="Commands to rerun the evaluation"><code>python eval/make_data.py                        # regenerate eval/data/ (byte-identical)
 python eval/bench_index.py --models models      # index cost
 python eval/run_eval.py   --models models       # calibrate, train, evaluate
 python eval/deck_b_worked.py --models models    # worked examples, per-record latency
@@ -546,7 +550,7 @@ python eval/sibling_eval.py --models models     # within-sibling check (without 
 
 <footer class="site">
   <p>Patrick Iben &middot; Apache-2.0 &middot; <a href="./">eCRF pipeline apps</a> &middot;
-    <a href="case-study.html">Case study</a> &middot;
+    <a href="case-study.html">Case study: four-tier coding and de-identification, traced</a> &middot;
     <a href="https://github.com/patrickiben/ecrf-pipeline-apps">Source on GitHub</a></p>
 </footer>
 

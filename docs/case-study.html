@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Four-tier coding case study</title>
+<title>Case study: four-tier coding and de-identification, traced</title>
 <meta name="description" content="Case study of the Coding QC assist and the De-identification review assist: the four-tier design, two worked examples on synthetic eCRF data, what ran on the stand-in path and on the real model path, and the limits.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:,">
@@ -31,6 +31,8 @@ body { margin:0; background:var(--bg); color:var(--text);
 .wrap { max-width:920px; margin:0 auto; padding:0 16px; }
 header.site { padding:40px 0 24px; border-bottom:1px solid var(--line); }
 .crumbs { margin:0 0 16px; font-size:.9rem; }
+/* visually hidden, still read by screen readers (a table's row-label column header) */
+.vh { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 .kicker { margin:0 0 8px; color:var(--muted); font-size:.85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
 h1 { margin:0 0 12px; font-size:clamp(1.7rem, 5vw, 2.3rem); line-height:1.2; }
 h2 { margin:44px 0 12px; font-size:1.35rem; line-height:1.3; }
@@ -49,6 +51,8 @@ code { font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.8
 .label { background:var(--surface); border:1px solid var(--line); }
 .note p:last-child, .fail p:last-child, .label p:last-child, .note ul:last-child, .fail ul:last-child { margin-bottom:0; }
 .tbl { overflow-x:auto; margin:0 0 16px; border:1px solid var(--line); border-radius:6px; background:var(--surface); }
+/* each table box is a named, focusable region, so a keyboard user can scroll a wide table sideways on a phone */
+.tbl:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 table { border-collapse:collapse; width:100%; font-size:.9rem; }
 th, td { padding:7px 10px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); }
 th { font-weight:600; color:var(--muted); background:var(--bg); }
@@ -77,9 +81,9 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
 <div class="wrap">
 
 <header class="site">
-  <p class="crumbs"><a href="./">eCRF pipeline apps</a> / Case study</p>
-  <p class="kicker">Case study &middot; synthetic data only</p>
-  <h1>A four-tier coding and de-identification assist, traced end to end</h1>
+  <p class="crumbs"><a href="./">eCRF pipeline apps</a> / Case study: four-tier coding and de-identification, traced</p>
+  <p class="kicker">Synthetic data only</p>
+  <h1>Case study: four-tier coding and de-identification, traced</h1>
   <p class="lede">The Coding QC assist (<code>meddra_app.py</code>) and the De-identification review assist
     (<code>phi_app.py</code>) share one design: four tiers, each handing named, readable columns to the next, so the
     final decision is a rule over numbers a reviewer can inspect and a threshold a reviewer can move. This page explains
@@ -140,8 +144,8 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     only when a trained artifact in the models dir actually loads; an artifact that is present but cannot be used stops
     the run instead of falling back to a stand-in. Numbers measured on the real path are tagged
     <span class="tag">[RM]</span> below.</p>
-  <div class="tbl"><table>
-    <thead><tr><th></th><th>Stand-in <span class="tag">[SI]</span></th><th>Real model path <span class="tag">[RM]</span></th></tr></thead>
+  <div class="tbl" role="region" tabindex="0" aria-label="Stand-in and real model path compared (table)"><table>
+    <thead><tr><th><span class="vh">Aspect</span></th><th>Stand-in <span class="tag">[SI]</span></th><th>Real model path <span class="tag">[RM]</span></th></tr></thead>
     <tbody>
       <tr><td>Where it runs</td><td>Anywhere: a local run, and the in-browser pages on GitHub Pages (numpy and pandas only)</td><td>Locally only, with the pinned runtimes and a models dir (<a href="https://github.com/patrickiben/ecrf-pipeline-apps/blob/main/eval/README.md">eval/README.md</a>). Not in the browser as built: Needle3 loads a native engine library, Laya needs torch, hnswlib has no Pyodide build, and Pyodide's xgboost (2.1.4) is older than the 3.4.1 the gates were trained with.</td></tr>
       <tr><td>Coding, Tier 2</td><td>Hashed bag-of-words, cosine over the dictionary</td><td>Cactus Needle3 embeddings (3072-dim) and an hnswlib inner-product index</td></tr>
@@ -161,7 +165,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     each tier writes named columns the next tier reads, and the decision tier receives only numbers derived from the
     text, never the text itself. A decision then becomes a row of readable columns, and its threshold a parameter a
     reviewer can move without retraining.</p>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="The four tiers in each app (table)"><table>
     <thead><tr><th>Tier</th><th>Job</th><th>Coding QC assist</th><th>De-identification review assist</th></tr></thead>
     <tbody>
       <tr><td>1. Intake</td><td>Align rows to participants; copy every value through unchanged (missing stays missing); find the columns to read by content</td><td>The one verbatim column the operator confirms (<code>AETERM</code> or a synonym)</td><td>Every column that is not strictly numeric, confirmed or deselected by the operator</td></tr>
@@ -186,7 +190,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     to the de-identification trace. Every exported row carries the full LLT, PT, HLT, HLGT and SOC path as evidence columns (<code>HLT</code> and <code>HLGT</code> are not SDTM
     write-back variables; the write-back fields are <code>AEDECOD</code>, <code>AEPTCD</code> and
     <code>AESOC</code>).</p>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Worked example 1: coding results (table)"><table>
     <thead><tr><th class="id">AESEQ</th><th class="id">USUBJID</th><th>Verbatim (<code>AETERM</code>)</th><th>Stand-in top PT, score <span class="tag">[SI]</span></th><th>Real top PT, re-rank score <span class="tag">[RM]</span></th><th class="id">Routed</th></tr></thead>
     <tbody>
       <tr><td class="n id">1</td><td class="id">SUBJ-3092</td><td class="verb">severe throbbing pain in back of head</td><td>Headache, 0.7726</td><td>Headache, 0.1235</td><td class="id">human coder</td></tr>
@@ -222,7 +226,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
   <h2 id="deid">Worked example 2: de-identification</h2>
   <p>The same cut carries four free-text fields built to test four cases. The app scans every non-numeric column in
     each domain; identifiers turn up only in <code>AECOM</code> and <code>PRDSC</code>.</p>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Worked example 2: the text as typed (table)"><table>
     <thead><tr><th>Domain, row, field</th><th>Text as typed (synthetic)</th><th>Case</th></tr></thead>
     <tbody>
       <tr><td>AE 1 <code>AECOM</code></td><td><code>CRC Note: Patient Jane Miller called site cell phone (617) 555-0192 at 10:15 AM.</code></td><td>direct identifiers</td></tr>
@@ -232,7 +236,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     </tbody>
   </table></div>
   <h3>Spans and redaction probabilities</h3>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Worked example 2: flagged spans (table)"><table>
     <thead><tr><th>Field</th><th>Span</th><th>Entity</th><th class="n">Start</th><th class="n">End</th><th class="n">P(redact) <span class="tag">[SI]</span></th><th class="n">P(redact) <span class="tag">[RM]</span></th></tr></thead>
     <tbody>
       <tr><td>AE 1</td><td>Jane Miller</td><td>PERSON_NAME (direct)</td><td class="n">18</td><td class="n">29</td><td class="n">0.99</td><td class="n">0.962</td></tr>
@@ -322,7 +326,7 @@ footer.site { margin:48px 0 0; padding:20px 0 40px; border-top:1px solid var(--l
     than kept. The first four rows were still in the decks when they were retired; the last four were in earlier
     versions of the decks and had already been replaced with measured values on 2026-10-22, before the decks were
     retired.</p>
-  <div class="tbl"><table>
+  <div class="tbl" role="region" tabindex="0" aria-label="Corrections to the retired decks (table)"><table>
     <thead><tr><th>The decks said</th><th>Where</th><th>What is true</th></tr></thead>
     <tbody>
       <tr><td>Sign-off "is captured under 21 CFR Part 11"; overrides are logged</td><td>the retired Deck A</td><td>No sign-off, override or Part 11 control exists in the apps</td></tr>
